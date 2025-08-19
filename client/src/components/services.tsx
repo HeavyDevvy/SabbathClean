@@ -1,4 +1,4 @@
-import { Home, Sparkles, Wrench, Leaf } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users } from "lucide-react";
 
 interface ServicesProps {
   onServiceSelect: (service: string) => void;
@@ -9,34 +9,61 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "house-cleaning",
       name: "House Cleaning",
-      description: "Complete home cleaning with attention to every detail",
+      description: "Complete home cleaning including dusting, vacuuming, mopping, kitchen & bathroom sanitization, organizing",
       price: "R450/hour",
       icon: Home,
-      gradient: "from-blue-50 to-blue-100",
+      gradient: "from-purple-50 to-purple-100",
       iconBg: "bg-primary",
     },
     {
       id: "deep-cleaning", 
       name: "Deep Cleaning",
-      description: "Thorough cleaning for move-ins, move-outs, and seasonal refresh",
+      description: "Thorough cleaning for move-ins, move-outs including carpet cleaning, window washing, appliance cleaning",
       price: "R810/hour",
       icon: Sparkles,
-      gradient: "from-green-50 to-green-100",
+      gradient: "from-purple-50 to-pink-100",
       iconBg: "bg-secondary",
     },
     {
-      id: "maintenance",
-      name: "Home Maintenance", 
-      description: "Plumbing, electrical, and general home repairs",
-      price: "R630/hour",
-      icon: Wrench,
-      gradient: "from-amber-50 to-amber-100",
-      iconBg: "bg-accent",
+      id: "plumbing",
+      name: "Plumbing Services", 
+      description: "Pipe repairs, leak fixing, faucet installation, drain cleaning, toilet repairs, water heater maintenance",
+      price: "R750/hour",
+      icon: Droplets,
+      gradient: "from-blue-50 to-blue-100",
+      iconBg: "bg-blue-600",
+    },
+    {
+      id: "electrical",
+      name: "Electrical Services",
+      description: "Wiring repairs, outlet installation, lighting setup, circuit breaker fixes, electrical safety inspections", 
+      price: "R850/hour",
+      icon: Zap,
+      gradient: "from-yellow-50 to-yellow-100",
+      iconBg: "bg-yellow-600",
+    },
+    {
+      id: "chef-catering",
+      name: "Chef & Catering",
+      description: "Personal chef services, meal preparation, event catering, menu planning, dietary accommodations",
+      price: "R950/hour",
+      icon: ChefHat,
+      gradient: "from-orange-50 to-orange-100",
+      iconBg: "bg-orange-600",
+    },
+    {
+      id: "waitering",
+      name: "Waitering Services",
+      description: "Professional waitstaff for events, table service, bar service, event coordination, cleanup assistance",
+      price: "R350/hour",
+      icon: Users,
+      gradient: "from-green-50 to-green-100",
+      iconBg: "bg-green-600",
     },
     {
       id: "gardening",
       name: "Garden Care",
-      description: "Lawn maintenance, pruning, and landscape care", 
+      description: "Lawn maintenance, pruning, weeding, planting, irrigation setup, landscape design consultation", 
       price: "R540/hour",
       icon: Leaf,
       gradient: "from-emerald-50 to-emerald-100",
@@ -52,7 +79,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
           <p className="mt-4 text-lg text-neutral">Professional domestic services tailored to your needs</p>
         </div>
         
-        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {services.map((service) => {
             const IconComponent = service.icon;
             return (

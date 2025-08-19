@@ -1,6 +1,6 @@
 # Overview
 
-Sabboath Cleaners is a full-stack domestic services marketplace platform that connects customers with verified service providers for house cleaning, deep cleaning, maintenance, and garden care services. The platform features a React frontend with shadcn/ui components, an Express.js backend with REST API endpoints, and PostgreSQL database using Drizzle ORM. The application supports service booking, provider matching, reviews, and payment processing with Stripe integration.
+Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform that connects customers with verified service providers for house cleaning, plumbing, electrical work, chef/catering, waitering, and garden care services. The platform features a React frontend with shadcn/ui components, an Express.js backend with REST API endpoints, and PostgreSQL database using Drizzle ORM. The application supports service booking with geolocation functionality, provider matching, reviews, and payment processing with Stripe integration using South African Rand (ZAR) currency.
 
 # User Preferences
 
