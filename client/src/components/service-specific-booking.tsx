@@ -94,8 +94,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   const { toast } = useToast();
 
   const { data: services } = useQuery<Service[]>({
-    queryKey: ["/api/services"],
+    queryKey: ['/api/services'],
     enabled: isOpen,
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
 
   const { data: providers } = useQuery<ServiceProvider[]>({
@@ -207,7 +209,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
   };
 
-  const service = services?.find(s => s.id === serviceId || s.category === serviceId);
+  const currentService = services?.find(s => s.id === serviceId || s.category === serviceId);
   
   // Filter chefs based on cuisine specialization and location
   const getRelevantChefs = () => {
@@ -301,12 +303,12 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
   // Determine which schema to use based on service type
   const getFormSchema = () => {
-    if (!service) return cleaningSchema;
+    if (!currentService) return cleaningSchema;
     
-    if (service.category.includes('cleaning')) return cleaningSchema;
-    if (service.category.includes('plumbing') || service.category.includes('electrical')) return maintenanceSchema;
-    if (service.category.includes('chef') || service.category.includes('waitering')) return cateringSchema;
-    if (service.category.includes('gardening')) return gardeningSchema;
+    if (currentService.category.includes('cleaning')) return cleaningSchema;
+    if (currentService.category.includes('plumbing') || currentService.category.includes('electrical')) return maintenanceSchema;
+    if (currentService.category.includes('chef') || currentService.category.includes('waitering')) return cateringSchema;
+    if (currentService.category.includes('gardening')) return gardeningSchema;
     
     return cleaningSchema;
   };
@@ -352,7 +354,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     const bookingData = {
       ...data,
       providerId: selectedMovingProvider?.id || selectedProvider,
-      totalAmount: movingServiceDetails?.totalPrice || parseFloat(service?.basePrice || "0"),
+      totalAmount: movingServiceDetails?.totalPrice || parseFloat(currentService?.basePrice || "0"),
       status: "pending",
     };
     
@@ -364,10 +366,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   };
 
   const renderServiceSpecificFields = () => {
-    if (!service) return null;
+    if (!currentService) return null;
 
     // Cleaning Services
-    if (service.category.includes('cleaning')) {
+    if (currentService.category.includes('cleaning')) {
       return (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -418,7 +420,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
 
     // Maintenance & Repairs
-    if (service.category.includes('plumbing') || service.category.includes('electrical')) {
+    if (currentService.category.includes('plumbing') || currentService.category.includes('electrical')) {
       return (
         <>
           <div>
@@ -463,7 +465,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
 
     // Chef & Catering Services
-    if (service.category.includes('chef') || service.category.includes('catering')) {
+    if (currentService.category.includes('chef') || currentService.category.includes('catering')) {
       const selectedCuisineData = selectedCuisine ? cuisineTypes[selectedCuisine as keyof typeof cuisineTypes] : null;
       
       return (
@@ -596,7 +598,6 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                           const newItems = [...customMenuItems];
                           newItems[index] = e.target.value;
                           setCustomMenuItems(newItems);
-                          form.setValue("customMenuItems", newItems.filter(item => item.trim()));
                         }}
                         placeholder="Enter dish name..."
                         className="flex-1"
@@ -609,7 +610,6 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                           onClick={() => {
                             const newItems = customMenuItems.filter((_, i) => i !== index);
                             setCustomMenuItems(newItems);
-                            form.setValue("customMenuItems", newItems.filter(item => item.trim()));
                           }}
                         >
                           <Minus className="h-4 w-4" />
@@ -660,7 +660,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                     }`}
                     onClick={() => {
                       setIngredientOption("customer-provides");
-                      form.setValue("ingredientOption", "customer-provides");
+                      // Ingredient option set
                     }}
                   >
                     <div className="flex items-center space-x-2">
@@ -700,7 +700,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                     }`}
                     onClick={() => {
                       setUtensilsOption("customer-provides");
-                      form.setValue("utensilsOption", "customer-provides");
+                      // Utensils option set
                     }}
                   >
                     <div className="flex items-center space-x-2">
@@ -745,7 +745,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
             <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
             <Textarea 
               placeholder="Any allergies, special diets, or dietary restrictions..."
-              {...form.register("dietaryRequirements")}
+              {...form.register("specialInstructions" as any)}
             />
           </div>
         </>
@@ -753,7 +753,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
 
     // Waitering Services
-    if (service.category.includes('waitering')) {
+    if (currentService.category.includes('waitering')) {
       return (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -801,7 +801,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
 
     // Garden Care
-    if (service.category.includes('gardening')) {
+    if (currentService.category.includes('gardening')) {
       return (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -876,23 +876,23 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
-            Book {service?.name}
+            Book {currentService?.name}
           </DialogTitle>
           <DialogDescription>
             Complete your booking in just a few simple steps
           </DialogDescription>
         </DialogHeader>
 
-        {service && (
+        {currentService && (
           <div className="space-y-6">
             {/* Service Details */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <Badge variant="outline" className="mb-2">{service.category}</Badge>
-                    <h3 className="text-xl font-semibold">{service.name}</h3>
-                    <p className="text-gray-600 mt-2">{service.description}</p>
+                    <Badge variant="outline" className="mb-2">{currentService.category}</Badge>
+                    <h3 className="text-xl font-semibold">{currentService.name}</h3>
+                    <p className="text-gray-600 mt-2">{currentService.description}</p>
                   </div>
                   <div className="text-right">
                     {serviceId === "chef-catering" && selectedCuisine && form.getValues().numberOfPeople ? (
@@ -902,7 +902,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                       </div>
                     ) : (
                       <div>
-                        <p className="text-2xl font-bold text-primary">R{service.basePrice}</p>
+                        <p className="text-2xl font-bold text-primary">R{currentService.basePrice}</p>
                         <p className="text-sm text-gray-500">starting from</p>
                       </div>
                     )}
@@ -913,7 +913,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Service-Specific Fields */}
-              {service.category === "chef-catering" ? (
+              {currentService.category === "chef-catering" ? (
                 <EnhancedChefBooking 
                   form={form}
                   onNext={() => {}}

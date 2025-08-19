@@ -111,7 +111,70 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllServices(): Promise<Service[]> {
-    return await db.select().from(services).where(eq(services.isActive, true));
+    const result = await db.select().from(services).where(eq(services.isActive, true));
+    
+    // If no services exist, seed with default services
+    if (result.length === 0) {
+      await this.seedDefaultServices();
+      return await db.select().from(services).where(eq(services.isActive, true));
+    }
+    
+    return result;
+  }
+
+  private async seedDefaultServices() {
+    const defaultServices = [
+      {
+        id: "chef-catering",
+        name: "Chef & Catering",
+        description: "Professional chef services for any occasion with authentic cuisine experiences",
+        category: "chef-catering",
+        basePrice: "550.00",
+        isActive: true,
+      },
+      {
+        id: "house-cleaning",
+        name: "House Cleaning",
+        description: "Professional eco-friendly cleaning solutions for your home",
+        category: "house-cleaning",
+        basePrice: "280.00",
+        isActive: true,
+      },
+      {
+        id: "plumbing",
+        name: "Plumbing Services",
+        description: "Certified plumbers available for repairs and installations",
+        category: "plumbing",
+        basePrice: "400.00",
+        isActive: true,
+      },
+      {
+        id: "electrical",
+        name: "Electrical Services",
+        description: "Safety-certified electrical repairs and installations",
+        category: "electrical",
+        basePrice: "450.00",
+        isActive: true,
+      },
+      {
+        id: "gardening",
+        name: "Garden Care",
+        description: "Sustainable garden maintenance and landscaping services",
+        category: "gardening",
+        basePrice: "320.00",
+        isActive: true,
+      },
+      {
+        id: "home-moving",
+        name: "Home Moving",
+        description: "Professional moving services with packing and transportation",
+        category: "home-moving",
+        basePrice: "800.00",
+        isActive: true,
+      },
+    ];
+
+    await db.insert(services).values(defaultServices).onConflictDoNothing();
   }
 
   async getServicesByCategory(category: string): Promise<Service[]> {
