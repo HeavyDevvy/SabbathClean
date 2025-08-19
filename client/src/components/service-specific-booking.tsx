@@ -16,6 +16,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Service, ServiceProvider } from "@shared/schema";
+import HomeMovingDetails from "./home-moving-details";
 
 interface ServiceSpecificBookingProps {
   isOpen: boolean;
@@ -77,6 +78,9 @@ const gardeningSchema = z.object({
 
 export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: ServiceSpecificBookingProps) {
   const [selectedProvider, setSelectedProvider] = useState<string>("");
+  const [showMovingDetails, setShowMovingDetails] = useState(false);
+  const [movingServiceDetails, setMovingServiceDetails] = useState<any>(null);
+  const [selectedMovingProvider, setSelectedMovingProvider] = useState<ServiceProvider | null>(null);
   const { toast } = useToast();
 
   const { data: services } = useQuery<Service[]>({
@@ -94,6 +98,32 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     p.servicesOffered.includes(serviceId) || 
     p.servicesOffered.includes(service?.category || "")
   );
+
+  // Handle Home Moving service with detailed flow
+  if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
+    setShowMovingDetails(true);
+  }
+
+  const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
+    setMovingServiceDetails(serviceDetails);
+    setSelectedMovingProvider(provider);
+    setShowMovingDetails(false);
+    // Continue with regular booking flow with pre-filled data
+  };
+
+  // Show Home Moving Details component for moving service
+  if (showMovingDetails) {
+    return (
+      <HomeMovingDetails
+        isOpen={showMovingDetails}
+        onClose={() => {
+          setShowMovingDetails(false);
+          onClose();
+        }}
+        onProceedToBooking={handleMovingBookingProceed}
+      />
+    );
+  }
 
   // Determine which schema to use based on service type
   const getFormSchema = () => {
@@ -138,12 +168,18 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   });
 
   const onSubmit = (data: any) => {
-    createBookingMutation.mutate({
+    const bookingData = {
       ...data,
-      providerId: selectedProvider,
-      totalAmount: parseFloat(service?.basePrice || "0"),
+      providerId: selectedMovingProvider?.id || selectedProvider,
+      totalAmount: movingServiceDetails?.totalPrice || parseFloat(service?.basePrice || "0"),
       status: "pending",
-    });
+    };
+    
+    if (movingServiceDetails) {
+      bookingData.serviceDetails = movingServiceDetails;
+    }
+    
+    createBookingMutation.mutate(bookingData);
   };
 
   const renderServiceSpecificFields = () => {
@@ -467,8 +503,16 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               <Card>
                 <CardContent className="p-6">
                   <h4 className="font-semibold text-lg mb-4">Select Your Provider</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {relevantProviders?.map((provider) => (
+                  {movingServiceDetails && selectedMovingProvider ? (
+                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h5 className="font-medium text-green-800">Selected Moving Provider:</h5>
+                      <p className="text-green-700">{selectedMovingProvider.firstName} {selectedMovingProvider.lastName}</p>
+                      <p className="text-sm text-green-600">Total Services: {movingServiceDetails.selectedServices.join(', ')}</p>
+                      <p className="text-sm text-green-600">Total Cost: R{movingServiceDetails.totalPrice}</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {relevantProviders?.map((provider) => (
                       <Card 
                         key={provider.id} 
                         className={`cursor-pointer transition-all ${
@@ -499,7 +543,8 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -524,7 +569,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={createBookingMutation.isPending || !selectedProvider}
+                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider)}
                   className="min-w-[120px]"
                 >
                   {createBookingMutation.isPending ? "Booking..." : "Book Service"}

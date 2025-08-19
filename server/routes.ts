@@ -61,7 +61,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           storage.getServiceProvidersByService("house-cleaning"),
           storage.getServiceProvidersByService("deep-cleaning"),
           storage.getServiceProvidersByService("maintenance"),
-          storage.getServiceProvidersByService("gardening")
+          storage.getServiceProvidersByService("gardening"),
+          storage.getServiceProvidersByService("home-moving")
         ]);
         providers = allProviders.flat();
         // Remove duplicates
@@ -95,6 +96,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(provider);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Service-specific providers endpoint
+  app.get("/api/providers/service/:category", async (req, res) => {
+    try {
+      const providers = await storage.getServiceProvidersByService(req.params.category);
+      res.json(providers);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
     }
   });
 
