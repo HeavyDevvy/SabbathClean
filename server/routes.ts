@@ -1,7 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertServiceProviderSchema, insertBookingSchema, insertReviewSchema, insertPaymentMethodSchema } from "@shared/schema";
+import { 
+  insertUserSchema, 
+  insertServiceProviderSchema, 
+  insertBookingSchema, 
+  insertReviewSchema, 
+  insertPaymentMethodSchema,
+  insertTrainingModuleSchema,
+  insertProviderTrainingProgressSchema,
+  insertCertificationSchema,
+  insertProviderCertificationSchema,
+  insertSkillAssessmentSchema,
+  insertProviderAssessmentResultSchema
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -213,6 +225,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Payment method deleted successfully" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Training system routes
+  app.get("/api/training/modules", async (req, res) => {
+    try {
+      const serviceType = req.query.serviceType as string;
+      let modules;
+      
+      if (serviceType) {
+        modules = await storage.getTrainingModulesByService(serviceType);
+      } else {
+        modules = await storage.getAllTrainingModules();
+      }
+      
+      res.json(modules);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/training/progress/:providerId", async (req, res) => {
+    try {
+      const progress = await storage.getProviderTrainingProgress(req.params.providerId);
+      res.json(progress);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/training/progress", async (req, res) => {
+    try {
+      const progressData = insertProviderTrainingProgressSchema.parse(req.body);
+      const progress = await storage.createTrainingProgress(progressData);
+      res.json(progress);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/training/progress/:id", async (req, res) => {
+    try {
+      const progress = await storage.updateTrainingProgress(req.params.id, req.body);
+      res.json(progress);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Certification routes
+  app.get("/api/certifications", async (req, res) => {
+    try {
+      const serviceType = req.query.serviceType as string;
+      let certifications;
+      
+      if (serviceType) {
+        certifications = await storage.getCertificationsByService(serviceType);
+      } else {
+        certifications = await storage.getAllCertifications();
+      }
+      
+      res.json(certifications);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/certifications/provider/:providerId", async (req, res) => {
+    try {
+      const certifications = await storage.getProviderCertifications(req.params.providerId);
+      res.json(certifications);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/certifications/provider", async (req, res) => {
+    try {
+      const certificationData = insertProviderCertificationSchema.parse(req.body);
+      const certification = await storage.createProviderCertification(certificationData);
+      res.json(certification);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Assessment routes
+  app.get("/api/assessments", async (req, res) => {
+    try {
+      const serviceType = req.query.serviceType as string;
+      if (!serviceType) {
+        return res.status(400).json({ message: "serviceType is required" });
+      }
+      
+      const assessments = await storage.getSkillAssessments(serviceType);
+      res.json(assessments);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/assessments/results/:providerId", async (req, res) => {
+    try {
+      const results = await storage.getProviderAssessmentResults(req.params.providerId);
+      res.json(results);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/assessments/results", async (req, res) => {
+    try {
+      const resultData = insertProviderAssessmentResultSchema.parse(req.body);
+      const result = await storage.createAssessmentResult(resultData);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
     }
   });
 

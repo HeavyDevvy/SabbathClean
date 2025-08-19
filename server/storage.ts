@@ -15,6 +15,18 @@ import {
   type InsertProviderLocation,
   type JobQueue,
   type InsertJobQueue,
+  type TrainingModule,
+  type InsertTrainingModule,
+  type ProviderTrainingProgress,
+  type InsertProviderTrainingProgress,
+  type Certification,
+  type InsertCertification,
+  type ProviderCertification,
+  type InsertProviderCertification,
+  type SkillAssessment,
+  type InsertSkillAssessment,
+  type ProviderAssessmentResult,
+  type InsertProviderAssessmentResult,
   users,
   serviceProviders,
   services,
@@ -22,7 +34,13 @@ import {
   reviews,
   paymentMethods,
   providerLocations,
-  jobQueue
+  jobQueue,
+  trainingModules,
+  providerTrainingProgress,
+  certifications,
+  providerCertifications,
+  skillAssessments,
+  providerAssessmentResults
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -68,6 +86,24 @@ export interface IStorage {
   // Job queue operations (for future DB implementation)
   getJobQueueItem(id: string): Promise<JobQueue | undefined>;
   createJobQueueItem(job: InsertJobQueue): Promise<JobQueue>;
+  
+  // Training system operations
+  getAllTrainingModules(): Promise<TrainingModule[]>;
+  getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]>;
+  getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]>;
+  updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress>;
+  createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress>;
+  
+  // Certification operations
+  getAllCertifications(): Promise<Certification[]>;
+  getCertificationsByService(serviceType: string): Promise<Certification[]>;
+  getProviderCertifications(providerId: string): Promise<ProviderCertification[]>;
+  createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification>;
+  
+  // Assessment operations
+  getSkillAssessments(serviceType: string): Promise<SkillAssessment[]>;
+  getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]>;
+  createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -266,6 +302,87 @@ export class DatabaseStorage implements IStorage {
   async createJobQueueItem(job: InsertJobQueue): Promise<JobQueue> {
     const [newJob] = await db.insert(jobQueue).values(job).returning();
     return newJob;
+  }
+
+  // Training system methods
+  async getAllTrainingModules(): Promise<TrainingModule[]> {
+    return await db.select().from(trainingModules)
+      .where(eq(trainingModules.isActive, true))
+      .orderBy(trainingModules.category, trainingModules.difficulty);
+  }
+
+  async getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]> {
+    return await db.select().from(trainingModules)
+      .where(and(
+        eq(trainingModules.serviceType, serviceType),
+        eq(trainingModules.isActive, true)
+      ))
+      .orderBy(trainingModules.difficulty);
+  }
+
+  async getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]> {
+    return await db.select().from(providerTrainingProgress)
+      .where(eq(providerTrainingProgress.providerId, providerId))
+      .orderBy(desc(providerTrainingProgress.lastAccessedAt));
+  }
+
+  async updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress> {
+    const [updatedProgress] = await db.update(providerTrainingProgress)
+      .set({ ...progress, updatedAt: new Date() })
+      .where(eq(providerTrainingProgress.id, progressId))
+      .returning();
+    return updatedProgress;
+  }
+
+  async createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress> {
+    const [newProgress] = await db.insert(providerTrainingProgress).values(progress).returning();
+    return newProgress;
+  }
+
+  async getAllCertifications(): Promise<Certification[]> {
+    return await db.select().from(certifications)
+      .where(eq(certifications.isActive, true))
+      .orderBy(certifications.serviceType, certifications.level);
+  }
+
+  async getCertificationsByService(serviceType: string): Promise<Certification[]> {
+    return await db.select().from(certifications)
+      .where(and(
+        eq(certifications.serviceType, serviceType),
+        eq(certifications.isActive, true)
+      ))
+      .orderBy(certifications.level);
+  }
+
+  async getProviderCertifications(providerId: string): Promise<ProviderCertification[]> {
+    return await db.select().from(providerCertifications)
+      .where(eq(providerCertifications.providerId, providerId))
+      .orderBy(desc(providerCertifications.earnedAt));
+  }
+
+  async createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification> {
+    const [newCertification] = await db.insert(providerCertifications).values(certification).returning();
+    return newCertification;
+  }
+
+  async getSkillAssessments(serviceType: string): Promise<SkillAssessment[]> {
+    return await db.select().from(skillAssessments)
+      .where(and(
+        eq(skillAssessments.serviceType, serviceType),
+        eq(skillAssessments.isActive, true)
+      ))
+      .orderBy(skillAssessments.title);
+  }
+
+  async getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]> {
+    return await db.select().from(providerAssessmentResults)
+      .where(eq(providerAssessmentResults.providerId, providerId))
+      .orderBy(desc(providerAssessmentResults.completedAt));
+  }
+
+  async createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult> {
+    const [newResult] = await db.insert(providerAssessmentResults).values(result).returning();
+    return newResult;
   }
 }
 
@@ -1039,6 +1156,55 @@ export class MemStorage implements IStorage {
     };
     this.jobQueue.set(job.id, job);
     return job;
+  }
+
+  // Training system methods (stub implementations for MemStorage)
+  async getAllTrainingModules(): Promise<TrainingModule[]> {
+    return [];
+  }
+
+  async getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]> {
+    return [];
+  }
+
+  async getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]> {
+    return [];
+  }
+
+  async updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress> {
+    throw new Error("Training progress update not implemented in MemStorage");
+  }
+
+  async createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress> {
+    throw new Error("Training progress creation not implemented in MemStorage");
+  }
+
+  async getAllCertifications(): Promise<Certification[]> {
+    return [];
+  }
+
+  async getCertificationsByService(serviceType: string): Promise<Certification[]> {
+    return [];
+  }
+
+  async getProviderCertifications(providerId: string): Promise<ProviderCertification[]> {
+    return [];
+  }
+
+  async createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification> {
+    throw new Error("Provider certification creation not implemented in MemStorage");
+  }
+
+  async getSkillAssessments(serviceType: string): Promise<SkillAssessment[]> {
+    return [];
+  }
+
+  async getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]> {
+    return [];
+  }
+
+  async createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult> {
+    throw new Error("Assessment result creation not implemented in MemStorage");
   }
 }
 

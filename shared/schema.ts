@@ -128,6 +128,91 @@ export const paymentMethods = pgTable("payment_methods", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Training and Certification System Tables
+export const trainingModules = pgTable("training_modules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // safety, technical, customer-service, specialized
+  serviceType: text("service_type").notNull(), // chef-catering, house-cleaning, plumbing, etc.
+  difficulty: text("difficulty").notNull(), // beginner, intermediate, advanced
+  estimatedDuration: integer("estimated_duration").notNull(), // in minutes
+  content: jsonb("content").notNull(), // structured content with sections, videos, documents
+  prerequisites: text("prerequisites").array(),
+  isRequired: boolean("is_required").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const providerTrainingProgress = pgTable("provider_training_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  moduleId: varchar("module_id").references(() => trainingModules.id).notNull(),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed, failed
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  progress: integer("progress").default(0), // percentage 0-100
+  timeSpent: integer("time_spent").default(0), // in minutes
+  attempts: integer("attempts").default(0),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const certifications = pgTable("certifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  serviceType: text("service_type").notNull(),
+  level: text("level").notNull(), // basic, intermediate, advanced, expert
+  requiredModules: text("required_modules").array().notNull(),
+  validityPeriod: integer("validity_period").notNull(), // in months
+  badgeIcon: text("badge_icon"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const providerCertifications = pgTable("provider_certifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  certificationId: varchar("certification_id").references(() => certifications.id).notNull(),
+  status: text("status").notNull().default("in_progress"), // in_progress, earned, expired, revoked
+  earnedAt: timestamp("earned_at"),
+  expiresAt: timestamp("expires_at"),
+  certificateNumber: text("certificate_number"),
+  verificationCode: text("verification_code"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const skillAssessments = pgTable("skill_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  serviceType: text("service_type").notNull(),
+  assessmentType: text("assessment_type").notNull(), // quiz, practical, portfolio
+  questions: jsonb("questions").notNull(), // structured assessment questions
+  passingScore: integer("passing_score").notNull(), // percentage
+  timeLimit: integer("time_limit"), // in minutes
+  maxAttempts: integer("max_attempts").default(3),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const providerAssessmentResults = pgTable("provider_assessment_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  assessmentId: varchar("assessment_id").references(() => skillAssessments.id).notNull(),
+  score: integer("score").notNull(), // percentage
+  passed: boolean("passed").notNull(),
+  answers: jsonb("answers"), // provider's answers
+  feedback: text("feedback"),
+  attemptNumber: integer("attempt_number").notNull(),
+  startedAt: timestamp("started_at").notNull(),
+  completedAt: timestamp("completed_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   serviceProvider: one(serviceProviders, {
@@ -145,6 +230,9 @@ export const serviceProvidersRelations = relations(serviceProviders, ({ one, man
   }),
   bookings: many(bookings),
   reviews: many(reviews),
+  trainingProgress: many(providerTrainingProgress),
+  certifications: many(providerCertifications),
+  assessmentResults: many(providerAssessmentResults),
 }));
 
 export const servicesRelations = relations(services, ({ many }) => ({
@@ -211,6 +299,52 @@ export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({
   }),
 }));
 
+// Training system relations
+export const trainingModulesRelations = relations(trainingModules, ({ many }) => ({
+  progress: many(providerTrainingProgress),
+}));
+
+export const providerTrainingProgressRelations = relations(providerTrainingProgress, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerTrainingProgress.providerId],
+    references: [serviceProviders.id],
+  }),
+  module: one(trainingModules, {
+    fields: [providerTrainingProgress.moduleId],
+    references: [trainingModules.id],
+  }),
+}));
+
+export const certificationsRelations = relations(certifications, ({ many }) => ({
+  providerCertifications: many(providerCertifications),
+}));
+
+export const providerCertificationsRelations = relations(providerCertifications, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerCertifications.providerId],
+    references: [serviceProviders.id],
+  }),
+  certification: one(certifications, {
+    fields: [providerCertifications.certificationId],
+    references: [certifications.id],
+  }),
+}));
+
+export const skillAssessmentsRelations = relations(skillAssessments, ({ many }) => ({
+  results: many(providerAssessmentResults),
+}));
+
+export const providerAssessmentResultsRelations = relations(providerAssessmentResults, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerAssessmentResults.providerId],
+    references: [serviceProviders.id],
+  }),
+  assessment: one(skillAssessments, {
+    fields: [providerAssessmentResults.assessmentId],
+    references: [skillAssessments.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -238,6 +372,58 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
 });
+
+// Training system insert schemas
+export const insertTrainingModuleSchema = createInsertSchema(trainingModules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProviderTrainingProgressSchema = createInsertSchema(providerTrainingProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCertificationSchema = createInsertSchema(certifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProviderCertificationSchema = createInsertSchema(providerCertifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSkillAssessmentSchema = createInsertSchema(skillAssessments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProviderAssessmentResultSchema = createInsertSchema(providerAssessmentResults).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Training system types
+export type TrainingModule = typeof trainingModules.$inferSelect;
+export type InsertTrainingModule = z.infer<typeof insertTrainingModuleSchema>;
+
+export type ProviderTrainingProgress = typeof providerTrainingProgress.$inferSelect;
+export type InsertProviderTrainingProgress = z.infer<typeof insertProviderTrainingProgressSchema>;
+
+export type Certification = typeof certifications.$inferSelect;
+export type InsertCertification = z.infer<typeof insertCertificationSchema>;
+
+export type ProviderCertification = typeof providerCertifications.$inferSelect;
+export type InsertProviderCertification = z.infer<typeof insertProviderCertificationSchema>;
+
+export type SkillAssessment = typeof skillAssessments.$inferSelect;
+export type InsertSkillAssessment = z.infer<typeof insertSkillAssessmentSchema>;
+
+export type ProviderAssessmentResult = typeof providerAssessmentResults.$inferSelect;
+export type InsertProviderAssessmentResult = z.infer<typeof insertProviderAssessmentResultSchema>;
 
 export const insertProviderLocationSchema = createInsertSchema(providerLocations).omit({
   id: true,
