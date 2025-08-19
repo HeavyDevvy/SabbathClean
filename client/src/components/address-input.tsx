@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { MapPin, Navigation } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,17 +36,35 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
 
     try {
       // Using Nominatim (OpenStreetMap) API for address geocoding
+      // Focus on South Africa but allow global search if no SA results
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=za&q=${encodeURIComponent(query)}`
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=8&countrycodes=za&q=${encodeURIComponent(query)}&accept-language=en`
       );
       
       if (response.ok) {
         const data = await response.json();
-        setSuggestions(data);
-        setShowSuggestions(true);
+        
+        // If no South African results, try global search
+        if (data.length === 0) {
+          const globalResponse = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}&accept-language=en`
+          );
+          
+          if (globalResponse.ok) {
+            const globalData = await globalResponse.json();
+            setSuggestions(globalData);
+            setShowSuggestions(globalData.length > 0);
+          }
+        } else {
+          setSuggestions(data);
+          setShowSuggestions(true);
+        }
       }
     } catch (error) {
       console.error('Address search error:', error);
+      // Silently fail - user can still type address manually
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
   };
 
@@ -69,8 +88,8 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       toast({
-        title: "Geolocation Not Supported",
-        description: "Your browser doesn't support geolocation.",
+        title: "Location Not Available",
+        description: "Your browser doesn't support location services.",
         variant: "destructive",
       });
       return;
@@ -83,24 +102,62 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
         const { latitude, longitude } = position.coords;
         
         try {
-          // Reverse geocoding to get address from coordinates
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
-          );
-          
-          if (response.ok) {
-            const data = await response.json();
-            const address = data.display_name || `${latitude}, ${longitude}`;
-            onChange(address);
-            toast({
-              title: "Location Found",
-              description: "Your address has been automatically filled in.",
-            });
+          // Reverse geocoding to get address from coordinates using multiple fallbacks
+          let address = "";
+          let success = false;
+
+          // Try Nominatim first (OpenStreetMap)
+          try {
+            const nominatimResponse = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en`
+            );
+            
+            if (nominatimResponse.ok) {
+              const nominatimData = await nominatimResponse.json();
+              if (nominatimData.display_name) {
+                address = nominatimData.display_name;
+                success = true;
+              }
+            }
+          } catch (nominatimError) {
+            console.log('Nominatim failed, trying fallback...');
           }
+
+          // Fallback to BigDataCloud if Nominatim fails
+          if (!success) {
+            try {
+              const fallbackResponse = await fetch(
+                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+              );
+              
+              if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json();
+                if (fallbackData.locality && fallbackData.principalSubdivision) {
+                  address = `${fallbackData.locality}, ${fallbackData.principalSubdivision}, ${fallbackData.countryName || 'South Africa'}`;
+                  success = true;
+                }
+              }
+            } catch (fallbackError) {
+              console.log('Fallback geocoding also failed');
+            }
+          }
+
+          // If all geocoding fails, use coordinates
+          if (!success) {
+            address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          }
+
+          onChange(address);
+          toast({
+            title: "Location Found",
+            description: success ? "Your address has been filled in." : "Your coordinates have been filled in.",
+          });
+          
         } catch (error) {
-          console.error('Reverse geocoding error:', error);
-          // Fallback to coordinates
-          onChange(`${latitude}, ${longitude}`);
+          console.error('Geocoding error:', error);
+          // Fallback to coordinates only
+          const coordsAddress = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          onChange(coordsAddress);
           toast({
             title: "Location Found",
             description: "Your coordinates have been filled in.",
@@ -112,29 +169,36 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
       (error) => {
         setIsLoadingLocation(false);
         let errorMessage = "Unable to get your location.";
+        let helpText = "";
         
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "Location access was denied. Please allow location access and try again.";
+            errorMessage = "Location access denied";
+            helpText = "Please allow location access in your browser settings and try again.";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information is unavailable.";
+            errorMessage = "Location unavailable";
+            helpText = "Your device cannot determine your location. Please enter your address manually.";
             break;
           case error.TIMEOUT:
-            errorMessage = "Location request timed out.";
+            errorMessage = "Location timeout";
+            helpText = "The location request took too long. Please try again or enter your address manually.";
             break;
+          default:
+            errorMessage = "Location error";
+            helpText = "Please enter your address manually.";
         }
         
         toast({
-          title: "Location Error",
-          description: errorMessage,
+          title: errorMessage,
+          description: helpText,
           variant: "destructive",
         });
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
+        timeout: 15000, // Increased timeout
+        maximumAge: 600000 // 10 minutes cache
       }
     );
   };
@@ -166,56 +230,65 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
   }, []);
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Input
-            type="text"
-            value={value}
-            onChange={handleInputChange}
-            placeholder={placeholder}
-            className="pr-10"
-            autoComplete="address-line1"
-            data-testid="input-address"
-          />
-          <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+    <TooltipProvider>
+      <div className={`relative ${className}`}>
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Input
+              type="text"
+              value={value}
+              onChange={handleInputChange}
+              placeholder={placeholder}
+              className="pr-10"
+              autoComplete="address-line1"
+              data-testid="input-address"
+            />
+            <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={getCurrentLocation}
+                disabled={isLoadingLocation}
+                className="shrink-0"
+                data-testid="button-get-location"
+              >
+                <Navigation className={`h-4 w-4 ${isLoadingLocation ? 'animate-pulse' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Use my current location</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
-        
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={getCurrentLocation}
-          disabled={isLoadingLocation}
-          className="shrink-0"
-          data-testid="button-get-location"
-        >
-          <Navigation className={`h-4 w-4 ${isLoadingLocation ? 'animate-pulse' : ''}`} />
-        </Button>
-      </div>
 
-      {/* Address Suggestions */}
-      {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-          {suggestions.map((suggestion, index) => (
-            <div
-              key={suggestion.place_id || index}
-              className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-              onClick={() => selectSuggestion(suggestion)}
-              data-testid={`suggestion-${index}`}
-            >
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {suggestion.display_name}
-                  </p>
+        {/* Address Suggestions */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={suggestion.place_id || index}
+                className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                onClick={() => selectSuggestion(suggestion)}
+                data-testid={`suggestion-${index}`}
+              >
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-4 w-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {suggestion.display_name}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
