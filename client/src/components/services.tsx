@@ -9,6 +9,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "house-cleaning",
       name: "House Cleaning",
+      category: "Cleaning Services",
       description: "Complete home cleaning including dusting, vacuuming, mopping, kitchen & bathroom sanitization, organizing",
       price: "R450/hour",
       icon: Home,
@@ -18,6 +19,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "deep-cleaning", 
       name: "Deep Cleaning",
+      category: "Cleaning Services",
       description: "Thorough cleaning for move-ins, move-outs including carpet cleaning, window washing, appliance cleaning",
       price: "R810/hour",
       icon: Sparkles,
@@ -27,6 +29,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "plumbing",
       name: "Plumbing Services", 
+      category: "Maintenance & Repairs",
       description: "Pipe repairs, leak fixing, faucet installation, drain cleaning, toilet repairs, water heater maintenance",
       price: "R750/hour",
       icon: Droplets,
@@ -36,6 +39,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "electrical",
       name: "Electrical Services",
+      category: "Maintenance & Repairs",
       description: "Wiring repairs, outlet installation, lighting setup, circuit breaker fixes, electrical safety inspections", 
       price: "R850/hour",
       icon: Zap,
@@ -45,6 +49,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "chef-catering",
       name: "Chef & Catering",
+      category: "Food & Event Services",
       description: "Personal chef services, meal preparation, event catering, menu planning, dietary accommodations",
       price: "R950/hour",
       icon: ChefHat,
@@ -54,6 +59,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "waitering",
       name: "Waitering Services",
+      category: "Food & Event Services",
       description: "Professional waitstaff for events, table service, bar service, event coordination, cleanup assistance",
       price: "R350/hour",
       icon: Users,
@@ -63,6 +69,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     {
       id: "gardening",
       name: "Garden Care",
+      category: "Outdoor Services",
       description: "Lawn maintenance, pruning, weeding, planting, irrigation setup, landscape design consultation", 
       price: "R540/hour",
       icon: Leaf,
@@ -75,7 +82,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
     <section id="services" className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Our Premium Services</h2>
+          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Our Home Experts Services</h2>
           <p className="mt-4 text-lg text-neutral">Professional domestic services tailored to your needs</p>
         </div>
         
@@ -92,6 +99,11 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                 <div className={`bg-gradient-to-br ${service.gradient} rounded-2xl p-8 text-center hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300`}>
                   <div className={`w-16 h-16 ${service.iconBg} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <IconComponent className="text-white h-6 w-6" />
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-xs bg-white/70 text-primary px-2 py-1 rounded-full font-medium">
+                      {service.category}
+                    </span>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.name}</h3>
                   <p className="text-neutral text-sm mb-4">{service.description}</p>

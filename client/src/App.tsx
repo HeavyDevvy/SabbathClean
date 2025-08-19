@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Booking from "@/pages/booking";
 import Providers from "@/pages/providers";
 import Profile from "@/pages/profile";
+import ProviderOnboarding from "@/pages/provider-onboarding";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/booking" component={Booking} />
       <Route path="/providers" component={Providers} />
+      <Route path="/provider-onboarding" component={ProviderOnboarding} />
       <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>

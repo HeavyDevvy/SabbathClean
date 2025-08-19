@@ -20,17 +20,26 @@ export const users = pgTable("users", {
 export const serviceProviders = pgTable("service_providers", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  email: text("email"),
+  phone: text("phone"),
   bio: text("bio"),
   profileImage: text("profile_image"),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }).notNull(),
   servicesOffered: text("services_offered").array().notNull(),
+  experience: text("experience"),
   availability: jsonb("availability"), // JSON object for schedule
   isVerified: boolean("is_verified").default(false),
   insuranceVerified: boolean("insurance_verified").default(false),
   backgroundCheckVerified: boolean("background_check_verified").default(false),
+  hasInsurance: boolean("has_insurance").default(false),
+  backgroundCheckConsent: boolean("background_check_consent").default(false),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   totalReviews: integer("total_reviews").default(0),
   location: text("location").notNull(),
+  idDocument: text("id_document"),
+  qualificationCertificate: text("qualification_certificate"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
