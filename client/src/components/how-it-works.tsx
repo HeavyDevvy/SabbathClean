@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, Sparkles, Droplets, Zap, ChefHat, Users, Leaf, Truck } from "lucide-react";
+import { Home, Sparkles, Droplets, Zap, ChefHat, Users, Leaf, Truck, Play } from "lucide-react";
 import { useState } from "react";
+import WorkflowSimulation from "./workflow-simulation";
 
 interface HowItWorksProps {
   onBookingClick: (serviceId?: string) => void;
@@ -9,6 +10,7 @@ interface HowItWorksProps {
 
 export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
   const [showServiceSelector, setShowServiceSelector] = useState(false);
+  const [showSimulation, setShowSimulation] = useState(false);
 
   const services = [
     { id: "house-cleaning", name: "House Cleaning", icon: Home, color: "bg-purple-600" },
@@ -64,14 +66,26 @@ export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
 
         <div className="mt-12 text-center">
           {!showServiceSelector ? (
-            <Button 
-              onClick={() => setShowServiceSelector(true)}
-              size="lg"
-              className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
-              data-testid="button-start-booking"
-            >
-              Start Your Service Booking
-            </Button>
+            <div className="space-y-4">
+              <Button 
+                onClick={() => setShowServiceSelector(true)}
+                size="lg"
+                className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg mr-4"
+                data-testid="button-start-booking"
+              >
+                Start Your Service Booking
+              </Button>
+              <Button 
+                onClick={() => setShowSimulation(true)}
+                size="lg"
+                variant="outline"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 transform hover:scale-105 transition-all duration-200"
+                data-testid="button-watch-workflow"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                See How It Works
+              </Button>
+            </div>
           ) : (
             <div className="space-y-6">
               <h3 className="text-2xl font-semibold text-gray-900">Choose Your Service</h3>
@@ -107,6 +121,15 @@ export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
                   Back
                 </Button>
                 <Button 
+                  onClick={() => setShowSimulation(true)}
+                  variant="outline"
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                  data-testid="button-watch-demo"
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Watch Demo
+                </Button>
+                <Button 
                   onClick={() => onBookingClick()}
                   variant="outline"
                   data-testid="button-browse-all"
@@ -117,6 +140,11 @@ export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
             </div>
           )}
         </div>
+        
+        {/* Workflow Simulation Modal */}
+        {showSimulation && (
+          <WorkflowSimulation onClose={() => setShowSimulation(false)} />
+        )}
       </div>
     </section>
   );
