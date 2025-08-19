@@ -1,7 +1,7 @@
 import Header from "@/components/header";
 import Hero from "@/components/hero";
 import Services from "@/components/services";
-import HowItWorks from "@/components/how-it-works";
+import { AnimatedBookingDemo } from "@/components/animated-booking-demo";
 import FeaturedProviders from "@/components/featured-providers";
 import Testimonials from "@/components/testimonials";
 import Pricing from "@/components/pricing";
@@ -26,7 +26,11 @@ export default function Home() {
       <main>
         <Hero onBookingClick={() => openBooking()} />
         <Services onServiceSelect={openBooking} />
-        <HowItWorks onBookingClick={() => openBooking()} />
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <AnimatedBookingDemo />
+          </div>
+        </section>
         <FeaturedProviders />
         <Testimonials />
         <Pricing onBookingClick={() => openBooking()} />
