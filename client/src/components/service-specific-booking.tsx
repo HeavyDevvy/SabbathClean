@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AddressInput from "@/components/address-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -424,9 +425,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                   <h4 className="font-semibold text-lg">Address & Scheduling</h4>
                   <div>
                     <Label htmlFor="address">Service Address</Label>
-                    <Input 
+                    <AddressInput
+                      value={form.watch("address" as any) || ""}
+                      onChange={(address) => form.setValue("address" as any, address)}
                       placeholder="Enter full address where service is needed"
-                      {...form.register("address" as any)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

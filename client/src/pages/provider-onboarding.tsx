@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AddressInput from "@/components/address-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -261,11 +262,10 @@ export default function ProviderOnboarding() {
                   
                   <div>
                     <Label htmlFor="location">Service Location *</Label>
-                    <Input
-                      id="location"
-                      {...form.register("location")}
+                    <AddressInput
+                      value={form.watch("location") || ""}
+                      onChange={(location) => form.setValue("location", location)}
                       placeholder="Cape Town, Western Cape"
-                      data-testid="input-location"
                     />
                     {form.formState.errors.location && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.location.message}</p>

@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import AddressInput from "@/components/address-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,7 +41,7 @@ type BookingFormData = z.infer<typeof bookingSchema>;
 export default function BookingModal({ isOpen, onClose, selectedService, selectedProvider: providerId }: BookingModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
   const { toast } = useToast();
 
   const { data: services } = useQuery<Service[]>({
@@ -90,51 +91,7 @@ export default function BookingModal({ isOpen, onClose, selectedService, selecte
     },
   });
 
-  const getLocation = () => {
-    setIsGettingLocation(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          try {
-            // Use a reverse geocoding service to get the address
-            const response = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-            );
-            const data = await response.json();
-            const address = `${data.locality}, ${data.principalSubdivision}, ${data.countryName}`;
-            form.setValue("address", address);
-            toast({
-              title: "Location Found",
-              description: "Your address has been automatically filled in.",
-            });
-          } catch (error) {
-            toast({
-              title: "Location Error",
-              description: "Could not get your address. Please enter it manually.",
-              variant: "destructive",
-            });
-          }
-          setIsGettingLocation(false);
-        },
-        (error) => {
-          toast({
-            title: "Location Access Denied",
-            description: "Please enter your address manually.",
-            variant: "destructive",
-          });
-          setIsGettingLocation(false);
-        }
-      );
-    } else {
-      toast({
-        title: "Location Not Supported",
-        description: "Your browser doesn't support geolocation.",
-        variant: "destructive",
-      });
-      setIsGettingLocation(false);
-    }
-  };
+
 
   const resetForm = () => {
     setCurrentStep(1);
@@ -274,33 +231,14 @@ export default function BookingModal({ isOpen, onClose, selectedService, selecte
                 </div>
                 <div className="sm:col-span-2">
                   <Label htmlFor="address">Location</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Input 
-                      {...form.register("address")}
-                      placeholder="Enter your address"
-                      className="flex-1"
-                      data-testid="input-address"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={getLocation}
-                      disabled={isGettingLocation}
-                      className="px-3"
-                      data-testid="button-get-location"
-                    >
-                      {isGettingLocation ? (
-                        <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-                      ) : (
-                        <Navigation className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                  <AddressInput
+                    value={form.watch("address") || ""}
+                    onChange={(address) => form.setValue("address", address)}
+                    placeholder="Enter your address"
+                  />
                   {form.formState.errors.address && (
                     <p className="text-red-500 text-sm mt-1">{form.formState.errors.address.message}</p>
                   )}
-                  <p className="text-xs text-neutral mt-1">Click the location icon to use your current location</p>
                 </div>
               </div>
               <div className="flex space-x-4">
