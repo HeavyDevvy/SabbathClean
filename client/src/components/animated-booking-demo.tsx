@@ -74,18 +74,18 @@ export function AnimatedBookingDemo() {
         },
         {
           id: 2,
-          title: "Choose Your Cuisine",
-          description: "Select from authentic cuisine types",
+          title: "Choose African Cuisine",
+          description: "Select from authentic African cuisine specialties",
           duration: 2500,
           component: (
             <div className="space-y-3 max-w-md mx-auto">
-              <h4 className="font-semibold text-center mb-4">Select Cuisine Type</h4>
+              <h4 className="font-semibold text-center mb-4">Select African Cuisine Type</h4>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { name: "Italian", icon: "🍝", active: true },
-                  { name: "Indian", icon: "🍛", active: false },
-                  { name: "Asian", icon: "🍜", active: false },
-                  { name: "Mediterranean", icon: "🥗", active: false }
+                  { name: "South African", icon: "🍖", active: true, description: "Braai & Boerewors" },
+                  { name: "Nigerian", icon: "🍛", active: false, description: "Jollof & Suya" },
+                  { name: "Ethiopian", icon: "🫓", active: false, description: "Injera & Doro Wat" },
+                  { name: "Moroccan", icon: "🍲", active: false, description: "Tagine & Couscous" }
                 ].map((cuisine) => (
                   <Card 
                     key={cuisine.name} 
@@ -96,6 +96,7 @@ export function AnimatedBookingDemo() {
                     <CardContent className="p-4 text-center">
                       <div className="text-2xl mb-2">{cuisine.icon}</div>
                       <p className="font-medium text-sm">{cuisine.name}</p>
+                      <p className="text-xs text-gray-500 mt-1">{cuisine.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -105,17 +106,24 @@ export function AnimatedBookingDemo() {
         },
         {
           id: 3,
-          title: "Chef Matched!",
-          description: "Professional chef ready to serve",
+          title: "African Chef Matched!",
+          description: "Specialist in authentic African cuisine",
           duration: 2000,
           component: (
             <div className="text-center max-w-sm mx-auto">
               <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
                 <CheckCircle className="h-12 w-12 text-orange-600" />
               </div>
-              <h3 className="text-xl font-semibold text-orange-700 mb-2">Chef Matched!</h3>
-              <p className="text-gray-600 mb-4">Chef Sarah will prepare Italian cuisine for 6 people</p>
-              <div className="text-2xl font-bold text-orange-500">R3,480</div>
+              <h3 className="text-xl font-semibold text-orange-700 mb-2">Chef Thabo Matched!</h3>
+              <p className="text-gray-600 mb-4">Specialist chef will prepare South African braai feast for 8 people</p>
+              <div className="space-y-2 mb-4">
+                <div className="bg-orange-50 p-3 rounded-lg">
+                  <p className="text-sm font-medium text-orange-800">Menu Highlights:</p>
+                  <p className="text-xs text-orange-600">Boerewors, Sosaties, Pap & Gravy, Chakalaka</p>
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-orange-500">R4,200</div>
+              <p className="text-xs text-gray-500 mt-1">Includes traditional braai setup & sides</p>
             </div>
           )
         }
@@ -161,7 +169,7 @@ export function AnimatedBookingDemo() {
           Watch How It Works
         </h2>
         <p className="text-lg text-neutral mb-6">
-          See how easy it is to book Chef & Catering services in just a few simple steps.
+          Experience authentic African cuisine with our specialized chefs in just a few simple steps.
         </p>
 
 
@@ -239,7 +247,7 @@ export function AnimatedBookingDemo() {
               Ready to See How It Works?
             </h3>
             <p className="text-neutral">
-              Click "Start Demo" to see our chef & catering booking process in action
+              Click "Start Demo" to see our African cuisine chef booking process in action
             </p>
           </div>
         )}
