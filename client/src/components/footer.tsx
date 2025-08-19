@@ -10,7 +10,7 @@ export default function Footer() {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Home className="text-white h-5 w-5" />
               </div>
-              <span className="ml-3 text-xl font-bold">Sabboath Cleaners</span>
+              <span className="ml-3 text-xl font-bold">Berry Events</span>
             </div>
             <p className="mt-4 text-gray-300 max-w-md">
               Premium domestic services with verified professionals. Your home, our priority.
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-700 text-center text-gray-300">
-          <p>&copy; 2024 Sabboath Cleaners. All rights reserved.</p>
+          <p>&copy; 2024 Berry Events. All rights reserved.</p>
         </div>
       </div>
     </footer>

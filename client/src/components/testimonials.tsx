@@ -13,7 +13,7 @@ export default function Testimonials() {
     {
       id: 2,
       rating: 5,
-      comment: "James fixed my plumbing issue same day I booked. Professional, reliable, and reasonably priced. Definitely using Sabboath again!",
+      comment: "James fixed my plumbing issue same day I booked. Professional, reliable, and reasonably priced. Definitely using Berry again!",
       customerName: "Michael Thompson", 
       location: "Johannesburg",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
@@ -33,7 +33,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">What Our Customers Say</h2>
-          <p className="mt-4 text-lg text-neutral">Join thousands of satisfied customers who trust Sabboath</p>
+          <p className="mt-4 text-lg text-neutral">Join thousands of satisfied customers who trust Berry</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
