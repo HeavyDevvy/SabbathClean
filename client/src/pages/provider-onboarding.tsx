@@ -14,7 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shield, Smartphone, Mail, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shield, Smartphone, Mail, Clock, Home } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -231,6 +232,19 @@ export default function ProviderOnboarding() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link href="/" data-testid="back-to-home-button">
+            <Button 
+              variant="outline" 
+              className="flex items-center space-x-2 hover:bg-primary hover:text-white transition-colors"
+            >
+              <Home className="h-4 w-4" />
+              <span>Back to Home</span>
+            </Button>
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Join Berry Events</h1>
           <p className="mt-2 text-lg text-neutral">Become one of our trusted home experts</p>
