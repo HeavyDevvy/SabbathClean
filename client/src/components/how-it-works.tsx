@@ -1,15 +1,31 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Home, Sparkles, Droplets, Zap, ChefHat, Users, Leaf, Truck } from "lucide-react";
+import { useState } from "react";
 
 interface HowItWorksProps {
-  onBookingClick: () => void;
+  onBookingClick: (serviceId?: string) => void;
 }
 
 export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
+  const [showServiceSelector, setShowServiceSelector] = useState(false);
+
+  const services = [
+    { id: "house-cleaning", name: "House Cleaning", icon: Home, color: "bg-purple-600" },
+    { id: "deep-cleaning", name: "Deep Cleaning", icon: Sparkles, color: "bg-pink-600" },
+    { id: "plumbing", name: "Plumbing", icon: Droplets, color: "bg-blue-600" },
+    { id: "electrical", name: "Electrical", icon: Zap, color: "bg-yellow-600" },
+    { id: "chef-catering", name: "Chef & Catering", icon: ChefHat, color: "bg-orange-600" },
+    { id: "waitering", name: "Waitering", icon: Users, color: "bg-green-600" },
+    { id: "gardening", name: "Garden Care", icon: Leaf, color: "bg-emerald-600" },
+    { id: "home-moving", name: "Home Moving", icon: Truck, color: "bg-indigo-600" },
+  ];
+
   const steps = [
     {
       number: 1,
       title: "Choose Your Service",
-      description: "Select from house cleaning, deep cleaning, maintenance, or garden care. Specify your requirements and preferred date.",
+      description: "Select from house cleaning, deep cleaning, maintenance, garden care, moving services, or professional catering. Specify your requirements and preferred date.",
       bgColor: "bg-primary",
     },
     {
@@ -47,14 +63,59 @@ export default function HowItWorks({ onBookingClick }: HowItWorksProps) {
         </div>
 
         <div className="mt-12 text-center">
-          <Button 
-            onClick={onBookingClick}
-            size="lg"
-            className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
-            data-testid="button-start-booking"
-          >
-            Start Your 2-Minute Booking
-          </Button>
+          {!showServiceSelector ? (
+            <Button 
+              onClick={() => setShowServiceSelector(true)}
+              size="lg"
+              className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+              data-testid="button-start-booking"
+            >
+              Start Your Service Booking
+            </Button>
+          ) : (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-semibold text-gray-900">Choose Your Service</h3>
+              <p className="text-neutral mb-8">Select the service you need and we'll connect you with the best providers in your area</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                {services.map((service) => {
+                  const IconComponent = service.icon;
+                  return (
+                    <Card 
+                      key={service.id}
+                      className="cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 group"
+                      onClick={() => onBookingClick(service.id)}
+                      data-testid={`service-selector-${service.id}`}
+                    >
+                      <CardContent className="p-6 text-center">
+                        <div className={`w-12 h-12 ${service.color} rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                          <IconComponent className="text-white h-6 w-6" />
+                        </div>
+                        <h4 className="font-medium text-gray-900 text-sm">{service.name}</h4>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+              
+              <div className="flex justify-center space-x-4 mt-8">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowServiceSelector(false)}
+                  data-testid="button-back-to-general"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={() => onBookingClick()}
+                  variant="outline"
+                  data-testid="button-browse-all"
+                >
+                  Browse All Services
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
