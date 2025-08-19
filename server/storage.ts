@@ -14,8 +14,18 @@ import {
   type ProviderLocation,
   type InsertProviderLocation,
   type JobQueue,
-  type InsertJobQueue
+  type InsertJobQueue,
+  users,
+  serviceProviders,
+  services,
+  bookings,
+  reviews,
+  paymentMethods,
+  providerLocations,
+  jobQueue
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -58,6 +68,142 @@ export interface IStorage {
   // Job queue operations (for future DB implementation)
   getJobQueueItem(id: string): Promise<JobQueue | undefined>;
   createJobQueueItem(job: InsertJobQueue): Promise<JobQueue>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
+    const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.id, id));
+    return provider || undefined;
+  }
+
+  async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {
+    const providers = await db.select().from(serviceProviders)
+      .where(eq(serviceProviders.servicesOffered, [serviceCategory]));
+    return providers;
+  }
+
+  async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
+    const [newProvider] = await db.insert(serviceProviders).values(provider).returning();
+    return newProvider;
+  }
+
+  async updateServiceProviderRating(id: string, rating: number, totalReviews: number): Promise<ServiceProvider> {
+    const [provider] = await db.update(serviceProviders)
+      .set({ rating: rating.toString(), totalReviews })
+      .where(eq(serviceProviders.id, id))
+      .returning();
+    return provider;
+  }
+
+  async getAllServices(): Promise<Service[]> {
+    return await db.select().from(services).where(eq(services.isActive, true));
+  }
+
+  async getServicesByCategory(category: string): Promise<Service[]> {
+    return await db.select().from(services)
+      .where(and(eq(services.category, category), eq(services.isActive, true)));
+  }
+
+  async createService(service: InsertService): Promise<Service> {
+    const [newService] = await db.insert(services).values(service).returning();
+    return newService;
+  }
+
+  async getBooking(id: string): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking || undefined;
+  }
+
+  async getBookingsByCustomer(customerId: string): Promise<Booking[]> {
+    return await db.select().from(bookings)
+      .where(eq(bookings.customerId, customerId))
+      .orderBy(desc(bookings.scheduledDate));
+  }
+
+  async getBookingsByProvider(providerId: string): Promise<Booking[]> {
+    return await db.select().from(bookings)
+      .where(eq(bookings.providerId, providerId))
+      .orderBy(desc(bookings.scheduledDate));
+  }
+
+  async createBooking(booking: InsertBooking): Promise<Booking> {
+    const [newBooking] = await db.insert(bookings).values(booking).returning();
+    return newBooking;
+  }
+
+  async updateBookingStatus(id: string, status: string): Promise<Booking> {
+    const [booking] = await db.update(bookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return booking;
+  }
+
+  async getReviewsByProvider(providerId: string): Promise<Review[]> {
+    return await db.select().from(reviews)
+      .where(eq(reviews.providerId, providerId))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const [newReview] = await db.insert(reviews).values(review).returning();
+    return newReview;
+  }
+
+  async getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]> {
+    return await db.select().from(paymentMethods)
+      .where(eq(paymentMethods.userId, userId));
+  }
+
+  async createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [newPaymentMethod] = await db.insert(paymentMethods).values(paymentMethod).returning();
+    return newPaymentMethod;
+  }
+
+  async deletePaymentMethod(id: string): Promise<void> {
+    await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+  }
+
+  async getProviderLocation(providerId: string): Promise<ProviderLocation | undefined> {
+    const [location] = await db.select().from(providerLocations).where(eq(providerLocations.providerId, providerId));
+    return location || undefined;
+  }
+
+  async updateProviderLocation(location: InsertProviderLocation): Promise<ProviderLocation> {
+    const [newLocation] = await db.insert(providerLocations)
+      .values(location)
+      .onConflictDoUpdate({
+        target: providerLocations.providerId,
+        set: { latitude: location.latitude, longitude: location.longitude, updatedAt: new Date() }
+      })
+      .returning();
+    return newLocation;
+  }
+
+  async getJobQueueItem(id: string): Promise<JobQueue | undefined> {
+    const [job] = await db.select().from(jobQueue).where(eq(jobQueue.id, id));
+    return job || undefined;
+  }
+
+  async createJobQueueItem(job: InsertJobQueue): Promise<JobQueue> {
+    const [newJob] = await db.insert(jobQueue).values(job).returning();
+    return newJob;
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -833,4 +979,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Switch to database storage for production
+export const storage = new DatabaseStorage();

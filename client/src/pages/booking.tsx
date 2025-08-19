@@ -116,7 +116,7 @@ export default function Booking() {
                   {services.map((service) => (
                     <Card 
                       key={service.id}
-                      className={`cursor-pointer transition-all duration-300 hover:shadow-lg transform hover:scale-105 ${service.color}`}
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02] ${service.color}`}
                       onClick={() => openBooking(service.id)}
                       data-testid={`service-card-${service.id}`}
                     >

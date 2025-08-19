@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AddressInput from "@/components/address-input";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Service, ServiceProvider } from "@shared/schema";
 import HomeMovingDetails from "./home-moving-details";
+import EnhancedChefBooking from "./enhanced-chef-booking";
 
 interface ServiceSpecificBookingProps {
   isOpen: boolean;
@@ -877,6 +878,9 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           <DialogTitle className="text-2xl">
             Book {service?.name}
           </DialogTitle>
+          <DialogDescription>
+            Complete your booking in just a few simple steps
+          </DialogDescription>
         </DialogHeader>
 
         {service && (
@@ -909,12 +913,20 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Service-Specific Fields */}
-              <Card>
-                <CardContent className="p-6 space-y-4">
-                  <h4 className="font-semibold text-lg">Service Details</h4>
-                  {renderServiceSpecificFields()}
-                </CardContent>
-              </Card>
+              {service.category === "chef-catering" ? (
+                <EnhancedChefBooking 
+                  form={form}
+                  onNext={() => {}}
+                  onBack={() => {}}
+                />
+              ) : (
+                <Card>
+                  <CardContent className="p-6 space-y-4">
+                    <h4 className="font-semibold text-lg">Service Details</h4>
+                    {renderServiceSpecificFields()}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Address & Scheduling */}
               <Card>
