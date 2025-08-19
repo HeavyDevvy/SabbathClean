@@ -117,6 +117,86 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     enabled: isOpen,
   });
 
+  const currentService = services?.find(s => s.id === serviceId || s.category === serviceId);
+  
+  // Determine which schema to use based on service type
+  const getFormSchema = () => {
+    if (!currentService) return cleaningSchema;
+    
+    if (currentService.category.includes('cleaning')) return cleaningSchema;
+    if (currentService.category.includes('plumbing') || currentService.category.includes('electrical')) return maintenanceSchema;
+    if (currentService.category.includes('chef') || currentService.category.includes('catering')) return cateringSchema;
+    if (currentService.category.includes('waitering')) return waiteringSchema;
+    if (currentService.category.includes('gardening')) return gardeningSchema;
+    
+    return cleaningSchema;
+  };
+
+  const form = useForm({
+    resolver: zodResolver(getFormSchema()),
+    defaultValues: {
+      serviceId: serviceId,
+      providerId: "",
+      numberOfPeople: "",
+      menuType: "popular" as const,
+      selectedMenu: "",
+      customMenuItems: [],
+      ingredientOption: "chef-brings" as const,
+      utensilsOption: "chef-brings" as const,
+    },
+  });
+
+  const createBookingMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("POST", "/api/bookings", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Booking Created",
+        description: "Your service has been booked successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
+      onClose();
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Booking Failed",
+        description: "There was an error creating your booking. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
+    setMovingServiceDetails(serviceDetails);
+    setSelectedMovingProvider(provider);
+    setShowMovingDetails(false);
+    // Continue with regular booking flow with pre-filled data
+  };
+
+  // Handle Home Moving service with detailed flow
+  useEffect(() => {
+    if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
+      setShowMovingDetails(true);
+    }
+  }, [serviceId, isOpen, showMovingDetails, movingServiceDetails]);
+
+  // Show Home Moving Details component for moving service
+  if (showMovingDetails) {
+    return (
+      <HomeMovingDetails
+        isOpen={showMovingDetails}
+        onClose={() => {
+          setShowMovingDetails(false);
+          onClose();
+        }}
+        onProceedToBooking={handleMovingBookingProceed}
+      />
+    );
+  }
+
   // Cuisine types and popular menus data
   const cuisineTypes = {
     italian: {
@@ -221,8 +301,6 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     }
   };
 
-  const currentService = services?.find(s => s.id === serviceId || s.category === serviceId);
-  
   // Filter chefs based on cuisine specialization and location
   const getRelevantChefs = () => {
     if (serviceId !== "chef-catering") {
@@ -286,84 +364,6 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     
     return basePrice.toFixed(2);
   };
-
-  const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
-    setMovingServiceDetails(serviceDetails);
-    setSelectedMovingProvider(provider);
-    setShowMovingDetails(false);
-    // Continue with regular booking flow with pre-filled data
-  };
-
-  // Handle Home Moving service with detailed flow
-  useEffect(() => {
-    if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
-      setShowMovingDetails(true);
-    }
-  }, [serviceId, isOpen, showMovingDetails, movingServiceDetails]);
-
-  // Show Home Moving Details component for moving service
-  if (showMovingDetails) {
-    return (
-      <HomeMovingDetails
-        isOpen={showMovingDetails}
-        onClose={() => {
-          setShowMovingDetails(false);
-          onClose();
-        }}
-        onProceedToBooking={handleMovingBookingProceed}
-      />
-    );
-  }
-
-  // Determine which schema to use based on service type
-  const getFormSchema = () => {
-    if (!currentService) return cleaningSchema;
-    
-    if (currentService.category.includes('cleaning')) return cleaningSchema;
-    if (currentService.category.includes('plumbing') || currentService.category.includes('electrical')) return maintenanceSchema;
-    if (currentService.category.includes('chef') || currentService.category.includes('catering')) return cateringSchema;
-    if (currentService.category.includes('waitering')) return waiteringSchema;
-    if (currentService.category.includes('gardening')) return gardeningSchema;
-    
-    return cleaningSchema;
-  };
-
-  const form = useForm({
-    resolver: zodResolver(getFormSchema()),
-    defaultValues: {
-      serviceId: serviceId,
-      providerId: "",
-      numberOfPeople: "",
-      menuType: "popular" as const,
-      selectedMenu: "",
-      customMenuItems: [],
-      ingredientOption: "chef-brings" as const,
-      utensilsOption: "chef-brings" as const,
-    },
-  });
-
-  const createBookingMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/bookings", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Booking Created",
-        description: "Your service has been booked successfully!",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
-      onClose();
-      form.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Booking Failed",
-        description: "There was an error creating your booking. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
 
   const onSubmit = (data: any) => {
     const bookingData = {
