@@ -138,7 +138,7 @@ export class MemStorage implements IStorage {
           email: "maria@example.com",
           phone: "+27123456789",
           bio: "500+ happy customers. Specializing in eco-friendly cleaning solutions.",
-          profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b588?w=300",
+          profileImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
           hourlyRate: "450.00",
           servicesOffered: ["house-cleaning", "deep-cleaning"],
           experience: "experienced",
