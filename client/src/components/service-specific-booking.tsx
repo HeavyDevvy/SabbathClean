@@ -68,6 +68,18 @@ const cateringSchema = z.object({
   providerId: z.string().min(1, "Please select a provider"),
 });
 
+const waiteringSchema = z.object({
+  serviceId: z.string(),
+  eventType: z.string().min(1, "Please select event type"),
+  serviceType: z.string().min(1, "Please select service type"),
+  numberOfPeople: z.string().min(1, "Please enter number of people"),
+  address: z.string().min(1, "Please enter your address"),
+  scheduledDate: z.string().min(1, "Please select a date"),
+  scheduledTime: z.string().min(1, "Please select a time"),
+  specialInstructions: z.string().optional(),
+  providerId: z.string().min(1, "Please select a provider"),
+});
+
 const gardeningSchema = z.object({
   serviceId: z.string(),
   gardenSize: z.string().min(1, "Please select garden size"),
@@ -216,7 +228,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     if (serviceId !== "chef-catering") {
       return providers?.filter(p => 
         p.servicesOffered.includes(serviceId) || 
-        p.servicesOffered.includes(service?.category || "")
+        p.servicesOffered.includes(currentService?.category || "")
       );
     }
 
@@ -245,7 +257,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
   // Calculate total price based on selections
   const calculateTotalPrice = () => {
-    let basePrice = parseFloat(service?.basePrice || "550");
+    let basePrice = parseFloat(currentService?.basePrice || "550");
     const numberOfPeopleStr = form.getValues().numberOfPeople || "1";
     const numberOfPeople = parseInt(numberOfPeopleStr);
     
@@ -307,7 +319,8 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     
     if (currentService.category.includes('cleaning')) return cleaningSchema;
     if (currentService.category.includes('plumbing') || currentService.category.includes('electrical')) return maintenanceSchema;
-    if (currentService.category.includes('chef') || currentService.category.includes('waitering')) return cateringSchema;
+    if (currentService.category.includes('chef') || currentService.category.includes('catering')) return cateringSchema;
+    if (currentService.category.includes('waitering')) return waiteringSchema;
     if (currentService.category.includes('gardening')) return gardeningSchema;
     
     return cleaningSchema;
