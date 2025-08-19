@@ -58,7 +58,7 @@ export default function Providers() {
               </div>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{provider.id}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{provider.firstName} {provider.lastName}</h3>
                   <div className="flex items-center">
                     <Star className="h-4 w-4 text-accent fill-current" />
                     <span className="ml-1 text-sm font-medium">{provider.rating}</span>
