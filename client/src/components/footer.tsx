@@ -1,4 +1,5 @@
-import { Home, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import berryLogo from "@assets/PHOTO-2025-07-11-15-55-28_1755621947509.jpg";
 
 export default function Footer() {
   return (
@@ -7,8 +8,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Home className="text-white h-5 w-5" />
+              <div className="w-10 h-10 rounded-lg overflow-hidden">
+                <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
               </div>
               <span className="ml-3 text-xl font-bold">Berry Events</span>
             </div>

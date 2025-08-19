@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Home, User, Plus } from "lucide-react";
+import { User, Plus } from "lucide-react";
 import { Link } from "wouter";
+import berryLogo from "@assets/PHOTO-2025-07-11-15-55-28_1755621947509.jpg";
 
 interface HeaderProps {
   onBookingClick?: () => void;
@@ -12,8 +13,8 @@ export default function Header({ onBookingClick }: HeaderProps) {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="text-white h-5 w-5" />
+            <div className="w-10 h-10 rounded-lg overflow-hidden">
+              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
             </div>
             <span className="ml-3 text-xl font-bold text-primary">Berry Events</span>
             <span className="ml-2 text-sm text-neutral">- All your Home Services In One</span>
