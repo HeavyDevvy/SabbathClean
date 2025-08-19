@@ -133,6 +133,14 @@ export class MemStorage implements IStorage {
         basePrice: "320.00",
         isActive: true,
       },
+      {
+        id: "service-8",
+        name: "Home Moving",
+        description: "Packing services, furniture disassembly/assembly, loading/unloading, transportation, unpacking, storage solutions",
+        category: "home-moving",
+        basePrice: "450.00",
+        isActive: true,
+      },
     ];
 
     services.forEach(service => this.services.set(service.id, service as Service));
@@ -294,12 +302,104 @@ export class MemStorage implements IStorage {
           qualificationCertificate: "/uploads/certs/david-cert.pdf",
           createdAt: new Date(),
         }
+      },
+      {
+        user: {
+          id: "user-5",
+          email: "mike@example.com",
+          username: "mike_movers",
+          password: "hashed_password",
+          firstName: "Mike",
+          lastName: "Thompson",
+          phone: "+27123456793",
+          address: "Pretoria, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-5",
+          userId: "user-5",
+          firstName: "Mike",
+          lastName: "Thompson",
+          email: "mike@example.com",
+          phone: "+27123456793",
+          bio: "Professional moving services with 10+ years experience. Specialized in residential and office relocations.",
+          profileImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300",
+          hourlyRate: "450.00",
+          servicesOffered: ["home-moving"],
+          experience: "expert",
+          availability: { monday: ["7:00", "19:00"], tuesday: ["7:00", "19:00"], wednesday: ["7:00", "19:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.7",
+          totalReviews: 152,
+          location: "Pretoria",
+          idDocument: "/uploads/id/mike-id.jpg",
+          qualificationCertificate: "/uploads/certs/mike-cert.pdf",
+          createdAt: new Date(),
+        }
       }
     ];
 
     providers.forEach(({ user, provider }) => {
       this.users.set(user.id, user as User);
       this.serviceProviders.set(provider.id, provider as ServiceProvider);
+    });
+
+    // Seed provider locations
+    const providerLocations = [
+      {
+        id: randomUUID(),
+        providerId: "provider-1",
+        latitude: -33.9249,
+        longitude: 18.4241,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-2", 
+        latitude: -26.2041,
+        longitude: 28.0473,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-3",
+        latitude: -29.8587,
+        longitude: 31.0218,
+        isOnline: false,
+        lastSeen: new Date(Date.now() - 3600000), // 1 hour ago
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-4",
+        latitude: -33.9289,
+        longitude: 18.4194,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-5", // New moving provider
+        latitude: -25.7479,
+        longitude: 28.2293,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    providerLocations.forEach(location => {
+      this.providerLocations.set(location.id, location as ProviderLocation);
     });
   }
 

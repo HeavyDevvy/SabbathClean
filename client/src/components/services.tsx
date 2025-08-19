@@ -1,4 +1,4 @@
-import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck } from "lucide-react";
 
 interface ServicesProps {
   onServiceSelect: (service: string) => void;
@@ -75,6 +75,16 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       icon: Leaf,
       gradient: "from-emerald-50 to-emerald-100",
       iconBg: "bg-emerald-600",
+    },
+    {
+      id: "home-moving",
+      name: "Home Moving",
+      category: "Moving & Relocation",
+      description: "Packing services, furniture disassembly/assembly, loading/unloading, transportation, unpacking, storage solutions",
+      price: "R450/hour",
+      icon: Truck,
+      gradient: "from-indigo-50 to-indigo-100",
+      iconBg: "bg-indigo-600",
     },
   ];
 
