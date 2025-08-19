@@ -33,6 +33,10 @@ export default function Hero({ onBookingClick }: HeroProps) {
                 variant="outline"
                 size="lg" 
                 className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-200"
+                onClick={() => {
+                  const demoSection = document.getElementById('demo-section');
+                  demoSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 data-testid="button-watch-how-it-works"
               >
                 <Play className="mr-2 h-5 w-5" />

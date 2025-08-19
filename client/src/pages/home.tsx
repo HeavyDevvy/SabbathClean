@@ -26,7 +26,7 @@ export default function Home() {
       <main>
         <Hero onBookingClick={() => openBooking()} />
         <Services onServiceSelect={openBooking} />
-        <section className="py-16 bg-white">
+        <section id="demo-section" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <AnimatedBookingDemo />
           </div>
