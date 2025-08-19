@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Star, ChefHat, ShoppingCart, Utensils, Plus, Minus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,9 +53,13 @@ const cateringSchema = z.object({
   serviceId: z.string(),
   eventType: z.string().min(1, "Please select event type"),
   cuisineType: z.string().min(1, "Please select cuisine type"),
+  menuType: z.enum(["popular", "custom"]).default("popular"),
+  selectedMenu: z.string().optional(),
+  customMenuItems: z.array(z.string()).optional(),
+  ingredientOption: z.enum(["chef-brings", "customer-provides"]).default("chef-brings"),
+  utensilsOption: z.enum(["chef-brings", "customer-provides"]).default("chef-brings"),
   numberOfPeople: z.string().min(1, "Please enter number of people"),
   dietaryRequirements: z.string().optional(),
-  menuPreferences: z.string().optional(),
   address: z.string().min(1, "Please enter your address"),
   scheduledDate: z.string().min(1, "Please select a date"),
   scheduledTime: z.string().min(1, "Please select a time"),
@@ -81,6 +85,11 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   const [showMovingDetails, setShowMovingDetails] = useState(false);
   const [movingServiceDetails, setMovingServiceDetails] = useState<any>(null);
   const [selectedMovingProvider, setSelectedMovingProvider] = useState<ServiceProvider | null>(null);
+  const [selectedCuisine, setSelectedCuisine] = useState<string>("");
+  const [menuType, setMenuType] = useState<"popular" | "custom">("popular");
+  const [customMenuItems, setCustomMenuItems] = useState<string[]>([""]);
+  const [ingredientOption, setIngredientOption] = useState<"chef-brings" | "customer-provides">("chef-brings");
+  const [utensilsOption, setUtensilsOption] = useState<"chef-brings" | "customer-provides">("chef-brings");
   const { toast } = useToast();
 
   const { data: services } = useQuery<Service[]>({
@@ -93,11 +102,175 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     enabled: isOpen,
   });
 
+  // Cuisine types and popular menus data
+  const cuisineTypes = {
+    italian: {
+      name: "Italian",
+      specialization: "italian",
+      popularMenus: [
+        {
+          id: "classic-italian",
+          name: "Classic Italian Feast",
+          description: "Traditional pasta, risotto, and authentic Italian flavors",
+          items: ["Antipasto Platter", "Spaghetti Carbonara", "Chicken Parmigiana", "Tiramisu"],
+          basePrice: 650
+        },
+        {
+          id: "gourmet-italian",
+          name: "Gourmet Italian Experience",
+          description: "Premium ingredients with contemporary Italian cuisine",
+          items: ["Burrata with Truffle Oil", "Osso Buco", "Seafood Risotto", "Panna Cotta"],
+          basePrice: 850
+        }
+      ]
+    },
+    asian: {
+      name: "Asian Fusion",
+      specialization: "asian",
+      popularMenus: [
+        {
+          id: "thai-delight",
+          name: "Thai Delight",
+          description: "Authentic Thai flavors with fresh herbs and spices",
+          items: ["Thai Green Curry", "Pad Thai", "Tom Yum Soup", "Mango Sticky Rice"],
+          basePrice: 580
+        },
+        {
+          id: "japanese-zen",
+          name: "Japanese Zen",
+          description: "Traditional Japanese cuisine with fresh ingredients",
+          items: ["Miso Soup", "Chicken Teriyaki", "Sushi Platter", "Mochi Ice Cream"],
+          basePrice: 720
+        }
+      ]
+    },
+    african: {
+      name: "African Traditional",
+      specialization: "african",
+      popularMenus: [
+        {
+          id: "heritage-feast",
+          name: "Heritage Feast",
+          description: "Traditional South African flavors and comfort food",
+          items: ["Bobotie", "Potjiekos", "Boerewors", "Malva Pudding"],
+          basePrice: 520
+        },
+        {
+          id: "modern-african",
+          name: "Modern African",
+          description: "Contemporary take on African cuisine",
+          items: ["Springbok Carpaccio", "Ostrich Fillet", "Amaranth Salad", "Rooibos Panna Cotta"],
+          basePrice: 680
+        }
+      ]
+    },
+    indian: {
+      name: "Indian Cuisine",
+      specialization: "indian",
+      popularMenus: [
+        {
+          id: "curry-house",
+          name: "Curry House Special",
+          description: "Rich curries and aromatic spices",
+          items: ["Chicken Tikka Masala", "Lamb Biryani", "Naan Bread", "Gulab Jamun"],
+          basePrice: 590
+        },
+        {
+          id: "vegetarian-indian",
+          name: "Vegetarian Indian",
+          description: "Plant-based Indian delicacies",
+          items: ["Dal Makhani", "Palak Paneer", "Vegetable Biryani", "Kulfi"],
+          basePrice: 520
+        }
+      ]
+    },
+    mediterranean: {
+      name: "Mediterranean",
+      specialization: "mediterranean",
+      popularMenus: [
+        {
+          id: "greek-island",
+          name: "Greek Island",
+          description: "Fresh Mediterranean flavors with olive oil and herbs",
+          items: ["Greek Salad", "Moussaka", "Grilled Lamb", "Baklava"],
+          basePrice: 620
+        },
+        {
+          id: "healthy-med",
+          name: "Healthy Mediterranean",
+          description: "Light and nutritious Mediterranean dishes",
+          items: ["Hummus Platter", "Grilled Fish", "Quinoa Tabbouleh", "Fresh Fruit"],
+          basePrice: 580
+        }
+      ]
+    }
+  };
+
   const service = services?.find(s => s.id === serviceId || s.category === serviceId);
-  const relevantProviders = providers?.filter(p => 
-    p.servicesOffered.includes(serviceId) || 
-    p.servicesOffered.includes(service?.category || "")
-  );
+  
+  // Filter chefs based on cuisine specialization and location
+  const getRelevantChefs = () => {
+    if (serviceId !== "chef-catering") {
+      return providers?.filter(p => 
+        p.servicesOffered.includes(serviceId) || 
+        p.servicesOffered.includes(service?.category || "")
+      );
+    }
+
+    // For chef & catering, filter by cuisine specialization
+    let filteredChefs = providers?.filter(p => 
+      p.servicesOffered.includes("chef-catering") || 
+      p.servicesOffered.includes("chef") ||
+      p.servicesOffered.includes("catering")
+    );
+
+    // If cuisine is selected, filter by specialization
+    if (selectedCuisine && filteredChefs) {
+      const cuisineData = cuisineTypes[selectedCuisine as keyof typeof cuisineTypes];
+      if (cuisineData) {
+        filteredChefs = filteredChefs.filter(chef => 
+          chef.bio?.toLowerCase().includes(cuisineData.name.toLowerCase()) ||
+          chef.bio?.toLowerCase().includes(cuisineData.specialization)
+        );
+      }
+    }
+
+    return filteredChefs;
+  };
+
+  const relevantProviders = getRelevantChefs();
+
+  // Calculate total price based on selections
+  const calculateTotalPrice = () => {
+    let basePrice = parseFloat(service?.basePrice || "550");
+    const numberOfPeopleStr = form.getValues().numberOfPeople || "1";
+    const numberOfPeople = parseInt(numberOfPeopleStr);
+    
+    if (serviceId === "chef-catering") {
+      // Menu pricing
+      const selectedMenuValue = form.getValues().selectedMenu;
+      if (menuType === "popular" && selectedCuisine && selectedMenuValue) {
+        const cuisineData = cuisineTypes[selectedCuisine as keyof typeof cuisineTypes];
+        const selectedMenuData = cuisineData?.popularMenus.find(m => m.id === selectedMenuValue);
+        if (selectedMenuData) {
+          basePrice = selectedMenuData.basePrice;
+        }
+      }
+      
+      // Ingredient and utensil pricing
+      if (ingredientOption === "chef-brings") {
+        basePrice += 80; // Additional cost for ingredients
+      }
+      if (utensilsOption === "chef-brings") {
+        basePrice += 50; // Additional cost for utensils
+      }
+      
+      // Per person pricing
+      basePrice = basePrice * numberOfPeople;
+    }
+    
+    return basePrice.toFixed(2);
+  };
 
   // Handle Home Moving service with detailed flow
   if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
@@ -138,9 +311,16 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   };
 
   const form = useForm({
+    resolver: zodResolver(getFormSchema()),
     defaultValues: {
       serviceId: serviceId,
       providerId: "",
+      numberOfPeople: "",
+      menuType: "popular" as const,
+      selectedMenu: "",
+      customMenuItems: [],
+      ingredientOption: "chef-brings" as const,
+      utensilsOption: "chef-brings" as const,
     },
   });
 
@@ -281,14 +461,16 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
       );
     }
 
-    // Food & Event Services
-    if (service.category.includes('chef') || service.category.includes('waitering')) {
+    // Chef & Catering Services
+    if (service.category.includes('chef') || service.category.includes('catering')) {
+      const selectedCuisineData = selectedCuisine ? cuisineTypes[selectedCuisine as keyof typeof cuisineTypes] : null;
+      
       return (
         <>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="eventType">Event Type</Label>
-              <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
+              <Select onValueChange={(value) => form.setValue("eventType", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
@@ -307,41 +489,311 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               <Input 
                 type="number"
                 placeholder="e.g. 10"
-                {...form.register("numberOfPeople" as any)}
+                {...form.register("numberOfPeople")}
               />
             </div>
           </div>
+          
+          {/* Cuisine Selection */}
           <div>
             <Label htmlFor="cuisineType">Cuisine Type</Label>
-            <Select onValueChange={(value) => form.setValue("cuisineType" as any, value)}>
+            <Select 
+              onValueChange={(value) => {
+                setSelectedCuisine(value);
+                form.setValue("cuisineType", value);
+                form.setValue("selectedMenu", ""); // Reset menu selection
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select cuisine preference" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="south-african">South African</SelectItem>
-                <SelectItem value="italian">Italian</SelectItem>
-                <SelectItem value="indian">Indian</SelectItem>
-                <SelectItem value="chinese">Chinese</SelectItem>
-                <SelectItem value="mediterranean">Mediterranean</SelectItem>
-                <SelectItem value="continental">Continental</SelectItem>
-                <SelectItem value="vegetarian">Vegetarian</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {Object.entries(cuisineTypes).map(([key, cuisine]) => (
+                  <SelectItem key={key} value={key}>
+                    <div className="flex items-center">
+                      <ChefHat className="h-4 w-4 mr-2" />
+                      {cuisine.name}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* Menu Selection - Only show after cuisine is selected */}
+          {selectedCuisine && selectedCuisineData && (
+            <div className="space-y-4">
+              <div>
+                <Label>Menu Options</Label>
+                <div className="flex space-x-4 mt-2">
+                  <Button
+                    type="button"
+                    variant={menuType === "popular" ? "default" : "outline"}
+                    onClick={() => setMenuType("popular")}
+                    className="flex-1"
+                  >
+                    Popular Menus
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={menuType === "custom" ? "default" : "outline"}
+                    onClick={() => setMenuType("custom")}
+                    className="flex-1"
+                  >
+                    Custom Menu
+                  </Button>
+                </div>
+              </div>
+
+              {/* Popular Menus */}
+              {menuType === "popular" && (
+                <div className="space-y-3">
+                  <Label>Choose from our popular {selectedCuisineData.name} menus:</Label>
+                  {selectedCuisineData.popularMenus.map((menu) => (
+                    <Card 
+                      key={menu.id}
+                      className={`cursor-pointer transition-all ${
+                        form.getValues().selectedMenu === menu.id 
+                          ? 'ring-2 ring-primary bg-primary/5' 
+                          : 'hover:shadow-md'
+                      }`}
+                      onClick={() => form.setValue("selectedMenu", menu.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-lg">{menu.name}</h5>
+                            <p className="text-gray-600 text-sm mb-2">{menu.description}</p>
+                            <div className="flex flex-wrap gap-1">
+                              {menu.items.map((item, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {item}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="text-right ml-4">
+                            <p className="font-bold text-primary">R{menu.basePrice}</p>
+                            <p className="text-xs text-gray-500">per person</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {/* Custom Menu */}
+              {menuType === "custom" && (
+                <div className="space-y-3">
+                  <Label>Configure your custom menu:</Label>
+                  {customMenuItems.map((item, index) => (
+                    <div key={index} className="flex space-x-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => {
+                          const newItems = [...customMenuItems];
+                          newItems[index] = e.target.value;
+                          setCustomMenuItems(newItems);
+                          form.setValue("customMenuItems", newItems.filter(item => item.trim()));
+                        }}
+                        placeholder="Enter dish name..."
+                        className="flex-1"
+                      />
+                      {customMenuItems.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newItems = customMenuItems.filter((_, i) => i !== index);
+                            setCustomMenuItems(newItems);
+                            form.setValue("customMenuItems", newItems.filter(item => item.trim()));
+                          }}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setCustomMenuItems([...customMenuItems, ""])}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Another Dish
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Ingredient and Utensil Options */}
+          {selectedCuisine && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Ingredient Sourcing</Label>
+                <div className="space-y-2 mt-2">
+                  <div 
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      ingredientOption === "chef-brings" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                    }`}
+                    onClick={() => {
+                      setIngredientOption("chef-brings");
+                      form.setValue("ingredientOption", "chef-brings");
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <ShoppingCart className="h-4 w-4" />
+                      <div>
+                        <p className="font-medium">Chef Brings Ingredients</p>
+                        <p className="text-sm text-gray-600">+R80 per person</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div 
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      ingredientOption === "customer-provides" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                    }`}
+                    onClick={() => {
+                      setIngredientOption("customer-provides");
+                      form.setValue("ingredientOption", "customer-provides");
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <div>
+                        <p className="font-medium">I'll Provide Ingredients</p>
+                        <p className="text-sm text-gray-600">Shopping list will be provided</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Cooking Utensils</Label>
+                <div className="space-y-2 mt-2">
+                  <div 
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      utensilsOption === "chef-brings" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                    }`}
+                    onClick={() => {
+                      setUtensilsOption("chef-brings");
+                      form.setValue("utensilsOption", "chef-brings");
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Utensils className="h-4 w-4" />
+                      <div>
+                        <p className="font-medium">Chef Brings Utensils</p>
+                        <p className="text-sm text-gray-600">+R50 per person</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div 
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      utensilsOption === "customer-provides" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                    }`}
+                    onClick={() => {
+                      setUtensilsOption("customer-provides");
+                      form.setValue("utensilsOption", "customer-provides");
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <div>
+                        <p className="font-medium">Use My Kitchen Utensils</p>
+                        <p className="text-sm text-gray-600">Chef will use your equipment</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Price Summary */}
+          {selectedCuisine && form.getValues().numberOfPeople && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h5 className="font-semibold text-blue-900 mb-2">Price Estimate</h5>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Base rate ({form.getValues().numberOfPeople} people):</span>
+                  <span>R{calculateTotalPrice()}</span>
+                </div>
+                {ingredientOption === "chef-brings" && (
+                  <div className="flex justify-between text-blue-700">
+                    <span>• Ingredients included</span>
+                    <span>✓</span>
+                  </div>
+                )}
+                {utensilsOption === "chef-brings" && (
+                  <div className="flex justify-between text-blue-700">
+                    <span>• Professional utensils included</span>
+                    <span>✓</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div>
             <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
             <Textarea 
               placeholder="Any allergies, special diets, or dietary restrictions..."
-              {...form.register("dietaryRequirements" as any)}
+              {...form.register("dietaryRequirements")}
             />
           </div>
+        </>
+      );
+    }
+
+    // Waitering Services
+    if (service.category.includes('waitering')) {
+      return (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="eventType">Event Type</Label>
+              <Select onValueChange={(value) => form.setValue("eventType", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="birthday">Birthday Party</SelectItem>
+                  <SelectItem value="wedding">Wedding</SelectItem>
+                  <SelectItem value="corporate">Corporate Event</SelectItem>
+                  <SelectItem value="dinner-party">Dinner Party</SelectItem>
+                  <SelectItem value="family-gathering">Family Gathering</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="numberOfPeople">Number of People</Label>
+              <Input 
+                type="number"
+                placeholder="e.g. 10"
+                {...form.register("numberOfPeople")}
+              />
+            </div>
+          </div>
           <div>
-            <Label htmlFor="menuPreferences">Menu Preferences</Label>
-            <Textarea 
-              placeholder="Any specific dishes or menu requests..."
-              {...form.register("menuPreferences" as any)}
-            />
+            <Label htmlFor="serviceType">Service Type</Label>
+            <Select onValueChange={(value) => form.setValue("serviceType", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select service type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="table-service">Table Service</SelectItem>
+                <SelectItem value="bar-service">Bar Service</SelectItem>
+                <SelectItem value="both">Table & Bar Service</SelectItem>
+                <SelectItem value="event-coordination">Event Coordination</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </>
       );
@@ -439,8 +891,17 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                     <p className="text-gray-600 mt-2">{service.description}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">R{service.basePrice}</p>
-                    <p className="text-sm text-gray-500">per hour</p>
+                    {serviceId === "chef-catering" && selectedCuisine && form.getValues().numberOfPeople ? (
+                      <div>
+                        <p className="text-2xl font-bold text-primary">R{calculateTotalPrice()}</p>
+                        <p className="text-sm text-gray-500">total estimate</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-2xl font-bold text-primary">R{service.basePrice}</p>
+                        <p className="text-sm text-gray-500">starting from</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -502,7 +963,22 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               {/* Provider Selection */}
               <Card>
                 <CardContent className="p-6">
-                  <h4 className="font-semibold text-lg mb-4">Select Your Provider</h4>
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-semibold text-lg">Select Your Provider</h4>
+                    {serviceId === "chef-catering" && selectedCuisine && (
+                      <Badge variant="secondary" className="ml-2">
+                        <ChefHat className="h-3 w-3 mr-1" />
+                        {cuisineTypes[selectedCuisine as keyof typeof cuisineTypes]?.name} Specialists
+                      </Badge>
+                    )}
+                  </div>
+                  {serviceId === "chef-catering" && selectedCuisine && (
+                    <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-medium">Cuisine-specific matching:</span> Showing chefs who specialize in {cuisineTypes[selectedCuisine as keyof typeof cuisineTypes]?.name} cuisine within your radius.
+                      </p>
+                    </div>
+                  )}
                   {movingServiceDetails && selectedMovingProvider ? (
                     <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                       <h5 className="font-medium text-green-800">Selected Moving Provider:</h5>
