@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import BookingModal from "@/components/booking-modal";
+import ServiceSpecificBooking from "@/components/service-specific-booking";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -100,9 +100,10 @@ export default function Profile() {
       </main>
       <Footer />
       
-      <BookingModal 
+      <ServiceSpecificBooking 
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
+        serviceId=""
       />
     </div>
   );

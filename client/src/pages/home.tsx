@@ -6,7 +6,7 @@ import FeaturedProviders from "@/components/featured-providers";
 import Testimonials from "@/components/testimonials";
 import Pricing from "@/components/pricing";
 import Footer from "@/components/footer";
-import BookingModal from "@/components/booking-modal";
+import ServiceSpecificBooking from "@/components/service-specific-booking";
 import { useState } from "react";
 import { Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,10 @@ export default function Home() {
         </Button>
       </div>
 
-      <BookingModal 
+      <ServiceSpecificBooking 
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        selectedService={selectedService}
+        serviceId={selectedService}
       />
     </div>
   );
