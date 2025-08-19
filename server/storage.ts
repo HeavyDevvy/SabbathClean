@@ -572,7 +572,15 @@ export class MemStorage implements IStorage {
   async createPaymentMethod(paymentMethodData: InsertPaymentMethod): Promise<PaymentMethod> {
     const paymentMethod: PaymentMethod = {
       id: randomUUID(),
-      ...paymentMethodData,
+      type: paymentMethodData.type,
+      userId: paymentMethodData.userId,
+      cardNumber: paymentMethodData.cardNumber || null,
+      cardHolderName: paymentMethodData.cardHolderName || null,
+      expiryMonth: paymentMethodData.expiryMonth || null,
+      expiryYear: paymentMethodData.expiryYear || null,
+      bankName: paymentMethodData.bankName || null,
+      accountNumber: paymentMethodData.accountNumber || null,
+      cardType: paymentMethodData.cardType || null,
       isActive: paymentMethodData.isActive ?? true,
       isDefault: paymentMethodData.isDefault ?? false,
       createdAt: new Date(),
