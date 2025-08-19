@@ -8,7 +8,13 @@ import {
   type Booking,
   type InsertBooking,
   type Review,
-  type InsertReview
+  type InsertReview,
+  type PaymentMethod,
+  type InsertPaymentMethod,
+  type ProviderLocation,
+  type InsertProviderLocation,
+  type JobQueue,
+  type InsertJobQueue
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -39,6 +45,19 @@ export interface IStorage {
   // Review operations
   getReviewsByProvider(providerId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+  
+  // Payment method operations
+  getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]>;
+  createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  deletePaymentMethod(id: string): Promise<void>;
+  
+  // Location operations (for future DB implementation)
+  getProviderLocation(providerId: string): Promise<ProviderLocation | undefined>;
+  updateProviderLocation(location: InsertProviderLocation): Promise<ProviderLocation>;
+  
+  // Job queue operations (for future DB implementation)
+  getJobQueueItem(id: string): Promise<JobQueue | undefined>;
+  createJobQueueItem(job: InsertJobQueue): Promise<JobQueue>;
 }
 
 export class MemStorage implements IStorage {
@@ -47,6 +66,9 @@ export class MemStorage implements IStorage {
   private services: Map<string, Service> = new Map();
   private bookings: Map<string, Booking> = new Map();
   private reviews: Map<string, Review> = new Map();
+  private paymentMethods: Map<string, PaymentMethod> = new Map();
+  private providerLocations: Map<string, ProviderLocation> = new Map();
+  private jobQueue: Map<string, JobQueue> = new Map();
 
   constructor() {
     this.seedData();
@@ -431,11 +453,84 @@ export class MemStorage implements IStorage {
     const review: Review = {
       ...insertReview,
       id,
+      serviceQuality: insertReview.serviceQuality || null,
+      punctuality: insertReview.punctuality || null,
+      professionalism: insertReview.professionalism || null,
       comment: insertReview.comment || null,
+      wouldRecommend: insertReview.wouldRecommend || true,
       createdAt: new Date()
     };
     this.reviews.set(id, review);
     return review;
+  }
+
+  // Payment method operations
+  async getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]> {
+    return Array.from(this.paymentMethods.values()).filter(pm => pm.userId === userId && pm.isActive);
+  }
+
+  async createPaymentMethod(paymentMethodData: InsertPaymentMethod): Promise<PaymentMethod> {
+    const paymentMethod: PaymentMethod = {
+      id: randomUUID(),
+      ...paymentMethodData,
+      isActive: paymentMethodData.isActive ?? true,
+      isDefault: paymentMethodData.isDefault ?? false,
+      createdAt: new Date(),
+    };
+    this.paymentMethods.set(paymentMethod.id, paymentMethod);
+    return paymentMethod;
+  }
+
+  async deletePaymentMethod(id: string): Promise<void> {
+    const paymentMethod = this.paymentMethods.get(id);
+    if (paymentMethod) {
+      paymentMethod.isActive = false;
+      this.paymentMethods.set(id, paymentMethod);
+    }
+  }
+
+  // Location operations (placeholder for now)
+  async getProviderLocation(providerId: string): Promise<ProviderLocation | undefined> {
+    return Array.from(this.providerLocations.values()).find(loc => loc.providerId === providerId);
+  }
+
+  async updateProviderLocation(locationData: InsertProviderLocation): Promise<ProviderLocation> {
+    const existingLocation = Array.from(this.providerLocations.values()).find(loc => loc.providerId === locationData.providerId);
+    
+    if (existingLocation) {
+      const updatedLocation = { ...existingLocation, ...locationData, updatedAt: new Date() };
+      this.providerLocations.set(existingLocation.id, updatedLocation);
+      return updatedLocation;
+    } else {
+      const location: ProviderLocation = {
+        id: randomUUID(),
+        ...locationData,
+        isOnline: locationData.isOnline ?? false,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      };
+      this.providerLocations.set(location.id, location);
+      return location;
+    }
+  }
+
+  // Job queue operations (placeholder for now)
+  async getJobQueueItem(id: string): Promise<JobQueue | undefined> {
+    return this.jobQueue.get(id);
+  }
+
+  async createJobQueueItem(jobData: InsertJobQueue): Promise<JobQueue> {
+    const job: JobQueue = {
+      id: randomUUID(),
+      ...jobData,
+      status: jobData.status ?? "pending",
+      maxRadius: jobData.maxRadius ?? 20,
+      priority: jobData.priority ?? 1,
+      assignedProviderId: jobData.assignedProviderId ?? null,
+      createdAt: new Date(),
+    };
+    this.jobQueue.set(job.id, job);
+    return job;
   }
 }
 

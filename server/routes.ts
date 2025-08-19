@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertServiceProviderSchema, insertBookingSchema, insertReviewSchema } from "@shared/schema";
+import { insertUserSchema, insertServiceProviderSchema, insertBookingSchema, insertReviewSchema, insertPaymentMethodSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -164,6 +164,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reviews = await storage.getReviewsByProvider(req.params.providerId);
       res.json(reviews);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Payment method routes
+  app.get("/api/payment-methods", async (req, res) => {
+    try {
+      // In a real app, get userId from session/auth
+      const userId = req.query.userId as string || "user-1"; 
+      const paymentMethods = await storage.getPaymentMethodsByUser(userId);
+      res.json(paymentMethods);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/payment-methods", async (req, res) => {
+    try {
+      // In a real app, get userId from session/auth
+      const userId = req.body.userId || "user-1";
+      const paymentMethodData = insertPaymentMethodSchema.parse({
+        ...req.body,
+        userId
+      });
+      const paymentMethod = await storage.createPaymentMethod(paymentMethodData);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/payment-methods/:id", async (req, res) => {
+    try {
+      await storage.deletePaymentMethod(req.params.id);
+      res.json({ message: "Payment method deleted successfully" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

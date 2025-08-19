@@ -2,21 +2,36 @@
 
 Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform that connects customers with verified service providers for house cleaning, plumbing, electrical work, chef/catering, waitering, and garden care services. The platform features a React frontend with shadcn/ui components, an Express.js backend with REST API endpoints, and PostgreSQL database using Drizzle ORM. The application supports service booking with geolocation functionality, provider matching, reviews, and payment processing with Stripe integration using South African Rand (ZAR) currency.
 
-## Recent Changes (January 2025)
+## Recent Changes (August 2025)
 
-✓ **Branding Update**: Fixed logo display and updated tagline to "Berry Events - All your Home Services In One"
-✓ **Service Organization**: Added categorized service structure with color-coded badges:
-  - Cleaning Services (House Cleaning, Deep Cleaning)
-  - Maintenance & Repairs (Plumbing, Electrical)
-  - Food & Event Services (Chef & Catering, Waitering)
-  - Outdoor Services (Garden Care)
-✓ **Provider Onboarding**: Implemented comprehensive 4-step registration process including:
-  - Personal information collection
-  - Professional details and service selection
-  - Document verification with image uploads
-  - Legal consent and insurance verification
-✓ **Object Storage**: Set up cloud storage for provider verification documents and profile images
-✓ **Database Enhancement**: Extended provider schema with additional fields for qualifications, certifications, experience levels, and verification status
+✓ **Uber-Style Location Matching**: Implemented sophisticated location-based provider allocation system:
+  - Real-time geolocation detection with fallback options
+  - Radius-based provider matching (default 20km)
+  - Distance calculation using Haversine formula
+  - Combined scoring algorithm (70% rating, 30% distance proximity)
+  
+✓ **Enhanced Rating System**: Comprehensive multi-aspect review functionality:
+  - 5-star overall rating with detailed breakdowns
+  - Service quality, punctuality, and professionalism ratings
+  - Written reviews with recommendation system
+  - Real-time provider rating updates
+  
+✓ **Advanced Payment Integration**: Complete payment method management system:
+  - Multiple payment options (cards, bank transfer, cash)
+  - Secure card storage with masked display
+  - Card type detection (Visa, Mastercard, Amex)
+  - Default payment method selection
+  
+✓ **Smart Job Queue System**: Automatic provider allocation infrastructure:
+  - Queue-based job processing with priority levels
+  - 30-minute automatic expiration for unassigned jobs
+  - Provider online/offline status tracking
+  - Location updates for real-time matching
+  
+✓ **Enhanced Booking Flow**: Complete 3-step booking experience:
+  - Service details collection with location detection
+  - Nearby provider selection with distance display
+  - Payment method selection and booking confirmation
 
 # User Preferences
 

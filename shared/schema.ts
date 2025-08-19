@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, boolean, decimal, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, boolean, decimal, jsonb, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -77,8 +77,54 @@ export const reviews = pgTable("reviews", {
   bookingId: varchar("booking_id").references(() => bookings.id).notNull(),
   customerId: varchar("customer_id").references(() => users.id).notNull(),
   providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
-  rating: integer("rating").notNull(), // 1-5 stars
+  rating: integer("rating").notNull(), // 1-5 stars overall
+  serviceQuality: integer("service_quality"), // 1-5 stars
+  punctuality: integer("punctuality"), // 1-5 stars  
+  professionalism: integer("professionalism"), // 1-5 stars
   comment: text("comment"),
+  wouldRecommend: boolean("would_recommend").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Provider locations for real-time tracking
+export const providerLocations = pgTable("provider_locations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  latitude: real("latitude").notNull(),
+  longitude: real("longitude").notNull(),
+  isOnline: boolean("is_online").default(false),
+  lastSeen: timestamp("last_seen").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Job queue for automatic allocation
+export const jobQueue = pgTable("job_queue", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bookingId: varchar("booking_id").references(() => bookings.id).notNull(),
+  serviceType: varchar("service_type").notNull(),
+  customerLatitude: real("customer_latitude").notNull(),
+  customerLongitude: real("customer_longitude").notNull(),
+  maxRadius: real("max_radius").default(20), // km
+  priority: integer("priority").default(1), // 1-5, higher is more urgent
+  status: varchar("status").default("pending"), // pending, assigned, expired
+  assignedProviderId: varchar("assigned_provider_id").references(() => serviceProviders.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+// Payment methods
+export const paymentMethods = pgTable("payment_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type").notNull(), // card, bank_transfer, cash
+  cardNumber: varchar("card_number"), // masked for display (e.g., ****1234)
+  cardHolderName: varchar("card_holder_name"),
+  expiryMonth: integer("expiry_month"),
+  expiryYear: integer("expiry_year"),
+  bankName: varchar("bank_name"),
+  cardType: varchar("card_type"), // visa, mastercard, amex
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -140,6 +186,31 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const providerLocationsRelations = relations(providerLocations, ({ one }) => ({
+  provider: one(serviceProviders, {
+    fields: [providerLocations.providerId],
+    references: [serviceProviders.id],
+  }),
+}));
+
+export const jobQueueRelations = relations(jobQueue, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [jobQueue.bookingId],
+    references: [bookings.id],
+  }),
+  assignedProvider: one(serviceProviders, {
+    fields: [jobQueue.assignedProviderId],
+    references: [serviceProviders.id],
+  }),
+}));
+
+export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentMethods.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -168,6 +239,22 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const insertProviderLocationSchema = createInsertSchema(providerLocations).omit({
+  id: true,
+  lastSeen: true,
+  updatedAt: true,
+});
+
+export const insertJobQueueSchema = createInsertSchema(jobQueue).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -183,3 +270,12 @@ export type InsertBooking = z.infer<typeof insertBookingSchema>;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type ProviderLocation = typeof providerLocations.$inferSelect;
+export type InsertProviderLocation = z.infer<typeof insertProviderLocationSchema>;
+
+export type JobQueue = typeof jobQueue.$inferSelect;
+export type InsertJobQueue = z.infer<typeof insertJobQueueSchema>;
+
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
