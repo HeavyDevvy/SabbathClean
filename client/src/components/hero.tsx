@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Play, Shield, UserCheck, Clock } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface HeroProps {
   onBookingClick: () => void;
 }
 
 export default function Hero({ onBookingClick }: HeroProps) {
+  const [, setLocation] = useLocation();
   return (
     <section className="relative bg-gradient-to-br from-blue-50 to-green-50 py-16 lg:py-24">
       <div className="absolute inset-0 bg-black bg-opacity-5"></div>
@@ -21,7 +23,7 @@ export default function Hero({ onBookingClick }: HeroProps) {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button 
-                onClick={onBookingClick}
+                onClick={() => setLocation('/booking')}
                 size="lg"
                 className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
                 data-testid="button-book-service-now"
