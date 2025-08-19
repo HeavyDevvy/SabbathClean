@@ -182,7 +182,7 @@ export default function Booking() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Why Choose Sabboath?</CardTitle>
+                <CardTitle>Why Choose Berry Events?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center text-sm">
