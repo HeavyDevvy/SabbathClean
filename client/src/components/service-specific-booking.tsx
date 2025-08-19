@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -287,17 +287,19 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     return basePrice.toFixed(2);
   };
 
-  // Handle Home Moving service with detailed flow
-  if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
-    setShowMovingDetails(true);
-  }
-
   const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
     setMovingServiceDetails(serviceDetails);
     setSelectedMovingProvider(provider);
     setShowMovingDetails(false);
     // Continue with regular booking flow with pre-filled data
   };
+
+  // Handle Home Moving service with detailed flow
+  useEffect(() => {
+    if (serviceId === "home-moving" && isOpen && !showMovingDetails && !movingServiceDetails) {
+      setShowMovingDetails(true);
+    }
+  }, [serviceId, isOpen, showMovingDetails, movingServiceDetails]);
 
   // Show Home Moving Details component for moving service
   if (showMovingDetails) {
@@ -486,7 +488,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="eventType">Event Type</Label>
-              <Select onValueChange={(value) => form.setValue("eventType", value)}>
+              <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
@@ -516,7 +518,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
             <Select 
               onValueChange={(value) => {
                 setSelectedCuisine(value);
-                form.setValue("cuisineType", value);
+                form.setValue("cuisineType" as any, value);
                 form.setValue("selectedMenu", ""); // Reset menu selection
               }}
             >
@@ -772,7 +774,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="eventType">Event Type</Label>
-              <Select onValueChange={(value) => form.setValue("eventType", value)}>
+              <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
@@ -797,7 +799,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           </div>
           <div>
             <Label htmlFor="serviceType">Service Type</Label>
-            <Select onValueChange={(value) => form.setValue("serviceType", value)}>
+            <Select onValueChange={(value) => form.setValue("serviceType" as any, value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
