@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shield } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shield, Smartphone, Mail, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
@@ -94,6 +94,8 @@ const timeSlots = [
 export default function ProviderOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: string}>({});
+  const [isMobile, setIsMobile] = useState(false);
+  const [applicationSubmitted, setApplicationSubmitted] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ProviderFormData>({
@@ -107,14 +109,22 @@ export default function ProviderOnboarding() {
     },
   });
 
+  // Check for mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    checkMobile();
+  }, []);
+
   const createProviderMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/providers", data),
     onSuccess: () => {
+      setApplicationSubmitted(true);
       toast({
-        title: "Application Submitted!",
-        description: "We'll review your application and get back to you within 24 hours.",
+        title: "Application Submitted Successfully!",
+        description: "We'll review your application and contact you within 24-48 hours.",
       });
-      // Redirect to success page or home
     },
     onError: (error: any) => {
       toast({
@@ -125,9 +135,50 @@ export default function ProviderOnboarding() {
     },
   });
 
+  const handleCameraCapture = async (field: string) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } // Use back camera for document capture
+      });
+      
+      // Create video element to display camera feed
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+      
+      // Create canvas to capture photo
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      
+      // Wait for video to be ready
+      video.onloadedmetadata = () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Capture frame
+        context?.drawImage(video, 0, 0);
+        
+        // Convert to blob
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], `${field}-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            handleFileUpload(file, field);
+          }
+        }, 'image/jpeg', 0.8);
+        
+        // Stop camera
+        stream.getTracks().forEach(track => track.stop());
+      };
+    } catch (error) {
+      toast({
+        title: "Camera Access Failed",
+        description: "Please allow camera access or use file upload instead.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleFileUpload = async (file: File, field: string) => {
-    // In a real app, this would upload to object storage
-    // For now, we'll simulate the upload
     const formData = new FormData();
     formData.append('file', file);
     
@@ -140,7 +191,7 @@ export default function ProviderOnboarding() {
       setUploadedFiles(prev => ({ ...prev, [field]: mockUrl }));
       
       toast({
-        title: "File Uploaded",
+        title: "Document Uploaded",
         description: `${file.name} has been uploaded successfully.`,
       });
     } catch (error) {
@@ -405,25 +456,40 @@ export default function ProviderOnboarding() {
                       <Label htmlFor="profileImage">Profile Photo *</Label>
                       <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-4">
-                          <input
-                            type="file"
-                            id="profileImage"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload(file, "profileImage");
-                            }}
-                            className="hidden"
-                            data-testid="input-profile-image"
-                          />
-                          <label
-                            htmlFor="profileImage"
-                            className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90"
-                          >
-                            Upload Profile Photo
-                          </label>
-                          <p className="mt-2 text-sm text-gray-500">PNG, JPG up to 10MB</p>
+                        <div className="mt-4 space-y-3">
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <input
+                              type="file"
+                              id="profileImage"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(file, "profileImage");
+                              }}
+                              className="hidden"
+                              data-testid="input-profile-image"
+                            />
+                            <label
+                              htmlFor="profileImage"
+                              className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Photo
+                            </label>
+                            {isMobile && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleCameraCapture("profileImage")}
+                                className="flex items-center"
+                                data-testid="button-camera-profile"
+                              >
+                                <Camera className="h-4 w-4 mr-2" />
+                                Take Photo
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
                         </div>
                         {uploadedFiles.profileImage && (
                           <div className="mt-4 flex items-center justify-center">
@@ -437,26 +503,44 @@ export default function ProviderOnboarding() {
                     <div>
                       <Label htmlFor="idDocument">ID Document *</Label>
                       <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-4">
-                          <input
-                            type="file"
-                            id="idDocument"
-                            accept="image/*,.pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload(file, "idDocument");
-                            }}
-                            className="hidden"
-                            data-testid="input-id-document"
-                          />
-                          <label
-                            htmlFor="idDocument"
-                            className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90"
-                          >
-                            Upload ID Document
-                          </label>
-                          <p className="mt-2 text-sm text-gray-500">ID Card, Passport, or Driver's License</p>
+                        <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-4 space-y-3">
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <input
+                              type="file"
+                              id="idDocument"
+                              accept="image/*,.pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(file, "idDocument");
+                              }}
+                              className="hidden"
+                              data-testid="input-id-document"
+                            />
+                            <label
+                              htmlFor="idDocument"
+                              className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Document
+                            </label>
+                            {isMobile && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleCameraCapture("idDocument")}
+                                className="flex items-center"
+                                data-testid="button-camera-id"
+                              >
+                                <Camera className="h-4 w-4 mr-2" />
+                                Scan Document
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">ID Card, Passport, or Driver's License</p>
+                          {isMobile && (
+                            <p className="text-xs text-blue-600">💡 Tip: Use "Scan Document" for better quality</p>
+                          )}
                         </div>
                         {uploadedFiles.idDocument && (
                           <div className="mt-4 flex items-center justify-center">
@@ -470,26 +554,41 @@ export default function ProviderOnboarding() {
                     <div>
                       <Label htmlFor="qualificationCertificate">Qualification Certificate (Optional)</Label>
                       <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                        <div className="mt-4">
-                          <input
-                            type="file"
-                            id="qualificationCertificate"
-                            accept="image/*,.pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload(file, "qualificationCertificate");
-                            }}
-                            className="hidden"
-                            data-testid="input-qualification-certificate"
-                          />
-                          <label
-                            htmlFor="qualificationCertificate"
-                            className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90"
-                          >
-                            Upload Certificate
-                          </label>
-                          <p className="mt-2 text-sm text-gray-500">Trade certificates, training certificates, etc.</p>
+                        <Shield className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="mt-4 space-y-3">
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <input
+                              type="file"
+                              id="qualificationCertificate"
+                              accept="image/*,.pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(file, "qualificationCertificate");
+                              }}
+                              className="hidden"
+                              data-testid="input-qualification-certificate"
+                            />
+                            <label
+                              htmlFor="qualificationCertificate"
+                              className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 flex items-center"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Certificate
+                            </label>
+                            {isMobile && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => handleCameraCapture("qualificationCertificate")}
+                                className="flex items-center"
+                                data-testid="button-camera-certificate"
+                              >
+                                <Camera className="h-4 w-4 mr-2" />
+                                Scan Certificate
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">Trade certificates, training certificates, etc.</p>
                         </div>
                         {uploadedFiles.qualificationCertificate && (
                           <div className="mt-4 flex items-center justify-center">
@@ -591,10 +690,21 @@ export default function ProviderOnboarding() {
                     </Button>
                     <Button 
                       type="submit"
-                      disabled={createProviderMutation.isPending || !form.watch("termsAccepted")}
+                      disabled={createProviderMutation.isPending || !form.watch("termsAccepted") || !form.watch("backgroundCheckConsent") || !uploadedFiles.profileImage || !uploadedFiles.idDocument}
+                      className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 flex-1"
                       data-testid="button-submit-application"
                     >
-                      {createProviderMutation.isPending ? "Submitting..." : "Submit Application"}
+                      {createProviderMutation.isPending ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Submitting Application...
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <CheckCircle className="h-5 w-5 mr-2" />
+                          Submit Application
+                        </div>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -603,6 +713,72 @@ export default function ProviderOnboarding() {
           </Card>
         </form>
       </div>
+
+      {/* Application Submitted Success Screen */}
+      {applicationSubmitted && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-8 text-center">
+              <div className="mb-6">
+                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <CheckCircle className="h-10 w-10 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
+                <p className="text-gray-600">Thank you for applying to become a Berry service provider.</p>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start space-x-3 text-left">
+                  <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Review Process</p>
+                    <p className="text-sm text-gray-600">We'll review your application within 24-48 hours</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 text-left">
+                  <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">We'll Contact You</p>
+                    <p className="text-sm text-gray-600">Updates will be sent to {form.watch("email")}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 text-left">
+                  <Smartphone className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">SMS Notifications</p>
+                    <p className="text-sm text-gray-600">Important updates sent to {form.watch("phone")}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-blue-900 mb-2">What Happens Next?</h3>
+                <ul className="text-sm text-blue-800 space-y-1 text-left">
+                  <li>• Document verification (1-2 business days)</li>
+                  <li>• Background check processing</li>
+                  <li>• Profile setup and training materials</li>
+                  <li>• Account activation and first booking opportunities</li>
+                </ul>
+              </div>
+
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => window.location.href = "/"}
+                  className="w-full bg-primary hover:bg-primary/90"
+                  data-testid="button-return-home"
+                >
+                  Return to Home
+                </Button>
+                <p className="text-xs text-gray-500">
+                  Questions? Contact our provider support team at providers@berry.co.za
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

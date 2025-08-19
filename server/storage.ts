@@ -579,7 +579,6 @@ export class MemStorage implements IStorage {
       expiryMonth: paymentMethodData.expiryMonth || null,
       expiryYear: paymentMethodData.expiryYear || null,
       bankName: paymentMethodData.bankName || null,
-      accountNumber: paymentMethodData.accountNumber || null,
       cardType: paymentMethodData.cardType || null,
       isActive: paymentMethodData.isActive ?? true,
       isDefault: paymentMethodData.isDefault ?? false,
