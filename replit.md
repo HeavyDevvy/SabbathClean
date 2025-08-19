@@ -2,6 +2,22 @@
 
 Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform that connects customers with verified service providers for house cleaning, plumbing, electrical work, chef/catering, waitering, and garden care services. The platform features a React frontend with shadcn/ui components, an Express.js backend with REST API endpoints, and PostgreSQL database using Drizzle ORM. The application supports service booking with geolocation functionality, provider matching, reviews, and payment processing with Stripe integration using South African Rand (ZAR) currency.
 
+## Recent Changes (January 2025)
+
+✓ **Branding Update**: Fixed logo display and updated tagline to "Berry Events - All your Home Services In One"
+✓ **Service Organization**: Added categorized service structure with color-coded badges:
+  - Cleaning Services (House Cleaning, Deep Cleaning)
+  - Maintenance & Repairs (Plumbing, Electrical)
+  - Food & Event Services (Chef & Catering, Waitering)
+  - Outdoor Services (Garden Care)
+✓ **Provider Onboarding**: Implemented comprehensive 4-step registration process including:
+  - Personal information collection
+  - Professional details and service selection
+  - Document verification with image uploads
+  - Legal consent and insurance verification
+✓ **Object Storage**: Set up cloud storage for provider verification documents and profile images
+✓ **Database Enhancement**: Extended provider schema with additional fields for qualifications, certifications, experience levels, and verification status
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.

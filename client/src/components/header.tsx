@@ -16,7 +16,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
               <Home className="text-white h-5 w-5" />
             </div>
             <span className="ml-3 text-xl font-bold text-primary">Berry Events</span>
-            <span className="ml-2 text-sm text-neutral">Our Home Experts</span>
+            <span className="ml-2 text-sm text-neutral">- All your Home Services In One</span>
           </Link>
           
           <div className="hidden md:block">
