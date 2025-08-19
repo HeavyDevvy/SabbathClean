@@ -34,10 +34,10 @@ Berry Events - All your Home Services In One is a comprehensive domestic service
   - Payment method selection and booking confirmation
 
 ✓ **Interactive Workflow Demonstration**: Engaging service preview system:
-  - 5-step simulated booking journey (Service Selection → Provider Matching → Provider Selection → Booking Confirmation → Service Completion)
-  - Real-time progress tracking with authentic provider data
-  - Integrated call-to-action conversion system
-  - Multiple access points from service selector and main interface
+  - Chef & Catering focused 3-step booking demonstration (Service Selection → Cuisine Selection → Chef Matching)
+  - Real-time progress tracking with authentic provider data and pricing
+  - Integrated "Watch How It Works" button with smooth scroll navigation
+  - Simplified demo experience focused exclusively on Chef & Catering service
 
 ✓ **Enhanced Provider Onboarding**: Professional application system with mobile optimization:
   - Mobile camera document capture for ID verification and certificates
