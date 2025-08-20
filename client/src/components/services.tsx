@@ -1,4 +1,4 @@
-import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star } from "lucide-react";
 
 interface ServicesProps {
   onServiceSelect: (service: string) => void;
@@ -108,7 +108,32 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.name}</h3>
                   <p className="text-neutral text-sm mb-4">{service.description}</p>
-                  <div className="text-primary font-semibold">From {service.price}</div>
+                  
+                  {/* Enhanced booking info */}
+                  <div className="space-y-2 mb-4">
+                    <div className="text-primary font-semibold">From {service.price}</div>
+                    <div className="flex items-center justify-center space-x-4 text-xs text-gray-600">
+                      <span className="flex items-center">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Same day
+                      </span>
+                      <span className="flex items-center">
+                        <Star className="h-3 w-3 mr-1" />
+                        4.8+ rated
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Quick book button */}
+                  <button 
+                    className="w-full bg-white/90 hover:bg-white text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 group-hover:shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onServiceSelect(service.id);
+                    }}
+                  >
+                    Book Now
+                  </button>
                 </div>
               </div>
             );

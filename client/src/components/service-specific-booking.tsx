@@ -232,12 +232,14 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     // Service-specific pricing logic
     switch (serviceId) {
       case "house-cleaning":
-        const propertySize = form.getValues().propertySize;
-        const bathrooms = form.getValues().bathrooms;
+        const formValues = form.getValues();
+        const propertySize = (formValues as any).propertySize || "100";
+        const bathrooms = (formValues as any).bathrooms || "1";
         return (parseInt(propertySize) * 50 + parseInt(bathrooms) * 25).toString();
       case "chef-catering":
-        const guests = form.getValues().guests;
-        return (parseInt(guests || "1") * 150).toString();
+        const cateringValues = form.getValues();
+        const guests = (cateringValues as any).guests || "1";
+        return (parseInt(guests) * 150).toString();
       case "plumbing":
       case "electrical":
         return "200";
@@ -246,6 +248,12 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
       default:
         return "100";
     }
+  };
+
+  const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
+    setMovingServiceDetails(serviceDetails);
+    setSelectedMovingProvider(provider);
+    setShowMovingDetails(false);
   };
 
   if (serviceId === "home-moving" && showMovingDetails) {
@@ -261,17 +269,12 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   if (serviceId === "chef-catering" && showEnhancedChefBooking) {
     return (
       <EnhancedChefBooking
-        isOpen={showEnhancedChefBooking}
-        onClose={() => setShowEnhancedChefBooking(false)}
+        form={form}
+        onNext={() => setShowEnhancedChefBooking(false)}
+        onBack={() => setShowEnhancedChefBooking(false)}
       />
     );
   }
-
-  const handleMovingBookingProceed = (serviceDetails: any, provider: ServiceProvider) => {
-    setMovingServiceDetails(serviceDetails);
-    setSelectedMovingProvider(provider);
-    setShowMovingDetails(false);
-  };
 
   const cuisineTypes = {
     "south-african": { name: "South African", description: "Traditional SA cuisine" },

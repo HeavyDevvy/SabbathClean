@@ -171,7 +171,7 @@ export default function EnhancedChefBooking({ form, onNext, onBack }: EnhancedCh
     let basePrice = 450; // Default base price
     
     if (menuType === "popular" && selectedMenuData) {
-      basePrice = selectedMenuData.price;
+      basePrice = (selectedMenuData as any).price || 450;
     }
     
     return basePrice * numberOfPeople;
