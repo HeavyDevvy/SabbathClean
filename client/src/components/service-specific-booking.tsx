@@ -240,6 +240,39 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
         const cateringValues = form.getValues();
         const guests = (cateringValues as any).guests || "1";
         return (parseInt(guests) * 150).toString();
+      case "waitering":
+        const waiteringValues = form.getValues();
+        const guestCount = parseInt((waiteringValues as any).guestCount || "10");
+        const duration = parseInt((waiteringValues as any).duration || "4");
+        const eventType = (waiteringValues as any).eventType || "private-dinner";
+        
+        // Base rate per hour (competitive with Sweep South)
+        let baseRate = 180;
+        
+        // Event type multipliers (larger events need more coordination)
+        const eventMultipliers = {
+          "private-dinner": 1.0,
+          "cocktail-party": 1.2,
+          "birthday": 1.1,
+          "anniversary": 1.1,
+          "corporate": 1.4,
+          "wedding": 1.6
+        };
+        
+        // Guest count multipliers (more guests = more work)
+        let guestMultiplier = 1.0;
+        if (guestCount > 50) guestMultiplier = 1.5;
+        else if (guestCount > 30) guestMultiplier = 1.3;
+        else if (guestCount > 20) guestMultiplier = 1.2;
+        else if (guestCount > 10) guestMultiplier = 1.1;
+        
+        // Duration discount for longer events
+        let durationMultiplier = 1.0;
+        if (duration >= 8) durationMultiplier = 0.9; // 10% discount for full day
+        else if (duration >= 6) durationMultiplier = 0.95; // 5% discount
+        
+        const totalRate = baseRate * (eventMultipliers[eventType as keyof typeof eventMultipliers] || 1.0) * guestMultiplier * durationMultiplier * duration;
+        return Math.round(totalRate).toString();
       case "plumbing":
       case "electrical":
         return "200";
@@ -484,6 +517,94 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                     </div>
                   )}
 
+                  {/* Waitering specific fields */}
+                  {serviceId === "waitering" && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="eventType">Event Type</Label>
+                          <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select event type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="private-dinner">Private Dinner (1-10 guests)</SelectItem>
+                              <SelectItem value="cocktail-party">Cocktail Party (10-30 guests)</SelectItem>
+                              <SelectItem value="wedding">Wedding (50+ guests)</SelectItem>
+                              <SelectItem value="corporate">Corporate Event (20-100 guests)</SelectItem>
+                              <SelectItem value="birthday">Birthday Party (10-50 guests)</SelectItem>
+                              <SelectItem value="anniversary">Anniversary (10-30 guests)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="guestCount">Number of Guests</Label>
+                          <Input 
+                            type="number" 
+                            placeholder="e.g., 20"
+                            {...form.register("guestCount" as any)}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="duration">Event Duration (Hours)</Label>
+                          <Select onValueChange={(value) => form.setValue("duration" as any, value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select duration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">2 Hours</SelectItem>
+                              <SelectItem value="3">3 Hours</SelectItem>
+                              <SelectItem value="4">4 Hours</SelectItem>
+                              <SelectItem value="5">5 Hours</SelectItem>
+                              <SelectItem value="6">6 Hours</SelectItem>
+                              <SelectItem value="8">8 Hours (Full Day)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="serviceStyle">Service Style</Label>
+                          <Select onValueChange={(value) => form.setValue("serviceStyle" as any, value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select service style" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="casual">Casual Service</SelectItem>
+                              <SelectItem value="formal">Formal Table Service</SelectItem>
+                              <SelectItem value="buffet">Buffet Service</SelectItem>
+                              <SelectItem value="cocktail">Cocktail Service & Bar</SelectItem>
+                              <SelectItem value="fine-dining">Fine Dining Experience</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="additionalServices">Additional Services (Optional)</Label>
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                          <label className="flex items-center space-x-2">
+                            <input type="checkbox" className="rounded" />
+                            <span className="text-sm">Bar Service & Mixology</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input type="checkbox" className="rounded" />
+                            <span className="text-sm">Event Setup & Breakdown</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input type="checkbox" className="rounded" />
+                            <span className="text-sm">Wine Pairing Expertise</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input type="checkbox" className="rounded" />
+                            <span className="text-sm">Table Coordination</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Garden Care specific fields */}
                   {serviceId === "garden-care" && (
                     <div className="grid grid-cols-2 gap-4">
@@ -690,7 +811,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                     <div className="space-y-4">
                       <div>
                         <Label>Choose Payment Method</Label>
-                        <div className="grid grid-cols-3 gap-3 mt-2">
+                        <div className="grid grid-cols-2 gap-3 mt-2">
                           <button
                             type="button"
                             className={`p-4 border rounded-lg transition-all ${
@@ -719,20 +840,12 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                               <span className="text-sm">Bank Transfer</span>
                             </div>
                           </button>
-                          <button
-                            type="button"
-                            className={`p-4 border rounded-lg transition-all ${
-                              paymentDetails.paymentMethod === "cash" 
-                                ? "border-primary bg-primary/5 text-primary" 
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => setPaymentDetails(prev => ({...prev, paymentMethod: "cash"}))}
-                          >
-                            <div className="text-center">
-                              <Banknote className="h-6 w-6 mx-auto mb-1" />
-                              <span className="text-sm">Cash</span>
-                            </div>
-                          </button>
+                        </div>
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-xs text-blue-800">
+                            <strong>Secure Payment:</strong> All payments go through Berry Events for your protection. 
+                            Funds are distributed to service providers after successful completion.
+                          </p>
                         </div>
                       </div>
 
@@ -811,18 +924,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                         </div>
                       )}
 
-                      {/* Cash Payment Info */}
-                      {paymentDetails.paymentMethod === "cash" && (
-                        <div className="border-t pt-4">
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h5 className="font-semibold text-green-900 mb-2">Cash Payment</h5>
-                            <p className="text-sm text-green-800">
-                              Payment will be collected in cash when the service provider arrives. 
-                              Please have the exact amount ready.
-                            </p>
-                          </div>
-                        </div>
-                      )}
+
 
                       {/* Price Summary */}
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -869,7 +971,6 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                   className="min-w-[120px]"
                 >
                   {createBookingMutation.isPending ? "Processing Payment..." : 
-                    paymentDetails.paymentMethod === "cash" ? `Book Service (Pay R${(parseFloat(calculateTotalPrice()) + 15).toFixed(2)} on arrival)` :
                     paymentDetails.paymentMethod === "bank_transfer" ? `Book Service & Get Payment Details` :
                     `Pay R${(parseFloat(calculateTotalPrice()) + 15).toFixed(2)} & Book`}
                 </Button>

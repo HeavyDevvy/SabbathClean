@@ -130,7 +130,7 @@ export function AnimatedBookingDemo() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-
+  const [showSparkles, setShowSparkles] = useState(false);
 
   const currentServiceDemo = serviceDemos[0]; // Only one service now
   const demoSteps: DemoStep[] = currentServiceDemo?.steps || [];
@@ -139,12 +139,18 @@ export function AnimatedBookingDemo() {
     if (!isPlaying) return;
 
     const timer = setTimeout(() => {
-      if (currentStep < demoSteps.length - 1) {
-        setCurrentStep(prev => prev + 1);
-      } else {
-        // End of demo - just stop
-        setIsPlaying(false);
-      }
+      // Add visual transition effect
+      setShowSparkles(true);
+      
+      setTimeout(() => {
+        setShowSparkles(false);
+        if (currentStep < demoSteps.length - 1) {
+          setCurrentStep(prev => prev + 1);
+        } else {
+          // End of demo - just stop
+          setIsPlaying(false);
+        }
+      }, 400);
     }, demoSteps[currentStep]?.duration || 2000);
 
     return () => clearTimeout(timer);
@@ -159,6 +165,7 @@ export function AnimatedBookingDemo() {
     setCurrentStep(0);
     setIsPlaying(false);
     setHasStarted(false);
+    setShowSparkles(false);
   };
 
   const currentStepData = demoSteps[currentStep];
@@ -166,9 +173,16 @@ export function AnimatedBookingDemo() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Watch How It Works
-        </h2>
+        <div className="relative">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 relative">
+            🔥 Watch How It Works
+            {showSparkles && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles className="h-8 w-8 text-yellow-500 animate-pulse" />
+              </div>
+            )}
+          </h2>
+        </div>
         <p className="text-lg text-neutral mb-6">
           Experience authentic African cuisine with our specialized chefs in just a few simple steps.
         </p>
@@ -241,15 +255,20 @@ export function AnimatedBookingDemo() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Play className="h-12 w-12 text-gray-400" />
+            <div className="w-24 h-24 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse shadow-lg">
+              <Play className="h-12 w-12 text-white ml-1" />
             </div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              Ready to See How It Works?
+              🍽️ Ready to See African Cuisine Magic?
             </h3>
             <p className="text-neutral">
-              Click "Start Demo" to see our African cuisine chef booking process in action
+              Click "Start Demo" to see our authentic African chef booking process in action
             </p>
+            <div className="mt-4 text-sm text-gray-500 flex items-center justify-center gap-4">
+              <span className="flex items-center"><ChefHat className="h-4 w-4 mr-1" /> Premium Chefs</span>
+              <span className="flex items-center"><Star className="h-4 w-4 mr-1" /> 5-Star Service</span>
+              <span className="flex items-center"><Clock className="h-4 w-4 mr-1" /> 3 Simple Steps</span>
+            </div>
           </div>
         )}
       </div>

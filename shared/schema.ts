@@ -31,6 +31,7 @@ export const serviceProviders = pgTable("service_providers", {
   experience: text("experience"),
   availability: jsonb("availability"), // JSON object for schedule
   isVerified: boolean("is_verified").default(false),
+  verificationStatus: text("verification_status").default("pending"), // pending, under_review, approved, rejected
   insuranceVerified: boolean("insurance_verified").default(false),
   backgroundCheckVerified: boolean("background_check_verified").default(false),
   hasInsurance: boolean("has_insurance").default(false),
@@ -38,9 +39,17 @@ export const serviceProviders = pgTable("service_providers", {
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   totalReviews: integer("total_reviews").default(0),
   location: text("location").notNull(),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   idDocument: text("id_document"),
   qualificationCertificate: text("qualification_certificate"),
+  bankingDetails: jsonb("banking_details"), // For payment distribution
+  providerType: text("provider_type").default("individual"), // individual, company
+  companyName: text("company_name"),
+  companyRegistration: text("company_registration"),
+  taxNumber: text("tax_number"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const services = pgTable("services", {
@@ -61,9 +70,14 @@ export const bookings = pgTable("bookings", {
   scheduledTime: text("scheduled_time").notNull(),
   duration: integer("duration").notNull(), // in hours
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  berryEventsCommission: decimal("berry_events_commission", { precision: 10, scale: 2 }).default("0"),
+  providerPayout: decimal("provider_payout", { precision: 10, scale: 2 }).default("0"),
+  paymentStatus: text("payment_status").default("pending"), // pending, paid_to_berry, paid_to_provider
   status: text("status").notNull().default("pending"), // pending, confirmed, in-progress, completed, cancelled
-  propertySize: text("property_size").notNull(),
-  bathrooms: integer("bathrooms").notNull(),
+  serviceType: text("service_type").notNull(), // house-cleaning, chef-catering, waitering, etc.
+  serviceDetails: jsonb("service_details"), // Store service-specific details
+  propertySize: text("property_size"),
+  bathrooms: integer("bathrooms"),
   address: text("address").notNull(),
   specialInstructions: text("special_instructions"),
   isRecurring: boolean("is_recurring").default(false),
