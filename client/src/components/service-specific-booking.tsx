@@ -130,21 +130,12 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
   // Get user location on component mount
   useEffect(() => {
-    if (isOpen && !userLocation) {
+    if (isOpen && !userLocation && navigator.geolocation) {
       setLocationLoading(true);
       
-      const timeout = setTimeout(() => {
-        setLocationLoading(false);
-        toast({
-          title: "Location timeout",
-          description: "Using default providers instead",
-          variant: "destructive"
-        });
-      }, 10000); // 10 second timeout
-      
+      // Use a more forgiving approach - no error toasts, just silent fallback
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          clearTimeout(timeout);
           setLocationLoading(false);
           setUserLocation({
             latitude: position.coords.latitude,
@@ -152,21 +143,19 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           });
         },
         (error) => {
-          clearTimeout(timeout);
           setLocationLoading(false);
-          console.error("Location error:", error);
-          toast({
-            title: "Location access denied",
-            description: "Using default providers",
-            variant: "destructive"
-          });
+          // Silent fallback - no error toasts to avoid user annoyance
+          console.warn("Location detection failed, using default providers:", error.code);
         },
         {
-          enableHighAccuracy: true,
-          timeout: 8000,
-          maximumAge: 300000 // 5 minutes
+          enableHighAccuracy: false, // Faster, less precise location
+          timeout: 15000, // Longer timeout to prevent premature failures
+          maximumAge: 600000 // 10 minutes - use cached location if available
         }
       );
+    } else if (isOpen && !navigator.geolocation) {
+      // Browser doesn't support geolocation - proceed without location
+      setLocationLoading(false);
     }
   }, [isOpen]);
 
@@ -1255,12 +1244,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                               <p className="text-sm text-gray-600 mt-1">{provider.bio}</p>
                               <div className="flex items-center justify-between mt-2">
                                 <p className="text-sm font-medium text-primary">R{provider.hourlyRate}/hour</p>
-                                {provider.distanceText && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <MapPin className="h-3 w-3 mr-1" />
-                                    {provider.distanceText}
-                                  </Badge>
-                                )}
+                                <Badge variant="outline" className="text-xs">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  Nearby
+                                </Badge>
                               </div>
                             </div>
                           </div>

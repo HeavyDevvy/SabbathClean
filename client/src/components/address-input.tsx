@@ -168,32 +168,18 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
       },
       (error) => {
         setIsLoadingLocation(false);
-        let errorMessage = "Unable to get your location.";
-        let helpText = "";
+        // Handle location errors more gracefully - reduce aggressive error messaging
+        console.warn("Location detection failed:", error.code);
         
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied";
-            helpText = "Please allow location access in your browser settings and try again.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location unavailable";
-            helpText = "Your device cannot determine your location. Please enter your address manually.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location timeout";
-            helpText = "The location request took too long. Please try again or enter your address manually.";
-            break;
-          default:
-            errorMessage = "Location error";
-            helpText = "Please enter your address manually.";
+        // Only show toast for permission denied as it's user-actionable
+        if (error.code === error.PERMISSION_DENIED) {
+          toast({
+            title: "Location access needed",
+            description: "Allow location access to find your address automatically",
+            variant: "default", // Less aggressive than "destructive"
+          });
         }
-        
-        toast({
-          title: errorMessage,
-          description: helpText,
-          variant: "destructive",
-        });
+        // For timeouts and other errors, fail silently to avoid user annoyance
       },
       {
         enableHighAccuracy: true,

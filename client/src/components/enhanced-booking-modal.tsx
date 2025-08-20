@@ -104,13 +104,21 @@ export default function EnhancedBookingModal({
   });
 
   const getCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Location not available",
+        description: "Please enter your address manually.",
+      });
+      return;
+    }
+
     setLocationLoading(true);
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
+          enableHighAccuracy: false, // Faster location
+          timeout: 15000, // Longer timeout
+          maximumAge: 600000, // 10 minutes cache
         });
       });
 
@@ -120,23 +128,38 @@ export default function EnhancedBookingModal({
         longitude: position.coords.longitude,
       }));
 
-      // Get address from coordinates
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${position.coords.latitude}+${position.coords.longitude}&key=YOUR_API_KEY`
-      );
-      const data = await response.json();
-      if (data.results?.[0]) {
+      // Use free geocoding service for address lookup
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&addressdetails=1&accept-language=en`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.display_name) {
+            setFormData(prev => ({
+              ...prev,
+              address: data.display_name,
+            }));
+          }
+        }
+      } catch (geocodeError) {
+        // Silent fallback - use coordinates only
         setFormData(prev => ({
           ...prev,
-          address: data.results[0].formatted,
+          address: `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
         }));
       }
-    } catch (error) {
-      toast({
-        title: "Location Error",
-        description: "Please enter your address manually.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      // Only show error for permission denied, fail silently for others
+      if (error.code === 1) { // PERMISSION_DENIED
+        toast({
+          title: "Location access needed",
+          description: "Please allow location access or enter your address manually.",
+        });
+      }
+      // For timeouts and other errors, fail silently
+      console.warn("Location detection failed:", error.code);
     } finally {
       setLocationLoading(false);
     }
