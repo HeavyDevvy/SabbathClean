@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return top 3 providers with distance info
       const topProviders = nearbyProviders.slice(0, 3).map(provider => ({
         ...provider,
-        distanceText: `${provider.distance?.toFixed(1)}km away`,
+        distanceText: provider.distance ? `${provider.distance.toFixed(1)}km away` : 'Distance unknown',
         isNearby: true
       }));
       
@@ -463,6 +463,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error: any) {
       res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
+  // Additional training system routes for comprehensive functionality
+  app.get("/api/providers/:providerId/training/modules/:moduleId/progress", async (req, res) => {
+    try {
+      const progress = await storage.getProviderModuleProgress?.(req.params.providerId, req.params.moduleId);
+      if (!progress) {
+        return res.status(404).json({ error: "Progress not found" });
+      }
+      res.json(progress);
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to fetch module progress" });
+    }
+  });
+
+  app.post("/api/certifications/:certificationId/validate", async (req, res) => {
+    try {
+      const { providerId, requiredModules } = req.body;
+      
+      // Check if provider has completed all required modules
+      const progress = await storage.getProviderTrainingProgress(providerId);
+      const completedModules = progress
+        .filter(p => p.status === 'completed')
+        .map(p => p.moduleId);
+      
+      const hasAllRequirements = requiredModules.every((moduleId: string) => 
+        completedModules.includes(moduleId)
+      );
+      
+      if (hasAllRequirements) {
+        // Award the certification
+        const certificationData = {
+          providerId,
+          certificationId: req.params.certificationId,
+          status: 'earned' as const,
+          earnedAt: new Date(),
+          expiresAt: new Date(Date.now() + (12 * 30 * 24 * 60 * 60 * 1000)), // 12 months
+          certificateNumber: `CERT_${Date.now()}`,
+          verificationCode: `VER_${Date.now().toString().slice(-6)}`
+        };
+        
+        const certification = await storage.createProviderCertification(certificationData);
+        res.json({ awarded: true, certification });
+      } else {
+        const missingModules = requiredModules.filter((moduleId: string) => 
+          !completedModules.includes(moduleId)
+        );
+        res.json({ awarded: false, missingModules });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to validate certification requirements" });
     }
   });
 

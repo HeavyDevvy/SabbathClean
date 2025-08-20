@@ -28,6 +28,9 @@ export default function Header({ onBookingClick }: HeaderProps) {
               <Link href="/providers" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-providers">
                 Our Home Experts
               </Link>
+              <Link href="/provider-training" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-training">
+                Training Center
+              </Link>
               <a href="#pricing" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-pricing">
                 Pricing
               </a>

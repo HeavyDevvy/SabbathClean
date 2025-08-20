@@ -384,6 +384,65 @@ export class DatabaseStorage implements IStorage {
     const [newResult] = await db.insert(providerAssessmentResults).values(result).returning();
     return newResult;
   }
+
+  // Additional methods for comprehensive training system
+  async getTrainingModule(id: string): Promise<TrainingModule | undefined> {
+    const [module] = await db.select().from(trainingModules).where(eq(trainingModules.id, id));
+    return module || undefined;
+  }
+
+  async createTrainingModule(module: InsertTrainingModule): Promise<TrainingModule> {
+    const [newModule] = await db.insert(trainingModules).values(module).returning();
+    return newModule;
+  }
+
+  async getProviderModuleProgress(providerId: string, moduleId: string): Promise<ProviderTrainingProgress | undefined> {
+    const [progress] = await db.select().from(providerTrainingProgress)
+      .where(and(
+        eq(providerTrainingProgress.providerId, providerId),
+        eq(providerTrainingProgress.moduleId, moduleId)
+      ));
+    return progress || undefined;
+  }
+
+  async getCertification(id: string): Promise<Certification | undefined> {
+    const [certification] = await db.select().from(certifications).where(eq(certifications.id, id));
+    return certification || undefined;
+  }
+
+  async createCertification(certification: InsertCertification): Promise<Certification> {
+    const [newCertification] = await db.insert(certifications).values(certification).returning();
+    return newCertification;
+  }
+
+  async updateProviderCertificationStatus(id: string, status: string, earnedAt?: Date, expiresAt?: Date): Promise<ProviderCertification> {
+    const [certification] = await db.update(providerCertifications)
+      .set({ status, earnedAt, expiresAt })
+      .where(eq(providerCertifications.id, id))
+      .returning();
+    return certification;
+  }
+
+  async getSkillAssessment(id: string): Promise<SkillAssessment | undefined> {
+    const [assessment] = await db.select().from(skillAssessments).where(eq(skillAssessments.id, id));
+    return assessment || undefined;
+  }
+
+  async createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment> {
+    const [newAssessment] = await db.insert(skillAssessments).values(assessment).returning();
+    return newAssessment;
+  }
+
+  async getProviderAssessmentResult(providerId: string, assessmentId: string): Promise<ProviderAssessmentResult | undefined> {
+    const [result] = await db.select().from(providerAssessmentResults)
+      .where(and(
+        eq(providerAssessmentResults.providerId, providerId),
+        eq(providerAssessmentResults.assessmentId, assessmentId)
+      ))
+      .orderBy(desc(providerAssessmentResults.completedAt))
+      .limit(1);
+    return result || undefined;
+  }
 }
 
 export class MemStorage implements IStorage {
