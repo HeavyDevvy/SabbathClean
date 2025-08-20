@@ -143,6 +143,14 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
       customMenuItems: [],
       ingredientOption: "chef-brings" as const,
       utensilsOption: "chef-brings" as const,
+      // Cleaning service fields
+      propertySize: "",
+      bathrooms: "",
+      cleaningType: "",
+      // Maintenance service fields
+      problemDescription: "",
+      urgency: "",
+      propertyType: "",
     },
   });
 
@@ -339,6 +347,52 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     const numberOfPeopleStr = form.getValues().numberOfPeople || "1";
     const numberOfPeople = parseInt(numberOfPeopleStr);
     
+    // House Cleaning Dynamic Pricing
+    if (currentService?.category.includes('cleaning')) {
+      const propertySize = form.getValues().propertySize;
+      const bathrooms = form.getValues().bathrooms;
+      const cleaningType = form.getValues().cleaningType;
+      
+      // Base price starts at R150 for small properties
+      basePrice = 150;
+      
+      // Property size multiplier
+      const sizeMultipliers = {
+        'small': 1.0,      // R150 base
+        'medium': 1.5,     // R225 
+        'large': 2.0       // R300
+      };
+      
+      if (propertySize && sizeMultipliers[propertySize as keyof typeof sizeMultipliers]) {
+        basePrice *= sizeMultipliers[propertySize as keyof typeof sizeMultipliers];
+      }
+      
+      // Additional cost per bathroom (beyond the first)
+      const bathroomCosts = {
+        '1': 0,
+        '2': 50,
+        '3': 100,
+        '4+': 150
+      };
+      
+      if (bathrooms && bathroomCosts[bathrooms as keyof typeof bathroomCosts]) {
+        basePrice += bathroomCosts[bathrooms as keyof typeof bathroomCosts];
+      }
+      
+      // Cleaning type multiplier
+      const cleaningTypeMultipliers = {
+        'regular': 1.0,        // No additional cost
+        'deep': 1.8,          // 80% more expensive
+        'move-in': 1.6,       // 60% more expensive  
+        'move-out': 1.7       // 70% more expensive
+      };
+      
+      if (cleaningType && cleaningTypeMultipliers[cleaningType as keyof typeof cleaningTypeMultipliers]) {
+        basePrice *= cleaningTypeMultipliers[cleaningType as keyof typeof cleaningTypeMultipliers];
+      }
+    }
+    
+    // Chef & Catering Dynamic Pricing
     if (serviceId === "chef-catering") {
       // Menu pricing
       const selectedMenuValue = form.getValues().selectedMenu;
@@ -430,6 +484,49 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Price Breakdown for Cleaning Services */}
+          {form.watch("propertySize") && (
+            <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-semibold mb-2">Price Breakdown</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Base price ({form.watch("propertySize")} property):</span>
+                  <span>R{(() => {
+                    const size = form.watch("propertySize");
+                    const multipliers = { 'small': 150, 'medium': 225, 'large': 300 };
+                    return multipliers[size as keyof typeof multipliers] || 150;
+                  })()}</span>
+                </div>
+                {form.watch("bathrooms") && form.watch("bathrooms") !== "1" && (
+                  <div className="flex justify-between">
+                    <span>Additional bathrooms:</span>
+                    <span>R{(() => {
+                      const bathrooms = form.watch("bathrooms");
+                      const costs = { '2': 50, '3': 100, '4+': 150 };
+                      return costs[bathrooms as keyof typeof costs] || 0;
+                    })()}</span>
+                  </div>
+                )}
+                {form.watch("cleaningType") && form.watch("cleaningType") !== "regular" && (
+                  <div className="flex justify-between">
+                    <span>{form.watch("cleaningType")} cleaning premium:</span>
+                    <span>
+                      {(() => {
+                        const type = form.watch("cleaningType");
+                        const multipliers = { 'deep': '+80%', 'move-in': '+60%', 'move-out': '+70%' };
+                        return multipliers[type as keyof typeof multipliers] || '';
+                      })()}
+                    </span>
+                  </div>
+                )}
+                <div className="border-t pt-1 font-semibold flex justify-between">
+                  <span>Total:</span>
+                  <span>R{calculateTotalPrice()}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       );
     }
