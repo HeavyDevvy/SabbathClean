@@ -128,34 +128,27 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     enabled: isOpen && !userLocation, // Only use fallback when no location
   });
 
-  // Get user location on component mount
+  // Get user location on component mount - completely silent
   useEffect(() => {
     if (isOpen && !userLocation && navigator.geolocation) {
-      setLocationLoading(true);
-      
-      // Use a more forgiving approach - no error toasts, just silent fallback
+      // No loading state shown to user - completely silent location detection
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocationLoading(false);
           setUserLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
           });
         },
         (error) => {
-          setLocationLoading(false);
-          // Silent fallback - no error toasts to avoid user annoyance
-          console.warn("Location detection failed, using default providers:", error.code);
+          // Completely silent fallback - no logging, no user indication
+          // Just proceed with default providers
         },
         {
-          enableHighAccuracy: false, // Faster, less precise location
-          timeout: 15000, // Longer timeout to prevent premature failures
-          maximumAge: 600000 // 10 minutes - use cached location if available
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 600000
         }
       );
-    } else if (isOpen && !navigator.geolocation) {
-      // Browser doesn't support geolocation - proceed without location
-      setLocationLoading(false);
     }
   }, [isOpen]);
 
@@ -175,12 +168,8 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
           const nearbyData = await response.json();
           setNearbyProviders(nearbyData);
         } catch (error) {
-          console.error("Error fetching nearby providers:", error);
-          toast({
-            title: "Provider search failed",
-            description: "Using default providers",
-            variant: "destructive"
-          });
+          // Silent fallback - no error messages to improve UX
+          console.warn("Provider search failed, using defaults:", error);
         }
       };
       
@@ -973,11 +962,11 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     if (currentService.category.includes('waitering')) {
       return (
         <>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="eventType">Event Type</Label>
               <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -995,23 +984,35 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               <Input 
                 type="number"
                 placeholder="e.g. 10"
+                className="w-full"
                 {...form.register("numberOfPeople")}
               />
             </div>
           </div>
-          <div>
-            <Label htmlFor="serviceType">Service Type</Label>
-            <Select onValueChange={(value) => form.setValue("serviceType" as any, value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select service type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="table-service">Table Service</SelectItem>
-                <SelectItem value="bar-service">Bar Service</SelectItem>
-                <SelectItem value="both">Table & Bar Service</SelectItem>
-                <SelectItem value="event-coordination">Event Coordination</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="serviceType">Service Type</Label>
+              <Select onValueChange={(value) => form.setValue("serviceType" as any, value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="table-service">Table Service</SelectItem>
+                  <SelectItem value="bar-service">Bar Service</SelectItem>
+                  <SelectItem value="both">Table & Bar Service</SelectItem>
+                  <SelectItem value="event-coordination">Event Coordination</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="eventDuration">Duration (hours)</Label>
+              <Input 
+                type="number"
+                placeholder="e.g. 4"
+                className="w-full"
+                {...form.register("eventDuration" as any)}
+              />
+            </div>
           </div>
         </>
       );
@@ -1390,7 +1391,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                           <div className="border-t border-blue-300 mt-2 pt-2">
                             <div className="flex justify-between font-semibold">
                               <span>Total Amount:</span>
-                              <span>R{calculateTotalPrice() + 15}</span>
+                              <span>R{(parseFloat(calculateTotalPrice()) + 15).toFixed(2)}</span>
                             </div>
                           </div>
                         </div>
@@ -1400,17 +1401,11 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </Card>
               )}
 
-              {/* Location Status */}
-              {locationLoading && (
-                <div className="flex items-center space-x-2 text-blue-600">
-                  <MapPin className="h-4 w-4 animate-pulse" />
-                  <span>Finding providers near you...</span>
-                </div>
-              )}
+              {/* Location Status - Only show positive feedback */}
               {nearbyProviders.length > 0 && (
                 <div className="flex items-center space-x-2 text-green-600">
                   <MapPin className="h-4 w-4" />
-                  <span>Showing top 3 providers within 20km of your location</span>
+                  <span>Showing top providers near you</span>
                 </div>
               )}
 
@@ -1421,11 +1416,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider) || 
-                    (paymentDetails.paymentMethod === "card" && (!paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv))}
+                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider)}
                   className="min-w-[120px]"
                 >
-                  {createBookingMutation.isPending ? "Processing..." : `Pay R${calculateTotalPrice() + 15} & Book`}
+                  {createBookingMutation.isPending ? "Processing..." : `Pay R${(parseFloat(calculateTotalPrice()) + 15).toFixed(2)} & Book`}
                 </Button>
               </div>
             </form>

@@ -16,16 +16,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       gradient: "from-purple-50 to-purple-100",
       iconBg: "bg-primary",
     },
-    {
-      id: "deep-cleaning", 
-      name: "Deep Cleaning",
-      category: "Cleaning Services",
-      description: "Thorough cleaning for move-ins, move-outs including carpet cleaning, window washing, appliance cleaning",
-      price: "R450/hour",
-      icon: Sparkles,
-      gradient: "from-purple-50 to-pink-100",
-      iconBg: "bg-secondary",
-    },
+
     {
       id: "plumbing",
       name: "Plumbing Services", 
