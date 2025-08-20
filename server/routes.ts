@@ -417,11 +417,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Return top 3 providers with distance info
-      const topProviders = nearbyProviders.slice(0, 3).map(provider => ({
+      const topProviders = nearbyProviders.slice(0, 3).map(provider => provider ? ({
         ...provider,
         distanceText: provider.distance ? `${provider.distance.toFixed(1)}km away` : 'Distance unknown',
         isNearby: true
-      }));
+      }) : null).filter(provider => provider !== null);
       
       res.json(topProviders);
     } catch (error: any) {
