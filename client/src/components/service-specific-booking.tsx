@@ -291,10 +291,87 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     );
   }
 
-  // Cuisine types and popular menus data
+  // Cuisine types organized by international standards - African cuisine featured first
   const cuisineTypes = {
+    // African Cuisine - South Africa Featured
+    "south-african": {
+      name: "South African",
+      region: "African",
+      specialization: "south-african",
+      popularMenus: [
+        {
+          id: "heritage-feast",
+          name: "Heritage Feast",
+          description: "Traditional South African flavors and comfort food",
+          items: ["Bobotie", "Potjiekos", "Boerewors & Pap", "Malva Pudding"],
+          basePrice: 520
+        },
+        {
+          id: "braai-experience",
+          name: "Authentic Braai Experience", 
+          description: "Classic South African BBQ with traditional sides",
+          items: ["Boerewors", "Lamb Chops", "Sosaties", "Roosterkoek", "Chakalaka"],
+          basePrice: 580
+        },
+        {
+          id: "cape-malay",
+          name: "Cape Malay Delights",
+          description: "Aromatic spices and traditional Cape Malay dishes",
+          items: ["Cape Malay Curry", "Samoosas", "Koeksisters", "Milk Tart"],
+          basePrice: 550
+        }
+      ]
+    },
+    
+    // Regional African Options
+    "east-african": {
+      name: "East African",
+      region: "African Regional",
+      specialization: "east-african",
+      popularMenus: [
+        {
+          id: "ethiopian-feast",
+          name: "Ethiopian Feast",
+          description: "Traditional Ethiopian cuisine with injera and stews",
+          items: ["Doro Wat", "Kitfo", "Injera Bread", "Tibs", "Ethiopian Coffee"],
+          basePrice: 580
+        },
+        {
+          id: "kenyan-classics",
+          name: "Kenyan Classics",
+          description: "Authentic Kenyan dishes with local ingredients",
+          items: ["Nyama Choma", "Ugali", "Sukuma Wiki", "Chapati", "Masala Chai"],
+          basePrice: 520
+        }
+      ]
+    },
+    
+    "west-african": {
+      name: "West African",
+      region: "African Regional",
+      specialization: "west-african",
+      popularMenus: [
+        {
+          id: "nigerian-delights",
+          name: "Nigerian Delights", 
+          description: "Rich Nigerian flavors with traditional spices",
+          items: ["Jollof Rice", "Suya", "Egusi Soup", "Pounded Yam", "Chin Chin"],
+          basePrice: 560
+        },
+        {
+          id: "ghanaian-feast",
+          name: "Ghanaian Feast",
+          description: "Traditional Ghanaian cuisine with bold flavors",
+          items: ["Banku & Tilapia", "Kelewele", "Waakye", "Red Red", "Bofrot"],
+          basePrice: 540
+        }
+      ]
+    },
+
+    // International Cuisines
     italian: {
       name: "Italian",
+      region: "European",
       specialization: "italian",
       popularMenus: [
         {
@@ -313,8 +390,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
         }
       ]
     },
+    
     asian: {
       name: "Asian Fusion",
+      region: "Asian",
       specialization: "asian",
       popularMenus: [
         {
@@ -333,28 +412,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
         }
       ]
     },
-    african: {
-      name: "African Traditional",
-      specialization: "african",
-      popularMenus: [
-        {
-          id: "heritage-feast",
-          name: "Heritage Feast",
-          description: "Traditional South African flavors and comfort food",
-          items: ["Bobotie", "Potjiekos", "Boerewors", "Malva Pudding"],
-          basePrice: 520
-        },
-        {
-          id: "modern-african",
-          name: "Modern African",
-          description: "Contemporary take on African cuisine",
-          items: ["Springbok Carpaccio", "Ostrich Fillet", "Amaranth Salad", "Rooibos Panna Cotta"],
-          basePrice: 680
-        }
-      ]
-    },
+    
     indian: {
       name: "Indian Cuisine",
+      region: "Asian",
       specialization: "indian",
       popularMenus: [
         {
@@ -373,22 +434,24 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
         }
       ]
     },
+
     mediterranean: {
       name: "Mediterranean",
+      region: "European",
       specialization: "mediterranean",
       popularMenus: [
         {
-          id: "greek-island",
-          name: "Greek Island",
+          id: "greek-islands",
+          name: "Greek Islands",
           description: "Fresh Mediterranean flavors with olive oil and herbs",
           items: ["Greek Salad", "Moussaka", "Grilled Lamb", "Baklava"],
           basePrice: 620
         },
         {
-          id: "healthy-med",
-          name: "Healthy Mediterranean",
-          description: "Light and nutritious Mediterranean dishes",
-          items: ["Hummus Platter", "Grilled Fish", "Quinoa Tabbouleh", "Fresh Fruit"],
+          id: "levantine-feast",
+          name: "Levantine Feast",
+          description: "Middle Eastern cuisine with fresh ingredients",
+          items: ["Hummus & Pita", "Lamb Shawarma", "Tabbouleh", "Kunafa"],
           basePrice: 580
         }
       ]
@@ -703,7 +766,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
             </div>
           </div>
           
-          {/* Cuisine Selection */}
+          {/* Cuisine Selection - Organized by International Standards */}
           <div>
             <Label htmlFor="cuisineType">Cuisine Type</Label>
             <Select 
@@ -717,14 +780,57 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 <SelectValue placeholder="Select cuisine preference" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(cuisineTypes).map(([key, cuisine]) => (
-                  <SelectItem key={key} value={key}>
-                    <div className="flex items-center">
-                      <ChefHat className="h-4 w-4 mr-2" />
-                      {cuisine.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                {/* African Cuisine - Featured First */}
+                <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">🌍 African Cuisine</div>
+                <SelectItem value="south-african">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    South African
+                  </div>
+                </SelectItem>
+                
+                <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">🌍 Regional African</div>
+                <SelectItem value="east-african">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    East African (Ethiopian, Kenyan)
+                  </div>
+                </SelectItem>
+                <SelectItem value="west-african">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    West African (Nigerian, Ghanaian)
+                  </div>
+                </SelectItem>
+                
+                {/* International Cuisines */}
+                <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">🌍 European</div>
+                <SelectItem value="italian">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    Italian
+                  </div>
+                </SelectItem>
+                <SelectItem value="mediterranean">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    Mediterranean
+                  </div>
+                </SelectItem>
+                
+                <div className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-50">🌍 Asian</div>
+                <SelectItem value="asian">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    Asian Fusion
+                  </div>
+                </SelectItem>
+                <SelectItem value="indian">
+                  <div className="flex items-center">
+                    <ChefHat className="h-4 w-4 mr-2" />
+                    Indian
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -961,9 +1067,9 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     // Waitering Services
     if (currentService.category.includes('waitering')) {
       return (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="w-full">
               <Label htmlFor="eventType">Event Type</Label>
               <Select onValueChange={(value) => form.setValue("eventType" as any, value)}>
                 <SelectTrigger className="w-full">
@@ -979,7 +1085,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="numberOfPeople">Number of People</Label>
               <Input 
                 type="number"
@@ -989,8 +1095,8 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="w-full">
               <Label htmlFor="serviceType">Service Type</Label>
               <Select onValueChange={(value) => form.setValue("serviceType" as any, value)}>
                 <SelectTrigger className="w-full">
@@ -1004,7 +1110,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="w-full">
               <Label htmlFor="eventDuration">Duration (hours)</Label>
               <Input 
                 type="number"
@@ -1014,7 +1120,7 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
               />
             </div>
           </div>
-        </>
+        </div>
       );
     }
 
