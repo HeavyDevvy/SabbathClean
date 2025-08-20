@@ -77,8 +77,8 @@ export class LocationService {
       .filter(provider => provider !== null && provider.distance <= maxRadius)
       .sort((a, b) => {
         // Sort by a combination of distance (30%) and rating (70%)
-        const scoreA = (Number(a.rating) || 0) * 0.7 - (a.distance * 0.3);
-        const scoreB = (Number(b.rating) || 0) * 0.7 - (b.distance * 0.3);
+        const scoreA = (Number(a?.rating) || 0) * 0.7 - ((a?.distance || 0) * 0.3);
+        const scoreB = (Number(b?.rating) || 0) * 0.7 - ((b?.distance || 0) * 0.3);
         return scoreB - scoreA;
       });
 
@@ -133,7 +133,7 @@ export class LocationService {
         const nearbyProviders = await this.findNearbyProviders(
           customerLocation,
           job.serviceType,
-          job.maxRadius
+          job.maxRadius || 20
         );
 
         if (nearbyProviders.length > 0) {

@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { LocationService } from "./location-service";
 import { 
   insertUserSchema, 
   insertServiceProviderSchema, 
@@ -59,14 +60,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Service Provider routes
+  // Service Provider routes with location-based matching
   app.get("/api/providers", async (req, res) => {
     try {
       const serviceCategory = req.query.service as string;
+      const latitude = req.query.latitude ? parseFloat(req.query.latitude as string) : null;
+      const longitude = req.query.longitude ? parseFloat(req.query.longitude as string) : null;
+      const maxRadius = req.query.radius ? parseInt(req.query.radius as string) : 20;
+      
       let providers;
       
-      if (serviceCategory) {
+      // If location is provided, use location-based matching
+      if (latitude && longitude && serviceCategory) {
+        try {
+          const nearbyProviders = await LocationService.findNearbyProviders(
+            { latitude, longitude },
+            serviceCategory,
+            maxRadius
+          );
+          
+          // Return top 3 rated providers within radius
+          providers = nearbyProviders
+            .slice(0, 3)
+            .map(provider => provider ? ({
+              ...provider,
+              distance: `${provider.distance?.toFixed(1)}km away`,
+              isNearby: true
+            }) : null)
+            .filter(provider => provider !== null);
+            
+        } catch (locationError) {
+          console.error("Location service error:", locationError);
+          // Fallback to regular provider search
+          providers = await storage.getServiceProvidersByService(serviceCategory);
+          providers = providers.slice(0, 3); // Still limit to top 3
+        }
+      } else if (serviceCategory) {
         providers = await storage.getServiceProvidersByService(serviceCategory);
+        providers = providers.slice(0, 3); // Limit to top 3 rated
       } else {
         // Get all providers by getting all service categories
         const allProviders = await Promise.all([
@@ -77,10 +108,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           storage.getServiceProvidersByService("home-moving")
         ]);
         providers = allProviders.flat();
-        // Remove duplicates
-        providers = providers.filter((provider, index, self) => 
-          index === self.findIndex(p => p.id === provider.id)
-        );
+        // Remove duplicates and limit to top providers
+        providers = providers
+          .filter((provider, index, self) => 
+            index === self.findIndex(p => p.id === provider.id)
+          )
+          .sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0))
+          .slice(0, 3);
       }
       
       res.json(providers);
@@ -342,6 +376,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Payment method routes
+  app.get("/api/payment-methods/:userId", async (req, res) => {
+    try {
+      const paymentMethods = await storage.getPaymentMethodsByUser(req.params.userId);
+      res.json(paymentMethods);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/payment-methods", async (req, res) => {
+    try {
+      const paymentData = insertPaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.createPaymentMethod(paymentData);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Location-based provider search endpoint
+  app.post("/api/providers/nearby", async (req, res) => {
+    try {
+      const { latitude, longitude, serviceType, radius = 20 } = req.body;
+      
+      if (!latitude || !longitude || !serviceType) {
+        return res.status(400).json({ 
+          message: "Latitude, longitude, and serviceType are required" 
+        });
+      }
+      
+      const nearbyProviders = await LocationService.findNearbyProviders(
+        { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+        serviceType,
+        parseInt(radius)
+      );
+      
+      // Return top 3 providers with distance info
+      const topProviders = nearbyProviders.slice(0, 3).map(provider => ({
+        ...provider,
+        distanceText: `${provider.distance?.toFixed(1)}km away`,
+        isNearby: true
+      }));
+      
+      res.json(topProviders);
+    } catch (error: any) {
+      console.error("Nearby providers error:", error);
+      res.status(500).json({ message: "Error finding nearby providers" });
+    }
+  });
+
+  // Payment processing endpoint
+  app.post("/api/payments/process", async (req, res) => {
+    try {
+      const { 
+        bookingId, 
+        amount, 
+        cardNumber, 
+        expiryDate, 
+        cvv, 
+        cardholderName,
+        paymentMethod = "card"
+      } = req.body;
+      
+      // Basic validation
+      if (!bookingId || !amount || (paymentMethod === "card" && (!cardNumber || !expiryDate || !cvv))) {
+        return res.status(400).json({ message: "Missing required payment information" });
+      }
+      
+      // Simulate payment processing
+      const paymentResult = {
+        success: true,
+        transactionId: `txn_${Date.now()}`,
+        amount: parseFloat(amount),
+        bookingId,
+        paymentMethod,
+        timestamp: new Date().toISOString(),
+        maskedCard: paymentMethod === "card" ? `****-****-****-${cardNumber.slice(-4)}` : null
+      };
+      
+      res.json(paymentResult);
+      
+    } catch (error: any) {
+      res.status(500).json({ message: "Payment processing failed" });
     }
   });
 

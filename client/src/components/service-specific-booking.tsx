@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User, Star, ChefHat, ShoppingCart, Utensils, Plus, Minus } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Star, ChefHat, ShoppingCart, Utensils, Plus, Minus, CreditCard, Building, Banknote, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -103,6 +103,17 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   const [customMenuItems, setCustomMenuItems] = useState<string[]>([""]);
   const [ingredientOption, setIngredientOption] = useState<"chef-brings" | "customer-provides">("chef-brings");
   const [utensilsOption, setUtensilsOption] = useState<"chef-brings" | "customer-provides">("chef-brings");
+  const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [nearbyProviders, setNearbyProviders] = useState<ServiceProvider[]>([]);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
+    paymentMethod: "card"
+  });
   const { toast } = useToast();
 
   const { data: services } = useQuery<Service[]>({
@@ -114,10 +125,79 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
   const { data: providers } = useQuery<ServiceProvider[]>({
     queryKey: ["/api/providers"],
-    enabled: isOpen,
+    enabled: isOpen && !userLocation, // Only use fallback when no location
   });
 
+  // Get user location on component mount
+  useEffect(() => {
+    if (isOpen && !userLocation) {
+      setLocationLoading(true);
+      
+      const timeout = setTimeout(() => {
+        setLocationLoading(false);
+        toast({
+          title: "Location timeout",
+          description: "Using default providers instead",
+          variant: "destructive"
+        });
+      }, 10000); // 10 second timeout
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          clearTimeout(timeout);
+          setLocationLoading(false);
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          clearTimeout(timeout);
+          setLocationLoading(false);
+          console.error("Location error:", error);
+          toast({
+            title: "Location access denied",
+            description: "Using default providers",
+            variant: "destructive"
+          });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 8000,
+          maximumAge: 300000 // 5 minutes
+        }
+      );
+    }
+  }, [isOpen]);
+
   const currentService = services?.find(s => s.id === serviceId || s.category === serviceId);
+
+  // Fetch nearby providers when location is available
+  useEffect(() => {
+    if (userLocation && currentService && isOpen) {
+      const fetchNearbyProviders = async () => {
+        try {
+          const response = await apiRequest("POST", "/api/providers/nearby", {
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            serviceType: currentService.category,
+            radius: 20
+          });
+          const nearbyData = await response.json();
+          setNearbyProviders(nearbyData);
+        } catch (error) {
+          console.error("Error fetching nearby providers:", error);
+          toast({
+            title: "Provider search failed",
+            description: "Using default providers",
+            variant: "destructive"
+          });
+        }
+      };
+      
+      fetchNearbyProviders();
+    }
+  }, [userLocation, currentService, isOpen]);
   
   // Determine which schema to use based on service type
   const getFormSchema = () => {
@@ -156,22 +236,50 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
 
   const createBookingMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/bookings", data);
+      // First process payment
+      const paymentResponse = await apiRequest("POST", "/api/payments/process", {
+        bookingId: `booking_${Date.now()}`, // Temporary ID
+        amount: calculateTotalPrice() + 15, // Include platform fee
+        ...paymentDetails
+      });
+      
+      const paymentResult = await paymentResponse.json();
+      
+      if (!paymentResult.success) {
+        throw new Error("Payment failed");
+      }
+      
+      // Then create booking with payment info
+      const bookingData = {
+        ...data,
+        totalAmount: calculateTotalPrice() + 15,
+        paymentTransactionId: paymentResult.transactionId,
+        paymentMethod: paymentDetails.paymentMethod
+      };
+      
+      const response = await apiRequest("POST", "/api/bookings", bookingData);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Booking Created",
-        description: "Your service has been booked successfully!",
+        title: "Booking Confirmed",
+        description: "Payment successful! Your service has been booked.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/bookings"] });
       onClose();
       form.reset();
+      setPaymentDetails({
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        paymentMethod: "card"
+      });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Booking Failed",
-        description: "There was an error creating your booking. Please try again.",
+        description: error.message || "Payment or booking failed. Please try again.",
         variant: "destructive",
       });
     },
@@ -339,7 +447,15 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
     return filteredChefs;
   };
 
-  const relevantProviders = getRelevantChefs();
+  // Use nearby providers if available, otherwise fallback to regular providers
+  const getDisplayProviders = () => {
+    if (nearbyProviders.length > 0) {
+      return nearbyProviders;
+    }
+    return getRelevantChefs();
+  };
+
+  const relevantProviders = getDisplayProviders();
 
   // Calculate total price based on selections
   const calculateTotalPrice = () => {
@@ -1137,7 +1253,15 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                                 <span className="text-sm text-gray-500">({provider.totalReviews} reviews)</span>
                               </div>
                               <p className="text-sm text-gray-600 mt-1">{provider.bio}</p>
-                              <p className="text-sm font-medium text-primary mt-2">R{provider.hourlyRate}/hour</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <p className="text-sm font-medium text-primary">R{provider.hourlyRate}/hour</p>
+                                {provider.distanceText && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <MapPin className="h-3 w-3 mr-1" />
+                                    {provider.distanceText}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </CardContent>
@@ -1162,6 +1286,147 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </CardContent>
               </Card>
 
+              {/* Payment Section */}
+              {(selectedProvider || selectedMovingProvider) && (
+                <Card>
+                  <CardContent className="p-6">
+                    <h4 className="font-semibold text-lg mb-4">Payment Information</h4>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="cardNumber">Card Number</Label>
+                          <Input 
+                            placeholder="1234 5678 9012 3456"
+                            value={paymentDetails.cardNumber}
+                            onChange={(e) => setPaymentDetails(prev => ({
+                              ...prev, 
+                              cardNumber: e.target.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim()
+                            }))}
+                            maxLength={19}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cardholderName">Cardholder Name</Label>
+                          <Input 
+                            placeholder="John Doe"
+                            value={paymentDetails.cardholderName}
+                            onChange={(e) => setPaymentDetails(prev => ({...prev, cardholderName: e.target.value}))}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="expiryDate">Expiry Date</Label>
+                          <Input 
+                            placeholder="MM/YY"
+                            value={paymentDetails.expiryDate}
+                            onChange={(e) => {
+                              let value = e.target.value.replace(/\D/g, '');
+                              if (value.length >= 2) {
+                                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                              }
+                              setPaymentDetails(prev => ({...prev, expiryDate: value}));
+                            }}
+                            maxLength={5}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cvv">CVV</Label>
+                          <Input 
+                            placeholder="123"
+                            type="password"
+                            value={paymentDetails.cvv}
+                            onChange={(e) => setPaymentDetails(prev => ({
+                              ...prev, 
+                              cvv: e.target.value.replace(/\D/g, '').substring(0, 3)
+                            }))}
+                            maxLength={3}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Payment Method Options */}
+                      <div>
+                        <Label>Payment Method</Label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          <button 
+                            type="button"
+                            className={`p-3 border rounded-lg transition-all ${
+                              paymentDetails.paymentMethod === "card" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                            }`}
+                            onClick={() => setPaymentDetails(prev => ({...prev, paymentMethod: "card"}))}
+                          >
+                            <div className="text-center">
+                              <CreditCard className="h-6 w-6 mx-auto mb-1" />
+                              <span className="text-sm">Card</span>
+                            </div>
+                          </button>
+                          <button 
+                            type="button"
+                            className={`p-3 border rounded-lg transition-all ${
+                              paymentDetails.paymentMethod === "bank" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                            }`}
+                            onClick={() => setPaymentDetails(prev => ({...prev, paymentMethod: "bank"}))}
+                          >
+                            <div className="text-center">
+                              <Building className="h-6 w-6 mx-auto mb-1" />
+                              <span className="text-sm">Bank Transfer</span>
+                            </div>
+                          </button>
+                          <button 
+                            type="button"
+                            className={`p-3 border rounded-lg transition-all ${
+                              paymentDetails.paymentMethod === "cash" ? 'border-primary bg-primary/5' : 'border-gray-200'
+                            }`}
+                            onClick={() => setPaymentDetails(prev => ({...prev, paymentMethod: "cash"}))}
+                          >
+                            <div className="text-center">
+                              <Banknote className="h-6 w-6 mx-auto mb-1" />
+                              <span className="text-sm">Cash</span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Price Summary */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-blue-900 mb-2">Payment Summary</h5>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span>Service Total:</span>
+                            <span>R{calculateTotalPrice()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Platform Fee:</span>
+                            <span>R15</span>
+                          </div>
+                          <div className="border-t border-blue-300 mt-2 pt-2">
+                            <div className="flex justify-between font-semibold">
+                              <span>Total Amount:</span>
+                              <span>R{calculateTotalPrice() + 15}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Location Status */}
+              {locationLoading && (
+                <div className="flex items-center space-x-2 text-blue-600">
+                  <MapPin className="h-4 w-4 animate-pulse" />
+                  <span>Finding providers near you...</span>
+                </div>
+              )}
+              {nearbyProviders.length > 0 && (
+                <div className="flex items-center space-x-2 text-green-600">
+                  <MapPin className="h-4 w-4" />
+                  <span>Showing top 3 providers within 20km of your location</span>
+                </div>
+              )}
+
               {/* Submit Button */}
               <div className="flex justify-end space-x-4">
                 <Button type="button" variant="outline" onClick={onClose}>
@@ -1169,10 +1434,11 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider)}
+                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider) || 
+                    (paymentDetails.paymentMethod === "card" && (!paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv))}
                   className="min-w-[120px]"
                 >
-                  {createBookingMutation.isPending ? "Booking..." : "Book Service"}
+                  {createBookingMutation.isPending ? "Processing..." : `Pay R${calculateTotalPrice() + 15} & Book`}
                 </Button>
               </div>
             </form>
