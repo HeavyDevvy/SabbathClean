@@ -232,6 +232,7 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
             <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
           
+          {/* Optional location button - only shown if user wants it */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -247,7 +248,7 @@ export default function AddressInput({ value, onChange, placeholder = "Enter you
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Use my current location</p>
+              <p>Use my current location (optional)</p>
             </TooltipContent>
           </Tooltip>
         </div>
