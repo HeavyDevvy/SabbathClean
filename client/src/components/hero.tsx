@@ -22,7 +22,7 @@ export default function Hero({ onBookingClick }: HeroProps) {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button 
-                onClick={() => setLocation('/booking')}
+                onClick={onBookingClick}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                 data-testid="button-book-service-now"

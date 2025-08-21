@@ -35,12 +35,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SweepSouthStyleHeader onBookingClick={() => openBooking()} />
+      <SweepSouthStyleHeader onBookingClick={() => openBooking('all-services')} />
       <main>
-        <Hero onBookingClick={() => openBooking()} />
+        <Hero onBookingClick={() => openBooking('all-services')} />
         <SweepSouthStyleServices onServiceSelect={openBooking} />
         <HowItWorksSection />
-        <BerryStarsSection />
+        <BerryStarsSection onBookService={openBooking} />
         <TrustSafetySection />
       </main>
       <Footer />

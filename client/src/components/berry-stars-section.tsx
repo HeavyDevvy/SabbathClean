@@ -1,7 +1,11 @@
 import { Star, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function BerryStarsSection() {
+interface BerryStarsSectionProps {
+  onBookService?: (service?: string) => void;
+}
+
+export default function BerryStarsSection({ onBookService }: BerryStarsSectionProps = {}) {
   const berryStars = [
     {
       id: 1,
@@ -169,7 +173,10 @@ export default function BerryStarsSection() {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="bg-white text-purple-600 font-bold px-8 py-3 rounded-xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <button 
+                  onClick={() => onBookService?.('all-services')}
+                  className="bg-white text-purple-600 font-bold px-8 py-3 rounded-xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
                   Book a Service
                 </button>
                 <button className="border-2 border-white text-white font-bold px-8 py-3 rounded-xl hover:bg-white hover:text-purple-600 transition-all duration-300 transform hover:scale-105">
