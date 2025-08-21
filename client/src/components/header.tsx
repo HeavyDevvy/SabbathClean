@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { User, Plus } from "lucide-react";
+import { User, Plus, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import berryLogo from "@assets/PHOTO-2025-07-11-15-55-28_1755621947509.jpg";
 
@@ -49,11 +49,14 @@ export default function Header({ onBookingClick }: HeaderProps) {
             </Link>
             <Button 
               onClick={onBookingClick}
-              className="bg-primary text-white hover:bg-blue-700"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
               data-testid="button-book-now"
             >
-              <span className="hidden sm:inline">Book Now</span>
-              <Plus className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline flex items-center">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Book Now
+              </span>
+              <Sparkles className="h-4 w-4 sm:hidden" />
             </Button>
           </div>
         </div>

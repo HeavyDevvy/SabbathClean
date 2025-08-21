@@ -13,7 +13,7 @@ import MobileNavigation from "@/components/mobile-navigation";
 import RecommendationEngine from "@/components/recommendation-engine";
 import OnboardingTutorial, { useOnboarding } from "@/components/onboarding-tutorial";
 import { useState } from "react";
-import { Plus, Calendar, Users, Sparkles, Play } from "lucide-react";
+import { Plus, Calendar, Users, Sparkles, Play, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -76,36 +76,36 @@ export default function Home() {
         {!hasCompletedTutorial && (
           <Button
             onClick={startTutorial}
-            className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 bg-purple-600 hover:bg-purple-700"
+            className="w-12 h-12 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 border-2 border-white"
             data-testid="floating-tutorial-button"
             title="Start Tutorial"
           >
-            <Play className="h-5 w-5" />
+            <Play className="h-4 w-4 text-white" />
           </Button>
         )}
         <Button
           onClick={() => setShowRecommendations(!showRecommendations)}
-          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 bg-yellow-600 hover:bg-yellow-700"
+          className="w-12 h-12 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-2 border-white"
           data-testid="floating-recommendations-button"
           title="Smart Recommendations"
         >
-          <Sparkles className="h-5 w-5" />
+          <Zap className="h-4 w-4 text-white" />
         </Button>
         <Button
           onClick={() => setIsProviderOnboardingOpen(true)}
-          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 bg-green-600 hover:bg-green-700"
+          className="w-12 h-12 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 border-2 border-white"
           data-testid="floating-provider-button"
           title="Become a Provider"
         >
-          <Users className="h-5 w-5" />
+          <Users className="h-4 w-4 text-white" />
         </Button>
         <Button
           onClick={() => openBooking()}
-          className="w-14 h-14 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
+          className="w-14 h-14 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all duration-300 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-2 border-white"
           data-testid="floating-book-button"
           title="Book Service"
         >
-          <Calendar className="h-5 w-5" />
+          <Calendar className="h-5 w-5 text-white" />
         </Button>
       </div>
 

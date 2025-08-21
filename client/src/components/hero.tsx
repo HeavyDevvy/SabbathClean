@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Play, Shield, UserCheck, Clock } from "lucide-react";
+import { Calendar, Play, Shield, UserCheck, Clock, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface HeroProps {
@@ -25,16 +25,16 @@ export default function Hero({ onBookingClick }: HeroProps) {
               <Button 
                 onClick={() => setLocation('/booking')}
                 size="lg"
-                className="bg-primary text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                 data-testid="button-book-service-now"
               >
-                <Calendar className="mr-2 h-5 w-5" />
+                <Sparkles className="mr-2 h-5 w-5" />
                 Book Service Now
               </Button>
               <Button 
                 variant="outline"
                 size="lg" 
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-200"
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-200 hover:scale-105 transform"
                 onClick={() => {
                   const demoSection = document.getElementById('demo-section');
                   demoSection?.scrollIntoView({ behavior: 'smooth' });
@@ -47,15 +47,21 @@ export default function Hero({ onBookingClick }: HeroProps) {
             </div>
             <div className="mt-8 flex items-center space-x-6 text-sm text-neutral">
               <div className="flex items-center">
-                <Shield className="text-secondary mr-2 h-4 w-4" />
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-2">
+                  <Shield className="text-green-600 h-4 w-4" />
+                </div>
                 Fully Insured
               </div>
               <div className="flex items-center">
-                <UserCheck className="text-secondary mr-2 h-4 w-4" />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                  <UserCheck className="text-blue-600 h-4 w-4" />
+                </div>
                 Background Verified
               </div>
               <div className="flex items-center">
-                <Clock className="text-secondary mr-2 h-4 w-4" />
+                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                  <Clock className="text-purple-600 h-4 w-4" />
+                </div>
                 Same Day Booking
               </div>
             </div>

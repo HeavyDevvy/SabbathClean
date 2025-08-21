@@ -17,17 +17,17 @@ export default function Footer() {
               Premium domestic services with verified professionals. Your home, our priority.
             </p>
             <div className="mt-6 flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200" data-testid="link-facebook">
-                <Facebook className="h-5 w-5" />
+              <a href="#" className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" data-testid="link-facebook">
+                <Facebook className="h-5 w-5 text-white" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200" data-testid="link-twitter">
-                <Twitter className="h-5 w-5" />
+              <a href="#" className="w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" data-testid="link-twitter">
+                <Twitter className="h-5 w-5 text-white" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200" data-testid="link-instagram">
-                <Instagram className="h-5 w-5" />
+              <a href="#" className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" data-testid="link-instagram">
+                <Instagram className="h-5 w-5 text-white" />
               </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors duration-200" data-testid="link-linkedin">
-                <Linkedin className="h-5 w-5" />
+              <a href="#" className="w-10 h-10 bg-blue-800 hover:bg-blue-900 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110" data-testid="link-linkedin">
+                <Linkedin className="h-5 w-5 text-white" />
               </a>
             </div>
           </div>

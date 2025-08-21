@@ -1,4 +1,4 @@
-import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star, Calendar } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star, Calendar, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ServiceDetailModal from "@/components/service-detail-modal";
 import { useState } from "react";

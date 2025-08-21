@@ -128,8 +128,8 @@ export default function MobileAppBanner() {
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-lg shadow-lg border border-blue-500">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center">
-            <Smartphone className="h-6 w-6 mr-2" />
-            <span className="font-semibold text-sm">Get the Berry Events App</span>
+            <Smartphone className="h-5 w-5 mr-2" />
+            <span className="font-medium text-sm">Install App</span>
           </div>
           <button
             onClick={handleDismiss}
@@ -141,17 +141,17 @@ export default function MobileAppBanner() {
         </div>
         
         <p className="text-white/90 text-xs mb-3">
-          Install our app for faster booking, offline access, and instant notifications about your services.
+          Get faster booking and instant notifications about your services.
         </p>
 
         <div className="flex items-center space-x-2">
           <Button
             onClick={handleInstallClick}
             size="sm"
-            className="bg-white text-blue-600 hover:bg-gray-100 flex-1"
+            className="bg-white text-blue-600 hover:bg-gray-100 flex-1 text-xs"
             data-testid="button-install-app"
           >
-            <Download className="h-4 w-4 mr-1" />
+            <Download className="h-3 w-3 mr-1" />
             Install
           </Button>
           
@@ -160,19 +160,13 @@ export default function MobileAppBanner() {
               onClick={requestNotificationPermission}
               size="sm"
               variant="outline"
-              className="bg-transparent border-white text-white hover:bg-white/10"
+              className="bg-transparent border-white text-white hover:bg-white/10 text-xs"
               data-testid="button-enable-notifications"
             >
-              <Bell className="h-4 w-4 mr-1" />
+              <Bell className="h-3 w-3 mr-1" />
               Notify
             </Button>
           )}
-        </div>
-
-        <div className="flex items-center justify-center mt-3 text-xs text-white/70">
-          <span className="flex items-center">
-            📱 Works offline • 🔔 Push notifications • 🚀 Fast loading
-          </span>
         </div>
       </div>
     </div>

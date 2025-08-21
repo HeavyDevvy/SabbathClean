@@ -1,11 +1,11 @@
-import { CheckCircle, Shield, Trophy, Star } from "lucide-react";
+import { CheckCircle, Shield, Trophy, Star, Sparkles, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function CompetitiveAdvantage() {
   const advantages = [
     {
       title: "Better Pricing",
-      icon: <Trophy className="h-8 w-8 text-yellow-500" />,
+      icon: <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"><Trophy className="h-6 w-6 text-white" /></div>,
       description: "Up to 40% more competitive than industry leaders",
       details: [
         "House cleaning: R280/hr vs SweepSouth R400/day average",
@@ -13,12 +13,12 @@ export default function CompetitiveAdvantage() {
         "Chef services: R550/event vs R800+ market rates",
         "All services include premium features at base price"
       ],
-      bgColor: "bg-yellow-50",
+      bgColor: "bg-gradient-to-br from-yellow-50 to-orange-50",
       borderColor: "border-yellow-200"
     },
     {
       title: "Secure Payment Flow",
-      icon: <Shield className="h-8 w-8 text-blue-500" />,
+      icon: <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center"><Shield className="h-6 w-6 text-white" /></div>,
       description: "All payments processed through Berry Events Bank first",
       details: [
         "Customer protection with escrow-style payments",
@@ -26,12 +26,12 @@ export default function CompetitiveAdvantage() {
         "15% platform fee (competitive with industry)",
         "2-3 business day payment processing to providers"
       ],
-      bgColor: "bg-blue-50",
+      bgColor: "bg-gradient-to-br from-blue-50 to-purple-50",
       borderColor: "border-blue-200"
     },
     {
       title: "Premium Service Standards",
-      icon: <Star className="h-8 w-8 text-purple-500" />,
+      icon: <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center"><Sparkles className="h-6 w-6 text-white" /></div>,
       description: "Higher quality standards with comprehensive verification",
       details: [
         "4-step provider onboarding with document verification",
@@ -39,12 +39,12 @@ export default function CompetitiveAdvantage() {
         "Background checks and insurance verification",
         "Real-time customer feedback and rating system"
       ],
-      bgColor: "bg-purple-50",
+      bgColor: "bg-gradient-to-br from-purple-50 to-pink-50",
       borderColor: "border-purple-200"
     },
     {
       title: "South African Focus",
-      icon: <CheckCircle className="h-8 w-8 text-green-500" />,
+      icon: <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center"><Zap className="h-6 w-6 text-white" /></div>,
       description: "Specialized for local market with authentic African cuisine",
       details: [
         "African cuisine specialists with authentic recipes",
@@ -52,7 +52,7 @@ export default function CompetitiveAdvantage() {
         "Understanding of South African service expectations",
         "Community-focused provider network"
       ],
-      bgColor: "bg-green-50",
+      bgColor: "bg-gradient-to-br from-green-50 to-teal-50",
       borderColor: "border-green-200"
     }
   ];
