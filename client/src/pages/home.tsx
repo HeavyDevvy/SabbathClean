@@ -1,11 +1,9 @@
-import Header from "@/components/header";
+import SweepSouthStyleHeader from "@/components/sweepsouth-style-header";
 import Hero from "@/components/hero";
-import Services from "@/components/services";
-import ProvenirStyleDemo from "@/components/provenir-style-demo";
-import FeaturedProviders from "@/components/featured-providers";
-import Testimonials from "@/components/testimonials";
-import DynamicPricing from "@/components/dynamic-pricing";
-import CompetitiveAdvantage from "@/components/competitive-advantage";
+import SweepSouthStyleServices from "@/components/sweepsouth-style-services";
+import HowItWorksSection from "@/components/how-it-works-section";
+import TrustSafetySection from "@/components/trust-safety-section";
+import BerryStarsSection from "@/components/berry-stars-section";
 import Footer from "@/components/footer";
 import EnhancedBooking from "@/pages/enhanced-booking";
 import ProviderOnboarding from "@/components/provider-onboarding";
@@ -24,17 +22,13 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onBookingClick={() => openBooking()} />
+      <SweepSouthStyleHeader onBookingClick={() => openBooking()} />
       <main>
         <Hero onBookingClick={() => openBooking()} />
-        <Services onServiceSelect={openBooking} />
-        <section id="demo-section">
-          <ProvenirStyleDemo />
-        </section>
-        <FeaturedProviders />
-        <Testimonials />
-        <DynamicPricing onBookingClick={() => openBooking()} />
-        <CompetitiveAdvantage />
+        <SweepSouthStyleServices onServiceSelect={openBooking} />
+        <HowItWorksSection />
+        <BerryStarsSection />
+        <TrustSafetySection />
       </main>
       <Footer />
 
@@ -46,10 +40,12 @@ export default function Home() {
         />
       )}
       
-      <ProviderOnboarding 
-        isOpen={isProviderOnboardingOpen}
-        onClose={() => setIsProviderOnboardingOpen(false)}
-      />
+      {isProviderOnboardingOpen && (
+        <ProviderOnboarding 
+          isOpen={isProviderOnboardingOpen}
+          onClose={() => setIsProviderOnboardingOpen(false)}
+        />
+      )}
     </div>
   );
 }

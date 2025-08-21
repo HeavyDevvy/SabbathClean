@@ -15,11 +15,10 @@ export default function Hero({ onBookingClick }: HeroProps) {
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
           <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
             <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl lg:text-6xl">
-              Premium Home Services
-              <span className="text-primary block">In Just 2 Minutes</span>
+              All the help your home needs.
             </h1>
             <p className="mt-6 text-xl text-neutral leading-8">
-              Book trusted, verified domestic services instantly. Our background-checked professionals deliver exceptional cleaning, maintenance, and care for your home.
+              Whether you need a quick clean, or full-time help, Berry Events connects you with reliable professionals you can trust.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Button 
