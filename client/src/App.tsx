@@ -10,6 +10,7 @@ import Providers from "@/pages/providers";
 import Profile from "@/pages/profile";
 import ProviderOnboarding from "@/pages/provider-onboarding";
 import ProviderTraining from "@/pages/provider-training";
+import ProviderDashboard from "@/pages/provider-dashboard";
 import NotFound from "@/pages/not-found";
 import Offline from "@/pages/offline";
 import Bookings from "@/pages/bookings";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/providers" component={Providers} />
       <Route path="/provider-onboarding" component={ProviderOnboarding} />
       <Route path="/provider-training" component={ProviderTraining} />
+      <Route path="/provider-dashboard" component={ProviderDashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/notifications" component={NotificationSettings} />
       <Route path="/offline" component={Offline} />

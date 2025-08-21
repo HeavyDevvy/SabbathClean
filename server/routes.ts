@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { registerTrainingRoutes } from "./training-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -792,6 +793,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update notification preferences" });
     }
   });
+
+  // Register training center routes
+  registerTrainingRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
