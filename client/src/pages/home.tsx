@@ -5,6 +5,7 @@ import { AnimatedBookingDemo } from "@/components/animated-booking-demo";
 import FeaturedProviders from "@/components/featured-providers";
 import Testimonials from "@/components/testimonials";
 import DynamicPricing from "@/components/dynamic-pricing";
+import CompetitiveAdvantage from "@/components/competitive-advantage";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
 import ProviderOnboarding from "@/components/provider-onboarding";
@@ -36,6 +37,7 @@ export default function Home() {
         <FeaturedProviders />
         <Testimonials />
         <DynamicPricing onBookingClick={() => openBooking()} />
+        <CompetitiveAdvantage />
       </main>
       <Footer />
       

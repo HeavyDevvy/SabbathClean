@@ -15,11 +15,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R280",
       period: "/hour",
       description: "Professional home cleaning with eco-friendly products",
+      competitorPrice: "R75/hr",
+      competitorNote: "SweepSouth average",
+      valueProposition: "Premium service with guaranteed quality",
       features: [
         "Deep cleaning included",
-        "Bring own supplies",
+        "Professional supplies provided",
         "Flexible scheduling",
-        "Satisfaction guarantee",
+        "100% satisfaction guarantee",
       ],
       color: "border-blue-500",
       bgColor: "bg-blue-50",
@@ -29,11 +32,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R550",
       period: "/event",
       description: "Personal chef services and event catering",
+      competitorPrice: "R800+",
+      competitorNote: "Market average",
+      valueProposition: "Authentic African cuisine specialists",
       features: [
-        "Menu customization",
+        "African cuisine mastery",
+        "Premium ingredients sourced",
         "Professional presentation",
-        "Quality ingredients", 
-        "Event coordination",
+        "Complete event coordination",
       ],
       color: "border-orange-500",
       bgColor: "bg-orange-50",
@@ -43,11 +49,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R180",
       period: "/hour",
       description: "Professional waitstaff for your events",
+      competitorPrice: "R200+",
+      competitorNote: "Industry standard",
+      valueProposition: "Event specialists with bar training",
       features: [
-        "Event-based pricing",
-        "Professional service",
-        "Bar service available",
-        "Setup & breakdown",
+        "Event-specific training",
+        "Bar service certified",
+        "Setup & breakdown included",
+        "Professional presentation",
       ],
       color: "border-green-500",
       bgColor: "bg-green-50",
@@ -57,11 +66,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R380",
       period: "/hour",
       description: "Licensed plumbers for all your needs",
+      competitorPrice: "R450+",
+      competitorNote: "Competitor rates",
+      valueProposition: "Licensed with parts warranty",
       features: [
-        "Emergency available",
-        "Licensed professionals",
-        "Quality guaranteed",
-        "Parts warranty",
+        "24/7 emergency service",
+        "Licensed professionals only",
+        "Quality parts warranty",
+        "Upfront pricing guarantee",
       ],
       color: "border-blue-600",
       bgColor: "bg-blue-50",
@@ -71,11 +83,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R320",
       period: "/hour",
       description: "Complete garden maintenance and landscaping",
+      competitorPrice: "R400+",
+      competitorNote: "Garden services",
+      valueProposition: "Eco-friendly with plant expertise",
       features: [
-        "Seasonal care",
-        "Plant expertise",
-        "Equipment included",
-        "Eco-friendly methods",
+        "Seasonal care planning",
+        "Plant health specialists",
+        "Professional equipment",
+        "Eco-friendly practices",
       ],
       color: "border-emerald-500",
       bgColor: "bg-emerald-50",
@@ -85,11 +100,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
       price: "R420",
       period: "/hour",
       description: "Safe and reliable electrical repairs",
+      competitorPrice: "R500+",
+      competitorNote: "Electrical contractors",
+      valueProposition: "COC certified with safety guarantee",
       features: [
-        "Safety certified",
-        "Code compliance",
-        "Emergency service",
-        "Quality materials",
+        "COC compliance certified",
+        "Safety inspection included",
+        "Emergency call-outs",
+        "Quality materials only",
       ],
       color: "border-yellow-500",
       bgColor: "bg-yellow-50",
@@ -133,15 +151,36 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
         {/* Dynamic service pricing card */}
         <div className="mt-8 flex justify-center">
           <div 
-            className={`max-w-md w-full border-2 ${currentService.color} rounded-2xl p-8 ${currentService.bgColor} transition-all duration-500 transform`}
+            className={`max-w-lg w-full border-2 ${currentService.color} rounded-2xl p-8 ${currentService.bgColor} transition-all duration-500 transform relative overflow-hidden`}
             data-testid={`card-pricing-${currentService.name.toLowerCase().replace(/\s+/g, '-')}`}
           >
+            {/* Competitive advantage badge */}
+            <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+              Better Value
+            </div>
+
             <div className="text-center">
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">{currentService.name}</h3>
-              <div className="text-4xl font-bold text-primary mb-2">
-                {currentService.price}
-                <span className="text-lg text-neutral">{currentService.period}</span>
+              
+              {/* Pricing comparison */}
+              <div className="mb-4">
+                <div className="text-4xl font-bold text-primary mb-1">
+                  {currentService.price}
+                  <span className="text-lg text-neutral">{currentService.period}</span>
+                </div>
+                
+                {currentService.competitorPrice && (
+                  <div className="text-sm text-gray-500 mb-2">
+                    <span className="line-through">{currentService.competitorPrice}</span>
+                    <span className="ml-2">({currentService.competitorNote})</span>
+                  </div>
+                )}
+                
+                <p className="text-sm font-medium text-green-600 mb-4">
+                  {currentService.valueProposition}
+                </p>
               </div>
+              
               <p className="text-neutral mb-6">{currentService.description}</p>
               
               <ul className="space-y-3 mb-8 text-left">
@@ -152,6 +191,14 @@ export default function DynamicPricing({ onBookingClick }: DynamicPricingProps) 
                   </li>
                 ))}
               </ul>
+              
+              {/* Payment security notice */}
+              <div className="bg-blue-50 p-3 rounded-lg mb-6 text-sm">
+                <div className="flex items-center justify-center text-blue-800">
+                  <span className="mr-2">🛡️</span>
+                  Secure payments via Berry Events Bank
+                </div>
+              </div>
               
               <Button 
                 onClick={onBookingClick}
