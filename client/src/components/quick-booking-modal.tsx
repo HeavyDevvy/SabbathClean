@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface QuickBookingModalProps {
   selectedService: string;
+  selectedOption?: string;
   onClose: () => void;
 }
 
-export default function QuickBookingModal({ selectedService, onClose }: QuickBookingModalProps) {
+export default function QuickBookingModal({ selectedService, selectedOption, onClose }: QuickBookingModalProps) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
