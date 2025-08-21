@@ -518,6 +518,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Push notification subscription routes
+  app.post("/api/push-subscriptions", async (req, res) => {
+    try {
+      const subscription = req.body;
+      
+      // In production, store subscription in database
+      // For now, just acknowledge the subscription
+      console.log('Push subscription received:', subscription);
+      
+      res.status(201).json({ 
+        message: "Push subscription registered successfully",
+        subscriptionId: Date.now() // Mock ID
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to register push subscription" });
+    }
+  });
+
+  app.delete("/api/push-subscriptions", async (req, res) => {
+    try {
+      const subscription = req.body;
+      
+      // In production, remove subscription from database
+      console.log('Push subscription removed:', subscription);
+      
+      res.json({ message: "Push subscription removed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to remove push subscription" });
+    }
+  });
+
+  // Test notification endpoint
+  app.post("/api/notifications/test", async (req, res) => {
+    try {
+      const { subscription } = req.body;
+      
+      // In production, you would use web-push library to send actual push notifications
+      // For now, just simulate sending a notification
+      console.log('Test notification requested for subscription:', subscription?.endpoint);
+      
+      res.json({ 
+        message: "Test notification sent",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // Notification preferences routes
+  app.get("/api/users/:userId/notification-preferences", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // In production, get from database
+      const defaultPreferences = {
+        bookingConfirmations: true,
+        providerUpdates: true,
+        paymentAlerts: true,
+        reviewReminders: true,
+        promotions: false,
+        maintenanceUpdates: false
+      };
+      
+      res.json(defaultPreferences);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get notification preferences" });
+    }
+  });
+
+  app.put("/api/users/:userId/notification-preferences", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const preferences = req.body;
+      
+      // In production, save to database
+      console.log(`Notification preferences updated for user ${userId}:`, preferences);
+      
+      res.json({ 
+        message: "Notification preferences updated successfully",
+        preferences 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

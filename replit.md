@@ -4,6 +4,15 @@ Berry Events - All your Home Services In One is a comprehensive domestic service
 
 ## Recent Changes (August 2025)
 
+✓ **Mobile App Companion with PWA Technology**: Complete Progressive Web App implementation (August 2025):
+  - Full PWA manifest with service worker for offline functionality and native app features
+  - Mobile app installation banner with install prompts and app shortcuts
+  - Push notifications system with usePushNotifications hook and notification settings
+  - Mobile-optimized navigation with bottom tabs and slide-out menu
+  - Offline page with cached content access and background sync for bookings
+  - Enhanced SEO meta tags and social media sharing optimization
+  - Backend API support for push subscriptions and notification preferences
+
 ✓ **Competitive Pricing Analysis & Implementation**: Comprehensive market positioning system:
   - Researched SweepSouth and competitors: R75/hour average vs Berry Events R280/hour premium positioning
   - Dynamic pricing component shows competitor comparisons for all 6 services

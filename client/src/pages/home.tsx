@@ -9,6 +9,7 @@ import CompetitiveAdvantage from "@/components/competitive-advantage";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
 import ProviderOnboarding from "@/components/provider-onboarding";
+import MobileNavigation from "@/components/mobile-navigation";
 import { useState } from "react";
 import { Plus, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <MobileNavigation />
       <Header onBookingClick={() => openBooking()} />
       <main>
         <Hero onBookingClick={() => openBooking()} />

@@ -1,0 +1,7 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#3B82F6"/>
+  <path d="M96 48C82.7452 48 72 58.7452 72 72V84C72 88.4183 75.5817 92 80 92H112C116.418 92 120 88.4183 120 84V72C120 58.7452 109.255 48 96 48Z" fill="white"/>
+  <path d="M64 108C64 101.373 69.3726 96 76 96H116C122.627 96 128 101.373 128 108V132C128 138.627 122.627 144 116 144H76C69.3726 144 64 138.627 64 132V108Z" fill="white"/>
+  <circle cx="96" cy="120" r="8" fill="#3B82F6"/>
+  <text x="96" y="170" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Berry Events</text>
+</svg>
