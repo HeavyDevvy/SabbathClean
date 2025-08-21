@@ -21,6 +21,7 @@ import {
   Shuffle
 } from "lucide-react";
 import { motion } from "framer-motion";
+import ServiceDetailModal from "@/components/service-detail-modal";
 
 interface RecommendationEngineProps {
   userId?: string;
@@ -28,6 +29,8 @@ interface RecommendationEngineProps {
   onViewProvider?: (providerId: string) => void;
   showHeader?: boolean;
 }
+
+
 
 export default function RecommendationEngine({ 
   userId = "demo-user", 
@@ -37,6 +40,8 @@ export default function RecommendationEngine({
 }: RecommendationEngineProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showPreferences, setShowPreferences] = useState(false);
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
 
   const { 
     recommendations, 
@@ -69,7 +74,25 @@ export default function RecommendationEngine({
 
   const handleRecommendationClick = (recommendation: any) => {
     trackInteraction('view', recommendation.id);
-    onBookService?.(recommendation.id, recommendation.provider.id);
+    // Extract service ID from service name for modal
+    const serviceMap: Record<string, string> = {
+      'Deep House Cleaning': 'house-cleaning',
+      'Traditional African Catering': 'chef-catering',
+      'Garden Maintenance': 'garden-care',
+      'Plumbing Service': 'plumbing',
+      'Electrical Work': 'electrical',
+      'Waitering Service': 'waitering'
+    };
+    
+    const serviceId = serviceMap[recommendation.serviceName] || 'house-cleaning';
+    setSelectedServiceId(serviceId);
+    setShowServiceModal(true);
+  };
+
+  const handleServiceSelection = (serviceId: string, optionId: string, addOns?: string[]) => {
+    // Process the service selection and continue to booking
+    onBookService?.(serviceId, 'recommended-provider');
+    setShowServiceModal(false);
   };
 
   const handleFavorite = (recommendationId: string) => {
@@ -334,6 +357,14 @@ export default function RecommendationEngine({
           </p>
         </CardContent>
       </Card>
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        isOpen={showServiceModal}
+        onClose={() => setShowServiceModal(false)}
+        serviceId={selectedServiceId}
+        onSelectService={handleServiceSelection}
+      />
     </div>
   );
 }

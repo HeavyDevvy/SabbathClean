@@ -1,10 +1,26 @@
-import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ServiceDetailModal from "@/components/service-detail-modal";
+import { useState } from "react";
 
 interface ServicesProps {
   onServiceSelect: (service: string) => void;
 }
 
 export default function Services({ onServiceSelect }: ServicesProps) {
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+
+  const handleCalendarClick = (serviceId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setSelectedServiceId(serviceId);
+    setShowServiceModal(true);
+  };
+
+  const handleServiceSelection = (serviceId: string, optionId: string, addOns?: string[]) => {
+    onServiceSelect(serviceId);
+    setShowServiceModal(false);
+  };
   const services = [
     {
       id: "house-cleaning",
@@ -58,7 +74,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       iconBg: "bg-green-600",
     },
     {
-      id: "gardening",
+      id: "garden-care",
       name: "Garden Care",
       category: "Outdoor Services",
       description: "Lawn maintenance, pruning, weeding, planting, irrigation setup, landscape design consultation", 
@@ -124,22 +140,41 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                     </div>
                   </div>
                   
-                  {/* Quick book button */}
-                  <button 
-                    className="w-full bg-white/90 hover:bg-white text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 group-hover:shadow-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onServiceSelect(service.id);
-                    }}
-                  >
-                    Book Now
-                  </button>
+                  {/* Enhanced booking buttons */}
+                  <div className="flex gap-2">
+                    <button 
+                      className="flex-1 bg-white/90 hover:bg-white text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 group-hover:shadow-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onServiceSelect(service.id);
+                      }}
+                    >
+                      Quick Book
+                    </button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-white/90 hover:bg-white border-primary/20"
+                      onClick={(e) => handleCalendarClick(service.id, e)}
+                      title="View Service Details & Options"
+                    >
+                      <Calendar className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        isOpen={showServiceModal}
+        onClose={() => setShowServiceModal(false)}
+        serviceId={selectedServiceId}
+        onSelectService={handleServiceSelection}
+      />
     </section>
   );
 }
