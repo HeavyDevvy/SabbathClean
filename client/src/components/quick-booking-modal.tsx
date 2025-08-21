@@ -35,14 +35,33 @@ export default function QuickBookingModal({ selectedService, selectedOption, onC
     "garden-care": "Garden Care"
   };
 
-  const servicePricing: { [key: string]: string } = {
-    "house-cleaning": "R280/hour",
-    "plumbing": "R380/hour",
-    "electrical": "R420/hour",
-    "chef-catering": "R550/event",
-    "waitering": "R220/hour",
-    "garden-care": "R350/hour"
+  const getServicePricing = (serviceId: string, duration: string) => {
+    const basePrices: { [key: string]: number } = {
+      "house-cleaning": 280,
+      "plumbing": 380,
+      "electrical": 420,
+      "chef-catering": 550,
+      "waitering": 220,
+      "garden-care": 350
+    };
+
+    const basePrice = basePrices[serviceId] || 0;
+    const hours = parseInt(duration) || 1;
+
+    // Progressive pricing tiers based on hours
+    let finalPrice = basePrice;
+    if (hours >= 4) finalPrice = Math.round(basePrice * 1.25); // 25% increase for 4+ hours
+    else if (hours >= 2) finalPrice = Math.round(basePrice * 1.1); // 10% increase for 2+ hours
+
+    return {
+      basePrice: basePrice,
+      finalPrice: finalPrice,
+      hours: hours,
+      savings: hours >= 2 ? Math.round((basePrice * hours) - (finalPrice * hours)) : 0
+    };
   };
+
+  const currentPricing = formData.duration ? getServicePricing(selectedService, formData.duration) : null;
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -172,10 +191,31 @@ export default function QuickBookingModal({ selectedService, selectedOption, onC
                     <div>
                       <p className="font-semibold text-gray-900">{serviceNames[selectedService]}</p>
                       <p className="text-sm text-gray-600">Professional service at your location</p>
+                      {selectedOption && (
+                        <p className="text-sm text-blue-600 mt-1">Selected: {selectedOption}</p>
+                      )}
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-blue-600 text-lg">{servicePricing[selectedService]}</p>
-                      <p className="text-xs text-gray-500">Transparent pricing</p>
+                      {currentPricing ? (
+                        <div>
+                          <p className="font-bold text-blue-600 text-lg">
+                            R{currentPricing.finalPrice}/hour
+                          </p>
+                          {currentPricing.hours >= 2 && (
+                            <p className="text-xs text-green-600">
+                              {currentPricing.hours >= 4 ? "Extended service pricing" : "Multi-hour rate"}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">+ platform & payment fees</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="font-bold text-blue-600 text-lg">
+                            From R{getServicePricing(selectedService, "1").basePrice}/hour
+                          </p>
+                          <p className="text-xs text-gray-500">Rate varies by duration</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -219,11 +259,12 @@ export default function QuickBookingModal({ selectedService, selectedOption, onC
                         <SelectValue placeholder="Select duration" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 hour</SelectItem>
-                        <SelectItem value="2">2 hours</SelectItem>
-                        <SelectItem value="3">3 hours</SelectItem>
-                        <SelectItem value="4">4 hours</SelectItem>
-                        <SelectItem value="full-day">Full day</SelectItem>
+                        <SelectItem value="1">1 hour - Base rate</SelectItem>
+                        <SelectItem value="2">2 hours - Multi-hour rate (+10%)</SelectItem>
+                        <SelectItem value="3">3 hours - Multi-hour rate (+10%)</SelectItem>
+                        <SelectItem value="4">4 hours - Extended rate (+25%)</SelectItem>
+                        <SelectItem value="6">6 hours - Extended rate (+25%)</SelectItem>
+                        <SelectItem value="8">8 hours (Full day) - Extended rate (+25%)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
