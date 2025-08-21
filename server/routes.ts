@@ -567,6 +567,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recommendation Engine API routes
+  app.get("/api/recommendations/preferences/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      
+      // Mock user preferences - in production, get from database
+      const mockPreferences = {
+        preferredServices: ["house-cleaning", "chef-catering"],
+        budgetRange: { min: 200, max: 1000 },
+        locationRadius: 15,
+        preferredTimes: ["morning", "afternoon"],
+        serviceFrequency: {
+          "house-cleaning": "weekly",
+          "chef-catering": "monthly"
+        },
+        providerPreferences: {
+          minRating: 4.5,
+          experienceLevel: "experienced",
+          language: ["english", "afrikaans"]
+        },
+        bookingHistory: [
+          {
+            serviceType: "house-cleaning",
+            providerId: "provider-1",
+            rating: 5,
+            date: "2025-08-15"
+          }
+        ]
+      };
+      
+      res.json(mockPreferences);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get user preferences" });
+    }
+  });
+
+  app.put("/api/recommendations/preferences/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const preferences = req.body;
+      
+      // In production, save to database
+      console.log(`Preferences updated for user ${userId}:`, preferences);
+      
+      res.json({ 
+        message: "Preferences updated successfully",
+        preferences 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  app.post("/api/recommendations/generate", async (req, res) => {
+    try {
+      const { userId, preferences, includePromoted } = req.body;
+      
+      // Smart recommendation algorithm
+      const mockRecommendations = [
+        {
+          id: "rec-1",
+          serviceName: "Deep House Cleaning",
+          provider: {
+            id: "provider-1",
+            name: "Nomsa Mbeki",
+            rating: 4.8,
+            specialties: ["deep-cleaning", "eco-friendly"],
+            distance: 2.3
+          },
+          matchScore: 94,
+          reasons: ["High rating match", "Within budget", "Previous positive experience"],
+          estimatedPrice: 420,
+          availability: ["Tomorrow 9:00", "Thursday 14:00", "Friday 10:00"],
+          isPromoted: false
+        },
+        {
+          id: "rec-2",
+          serviceName: "Traditional African Catering",
+          provider: {
+            id: "provider-2", 
+            name: "Chef Thabo Mthembu",
+            rating: 4.9,
+            specialties: ["traditional-cuisine", "braai-specialist"],
+            distance: 5.7
+          },
+          matchScore: 88,
+          reasons: ["African cuisine preference", "High ratings", "Event specialist"],
+          estimatedPrice: 1650,
+          availability: ["Weekend available", "Next week slots"],
+          isPromoted: true
+        },
+        {
+          id: "rec-3",
+          serviceName: "Garden Maintenance",
+          provider: {
+            id: "provider-3",
+            name: "Green Thumb Services",
+            rating: 4.6,
+            specialties: ["landscaping", "indigenous-plants"],
+            distance: 8.2
+          },
+          matchScore: 76,
+          reasons: ["Seasonal demand", "Local expertise", "Eco-friendly approach"],
+          estimatedPrice: 580,
+          availability: ["This weekend", "Weekly slots"],
+          isPromoted: false
+        }
+      ];
+
+      // Filter based on user preferences
+      let filteredRecommendations = mockRecommendations;
+      
+      if (preferences?.budgetRange) {
+        filteredRecommendations = filteredRecommendations.filter(rec => 
+          rec.estimatedPrice >= preferences.budgetRange.min && 
+          rec.estimatedPrice <= preferences.budgetRange.max
+        );
+      }
+
+      if (preferences?.providerPreferences?.minRating) {
+        filteredRecommendations = filteredRecommendations.filter(rec => 
+          rec.provider.rating >= preferences.providerPreferences.minRating
+        );
+      }
+
+      // Sort by match score
+      filteredRecommendations.sort((a, b) => b.matchScore - a.matchScore);
+      
+      res.json(filteredRecommendations);
+    } catch (error: any) {
+      console.error("Recommendation generation error:", error);
+      res.status(500).json({ message: "Failed to generate recommendations" });
+    }
+  });
+
+  app.post("/api/recommendations/contextual", async (req, res) => {
+    try {
+      const { timeOfDay, dayOfWeek, weather, location, previousSearches } = req.body;
+      
+      // Contextual suggestions based on time and context
+      const contextualSuggestions = [];
+      
+      if (timeOfDay === 'morning' && (dayOfWeek === 'saturday' || dayOfWeek === 'sunday')) {
+        contextualSuggestions.push({
+          id: 'ctx-1',
+          serviceName: 'Weekend House Cleaning',
+          contextReason: 'Perfect time for deep cleaning',
+          provider: { id: 'provider-1', name: 'Weekend Cleaning Pro' }
+        });
+      }
+      
+      if (dayOfWeek === 'friday' || dayOfWeek === 'saturday') {
+        contextualSuggestions.push({
+          id: 'ctx-2',
+          serviceName: 'Weekend Braai Catering',
+          contextReason: 'Weekend braai season',
+          provider: { id: 'provider-2', name: 'Braai Master Chef' }
+        });
+      }
+
+      if (timeOfDay === 'afternoon') {
+        contextualSuggestions.push({
+          id: 'ctx-3',
+          serviceName: 'Garden Watering Service',
+          contextReason: 'Best time for garden care',
+          provider: { id: 'provider-3', name: 'Garden Care Experts' }
+        });
+      }
+      
+      res.json(contextualSuggestions);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to get contextual suggestions" });
+    }
+  });
+
+  app.post("/api/recommendations/track", async (req, res) => {
+    try {
+      const { userId, interactionType, recommendationId, timestamp, ...additionalData } = req.body;
+      
+      // In production, save interaction to database for ML learning
+      console.log(`User ${userId} ${interactionType} recommendation ${recommendationId} at ${timestamp}`);
+      
+      res.json({ message: "Interaction tracked successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to track interaction" });
+    }
+  });
+
   // Notification preferences routes
   app.get("/api/users/:userId/notification-preferences", async (req, res) => {
     try {

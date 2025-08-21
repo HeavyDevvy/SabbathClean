@@ -4,6 +4,14 @@ Berry Events - All your Home Services In One is a comprehensive domestic service
 
 ## Recent Changes (August 2025)
 
+✓ **Personalized Recommendation Engine & Interactive Onboarding**: AI-powered service matching with animated tutorial system (August 2025):
+  - Smart recommendation engine with user preference tracking and contextual suggestions
+  - Machine learning algorithms for service-provider matching based on location, ratings, and user history
+  - Interactive onboarding tutorial with 9-step animated walkthrough covering all platform features
+  - Contextual recommendations based on time of day, weather, and previous searches
+  - User preference management system with budget, location, timing, and provider criteria
+  - Real-time recommendation scoring with match explanations and quality indicators
+
 ✓ **Mobile App Companion with PWA Technology**: Complete Progressive Web App implementation (August 2025):
   - Full PWA manifest with service worker for offline functionality and native app features
   - Mobile app installation banner with install prompts and app shortcuts
