@@ -16,8 +16,8 @@ export default function Header({ onBookingClick }: HeaderProps) {
             <div className="w-10 h-10 rounded-lg overflow-hidden">
               <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="ml-3 text-xl font-bold text-primary">Berry Events</span>
-            <span className="ml-2 text-sm text-neutral">- All your Home Services In One</span>
+            <span className="ml-3 text-xl font-bold text-gray-900">Berry Events</span>
+            <span className="ml-2 text-sm text-gray-600">- All your Home Services In One</span>
           </Link>
           
           <div className="hidden md:block">
@@ -41,22 +41,19 @@ export default function Header({ onBookingClick }: HeaderProps) {
             <Link href="/provider-onboarding" className="text-primary hover:text-primary/80 transition-colors duration-200 text-sm font-medium" data-testid="link-become-provider">
               Become a Provider
             </Link>
-            <Link href="/profile">
-              <Button variant="ghost" className="text-neutral hover:text-primary" data-testid="button-profile">
+            <Link href="/auth">
+              <Button variant="ghost" className="text-gray-600 hover:text-gray-900" data-testid="button-signin">
                 <span className="hidden sm:inline">Sign In</span>
                 <User className="h-4 w-4 sm:hidden" />
               </Button>
             </Link>
             <Button 
               onClick={onBookingClick}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
               data-testid="button-book-now"
             >
-              <span className="hidden sm:inline flex items-center">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Book Now
-              </span>
-              <Sparkles className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Book Now</span>
+              <Plus className="h-4 w-4 sm:hidden" />
             </Button>
           </div>
         </div>
