@@ -5,7 +5,7 @@ import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 import BerryStarsSection from "@/components/berry-stars-section";
 import Footer from "@/components/footer";
-import EnhancedBooking from "@/pages/enhanced-booking";
+import QuickBookingModal from "@/components/quick-booking-modal";
 import ProviderOnboarding from "@/components/provider-onboarding";
 import { useState } from "react";
 
@@ -34,7 +34,7 @@ export default function Home() {
 
       {/* Modals */}
       {isBookingOpen && (
-        <EnhancedBooking 
+        <QuickBookingModal 
           selectedService={selectedService}
           onClose={() => setIsBookingOpen(false)}
         />

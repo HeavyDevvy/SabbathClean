@@ -3,13 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Home, 
-  Sparkles, 
-  Building2, 
+  Droplets, 
+  Zap, 
+  ChefHat, 
   Users, 
-  Baby, 
-  Leaf, 
-  Clock, 
-  Heart,
+  Leaf,
   Star,
   ArrowRight
 } from "lucide-react";
@@ -23,85 +21,64 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
 
   const mainServices = [
     {
-      id: "indoor-cleaning",
-      name: "Indoor\nCleaning",
-      description: "3.5 – 10 hours of top to bottom comprehensive cleaning of your home",
+      id: "house-cleaning",
+      name: "House\nCleaning",
+      description: "Complete home cleaning including dusting, vacuuming, mopping, kitchen & bathroom sanitization",
+      price: "R280/hour",
       icon: Home,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-700"
-    },
-    {
-      id: "outdoor-services", 
-      name: "Outdoor\nServices",
-      description: "Get help with outdoor tasks and garden maintenance",
-      icon: Leaf,
-      color: "from-green-500 to-green-600",
-      bgColor: "bg-green-50",
-      textColor: "text-green-700"
-    },
-    {
-      id: "office-cleaning",
-      name: "Office\nCleaning", 
-      description: "Get a half-day or full-day clean to keep your office spotless and productive",
-      icon: Building2,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
       textColor: "text-purple-700"
     },
     {
-      id: "moving-cleaning",
-      name: "Moving\nCleaning",
-      description: "Essential service to ensure a spotless home and stress-free moving experience",
-      icon: Sparkles,
+      id: "plumbing", 
+      name: "Plumbing\nServices",
+      description: "Pipe repairs, leak fixing, faucet installation, drain cleaning, toilet repairs",
+      price: "R380/hour",
+      icon: Droplets,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-700"
+    },
+    {
+      id: "electrical",
+      name: "Electrical\nServices", 
+      description: "Wiring repairs, outlet installation, lighting setup, circuit breaker fixes",
+      price: "R420/hour",
+      icon: Zap,
+      color: "from-yellow-500 to-yellow-600",
+      bgColor: "bg-yellow-50",
+      textColor: "text-yellow-700"
+    },
+    {
+      id: "chef-catering",
+      name: "Chef &\nCatering",
+      description: "Personal chef services, meal preparation, event catering, menu planning",
+      price: "R550/event",
+      icon: ChefHat,
       color: "from-orange-500 to-orange-600", 
       bgColor: "bg-orange-50",
       textColor: "text-orange-700"
     },
     {
-      id: "laundry-ironing",
-      name: "Laundry\n& Ironing",
-      description: "Get your laundry and ironing done by expert workers with top ratings",
-      icon: Sparkles,
-      color: "from-pink-500 to-pink-600",
-      bgColor: "bg-pink-50",
-      textColor: "text-pink-700"
-    },
-    {
-      id: "moms-helper",
-      name: "Mom's\nHelper", 
-      description: "With Mom's Helper you get a supervised assistant to support you with your children & around your home",
-      icon: Baby,
-      color: "from-rose-500 to-rose-600",
-      bgColor: "bg-rose-50",
-      textColor: "text-rose-700"
-    },
-    {
-      id: "elder-care",
-      name: "Elder\nCare",
-      description: "Help seniors with their daily lives and admin, while ensuring they stay safe and comfortable at home",
-      icon: Heart,
-      color: "from-teal-500 to-teal-600",
-      bgColor: "bg-teal-50", 
-      textColor: "text-teal-700"
-    },
-    {
-      id: "extra-care",
-      name: "Extra\nCare",
-      description: "Flexible & trusted care for you or a loved one needing care at home",
+      id: "waitering",
+      name: "Waitering\nServices",
+      description: "Professional waitstaff for events, table service, bar service, event coordination",
+      price: "R220/hour",
       icon: Users,
-      color: "from-indigo-500 to-indigo-600",
-      bgColor: "bg-indigo-50",
-      textColor: "text-indigo-700"
+      color: "from-green-500 to-green-600",
+      bgColor: "bg-green-50",
+      textColor: "text-green-700"
     },
     {
-      id: "express-cleaning",
-      name: "Express\nCleaning", 
-      description: "Get help with specific tasks like laundry, ironing and tidying up (1-3 hours)",
-      icon: Clock,
-      color: "from-yellow-500 to-yellow-600",
-      bgColor: "bg-yellow-50",
-      textColor: "text-yellow-700"
+      id: "garden-care",
+      name: "Garden\nCare", 
+      description: "Garden maintenance, lawn mowing, landscaping, plant care, outdoor cleaning",
+      price: "R350/hour",
+      icon: Leaf,
+      color: "from-teal-500 to-teal-600",
+      bgColor: "bg-teal-50",
+      textColor: "text-teal-700"
     }
   ];
 
@@ -117,7 +94,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {mainServices.map((service) => {
             const Icon = service.icon;
             return (
@@ -140,6 +117,11 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
                     <h3 className={`text-lg font-bold whitespace-pre-line ${service.textColor} group-hover:text-gray-900 transition-colors`}>
                       {service.name}
                     </h3>
+                    {service.price && (
+                      <p className="text-sm font-semibold text-gray-800 mt-1">
+                        {service.price}
+                      </p>
+                    )}
                   </div>
                   
                   {/* Service Description - Always visible on desktop, hover for mobile */}
@@ -168,7 +150,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
         {/* Primary CTA */}
         <div className="text-center mt-12">
           <Button 
-            onClick={() => onServiceSelect('indoor-cleaning')}
+            onClick={() => onServiceSelect('house-cleaning')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
             data-testid="button-book-service-main"
           >
