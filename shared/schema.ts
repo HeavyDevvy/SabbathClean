@@ -8,13 +8,24 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phone: text("phone"),
   address: text("address"),
+  city: text("city"),
+  province: text("province"),
+  postalCode: text("postal_code"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  profileImage: text("profile_image"),
   isProvider: boolean("is_provider").default(false),
+  isVerified: boolean("is_verified").default(false),
+  preferences: jsonb("preferences"), // UI preferences, notification settings
+  notificationSettings: jsonb("notification_settings"),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const serviceProviders = pgTable("service_providers", {
@@ -56,32 +67,58 @@ export const services = pgTable("services", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  category: text("category").notNull(), // house-cleaning, deep-cleaning, maintenance, gardening
+  category: text("category").notNull(), // indoor-services, outdoor-services, specialized-services, maintenance, full-time-placements
+  subcategory: text("subcategory"), // house-cleaning, laundry-ironing, garden-maintenance, etc.
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  priceType: text("price_type").default("hourly"), // hourly, fixed, per_room, per_sqm
+  estimatedDuration: integer("estimated_duration"), // in minutes
+  icon: text("icon"),
+  features: text("features").array(),
+  requirements: text("requirements").array(),
   isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const bookings = pgTable("bookings", {
+export const bookings: ReturnType<typeof pgTable> = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   customerId: varchar("customer_id").references(() => users.id).notNull(),
-  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  providerId: varchar("provider_id").references(() => serviceProviders.id),
   serviceId: varchar("service_id").references(() => services.id).notNull(),
+  bookingNumber: text("booking_number").notNull().unique(),
   scheduledDate: timestamp("scheduled_date").notNull(),
   scheduledTime: text("scheduled_time").notNull(),
   duration: integer("duration").notNull(), // in hours
   totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-  berryEventsCommission: decimal("berry_events_commission", { precision: 10, scale: 2 }).default("0"),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).default("0"),
+  paymentProcessingFee: decimal("payment_processing_fee", { precision: 10, scale: 2 }).default("0"),
   providerPayout: decimal("provider_payout", { precision: 10, scale: 2 }).default("0"),
-  paymentStatus: text("payment_status").default("pending"), // pending, paid_to_berry, paid_to_provider
-  status: text("status").notNull().default("pending"), // pending, confirmed, in-progress, completed, cancelled
-  serviceType: text("service_type").notNull(), // house-cleaning, chef-catering, waitering, etc.
-  serviceDetails: jsonb("service_details"), // Store service-specific details
-  propertySize: text("property_size"),
-  bathrooms: integer("bathrooms"),
+  tipAmount: decimal("tip_amount", { precision: 10, scale: 2 }).default("0"),
+  paymentStatus: text("payment_status").default("pending"), // pending, authorized, captured, refunded
+  paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID
+  status: text("status").notNull().default("pending"), // pending, confirmed, provider_assigned, in_progress, completed, cancelled, refunded
+  serviceType: text("service_type").notNull(),
+  serviceDetails: jsonb("service_details"),
+  customerDetails: jsonb("customer_details"), // contact info, preferences
   address: text("address").notNull(),
+  city: text("city"),
+  postalCode: text("postal_code"),
+  propertyType: text("property_type"), // house, apartment, office, etc.
+  propertySize: text("property_size"),
+  rooms: integer("rooms"),
+  bathrooms: integer("bathrooms"),
+  accessInstructions: text("access_instructions"),
   specialInstructions: text("special_instructions"),
+  emergencyContact: jsonb("emergency_contact"),
   isRecurring: boolean("is_recurring").default(false),
   recurringFrequency: text("recurring_frequency"), // weekly, bi-weekly, monthly
+  recurringEndDate: timestamp("recurring_end_date"),
+  parentBookingId: varchar("parent_booking_id"), // for recurring bookings - self reference
+  remindersSent: integer("reminders_sent").default(0),
+  customerRating: integer("customer_rating"), // 1-5 stars given by customer
+  providerRating: integer("provider_rating"), // 1-5 stars given by provider
+  notes: text("notes"), // internal notes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -126,19 +163,143 @@ export const jobQueue = pgTable("job_queue", {
   expiresAt: timestamp("expires_at").notNull(),
 });
 
-// Payment methods
+// Payment methods with enhanced security
 export const paymentMethods = pgTable("payment_methods", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id).notNull(),
-  type: varchar("type").notNull(), // card, bank_transfer, cash
-  cardNumber: varchar("card_number"), // masked for display (e.g., ****1234)
+  type: varchar("type").notNull(), // card, bank_transfer, mobile_money, cash
+  stripePaymentMethodId: text("stripe_payment_method_id"), // Stripe payment method ID
+  cardLast4: varchar("card_last4"), // last 4 digits for display
+  cardBrand: varchar("card_brand"), // visa, mastercard, amex
   cardHolderName: varchar("card_holder_name"),
   expiryMonth: integer("expiry_month"),
   expiryYear: integer("expiry_year"),
   bankName: varchar("bank_name"),
-  cardType: varchar("card_type"), // visa, mastercard, amex
+  accountHolderName: varchar("account_holder_name"),
+  nickname: varchar("nickname"), // user-friendly name for the payment method
+  billingAddress: jsonb("billing_address"),
   isDefault: boolean("is_default").default(false),
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Messages and Communication System
+export const conversations = pgTable("conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bookingId: varchar("booking_id").references(() => bookings.id),
+  customerId: varchar("customer_id").references(() => users.id).notNull(),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  subject: text("subject"),
+  status: text("status").default("active"), // active, closed, archived
+  lastMessageAt: timestamp("last_message_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
+  senderId: varchar("sender_id").references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  messageType: text("message_type").default("text"), // text, image, document, system
+  attachments: jsonb("attachments"), // file URLs and metadata
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  editedAt: timestamp("edited_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Notifications System
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull(), // booking_update, payment_received, message_received, review_received
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  data: jsonb("data"), // additional notification data
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  actionUrl: text("action_url"), // URL to navigate when clicked
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Support Tickets
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketNumber: text("ticket_number").notNull().unique(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  bookingId: varchar("booking_id").references(() => bookings.id),
+  category: text("category").notNull(), // payment, service_quality, technical, account, other
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  subject: text("subject").notNull(),
+  description: text("description").notNull(),
+  status: text("status").default("open"), // open, in_progress, resolved, closed
+  assignedTo: varchar("assigned_to"), // admin/support staff ID
+  resolutionNotes: text("resolution_notes"),
+  attachments: jsonb("attachments"),
+  customerSatisfactionRating: integer("customer_satisfaction_rating"), // 1-5
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Provider Availability and Schedule
+export const providerAvailability = pgTable("provider_availability", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = Sunday, 1 = Monday, etc.
+  startTime: text("start_time").notNull(), // HH:MM format
+  endTime: text("end_time").notNull(), // HH:MM format
+  isAvailable: boolean("is_available").default(true),
+  maxBookingsPerSlot: integer("max_bookings_per_slot").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const providerTimeOff = pgTable("provider_time_off", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  reason: text("reason"),
+  isApproved: boolean("is_approved").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Provider Earnings and Payouts
+export const providerEarnings = pgTable("provider_earnings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  bookingId: varchar("booking_id").references(() => bookings.id).notNull(),
+  baseAmount: decimal("base_amount", { precision: 10, scale: 2 }).notNull(),
+  tipAmount: decimal("tip_amount", { precision: 10, scale: 2 }).default("0"),
+  bonusAmount: decimal("bonus_amount", { precision: 10, scale: 2 }).default("0"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  platformCommission: decimal("platform_commission", { precision: 10, scale: 2 }).notNull(),
+  netAmount: decimal("net_amount", { precision: 10, scale: 2 }).notNull(),
+  payoutStatus: text("payout_status").default("pending"), // pending, processing, paid, failed
+  payoutDate: timestamp("payout_date"),
+  payoutReference: text("payout_reference"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Promotional Codes and Discounts
+export const promotionalCodes = pgTable("promotional_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: text("code").notNull().unique(),
+  description: text("description"),
+  discountType: text("discount_type").notNull(), // percentage, fixed_amount
+  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minimumAmount: decimal("minimum_amount", { precision: 10, scale: 2 }),
+  maximumDiscount: decimal("maximum_discount", { precision: 10, scale: 2 }),
+  usageLimit: integer("usage_limit"),
+  usageCount: integer("usage_count").default(0),
+  validFrom: timestamp("valid_from").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  isActive: boolean("is_active").default(true),
+  applicableServices: text("applicable_services").array(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

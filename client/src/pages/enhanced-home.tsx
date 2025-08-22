@@ -1,0 +1,88 @@
+import { useState } from "react";
+import EnhancedHeader from "@/components/enhanced-header";
+import EnhancedHero from "@/components/enhanced-hero";
+import EnhancedServices from "@/components/enhanced-services";
+import ComprehensiveBookingModal from "@/components/comprehensive-booking-modal";
+import BerryStarsSection from "@/components/berry-stars-section";
+import HowItWorksSection from "@/components/how-it-works-section";
+import TrustSafetySection from "@/components/trust-safety-section";
+import Footer from "@/components/footer";
+
+export default function EnhancedHome() {
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string>("");
+  
+  // Mock user data - replace with actual auth
+  const [user] = useState({
+    firstName: "John",
+    lastName: "Doe", 
+    profileImage: "",
+    isProvider: false,
+  });
+  
+  const [isAuthenticated] = useState(true);
+  const [notificationCount] = useState(3);
+  const [messageCount] = useState(1);
+
+  const handleBookingClick = () => {
+    setIsBookingModalOpen(true);
+  };
+
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedService(serviceId);
+    setIsBookingModalOpen(true);
+  };
+
+  const handleDemoClick = () => {
+    const howItWorksSection = document.getElementById('how-it-works');
+    howItWorksSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Enhanced Header with authentication state */}
+      <EnhancedHeader 
+        onBookingClick={handleBookingClick}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        notificationCount={notificationCount}
+        messageCount={messageCount}
+      />
+
+      <main>
+        {/* Enhanced Hero Section */}
+        <EnhancedHero 
+          onBookingClick={handleBookingClick}
+          onDemoClick={handleDemoClick}
+        />
+
+        {/* Comprehensive Services Section */}
+        <EnhancedServices onServiceSelect={handleServiceSelect} />
+
+        {/* How It Works Section */}
+        <HowItWorksSection />
+
+        {/* Featured Providers Section */}
+        <BerryStarsSection onBookService={handleServiceSelect} />
+
+        {/* Trust & Safety Section */}
+        <TrustSafetySection />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Comprehensive Booking Modal */}
+      {isBookingModalOpen && (
+        <ComprehensiveBookingModal
+          isOpen={isBookingModalOpen}
+          onClose={() => {
+            setIsBookingModalOpen(false);
+            setSelectedService("");
+          }}
+          preSelectedService={selectedService}
+        />
+      )}
+    </div>
+  );
+}

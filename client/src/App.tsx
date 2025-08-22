@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
+import EnhancedHome from "@/pages/enhanced-home";
 import Auth from "@/pages/auth";
 import Booking from "@/pages/booking";
 import BookingConfirmation from "@/pages/booking-confirmation";
@@ -22,7 +23,8 @@ import NotificationSettings from "@/components/notification-settings";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={EnhancedHome} />
+      <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/booking" component={Booking} />
       <Route path="/booking-confirmation" component={BookingConfirmation} />
