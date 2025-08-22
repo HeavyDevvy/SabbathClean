@@ -6,6 +6,7 @@ import ComprehensiveBookingModal from "@/components/comprehensive-booking-modal"
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
+import CompetitiveAdvantageSection from "@/components/competitive-advantage-section";
 import Footer from "@/components/footer";
 
 export default function EnhancedHome() {
@@ -60,13 +61,16 @@ export default function EnhancedHome() {
         <EnhancedServices onServiceSelect={handleServiceSelect} />
 
         {/* How It Works Section */}
-        <HowItWorksSection />
+        <HowItWorksSection onBookNowClick={handleBookingClick} />
 
         {/* Featured Providers Section */}
         <BerryStarsSection onBookService={handleServiceSelect} />
 
         {/* Trust & Safety Section */}
         <TrustSafetySection />
+
+        {/* Competitive Advantage Section */}
+        <CompetitiveAdvantageSection />
       </main>
 
       {/* Footer */}
