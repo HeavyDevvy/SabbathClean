@@ -25,6 +25,7 @@ export interface UserPreferences {
 export interface ServiceProvider {
   id: string;
   userId: string;
+  user?: User;
   businessName?: string;
   bio: string;
   services: string[];

@@ -45,20 +45,20 @@ export default function BookingPage() {
   const customerId = 'customer-1';
 
   // Fetch services
-  const { data: services = [] } = useQuery({
+  const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
 
   // Fetch selected service details
-  const { data: serviceDetails } = useQuery({
+  const { data: serviceDetails } = useQuery<Service>({
     queryKey: [`/api/services/${selectedService}`],
     enabled: !!selectedService,
   });
 
   // Fetch matched providers
-  const { data: matchedProviders = [] } = useQuery({
+  const { data: matchedProviders = [] } = useQuery<ServiceProvider[]>({
     queryKey: [`/api/search/providers`],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceProvider[]> => {
       if (!selectedService || !bookingDetails.address?.city) return [];
       
       const response = await apiRequest('POST', '/api/search/providers', {

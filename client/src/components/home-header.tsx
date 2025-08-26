@@ -30,7 +30,7 @@ export default function HomeHeader({
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <h1 className="text-2xl font-bold text-blue-600" data-testid="logo">
-              HomeServices
+              Berry Events
             </h1>
           </div>
 

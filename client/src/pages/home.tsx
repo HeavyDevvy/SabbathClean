@@ -18,12 +18,12 @@ export default function HomePage() {
   const [isAuthenticated] = useState(false); // Mock auth state
 
   // Fetch featured providers
-  const { data: providers = [] } = useQuery({
+  const { data: providers = [] } = useQuery<ServiceProvider[]>({
     queryKey: ["/api/providers?verified=true"],
   });
 
   // Fetch platform stats
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<any>({
     queryKey: ["/api/admin/stats"],
   });
 

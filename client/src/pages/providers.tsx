@@ -9,7 +9,7 @@ import {
   Filter, Search, ArrowRight, Check
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import type { ServiceProvider } from "@shared/schema";
+import type { ServiceProvider, Service } from "@shared/schema";
 
 export default function ProvidersPage() {
   const [, setLocation] = useLocation();
@@ -21,9 +21,9 @@ export default function ProvidersPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch providers
-  const { data: providers = [], isLoading } = useQuery({
+  const { data: providers = [], isLoading } = useQuery<ServiceProvider[]>({
     queryKey: ["/api/providers", filters],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceProvider[]> => {
       const params = new URLSearchParams();
       if (filters.serviceId) params.append('serviceId', filters.serviceId);
       if (filters.location) params.append('location', filters.location);
@@ -35,11 +35,11 @@ export default function ProvidersPage() {
   });
 
   // Fetch services for filter
-  const { data: services = [] } = useQuery({
+  const { data: services = [] } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
 
-  const filteredProviders = providers.filter((provider: any) => {
+  const filteredProviders = providers.filter((provider: ServiceProvider) => {
     const fullName = `${provider.user?.firstName} ${provider.user?.lastName}`.toLowerCase();
     const businessName = provider.businessName?.toLowerCase() || '';
     const bio = provider.bio.toLowerCase();
@@ -293,7 +293,7 @@ export default function ProvidersPage() {
                       {/* Starting Rate */}
                       <div className="text-center mb-4">
                         <div className="text-lg font-bold text-blue-600">
-                          Starting from {formatCurrency(Math.min(...Object.values(provider.hourlyRates)))}
+                          Starting from {formatCurrency(Math.min(...Object.values(provider.hourlyRates) as number[]))}
                         </div>
                         <div className="text-xs text-gray-500">per hour</div>
                       </div>

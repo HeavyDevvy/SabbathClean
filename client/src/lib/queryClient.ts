@@ -3,7 +3,7 @@ import { QueryClient } from "@tanstack/react-query";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: async ({ queryKey }) => {
+      queryFn: async ({ queryKey }): Promise<any> => {
         const response = await fetch(queryKey[0] as string);
         if (!response.ok) {
           throw new Error(`${response.status}: ${response.statusText}`);

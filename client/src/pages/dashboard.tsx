@@ -37,17 +37,17 @@ export default function DashboardPage() {
   });
 
   // Fetch user's bookings
-  const { data: bookings = [] } = useQuery({
+  const { data: bookings = [] } = useQuery<Booking[]>({
     queryKey: [`/api/bookings?customerId=${currentUserId}`],
   });
 
   // Fetch user's notifications
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: [`/api/notifications/${currentUserId}`],
   });
 
   // Fetch user's provider profile (if they are a provider)
-  const { data: providerProfile } = useQuery({
+  const { data: providerProfile } = useQuery<ServiceProvider>({
     queryKey: [`/api/providers/user/${currentUserId}`],
     enabled: currentUser?.role === 'provider',
   });
