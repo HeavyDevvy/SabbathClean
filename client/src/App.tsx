@@ -1,54 +1,19 @@
-import { Switch, Route } from "wouter";
-import { useEffect } from "react";
-import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import Home from "@/pages/home";
-import EnhancedHome from "@/pages/enhanced-home";
-import Auth from "@/pages/auth";
-import Booking from "@/pages/booking";
-import BookingConfirmation from "@/pages/booking-confirmation";
-import Providers from "@/pages/providers";
-import Profile from "@/pages/profile";
-import ProviderOnboarding from "@/pages/provider-onboarding";
-import EnhancedProviderOnboarding from "@/pages/enhanced-provider-onboarding";
-import ProviderTraining from "@/pages/provider-training";
-import ProviderDashboard from "@/pages/provider-dashboard";
-import NotFound from "@/pages/not-found";
-import Offline from "@/pages/offline";
-import Bookings from "@/pages/bookings";
-import NotificationSettings from "@/components/notification-settings";
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={EnhancedHome} />
-      <Route path="/old-home" component={Home} />
-      <Route path="/auth" component={Auth} />
-      <Route path="/booking" component={Booking} />
-      <Route path="/booking-confirmation" component={BookingConfirmation} />
-      <Route path="/bookings" component={Bookings} />
-      <Route path="/providers" component={Providers} />
-      <Route path="/provider-onboarding" component={EnhancedProviderOnboarding} />
-      <Route path="/provider-training" component={ProviderTraining} />
-      <Route path="/provider-dashboard" component={ProviderDashboard} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/notifications" component={NotificationSettings} />
-      <Route path="/offline" component={Offline} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
+import { queryClient } from "@/lib/queryClient";
 
 function App() {
-
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto py-8">
+          <h1 className="text-4xl font-bold text-center mb-8">
+            Fresh Start - Berry Events
+          </h1>
+          <p className="text-center text-gray-600">
+            Clean slate - ready to build something amazing!
+          </p>
+        </div>
+      </div>
     </QueryClientProvider>
   );
 }
