@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import AppStoreCards from "@/components/app-store-cards";
 import { 
   Facebook, 
   Twitter, 
@@ -223,6 +224,26 @@ export default function Footer() {
                 <div className="text-gray-300 text-sm">Cape Town, Johannesburg, Durban</div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile App Download Section */}
+      <div className="bg-gray-800 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Download the Berry Events Mobile App
+            </h3>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              Book services faster, track your appointments, and get instant notifications on your mobile device. 
+              Available for iOS and Android.
+            </p>
+          </div>
+          
+          {/* App Store Cards */}
+          <div className="max-w-4xl mx-auto">
+            <AppStoreCards />
           </div>
         </div>
       </div>

@@ -110,14 +110,6 @@ export default function EnhancedHeader({
               <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
-            <Link 
-              href="/mobile-app" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
-              data-testid="nav-mobile-app"
-            >
-              <Smartphone className="h-4 w-4 mr-1" />
-              Mobile App
-            </Link>
             <button 
               onClick={() => {
                 const howItWorksSection = document.getElementById('how-it-works');
