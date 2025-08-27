@@ -19,6 +19,8 @@ import NotFound from "@/pages/not-found";
 import Offline from "@/pages/offline";
 import Bookings from "@/pages/bookings";
 import NotificationSettings from "@/components/notification-settings";
+import ServicesPage from "@/pages/services";
+import PaymentPage from "@/pages/payment";
 
 function Router() {
   return (
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/booking" component={Booking} />
       <Route path="/booking-confirmation" component={BookingConfirmation} />
       <Route path="/bookings" component={Bookings} />
+      <Route path="/services" component={ServicesPage} />
+      <Route path="/payment" component={PaymentPage} />
       <Route path="/providers" component={Providers} />
       <Route path="/provider-onboarding" component={EnhancedProviderOnboarding} />
       <Route path="/provider-training" component={ProviderTraining} />

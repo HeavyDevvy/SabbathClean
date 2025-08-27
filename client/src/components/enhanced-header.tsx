@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, MessageCircle, Calendar, Settings } from "lucide-react";
+import { Menu, X, Search, Bell, User, MessageCircle, Calendar, Settings, Home, Briefcase } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   DropdownMenu,
@@ -68,10 +68,19 @@ export default function EnhancedHeader({
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
+              href="/" 
+              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
+              data-testid="nav-home"
+            >
+              <Home className="h-4 w-4 mr-1" />
+              Home
+            </Link>
+            <Link 
               href="/services" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-services"
             >
+              <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
             <Link 

@@ -4,6 +4,15 @@ Berry Events - All your Home Services In One is a comprehensive domestic service
 
 ## Recent Changes (August 2025)
 
+✓ **Dynamic Pricing & Payment Gateway Integration**: Complete market-comparable pricing system with payment processing (August 2025):
+  - Dynamic pricing calculations with service-specific surcharges and customizations
+  - Market-competitive base rates: Cleaning (R75/hr), Chef & Catering (R400/event), Plumbing (R120/hr), Electrical (R150/hr)
+  - Chef & Catering specialized pricing: Halal/non-Halal options, ingredient sourcing (+R150), guest count multipliers
+  - Emergency service surcharges (plumbing +R80), property size adjustments (cleaning +R50), distance fees (moving +R200)
+  - Complete payment flow: booking modal → payment processing → confirmation page with receipt
+  - Payment confirmation page with booking details, customer info, cost breakdown, and next steps
+  - Functional header navigation with Home, Services, and Bookings pages
+
 ✓ **Comprehensive Home Services Platform Implementation**: Complete implementation of 8 service categories with advanced booking workflows (August 2025):
   - Comprehensive Services Component with cleaning, plumbing, electrical, chef/catering, moving, au pair, garden care, and waitering services
   - Advanced Booking Modal with service-specific multi-step workflows (4-5 steps per service)

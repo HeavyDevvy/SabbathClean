@@ -170,7 +170,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
     icon: MapPin,
     gradient: "from-green-500 to-emerald-500",
     estimatedDuration: "2-12 hours",
-    priceRange: "R550-R5000",
+    priceRange: "R400-R4500",
     steps: [
       {
         id: "service-type",
@@ -181,8 +181,8 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
       {
         id: "cuisine-menu",
         title: "Cuisine & Menu Selection",
-        description: "Choose cuisine and menu preferences",
-        fields: ["cuisine", "menu", "budget"]
+        description: "Choose cuisine, menu preferences, and dietary requirements",
+        fields: ["cuisine", "menu", "dietaryRequirements", "ingredientSource", "budget"]
       },
       {
         id: "event-details",
@@ -279,6 +279,17 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
   const [selectedService, setSelectedService] = useState(preSelectedService);
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [basePrices] = useState({
+    cleaning: 75,
+    plumbing: 120,
+    electrical: 150,
+    'chef-catering': 400,
+    moving: 600,
+    'au-pair': 65,
+    'garden-care': 90,
+    waitering: 85
+  });
 
   useEffect(() => {
     if (preSelectedService && serviceConfigs[preSelectedService]) {
@@ -309,19 +320,94 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
     setFormData({});
   };
 
+  const calculateTotalPrice = (data: any) => {
+    if (!selectedService) return 0;
+    
+    let basePrice = basePrices[selectedService as keyof typeof basePrices] || 0;
+    let additionalCosts = 0;
+    
+    // Chef & Catering specific pricing
+    if (selectedService === 'chef-catering') {
+      if (data.ingredientSource === 'chef-brings') {
+        additionalCosts += 150; // Chef brings ingredients surcharge
+      }
+      if (data.guestCount) {
+        const guests = parseInt(data.guestCount) || 1;
+        if (guests > 10) {
+          additionalCosts += (guests - 10) * 25; // R25 per guest over 10
+        }
+      }
+    }
+    
+    // Cleaning service pricing
+    if (selectedService === 'cleaning') {
+      if (data.propertySize === 'large' || data.propertySize === 'mansion') {
+        additionalCosts += 50; // Large property surcharge
+      }
+      if (data.frequency === 'one-time-deep') {
+        additionalCosts += 75; // Deep cleaning surcharge
+      }
+    }
+    
+    // Plumbing emergency surcharge
+    if (selectedService === 'plumbing' && data.emergencyService === 'yes') {
+      additionalCosts += 80; // Emergency service surcharge
+    }
+    
+    // Moving distance surcharge
+    if (selectedService === 'moving' && data.distance === 'long-distance') {
+      additionalCosts += 200; // Long distance surcharge
+    }
+    
+    return basePrice + additionalCosts;
+  };
+
   const handleFormChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [field]: value
-    }));
+    };
+    setFormData(newFormData);
+    setTotalPrice(calculateTotalPrice(newFormData));
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    // Simulate booking submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    onClose();
+    
+    try {
+      // Process payment through gateway
+      const bookingData = {
+        service: selectedService,
+        ...formData,
+        totalPrice,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Here we would integrate with Stripe or other payment gateway
+      console.log('Processing booking:', bookingData);
+      
+      // Simulate API call for booking creation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create URL parameters for payment page
+      const paymentParams = new URLSearchParams({
+        service: currentServiceConfig?.name || selectedService,
+        total: totalPrice.toString(),
+        basePrice: (basePrices[selectedService as keyof typeof basePrices] || 0).toString(),
+        date: formData.preferredDate || '2025-01-15',
+        time: formData.preferredTime || '09:00',
+        location: `${formData.address || '123 Oak Street'}, ${formData.city || 'Cape Town'}`,
+        ...(formData.ingredientSource && { ingredientSource: formData.ingredientSource })
+      });
+      
+      // Redirect to payment confirmation page
+      window.location.href = `/payment?${paymentParams.toString()}`;
+      
+    } catch (error) {
+      console.error('Booking failed:', error);
+      alert('Booking failed. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   const renderServiceSelection = () => (
@@ -435,6 +521,41 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
                     <Upload className="h-4 w-4 mr-2" />
                     Choose Files
                   </Button>
+                </div>
+              ) : field === 'dietaryRequirements' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select dietary requirements" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="halaal">Halaal</SelectItem>
+                    <SelectItem value="non-halaal">Non-Halaal</SelectItem>
+                    <SelectItem value="vegetarian">Vegetarian</SelectItem>
+                    <SelectItem value="vegan">Vegan</SelectItem>
+                    <SelectItem value="kosher">Kosher</SelectItem>
+                    <SelectItem value="none">No Restrictions</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'ingredientSource' ? (
+                <div className="space-y-4">
+                  <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                    <SelectTrigger data-testid={`select-${field}`}>
+                      <SelectValue placeholder="Choose ingredient sourcing" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="chef-brings">Chef Brings Ingredients (+R150)</SelectItem>
+                      <SelectItem value="on-site">Use On-Site Ingredients</SelectItem>
+                      <SelectItem value="mixed">Mixed (Some Chef, Some On-Site)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {formData[field] === 'chef-brings' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-800">
+                        <strong>Additional R150 charge</strong> applies for chef-sourced ingredients.
+                        This includes premium quality ingredients and dietary-specific items.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Input

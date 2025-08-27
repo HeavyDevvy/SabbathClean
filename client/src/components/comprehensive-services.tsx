@@ -59,7 +59,7 @@ const services: Service[] = [
     category: "Indoor Services",
     title: "House Cleaning",
     description: "Complete cleaning services from regular maintenance to deep cleaning with professional-grade equipment",
-    price: "From R280/hour",
+    price: "From R75/hour",
     duration: "2-6 hours",
     popular: true,
     serviceTypes: [
@@ -83,7 +83,7 @@ const services: Service[] = [
     category: "Maintenance",
     title: "Plumbing Services",
     description: "Professional plumbing solutions from emergency repairs to complete installations with certified plumbers",
-    price: "From R350/hour",
+    price: "From R120/hour",
     duration: "1-4 hours",
     urgent: true,
     serviceTypes: [
@@ -107,7 +107,7 @@ const services: Service[] = [
     category: "Maintenance",
     title: "Electrical Services",
     description: "Safe and certified electrical work including installations, repairs, and compliance certificates",
-    price: "From R400/hour",
+    price: "From R150/hour",
     duration: "1-8 hours",
     urgent: true,
     serviceTypes: [
@@ -131,7 +131,7 @@ const services: Service[] = [
     category: "Specialized",
     title: "Chef & Catering",
     description: "Professional chefs specializing in African cuisine and international dishes for events and daily meals",
-    price: "From R550/event",
+    price: "From R400/event",
     duration: "2-12 hours",
     popular: true,
     serviceTypes: [
@@ -155,7 +155,7 @@ const services: Service[] = [
     category: "Specialized",
     title: "Moving Services",
     description: "Complete moving solutions from local relocations to long-distance moves with professional teams",
-    price: "From R800/day",
+    price: "From R600/day",
     duration: "4-12 hours",
     serviceTypes: [
       "Local Moving (same city)",
@@ -178,7 +178,7 @@ const services: Service[] = [
     category: "Specialized",
     title: "Au Pair Services",
     description: "Trusted childcare providers offering flexible care solutions from occasional babysitting to live-in arrangements",
-    price: "From R180/hour",
+    price: "From R65/hour",
     duration: "4 hours - 12 months",
     serviceTypes: [
       "Live-in Au Pair (6-12 month contracts)",
@@ -201,7 +201,7 @@ const services: Service[] = [
     category: "Outdoor Services",
     title: "Garden Care",
     description: "Professional garden maintenance and landscaping services to keep your outdoor spaces beautiful",
-    price: "From R350/hour",
+    price: "From R90/hour",
     duration: "2-8 hours",
     serviceTypes: [
       "Regular Garden Maintenance",
@@ -224,7 +224,7 @@ const services: Service[] = [
     category: "Specialized", 
     title: "Waitering Services",
     description: "Professional event staff and waitering services for parties, corporate events, and special occasions",
-    price: "From R180/hour",
+    price: "From R85/hour",
     duration: "4-12 hours",
     serviceTypes: [
       "Event Waitering Staff",

@@ -1,268 +1,291 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, MapPin, User, Phone, Star, MessageSquare } from "lucide-react";
-import MobileNavigation from "@/components/mobile-navigation";
+import EnhancedHeader from "@/components/enhanced-header";
+import { 
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  Phone,
+  Star,
+  CreditCard,
+  CheckCircle2,
+  AlertCircle,
+  MoreVertical
+} from "lucide-react";
 
-interface Booking {
-  id: string;
-  serviceName: string;
-  providerName: string;
-  providerRating: number;
-  date: string;
-  time: string;
-  duration: string;
-  location: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  price: number;
-  providerPhone?: string;
-  notes?: string;
-}
+// Mock booking data
+const mockBookings = [
+  {
+    id: "1",
+    service: "House Cleaning",
+    provider: "Sarah Johnson",
+    date: "2025-01-15",
+    time: "09:00",
+    duration: "3 hours",
+    status: "confirmed",
+    location: "123 Oak Street, Cape Town",
+    price: 225,
+    rating: 4.8,
+    notes: "Deep cleaning, focus on kitchen and bathrooms"
+  },
+  {
+    id: "2", 
+    service: "Plumbing Services",
+    provider: "Mike Williams",
+    date: "2025-01-18",
+    time: "14:00",
+    duration: "2 hours",
+    status: "pending",
+    location: "456 Pine Avenue, Johannesburg", 
+    price: 240,
+    rating: 4.9,
+    notes: "Fix leaking tap in main bathroom"
+  },
+  {
+    id: "3",
+    service: "Chef & Catering",
+    provider: "Amara Okafor",
+    date: "2025-01-12",
+    time: "18:00", 
+    duration: "4 hours",
+    status: "completed",
+    location: "789 Elm Drive, Durban",
+    price: 650,
+    rating: 5.0,
+    notes: "Nigerian cuisine for 15 guests, halaal requirements"
+  },
+  {
+    id: "4",
+    service: "Garden Care",
+    provider: "David Smith",
+    date: "2025-01-20",
+    time: "08:00",
+    duration: "5 hours", 
+    status: "confirmed",
+    location: "321 Maple Road, Pretoria",
+    price: 450,
+    rating: 4.7,
+    notes: "Lawn maintenance and hedge trimming"
+  }
+];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "confirmed": return "bg-blue-100 text-blue-800";
+    case "pending": return "bg-yellow-100 text-yellow-800";
+    case "completed": return "bg-green-100 text-green-800";
+    case "cancelled": return "bg-red-100 text-red-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case "confirmed": return <CheckCircle2 className="h-4 w-4" />;
+    case "pending": return <Clock className="h-4 w-4" />;
+    case "completed": return <CheckCircle2 className="h-4 w-4" />;
+    case "cancelled": return <AlertCircle className="h-4 w-4" />;
+    default: return <Clock className="h-4 w-4" />;
+  }
+};
 
 export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
 
-  // Mock data - replace with actual API calls
-  const mockBookings: Booking[] = [
-    {
-      id: "1",
-      serviceName: "House Cleaning",
-      providerName: "Nomsa Mbeki",
-      providerRating: 4.8,
-      date: "2025-08-25",
-      time: "10:00",
-      duration: "3 hours",
-      location: "123 Sandton Drive, Sandton, Johannesburg",
-      status: "upcoming",
-      price: 840,
-      providerPhone: "+27 82 123 4567",
-      notes: "Deep clean kitchen and bathrooms"
-    },
-    {
-      id: "2", 
-      serviceName: "Chef & Catering",
-      providerName: "Chef Thabo Mthembu",
-      providerRating: 4.9,
-      date: "2025-08-22",
-      time: "18:00",
-      duration: "4 hours",
-      location: "456 Rosebank Ave, Rosebank, Johannesburg",
-      status: "completed",
-      price: 2200,
-      notes: "Traditional South African braai for 15 guests"
-    },
-    {
-      id: "3",
-      serviceName: "Plumbing",
-      providerName: "Mike van der Merwe",
-      providerRating: 4.7,
-      date: "2025-08-18",
-      time: "14:00",
-      duration: "2 hours",
-      location: "789 Hyde Park Lane, Hyde Park, Johannesburg", 
-      status: "cancelled",
-      price: 560
-    }
-  ];
-
-  const { data: bookings = mockBookings, isLoading } = useQuery({
-    queryKey: ['/api/bookings'],
-    queryFn: async () => {
-      // In production, this would make an actual API call
-      return mockBookings;
-    }
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'upcoming': return <Clock className="h-4 w-4" />;
-      case 'completed': return <Star className="h-4 w-4" />;
-      case 'cancelled': return <MessageSquare className="h-4 w-4" />;
-      default: return <Calendar className="h-4 w-4" />;
-    }
-  };
-
-  const filteredBookings = bookings.filter(booking => 
-    activeTab === 'all' || booking.status === activeTab
+  const upcomingBookings = mockBookings.filter(b => 
+    b.status === "confirmed" || b.status === "pending"
+  );
+  
+  const pastBookings = mockBookings.filter(b => 
+    b.status === "completed" || b.status === "cancelled"
   );
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  const renderBookingCard = (booking: any) => (
+    <Card key={booking.id} className="mb-4 hover:shadow-md transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center space-x-3 mb-2">
+              <h3 className="text-lg font-bold text-gray-900">{booking.service}</h3>
+              <Badge className={`${getStatusColor(booking.status)} capitalize`}>
+                {getStatusIcon(booking.status)}
+                <span className="ml-1">{booking.status}</span>
+              </Badge>
+            </div>
+            <p className="text-gray-600 mb-1">with {booking.provider}</p>
+            <div className="flex items-center text-yellow-500 mb-2">
+              <Star className="h-4 w-4 fill-current mr-1" />
+              <span className="text-sm font-medium">{booking.rating}</span>
+            </div>
+          </div>
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2">
+            <div className="flex items-center text-gray-600">
+              <Calendar className="h-4 w-4 mr-2" />
+              <span className="text-sm">{booking.date} at {booking.time}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <Clock className="h-4 w-4 mr-2" />
+              <span className="text-sm">{booking.duration}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <MapPin className="h-4 w-4 mr-2" />
+              <span className="text-sm">{booking.location}</span>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center text-gray-600">
+              <CreditCard className="h-4 w-4 mr-2" />
+              <span className="text-sm font-semibold text-green-600">R{booking.price}</span>
+            </div>
+            {booking.notes && (
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Notes:</span> {booking.notes}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex space-x-2">
+            {booking.status === "confirmed" && (
+              <>
+                <Button variant="outline" size="sm">
+                  <Phone className="h-4 w-4 mr-1" />
+                  Contact
+                </Button>
+                <Button variant="outline" size="sm">
+                  Reschedule
+                </Button>
+              </>
+            )}
+            {booking.status === "completed" && (
+              <Button variant="outline" size="sm">
+                <Star className="h-4 w-4 mr-1" />
+                Rate Service
+              </Button>
+            )}
+          </div>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-red-600 hover:text-red-700"
+          >
+            {booking.status === "completed" ? "View Receipt" : "Cancel Booking"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MobileNavigation />
+      <EnhancedHeader onBookingClick={() => {}} />
       
-      <div className="max-w-4xl mx-auto p-4 space-y-6">
-        <div className="text-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
-          <p className="text-gray-600">
-            Manage your service appointments and track their status
-          </p>
+          <p className="text-gray-600">Manage your service bookings and appointments</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className="space-y-4">
-            {filteredBookings.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No bookings found
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    You don't have any {activeTab !== 'all' ? activeTab : ''} bookings yet.
-                  </p>
-                  <Button>
-                    Book a Service
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredBookings.map((booking) => (
-                <Card key={booking.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl">{booking.serviceName}</CardTitle>
-                        <div className="flex items-center mt-2">
-                          <User className="h-4 w-4 text-gray-500 mr-2" />
-                          <span className="text-gray-700">{booking.providerName}</span>
-                          <div className="flex items-center ml-3">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span className="text-sm text-gray-600 ml-1">{booking.providerRating}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge className={`${getStatusColor(booking.status)} flex items-center gap-1`}>
-                        {getStatusIcon(booking.status)}
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-5 w-5 text-blue-500 mr-3" />
-                        <div>
-                          <p className="font-medium">{new Date(booking.date).toLocaleDateString('en-ZA', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}</p>
-                          <p className="text-sm text-gray-600">{booking.time} ({booking.duration})</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <MapPin className="h-5 w-5 text-green-500 mr-3" />
-                        <div>
-                          <p className="font-medium text-sm">{booking.location}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {booking.notes && (
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <p className="text-sm text-gray-700">
-                          <strong>Notes:</strong> {booking.notes}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-4 border-t">
-                      <div className="text-xl font-bold text-blue-600">
-                        R{booking.price.toLocaleString()}
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        {booking.status === 'upcoming' && (
-                          <>
-                            {booking.providerPhone && (
-                              <Button variant="outline" size="sm">
-                                <Phone className="h-4 w-4 mr-2" />
-                                Contact
-                              </Button>
-                            )}
-                            <Button variant="outline" size="sm">
-                              Reschedule
-                            </Button>
-                            <Button variant="destructive" size="sm">
-                              Cancel
-                            </Button>
-                          </>
-                        )}
-                        
-                        {booking.status === 'completed' && (
-                          <Button size="sm">
-                            <Star className="h-4 w-4 mr-2" />
-                            Rate Service
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {bookings.filter(b => b.status === 'upcoming').length}
+              <div className="text-2xl font-bold text-blue-600 mb-1">
+                {upcomingBookings.length}
               </div>
               <div className="text-sm text-gray-600">Upcoming</div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {bookings.filter(b => b.status === 'completed').length}
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {pastBookings.filter(b => b.status === "completed").length}
               </div>
               <div className="text-sm text-gray-600">Completed</div>
             </CardContent>
           </Card>
-          
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">
-                R{bookings.filter(b => b.status === 'completed').reduce((sum, b) => sum + b.price, 0).toLocaleString()}
+              <div className="text-2xl font-bold text-purple-600 mb-1">
+                R{mockBookings.reduce((sum, b) => sum + b.price, 0)}
               </div>
               <div className="text-sm text-gray-600">Total Spent</div>
             </CardContent>
           </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-yellow-600 mb-1">
+                {(mockBookings.reduce((sum, b) => sum + b.rating, 0) / mockBookings.length).toFixed(1)}
+              </div>
+              <div className="text-sm text-gray-600">Avg Rating</div>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Bookings Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upcoming">Upcoming Bookings</TabsTrigger>
+            <TabsTrigger value="past">Past Bookings</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="upcoming" className="mt-6">
+            {upcomingBookings.length > 0 ? (
+              <div>
+                {upcomingBookings.map(renderBookingCard)}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No upcoming bookings
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Ready to book your next service? Browse our available services.
+                  </p>
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white">
+                    Browse Services
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="past" className="mt-6">
+            {pastBookings.length > 0 ? (
+              <div>
+                {pastBookings.map(renderBookingCard)}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <CheckCircle2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No past bookings
+                  </h3>
+                  <p className="text-gray-600">
+                    Your completed bookings will appear here.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
