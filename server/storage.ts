@@ -49,8 +49,13 @@ import { randomUUID } from "crypto";
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, userData: Partial<User>): Promise<User>;
+  updateUserLastLogin(id: string): Promise<void>;
+  updateRememberToken(id: string, token: string, expiresAt: Date): Promise<void>;
+  clearRememberToken(id: string): Promise<void>;
   
   // Service Provider operations
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
@@ -75,9 +80,12 @@ export interface IStorage {
   createReview(review: InsertReview): Promise<Review>;
   
   // Payment method operations
-  getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]>;
-  createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
-  deletePaymentMethod(id: string): Promise<void>;
+  getUserPaymentMethods(userId: string): Promise<PaymentMethod[]>;
+  getPaymentMethod(id: string): Promise<PaymentMethod | undefined>;
+  addPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod>;
+  removePaymentMethod(id: string): Promise<void>;
+  unsetDefaultPaymentMethods(userId: string): Promise<void>;
   
   // Location operations (for future DB implementation)
   getProviderLocation(providerId: string): Promise<ProviderLocation | undefined>;
@@ -117,9 +125,46 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserById(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    const [user] = await db.update(users)
+      .set({ ...userData, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserLastLogin(id: string): Promise<void> {
+    await db.update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async updateRememberToken(id: string, token: string, expiresAt: Date): Promise<void> {
+    await db.update(users)
+      .set({ 
+        rememberToken: token, 
+        rememberTokenExpiresAt: expiresAt 
+      })
+      .where(eq(users.id, id));
+  }
+
+  async clearRememberToken(id: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        rememberToken: null, 
+        rememberTokenExpiresAt: null 
+      })
+      .where(eq(users.id, id));
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
@@ -264,18 +309,39 @@ export class DatabaseStorage implements IStorage {
     return newReview;
   }
 
-  async getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]> {
-    return await db.select().from(paymentMethods)
-      .where(eq(paymentMethods.userId, userId));
+  async getUserPaymentMethods(userId: string): Promise<PaymentMethod[]> {
+    const result = await db.select().from(paymentMethods)
+      .where(eq(paymentMethods.userId, userId))
+      .orderBy(desc(paymentMethods.isDefault), desc(paymentMethods.createdAt));
+    return result;
   }
 
-  async createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
-    const [newPaymentMethod] = await db.insert(paymentMethods).values(paymentMethod).returning();
-    return newPaymentMethod;
+  async getPaymentMethod(id: string): Promise<PaymentMethod | undefined> {
+    const [result] = await db.select().from(paymentMethods).where(eq(paymentMethods.id, id));
+    return result || undefined;
   }
 
-  async deletePaymentMethod(id: string): Promise<void> {
+  async addPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [result] = await db.insert(paymentMethods).values(paymentMethod).returning();
+    return result;
+  }
+
+  async updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod> {
+    const [result] = await db.update(paymentMethods)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(paymentMethods.id, id))
+      .returning();
+    return result;
+  }
+
+  async removePaymentMethod(id: string): Promise<void> {
     await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+  }
+
+  async unsetDefaultPaymentMethods(userId: string): Promise<void> {
+    await db.update(paymentMethods)
+      .set({ isDefault: false })
+      .where(eq(paymentMethods.userId, userId));
   }
 
   async getProviderLocation(providerId: string): Promise<ProviderLocation | undefined> {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, MessageCircle, Calendar, Settings, Home, Briefcase } from "lucide-react";
+import { Menu, X, Search, Bell, User, MessageCircle, Calendar, Settings, Home, Briefcase, LogOut, CreditCard } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   DropdownMenu,
@@ -10,6 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AuthModal from "./auth-modal";
+import UserProfileModal from "./user-profile-modal";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
@@ -34,6 +37,9 @@ export default function EnhancedHeader({
   const [, setLocation] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
@@ -189,9 +195,9 @@ export default function EnhancedHeader({
                       </p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setLocation("/profile")}>
+                    <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
                       <User className="mr-2 h-4 w-4" />
-                      Profile
+                      Profile & Settings
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setLocation("/bookings")}>
                       <Calendar className="mr-2 h-4 w-4" />
@@ -211,7 +217,7 @@ export default function EnhancedHeader({
             ) : (
               <>
                 <Button
-                  onClick={() => setLocation("/auth")}
+                  onClick={() => setIsAuthModalOpen(true)}
                   variant="ghost"
                   className="text-gray-700 hover:text-blue-600 font-medium"
                   data-testid="button-sign-in"
@@ -374,6 +380,24 @@ export default function EnhancedHeader({
           </div>
         )}
       </div>
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(user) => {
+          setCurrentUser(user);
+        }}
+      />
+
+      {/* User Profile Modal */}
+      {currentUser && (
+        <UserProfileModal 
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          user={currentUser}
+        />
+      )}
     </header>
   );
 }

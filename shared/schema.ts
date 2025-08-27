@@ -7,7 +7,7 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
-  username: text("username").notNull().unique(),
+  username: text("username").unique(),
   password: text("password"),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -21,8 +21,18 @@ export const users = pgTable("users", {
   profileImage: text("profile_image"),
   isProvider: boolean("is_provider").default(false),
   isVerified: boolean("is_verified").default(false),
+  // Social authentication providers
+  googleId: text("google_id"),
+  appleId: text("apple_id"),
+  twitterId: text("twitter_id"),
+  instagramId: text("instagram_id"),
+  authProvider: text("auth_provider").default("email"), // email, google, apple, twitter, instagram
+  // Password storage for remember me functionality
+  rememberToken: text("remember_token"),
+  rememberTokenExpiresAt: timestamp("remember_token_expires_at"),
+  // User preferences and settings
   preferences: jsonb("preferences"), // UI preferences, notification settings
-  notificationSettings: jsonb("notification_settings"),
+  notificationSettings: jsonb("notification_settings").default('{"email": true, "sms": true, "push": true, "marketing": false}'),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -81,7 +91,7 @@ export const services = pgTable("services", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const bookings: ReturnType<typeof pgTable> = pgTable("bookings", {
+export const bookings = pgTable("bookings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   customerId: varchar("customer_id").references(() => users.id).notNull(),
   providerId: varchar("provider_id").references(() => serviceProviders.id),

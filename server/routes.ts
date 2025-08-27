@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { registerTrainingRoutes } from "./training-routes";
+import { registerAuthRoutes } from "./auth-routes";
+import { registerPaymentRoutes } from "./payment-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -793,6 +795,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update notification preferences" });
     }
   });
+
+  // Register authentication routes
+  registerAuthRoutes(app);
+
+  // Register payment routes  
+  registerPaymentRoutes(app);
 
   // Register training center routes
   registerTrainingRoutes(app);
