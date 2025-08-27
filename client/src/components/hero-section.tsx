@@ -16,23 +16,17 @@ export default function HeroSection({ onBookService, onLearnMore }: HeroSectionP
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 via-white to-indigo-50 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-      </div>
-
+    <section className="hero-gradient overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Hero Content */}
           <div className="text-center lg:text-left">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
               All the help your{" "}
-              <span className="text-blue-600">home needs</span>
+              <span className="text-white">home needs.</span>
             </h1>
             
-            <p className="mt-6 text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl">
+            <p className="mt-6 text-lg md:text-xl text-white/90 leading-relaxed max-w-2xl">
               Connect with verified, insured professionals for house cleaning, repairs, 
               gardening, and specialized care services. Book in minutes, get quality results.
             </p>
@@ -42,35 +36,35 @@ export default function HeroSection({ onBookService, onLearnMore }: HeroSectionP
               <Button 
                 size="lg" 
                 onClick={onBookService}
-                className="text-lg px-8 py-4 bg-blue-600 hover:bg-blue-700"
+                className="text-lg px-8 py-4 bg-white text-sweepsouth-purple hover:bg-gray-50"
                 data-testid="hero-button-book-now"
               >
-                Book a Service Now
+                Book a Service
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 onClick={onLearnMore}
-                className="text-lg px-8 py-4"
+                className="text-lg px-8 py-4 border-white text-white hover:bg-white/10"
                 data-testid="hero-button-how-it-works"
               >
-                How It Works
+                Find Full-Time Help
               </Button>
             </div>
 
             {/* Quick Stats */}
             <div className="mt-12 grid grid-cols-3 gap-8">
               <div className="text-center lg:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-blue-600" data-testid="stat-services">245+</div>
-                <div className="text-sm text-gray-600">Services Completed Today</div>
+                <div className="text-2xl md:text-3xl font-bold text-white" data-testid="stat-services">245+</div>
+                <div className="text-sm text-white/70">Services Completed Today</div>
               </div>
               <div className="text-center lg:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-blue-600" data-testid="stat-providers">500+</div>
-                <div className="text-sm text-gray-600">Verified Providers</div>
+                <div className="text-2xl md:text-3xl font-bold text-white" data-testid="stat-providers">500+</div>
+                <div className="text-sm text-white/70">Verified Providers</div>
               </div>
               <div className="text-center lg:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-blue-600" data-testid="stat-rating">4.8★</div>
-                <div className="text-sm text-gray-600">Average Rating</div>
+                <div className="text-2xl md:text-3xl font-bold text-white" data-testid="stat-rating">4.8★</div>
+                <div className="text-sm text-white/70">Average Rating</div>
               </div>
             </div>
           </div>

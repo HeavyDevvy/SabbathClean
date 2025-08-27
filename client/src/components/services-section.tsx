@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { 
   Home, Leaf, Shirt, Wrench, Heart, Users, 
-  Clock, MapPin, Star, Shield 
+  Clock, MapPin, Star, Shield, Building, Package 
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type { Service } from "@shared/schema";
@@ -12,6 +12,57 @@ interface ServicesSectionProps {
 }
 
 export default function ServicesSection({ onSelectService }: ServicesSectionProps) {
+  // SweepSouth-style service cards
+  const sweepSouthServices = [
+    {
+      id: 'indoor-cleaning',
+      name: 'Indoor\nCleaning',
+      description: '3.5 – 10 hours of top to bottom comprehensive cleaning of your home',
+      icon: Home,
+      duration: '3.5-10 hours',
+      startingPrice: 150,
+    },
+    {
+      id: 'outdoor-services',
+      name: 'Outdoor\nServices', 
+      description: 'Get help with outdoor tasks and garden maintenance',
+      icon: Leaf,
+      duration: '2-6 hours',
+      startingPrice: 120,
+    },
+    {
+      id: 'office-cleaning',
+      name: 'Office\nCleaning',
+      description: 'Get a half-day or full-day clean to keep your office spotless and productive',
+      icon: Building,
+      duration: '4-8 hours', 
+      startingPrice: 200,
+    },
+    {
+      id: 'moving-cleaning',
+      name: 'Moving\nCleaning',
+      description: 'Essential service to ensure a spotless home and stress-free moving experience',
+      icon: Package,
+      duration: '4-8 hours',
+      startingPrice: 300,
+    },
+    {
+      id: 'laundry-ironing',
+      name: 'Laundry\n& Ironing',
+      description: 'Get your laundry and ironing done by expert workers with top ratings for laundry that\'s clean, soft, neat, and ready to use.',
+      icon: Shirt,
+      duration: '2-4 hours',
+      startingPrice: 80,
+    },
+    {
+      id: 'elder-care',
+      name: 'Elder\nCare',
+      description: 'Help seniors with their daily lives and admin, while ensuring they stay safe and comfortable at home',
+      icon: Heart,
+      duration: '4-8 hours',
+      startingPrice: 180,
+    }
+  ];
   // Mock services data - in real app, this would come from API
   const services: Service[] = [
     {
@@ -148,16 +199,49 @@ export default function ServicesSection({ onSelectService }: ServicesSectionProp
 
   return (
     <section id="services" className="py-16 lg:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header - SweepSouth style */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            Professional Home Services
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Choose the service you need
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            From regular house cleaning to specialized care, find the perfect professional 
-            for every home service need. All providers are verified, insured, and rated by our community.
-          </p>
+        </div>
+
+        {/* SweepSouth-style Service Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {sweepSouthServices.map((service) => {
+            const IconComponent = service.icon;
+            return (
+              <Card 
+                key={service.id}
+                className="bg-white hover:bg-sweepsouth-purple-light border border-gray-200 hover:border-sweepsouth-purple transition-all duration-300 cursor-pointer group"
+                onClick={() => onSelectService?.(service.id)}
+                data-testid={`service-card-${service.id}`}
+              >
+                <CardContent className="p-8 text-center">
+                  <div className="mb-6">
+                    <IconComponent className="w-12 h-12 mx-auto text-sweepsouth-purple group-hover:text-sweepsouth-purple" />
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 whitespace-pre-line leading-tight">
+                    {service.name}
+                  </h3>
+                  
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                    {service.description}
+                  </p>
+                  
+                  <div className="text-sweepsouth-purple font-semibold">
+                    Starting from {formatCurrency(service.startingPrice)}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 mt-1">
+                    {service.duration}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Service Categories Overview */}

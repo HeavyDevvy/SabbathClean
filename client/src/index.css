@@ -5,25 +5,32 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 0%;
+    /* SweepSouth inspired colors - Purple primary with clean whites */
+    --primary: 268 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 268 15% 96%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 268 15% 96%;
+    --accent-foreground: 0 0% 0%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 268 100% 50%;
+    --radius: 0.5rem;
+    
+    /* SweepSouth specific colors */
+    --sweepsouth-purple: 268 100% 50%;
+    --sweepsouth-purple-light: 268 15% 96%;
+    --sweepsouth-gray: 0 0% 45%;
+    --sweepsouth-gray-light: 0 0% 96%;
   }
 
   .dark {
@@ -72,5 +79,30 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  /* SweepSouth inspired utility classes */
+  .bg-sweepsouth-purple {
+    background-color: hsl(var(--sweepsouth-purple));
+  }
+  
+  .text-sweepsouth-purple {
+    color: hsl(var(--sweepsouth-purple));
+  }
+  
+  .bg-sweepsouth-purple-light {
+    background-color: hsl(var(--sweepsouth-purple-light));
+  }
+  
+  .text-sweepsouth-gray {
+    color: hsl(var(--sweepsouth-gray));
+  }
+  
+  .bg-sweepsouth-gray-light {
+    background-color: hsl(var(--sweepsouth-gray-light));
+  }
+  
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(var(--sweepsouth-purple)) 0%, hsl(268, 85%, 45%) 100%);
   }
 }

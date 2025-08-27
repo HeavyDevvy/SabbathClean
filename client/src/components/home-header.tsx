@@ -29,23 +29,23 @@ export default function HomeHeader({
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-2xl font-bold text-blue-600" data-testid="logo">
+            <h1 className="text-2xl font-bold text-sweepsouth-purple" data-testid="logo">
               Berry Events
             </h1>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium" data-testid="nav-services">
+            <a href="#services" className="text-gray-700 hover:text-sweepsouth-purple font-medium" data-testid="nav-services">
               Services
             </a>
-            <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 font-medium" data-testid="nav-how-it-works">
+            <a href="#how-it-works" className="text-gray-700 hover:text-sweepsouth-purple font-medium" data-testid="nav-how-it-works">
               How It Works
             </a>
-            <a href="#providers" className="text-gray-700 hover:text-blue-600 font-medium" data-testid="nav-become-provider">
+            <a href="#providers" className="text-gray-700 hover:text-sweepsouth-purple font-medium" data-testid="nav-become-provider">
               Become a Provider
             </a>
-            <a href="#support" className="text-gray-700 hover:text-blue-600 font-medium" data-testid="nav-support">
+            <a href="#support" className="text-gray-700 hover:text-sweepsouth-purple font-medium" data-testid="nav-support">
               Support
             </a>
           </nav>
