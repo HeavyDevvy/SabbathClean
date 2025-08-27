@@ -275,24 +275,9 @@ export default function ModernServiceModal({
 
   const handleAddressChange = (address: string) => {
     setFormData(prev => ({ ...prev, address }));
-    if (address.length > 5) {
-      toast({
-        title: "Location Detected",
-        description: "Address has been located successfully"
-      });
-    }
   };
 
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(() => {
-        toast({
-          title: "Location Found",
-          description: "Current location has been set"
-        });
-      });
-    }
-  };
+
 
   const handleNext = () => {
     if (step < currentConfig.steps) setStep(step + 1);
@@ -352,31 +337,19 @@ export default function ModernServiceModal({
         <div>
           <Label htmlFor="address">Service Address *</Label>
           <div className="space-y-3">
-            <div className="flex gap-2">
-              <Input
-                id="address"
-                placeholder="Enter your address for GPS location verification"
-                value={formData.address}
-                onChange={(e) => handleAddressChange(e.target.value)}
-                className="flex-1"
-                data-testid="input-address"
-              />
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm"
-                onClick={getCurrentLocation}
-                data-testid="button-current-location"
-                title="Use current GPS location"
-              >
-                <MapPin className="h-4 w-4" />
-              </Button>
-            </div>
+            <Input
+              id="address"
+              placeholder="Enter your service address"
+              value={formData.address}
+              onChange={(e) => handleAddressChange(e.target.value)}
+              className="w-full"
+              data-testid="input-address"
+            />
             {formData.address && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                 <p className="text-xs text-green-700 flex items-center">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Address entered - GPS coordinates will be verified for accurate provider matching within 20km radius
+                  Address confirmed - Provider matching within 20km radius
                 </p>
               </div>
             )}
