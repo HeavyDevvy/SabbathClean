@@ -44,6 +44,7 @@ export default function EnhancedHome() {
       {/* Enhanced Header with authentication state */}
       <EnhancedHeader 
         onBookingClick={handleBookingClick}
+        onServiceSelect={handleServiceSelect}
         isAuthenticated={isAuthenticated}
         user={user}
         notificationCount={notificationCount}
@@ -77,19 +78,21 @@ export default function EnhancedHome() {
       <Footer />
 
       {/* Standardized Modern Service Modal */}
-      <ModernServiceModal
-        isOpen={isBookingModalOpen}
-        onClose={() => {
-          setIsBookingModalOpen(false);
-          setSelectedService("");
-        }}
-        serviceId={selectedService || "house-cleaning"}
-        onBookingComplete={(bookingData) => {
-          console.log("Booking completed:", bookingData);
-          setIsBookingModalOpen(false);
-          setSelectedService(""); // Clear selected service to prevent card interference
-        }}
-      />
+      {isBookingModalOpen && (
+        <ModernServiceModal
+          isOpen={isBookingModalOpen}
+          onClose={() => {
+            setIsBookingModalOpen(false);
+            setSelectedService("");
+          }}
+          serviceId={selectedService || "house-cleaning"}
+          onBookingComplete={(bookingData) => {
+            console.log("Booking completed:", bookingData);
+            setIsBookingModalOpen(false);
+            setSelectedService(""); // Clear selected service to prevent card interference
+          }}
+        />
+      )}
     </div>
   );
 }
