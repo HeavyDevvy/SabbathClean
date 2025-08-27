@@ -220,29 +220,6 @@ const services: Service[] = [
     bookingSteps: 4
   },
 
-  // GARDEN CARE
-  {
-    id: "garden-care",
-    category: "Outdoor Services",
-    title: "Garden Care",
-    description: "Professional garden maintenance and landscaping services to keep your outdoor spaces beautiful",
-    price: "From R90/hour",
-    duration: "2-8 hours",
-    serviceTypes: [
-      "Regular Garden Maintenance",
-      "Landscaping Design & Installation",
-      "Tree Trimming & Removal",
-      "Lawn Care & Mowing",
-      "Irrigation System Installation",
-      "Garden Cleanup Services",
-      "Plant Care & Consultation"
-    ],
-    features: ["Garden specialists", "Professional tools", "Plant expertise", "Design consultation"],
-    icon: TreePine,
-    gradient: "from-green-600 to-emerald-600",
-    bookingSteps: 4
-  },
-
   // WAITERING SERVICES
   {
     id: "waitering",
