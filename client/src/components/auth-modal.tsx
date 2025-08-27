@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   Eye, 
   EyeOff, 
@@ -117,8 +117,66 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
 
   const socialLoginMutation = useMutation({
     mutationFn: async (provider: string) => {
-      // Redirect to social auth endpoint
-      window.location.href = `/api/auth/${provider}`;
+      return new Promise<any>((resolve, reject) => {
+        // Open popup window for social authentication
+        const popup = window.open(
+          `/api/auth/${provider}`,
+          `${provider}_auth`,
+          'width=500,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        if (!popup) {
+          reject(new Error('Popup blocked. Please allow popups and try again.'));
+          return;
+        }
+
+        // Listen for messages from popup
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) {
+            return;
+          }
+
+          try {
+            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+            
+            if (data && data.user && data.accessToken) {
+              // Store auth data
+              localStorage.setItem('accessToken', data.accessToken);
+              if (data.refreshToken) {
+                localStorage.setItem('refreshToken', data.refreshToken);
+              }
+              
+              window.removeEventListener('message', handleMessage);
+              resolve(data);
+            }
+          } catch (error) {
+            reject(new Error('Authentication failed'));
+          }
+        };
+
+        // Check if popup is closed manually
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            window.removeEventListener('message', handleMessage);
+            reject(new Error('Authentication cancelled'));
+          }
+        }, 1000);
+
+        window.addEventListener('message', handleMessage);
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Login Successful",
+        description: `Welcome, ${data.user.firstName}! You're now logged in.`,
+      });
+      
+      if (onSuccess) {
+        onSuccess(data.user);
+      }
+      
+      onClose();
     },
     onError: (error: any) => {
       toast({
@@ -185,6 +243,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               <X className="h-4 w-4" />
             </Button>
           </div>
+          <DialogDescription className="text-center text-gray-600">
+            {isLogin 
+              ? 'Welcome back! Sign in to access your Berry Events account.' 
+              : 'Join Berry Events to book premium home services in South Africa.'
+            }
+          </DialogDescription>
           <div id="auth-modal-description" className="sr-only">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
           </div>
