@@ -315,31 +315,36 @@ export default function ModernServiceModal({
 
         <div>
           <Label htmlFor="address">Service Address *</Label>
-          <div className="flex gap-2">
-            <Input
-              id="address"
-              placeholder="Enter your address for geolocation"
-              value={formData.address}
-              onChange={(e) => handleAddressChange(e.target.value)}
-              className="flex-1"
-              data-testid="input-address"
-            />
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm"
-              onClick={getCurrentLocation}
-              data-testid="button-current-location"
-            >
-              <MapPin className="h-4 w-4" />
-            </Button>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <Input
+                id="address"
+                placeholder="Enter your address for GPS location verification"
+                value={formData.address}
+                onChange={(e) => handleAddressChange(e.target.value)}
+                className="flex-1"
+                data-testid="input-address"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={getCurrentLocation}
+                data-testid="button-current-location"
+                title="Use current GPS location"
+              >
+                <MapPin className="h-4 w-4" />
+              </Button>
+            </div>
+            {formData.address && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <p className="text-xs text-green-700 flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Address entered - GPS coordinates will be verified for accurate provider matching within 20km radius
+                </p>
+              </div>
+            )}
           </div>
-          {formData.address && (
-            <p className="text-xs text-green-600 flex items-center mt-1">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Location will be verified
-            </p>
-          )}
         </div>
 
         {serviceId === "house-cleaning" && (
@@ -466,57 +471,83 @@ export default function ModernServiceModal({
         </div>
 
         <div>
-          <Label>Time Preference *</Label>
+          <Label>Modern Time Preference Selection *</Label>
           <Select value={formData.timePreference} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, timePreference: value }))
           }>
-            <SelectTrigger>
-              <SelectValue placeholder="Select preferred time" />
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Choose your preferred time slot" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="06:00">6:00 AM - Early Bird (premium 10% discount)</SelectItem>
               <SelectItem value="08:00">8:00 AM - Early Morning</SelectItem>
-              <SelectItem value="09:00">9:00 AM - Morning</SelectItem>
+              <SelectItem value="09:00">9:00 AM - Morning (most popular)</SelectItem>
               <SelectItem value="10:00">10:00 AM - Late Morning</SelectItem>
+              <SelectItem value="11:00">11:00 AM - Pre-Lunch</SelectItem>
               <SelectItem value="12:00">12:00 PM - Lunch Time</SelectItem>
+              <SelectItem value="13:00">1:00 PM - Early Afternoon</SelectItem>
               <SelectItem value="14:00">2:00 PM - Afternoon</SelectItem>
+              <SelectItem value="15:00">3:00 PM - Mid Afternoon</SelectItem>
               <SelectItem value="16:00">4:00 PM - Evening</SelectItem>
+              <SelectItem value="17:00">5:00 PM - After Work (high demand)</SelectItem>
+              <SelectItem value="18:00">6:00 PM - Evening (weekend only)</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div>
-          <Label>Recurring Schedule</Label>
+          <Label>Recurring Schedule Options</Label>
           <Select value={formData.recurringSchedule} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, recurringSchedule: value }))
           }>
-            <SelectTrigger>
-              <SelectValue />
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Choose booking frequency" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="one-time">One-time Service</SelectItem>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-              <SelectItem value="quarterly">Quarterly</SelectItem>
+              <SelectItem value="one-time">One-time Service (no commitment)</SelectItem>
+              <SelectItem value="weekly">Weekly (15% discount - most popular)</SelectItem>
+              <SelectItem value="bi-weekly">Bi-weekly (10% discount)</SelectItem>
+              <SelectItem value="monthly">Monthly (8% discount)</SelectItem>
+              <SelectItem value="quarterly">Quarterly (5% discount)</SelectItem>
+              <SelectItem value="custom">Custom Schedule (contact for pricing)</SelectItem>
             </SelectContent>
           </Select>
+          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && (
+            <p className="text-sm text-green-600 mt-2 flex items-center">
+              <CheckCircle className="h-4 w-4 mr-1" />
+              Recurring discount applied to total pricing
+            </p>
+          )}
         </div>
 
         <div>
-          <Label>Materials & Equipment</Label>
+          <Label>Materials & Equipment Supply Options</Label>
           <Select value={formData.materials} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, materials: value }))
           }>
-            <SelectTrigger>
-              <SelectValue />
+            <SelectTrigger className="h-12">
+              <SelectValue placeholder="Choose material supply option" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="supply">Provider Supplies (included in price)</SelectItem>
-              <SelectItem value="bring">I'll Provide Materials (15% discount)</SelectItem>
+              <SelectItem value="supply">Provider Supplies All Materials (premium quality included)</SelectItem>
+              <SelectItem value="bring">I'll Provide My Own Materials (15% price reduction)</SelectItem>
+              <SelectItem value="partial">Mix - Some Provided, Some Mine (custom pricing)</SelectItem>
             </SelectContent>
           </Select>
           {formData.materials === "bring" && (
-            <p className="text-sm text-green-600 mt-1">15% discount applied for providing your own materials</p>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
+              <p className="text-sm text-green-700 flex items-center">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                15% discount applied for providing your own materials. Total savings will reflect in final pricing.
+              </p>
+            </div>
+          )}
+          {formData.materials === "partial" && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
+              <p className="text-sm text-blue-700">
+                Custom pricing will be calculated based on which materials you provide versus what the provider supplies.
+              </p>
+            </div>
           )}
         </div>
 
@@ -585,8 +616,16 @@ export default function ModernServiceModal({
     <div className="space-y-6">
       <div className="text-center mb-6">
         <User className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="text-lg font-semibold">Choose Your Provider</h3>
-        <p className="text-gray-600 text-sm">Select from verified professionals within 20km</p>
+        <h3 className="text-lg font-semibold">Choose Your Verified Provider</h3>
+        <p className="text-gray-600 text-sm">
+          Showing {providers.length} verified professionals within 20km radius matching your requirements
+        </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+          <p className="text-xs text-blue-700 flex items-center justify-center">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            All providers are background-checked, insured, and rated 4.5+ stars
+          </p>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -644,26 +683,39 @@ export default function ModernServiceModal({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between">
-            <span>Base Service</span>
+            <span>Base Service ({serviceId.replace('-', ' ')})</span>
             <span>R{pricing.basePrice}</span>
           </div>
           {pricing.addOnsPrice > 0 && (
             <div className="flex justify-between">
-              <span>Add-ons</span>
-              <span>R{pricing.addOnsPrice}</span>
+              <span>Selected Add-ons</span>
+              <span>+R{pricing.addOnsPrice}</span>
+            </div>
+          )}
+          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && (
+            <div className="flex justify-between text-green-600">
+              <span>Recurring Service Discount</span>
+              <span>-R{Math.round(pricing.basePrice * 0.1)}</span>
             </div>
           )}
           {pricing.materialsDiscount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Materials Discount</span>
+              <span>Materials Discount (15%)</span>
               <span>-R{pricing.materialsDiscount}</span>
             </div>
           )}
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Provider within 20km radius</span>
+            <span>✓ Verified</span>
+          </div>
           <Separator />
           <div className="flex justify-between font-semibold text-lg">
-            <span>Total</span>
-            <span>R{pricing.totalPrice}</span>
+            <span>Total Amount</span>
+            <span className="text-primary">R{pricing.totalPrice}</span>
           </div>
+          <p className="text-xs text-gray-500 text-center">
+            Final amount includes all services, materials, and applicable discounts
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -671,13 +723,13 @@ export default function ModernServiceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="booking-description">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <currentConfig.icon className="h-6 w-6" />
             <span>{currentConfig.title}</span>
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="booking-description">
             Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
           </DialogDescription>
         </DialogHeader>

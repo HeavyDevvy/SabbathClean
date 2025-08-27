@@ -115,7 +115,10 @@ export default function Services({ onServiceSelect }: ServicesProps) {
               <div 
                 key={service.id}
                 className="relative group cursor-pointer"
-                onClick={() => onServiceSelect(service.id)}
+                onClick={() => {
+                  setSelectedServiceId(service.id);
+                  setShowServiceModal(true);
+                }}
                 data-testid={`card-service-${service.id}`}
               >
                 <div className="bg-white rounded-2xl p-8 text-center hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100">
@@ -148,13 +151,14 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                   {/* Enhanced booking buttons */}
                   <div className="flex gap-2">
                     <button 
-                      className="flex-1 bg-white/90 hover:bg-white text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 group-hover:shadow-lg"
+                      className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 group-hover:shadow-lg"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onServiceSelect(service.id);
+                        setSelectedServiceId(service.id);
+                        setShowServiceModal(true);
                       }}
                     >
-                      Quick Book
+                      Book Now
                     </button>
                     <Button
                       variant="outline"
