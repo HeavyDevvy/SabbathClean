@@ -297,14 +297,18 @@ export default function ModernServiceModal({
     };
 
     console.log("Processing booking:", bookingData);
-    onBookingComplete(bookingData);
     
     toast({
       title: "Booking Confirmed!",
-      description: `Your ${currentConfig.title} has been booked successfully.`
+      description: `${currentConfig.title} booked for ${formData.preferredDate} at ${formData.timePreference}. Provider: ${formData.selectedProvider?.name}. Total: R${pricing.totalPrice}`,
+      duration: 5000,
     });
     
+    // Close modal first to prevent repeated bookings
     onClose();
+    setTimeout(() => {
+      onBookingComplete(bookingData);
+    }, 300);
   };
 
   const renderStep1 = () => (
@@ -488,18 +492,11 @@ export default function ModernServiceModal({
               <SelectValue placeholder="Choose your preferred time slot" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="06:00">6:00 AM - Early Bird (premium 10% discount)</SelectItem>
-              <SelectItem value="08:00">8:00 AM - Early Morning</SelectItem>
-              <SelectItem value="09:00">9:00 AM - Morning (most popular)</SelectItem>
-              <SelectItem value="10:00">10:00 AM - Late Morning</SelectItem>
-              <SelectItem value="11:00">11:00 AM - Pre-Lunch</SelectItem>
-              <SelectItem value="12:00">12:00 PM - Lunch Time</SelectItem>
-              <SelectItem value="13:00">1:00 PM - Early Afternoon</SelectItem>
-              <SelectItem value="14:00">2:00 PM - Afternoon</SelectItem>
-              <SelectItem value="15:00">3:00 PM - Mid Afternoon</SelectItem>
-              <SelectItem value="16:00">4:00 PM - Evening</SelectItem>
-              <SelectItem value="17:00">5:00 PM - After Work (high demand)</SelectItem>
-              <SelectItem value="18:00">6:00 PM - Evening (weekend only)</SelectItem>
+              <SelectItem value="08:00">08:00 - Morning</SelectItem>
+              <SelectItem value="10:00">10:00 - Late Morning</SelectItem>
+              <SelectItem value="12:00">12:00 - Noon</SelectItem>
+              <SelectItem value="14:00">14:00 - Afternoon</SelectItem>
+              <SelectItem value="16:00">16:00 - Late Afternoon</SelectItem>
             </SelectContent>
           </Select>
         </div>
