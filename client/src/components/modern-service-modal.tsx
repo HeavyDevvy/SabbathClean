@@ -19,7 +19,12 @@ import {
   Star,
   CheckCircle,
   CreditCard,
-  Building
+  Building,
+  Zap,
+  TreePine,
+  ChefHat,
+  Users,
+  Wrench
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -194,6 +199,181 @@ export default function ModernServiceModal({
         { id: "toilet-repair", name: "Toilet Repair", price: 180 },
         { id: "water-heater", name: "Water Heater Service", price: 400 }
       ]
+    },
+    "electrical": {
+      title: "Electrical Service",
+      icon: Zap,
+      basePrice: 450,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment", multiplier: 1.0 },
+        { value: "house", label: "House", multiplier: 1.2 },
+        { value: "townhouse", label: "Townhouse", multiplier: 1.1 },
+        { value: "villa", label: "Villa", multiplier: 1.4 }
+      ],
+      urgencyLevels: [
+        { value: "emergency", label: "Emergency (24/7)", multiplier: 2.5 },
+        { value: "urgent", label: "Urgent (Same Day)", multiplier: 1.8 },
+        { value: "standard", label: "Standard (Next Day)", multiplier: 1.0 },
+        { value: "scheduled", label: "Scheduled (Flexible)", multiplier: 0.9 }
+      ],
+      addOns: [
+        { id: "outlet-install", name: "Outlet Installation", price: 180 },
+        { id: "light-fixture", name: "Light Fixture Installation", price: 220 },
+        { id: "ceiling-fan", name: "Ceiling Fan Installation", price: 350 },
+        { id: "electrical-panel", name: "Electrical Panel Service", price: 800 }
+      ]
+    },
+    "garden-maintenance": {
+      title: "Garden Maintenance Service",
+      icon: TreePine,
+      basePrice: 320,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
+        { value: "house", label: "House Garden", multiplier: 1.0 },
+        { value: "townhouse", label: "Townhouse Garden", multiplier: 0.9 },
+        { value: "villa", label: "Villa Estate", multiplier: 1.4 }
+      ],
+      gardenSizes: [
+        { value: "small", label: "Small (0-100m²)", multiplier: 1.0 },
+        { value: "medium", label: "Medium (100-300m²)", multiplier: 1.3 },
+        { value: "large", label: "Large (300-500m²)", multiplier: 1.6 },
+        { value: "estate", label: "Estate (500m²+)", multiplier: 2.0 }
+      ],
+      gardenConditions: [
+        { value: "well-maintained", label: "Well Maintained", multiplier: 1.0 },
+        { value: "needs-attention", label: "Needs Attention", multiplier: 1.2 },
+        { value: "overgrown", label: "Overgrown", multiplier: 1.5 },
+        { value: "neglected", label: "Severely Neglected", multiplier: 1.8 }
+      ],
+      addOns: [
+        { id: "lawn-care", name: "Lawn Mowing & Edging", price: 150 },
+        { id: "pruning", name: "Tree & Shrub Pruning", price: 200 },
+        { id: "weeding", name: "Weeding & Cleanup", price: 120 },
+        { id: "seasonal-prep", name: "Seasonal Preparation", price: 100 }
+      ]
+    },
+    "chef-catering": {
+      title: "Chef & Catering Service",
+      icon: ChefHat,
+      basePrice: 850,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment/Small Kitchen", multiplier: 1.0 },
+        { value: "house", label: "House Kitchen", multiplier: 1.1 },
+        { value: "townhouse", label: "Townhouse Kitchen", multiplier: 1.05 },
+        { value: "villa", label: "Villa/Large Kitchen", multiplier: 1.3 }
+      ],
+      cuisineTypes: [
+        { value: "south-african", label: "South African Traditional", multiplier: 1.0 },
+        { value: "west-african", label: "West African", multiplier: 1.1 },
+        { value: "east-african", label: "East African", multiplier: 1.1 },
+        { value: "north-african", label: "North African", multiplier: 1.2 },
+        { value: "halal", label: "Halal Certified", multiplier: 1.1 }
+      ],
+      eventSizes: [
+        { value: "intimate", label: "Intimate (2-8 people)", multiplier: 1.0 },
+        { value: "small", label: "Small (9-15 people)", multiplier: 1.5 },
+        { value: "medium", label: "Medium (16-30 people)", multiplier: 2.2 },
+        { value: "large", label: "Large (31-50 people)", multiplier: 3.5 }
+      ],
+      addOns: [
+        { id: "ingredient-sourcing", name: "Premium Ingredient Sourcing", price: 200 },
+        { id: "table-service", name: "Table Service & Cleanup", price: 300 },
+        { id: "dietary-customization", name: "Dietary Customization", price: 150 },
+        { id: "cooking-demonstration", name: "Live Cooking Demonstration", price: 250 }
+      ]
+    },
+    "event-staff": {
+      title: "Event Staffing Service",
+      icon: Users,
+      basePrice: 180,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment/Small Space", multiplier: 0.8 },
+        { value: "house", label: "House Event", multiplier: 1.0 },
+        { value: "townhouse", label: "Townhouse Event", multiplier: 0.9 },
+        { value: "villa", label: "Villa/Large Event", multiplier: 1.4 }
+      ],
+      staffTypes: [
+        { value: "waiters", label: "Professional Waiters", price: 180 },
+        { value: "bartenders", label: "Bartenders", price: 220 },
+        { value: "security", label: "Event Security", price: 300 },
+        { value: "coordinators", label: "Event Coordinators", price: 400 }
+      ],
+      eventSizes: [
+        { value: "small", label: "Small (10-25 guests)", multiplier: 1.0 },
+        { value: "medium", label: "Medium (26-50 guests)", multiplier: 1.5 },
+        { value: "large", label: "Large (51-100 guests)", multiplier: 2.5 },
+        { value: "corporate", label: "Corporate (100+ guests)", multiplier: 4.0 }
+      ],
+      addOns: [
+        { id: "uniform-rental", name: "Professional Uniform Rental", price: 50 },
+        { id: "overtime-coverage", name: "Overtime Coverage", price: 120 },
+        { id: "event-setup", name: "Event Setup Assistance", price: 200 },
+        { id: "cleanup-service", name: "Post-Event Cleanup", price: 250 }
+      ]
+    },
+    "handyman": {
+      title: "Handyman Service",
+      icon: Wrench,
+      basePrice: 350,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment", multiplier: 1.0 },
+        { value: "house", label: "House", multiplier: 1.2 },
+        { value: "townhouse", label: "Townhouse", multiplier: 1.1 },
+        { value: "villa", label: "Villa", multiplier: 1.4 }
+      ],
+      serviceTypes: [
+        { value: "general-repairs", label: "General Repairs", multiplier: 1.0 },
+        { value: "furniture-assembly", label: "Furniture Assembly", multiplier: 0.8 },
+        { value: "wall-mounting", label: "Wall Mounting & Hanging", multiplier: 0.9 },
+        { value: "home-maintenance", label: "Home Maintenance", multiplier: 1.2 }
+      ],
+      urgencyLevels: [
+        { value: "emergency", label: "Emergency (Same Day)", multiplier: 2.0 },
+        { value: "urgent", label: "Urgent (Next Day)", multiplier: 1.5 },
+        { value: "standard", label: "Standard (2-3 Days)", multiplier: 1.0 },
+        { value: "scheduled", label: "Scheduled (Flexible)", multiplier: 0.9 }
+      ],
+      addOns: [
+        { id: "materials-supply", name: "Materials & Hardware Supply", price: 150 },
+        { id: "painting-touchup", name: "Painting Touch-up", price: 200 },
+        { id: "minor-plumbing", name: "Minor Plumbing Fixes", price: 180 },
+        { id: "electrical-minor", name: "Minor Electrical Work", price: 220 }
+      ]
+    },
+    "beauty-wellness": {
+      title: "Beauty & Wellness Service",
+      icon: Scissors,
+      basePrice: 280,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment Visit", multiplier: 1.0 },
+        { value: "house", label: "House Visit", multiplier: 1.1 },
+        { value: "townhouse", label: "Townhouse Visit", multiplier: 1.05 },
+        { value: "villa", label: "Villa Visit", multiplier: 1.2 }
+      ],
+      serviceTypes: [
+        { value: "hair-styling", label: "Hair Styling & Cut", price: 280 },
+        { value: "manicure-pedicure", label: "Manicure & Pedicure", price: 220 },
+        { value: "massage-therapy", label: "Massage Therapy", price: 400 },
+        { value: "makeup-artistry", label: "Makeup Artistry", price: 350 }
+      ],
+      sessionDuration: [
+        { value: "quick", label: "Quick Session (30-60 min)", multiplier: 1.0 },
+        { value: "standard", label: "Standard Session (1-2 hours)", multiplier: 1.5 },
+        { value: "extended", label: "Extended Session (2-3 hours)", multiplier: 2.2 },
+        { value: "full-day", label: "Full Day Package", multiplier: 4.0 }
+      ],
+      addOns: [
+        { id: "premium-products", name: "Premium Product Upgrade", price: 150 },
+        { id: "group-discount", name: "Group Service (2+ people)", price: -50 },
+        { id: "travel-kit", name: "Professional Travel Kit", price: 100 },
+        { id: "follow-up-care", name: "Follow-up Care Package", price: 80 }
+      ]
     }
   };
 
@@ -219,7 +399,7 @@ export default function ModernServiceModal({
       if (propertySize) basePrice *= propertySize.multiplier;
     }
 
-    if (serviceId === "garden-care") {
+    if (serviceId === "garden-care" || serviceId === "garden-maintenance") {
       const gardenSize = config.gardenSizes?.find((s: any) => s.value === formData.gardenSize);
       if (gardenSize) basePrice *= gardenSize.multiplier;
       
@@ -227,9 +407,38 @@ export default function ModernServiceModal({
       if (condition) basePrice *= condition.multiplier;
     }
 
-    if (serviceId === "plumbing") {
+    if (serviceId === "plumbing" || serviceId === "electrical" || serviceId === "handyman") {
       const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
       if (urgency) basePrice *= urgency.multiplier;
+    }
+
+    if (serviceId === "chef-catering") {
+      const cuisineType = config.cuisineTypes?.find((c: any) => c.value === formData.cleaningType);
+      if (cuisineType) basePrice *= cuisineType.multiplier;
+      
+      const eventSize = config.eventSizes?.find((s: any) => s.value === formData.propertySize);
+      if (eventSize) basePrice *= eventSize.multiplier;
+    }
+
+    if (serviceId === "event-staff") {
+      const staffType = config.staffTypes?.find((s: any) => s.value === formData.cleaningType);
+      if (staffType) basePrice = staffType.price;
+      
+      const eventSize = config.eventSizes?.find((s: any) => s.value === formData.propertySize);
+      if (eventSize) basePrice *= eventSize.multiplier;
+    }
+
+    if (serviceId === "handyman") {
+      const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
+      if (serviceType) basePrice *= serviceType.multiplier;
+    }
+
+    if (serviceId === "beauty-wellness") {
+      const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
+      if (serviceType) basePrice = serviceType.price;
+      
+      const duration = config.sessionDuration?.find((d: any) => d.value === formData.propertySize);
+      if (duration) basePrice *= duration.multiplier;
     }
 
     // Add-ons pricing
