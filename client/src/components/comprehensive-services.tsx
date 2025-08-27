@@ -441,7 +441,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                             setSelectedServiceId(service.id);
                             setShowServiceModal(true);
                           }}
-                          className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-semibold text-sm py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                          className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                           data-testid={`book-${service.id}`}
                         >
                           Book Now - Advanced Booking
