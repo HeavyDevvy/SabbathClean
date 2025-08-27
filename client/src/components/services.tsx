@@ -1,6 +1,6 @@
-import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star, Calendar, Shield } from "lucide-react";
+import { Home, Sparkles, Wrench, Leaf, Zap, Droplets, ChefHat, Users, Truck, Clock, Star, Calendar, Shield, Scissors, UtensilsCrossed } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ServiceDetailModal from "@/components/service-detail-modal";
+import ModernServiceModal from "@/components/modern-service-modal";
 import { useState } from "react";
 
 interface ServicesProps {
@@ -28,11 +28,11 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       category: "Cleaning Services",
       description: "Complete home cleaning including dusting, vacuuming, mopping, kitchen & bathroom sanitization, organizing",
       price: "R280/hour",
-      icon: Home,
-      gradient: "from-purple-50 to-purple-100",
-      iconBg: "bg-primary",
+      icon: Sparkles,
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-blue-500 to-purple-600",
+      modernIcon: true,
     },
-
     {
       id: "plumbing",
       name: "Plumbing Services", 
@@ -40,8 +40,9 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       description: "Pipe repairs, leak fixing, faucet installation, drain cleaning, toilet repairs, water heater maintenance",
       price: "R380/hour",
       icon: Droplets,
-      gradient: "from-blue-50 to-blue-100",
-      iconBg: "bg-blue-600",
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-cyan-500 to-blue-600",
+      modernIcon: true,
     },
     {
       id: "electrical",
@@ -50,8 +51,9 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       description: "Wiring repairs, outlet installation, lighting setup, circuit breaker fixes, electrical safety inspections", 
       price: "R420/hour",
       icon: Zap,
-      gradient: "from-yellow-50 to-yellow-100",
-      iconBg: "bg-yellow-600",
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-yellow-500 to-orange-600",
+      modernIcon: true,
     },
     {
       id: "chef-catering",
@@ -59,9 +61,10 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       category: "Food & Event Services",
       description: "Personal chef services, meal preparation, event catering, menu planning, dietary accommodations",
       price: "R550/hour",
-      icon: ChefHat,
-      gradient: "from-orange-50 to-orange-100",
-      iconBg: "bg-orange-600",
+      icon: UtensilsCrossed,
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-orange-500 to-red-600",
+      modernIcon: true,
     },
     {
       id: "waitering",
@@ -70,8 +73,9 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       description: "Professional waitstaff for events, table service, bar service, event coordination, cleanup assistance",
       price: "R220/hour",
       icon: Users,
-      gradient: "from-green-50 to-green-100",
-      iconBg: "bg-green-600",
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-green-500 to-teal-600",
+      modernIcon: true,
     },
     {
       id: "garden-care",
@@ -79,9 +83,10 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       category: "Outdoor Services",
       description: "Lawn maintenance, pruning, weeding, planting, irrigation setup, landscape design consultation", 
       price: "R320/hour",
-      icon: Leaf,
-      gradient: "from-emerald-50 to-emerald-100",
-      iconBg: "bg-emerald-600",
+      icon: Scissors,
+      gradient: "from-gradient-start to-gradient-end",
+      iconBg: "bg-gradient-to-br from-emerald-500 to-green-600",
+      modernIcon: true,
     },
     {
       id: "home-moving",
@@ -113,9 +118,9 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                 onClick={() => onServiceSelect(service.id)}
                 data-testid={`card-service-${service.id}`}
               >
-                <div className={`bg-gradient-to-br ${service.gradient} rounded-2xl p-8 text-center hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300`}>
-                  <div className={`w-16 h-16 ${service.iconBg} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="text-white h-6 w-6" />
+                <div className="bg-white rounded-2xl p-8 text-center hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 border border-gray-100">
+                  <div className={`w-16 h-16 ${service.iconBg} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <IconComponent className="text-white h-7 w-7" />
                   </div>
                   <div className="mb-2">
                     <span className="text-xs bg-white/70 text-primary px-2 py-1 rounded-full font-medium">
@@ -168,12 +173,16 @@ export default function Services({ onServiceSelect }: ServicesProps) {
         </div>
       </div>
 
-      {/* Service Detail Modal */}
-      <ServiceDetailModal
+      {/* Modern Service Modal */}
+      <ModernServiceModal
         isOpen={showServiceModal}
         onClose={() => setShowServiceModal(false)}
         serviceId={selectedServiceId}
-        onSelectService={handleServiceSelection}
+        onBookingComplete={(bookingData) => {
+          console.log("Booking completed:", bookingData);
+          setShowServiceModal(false);
+          onServiceSelect(selectedServiceId);
+        }}
       />
     </section>
   );

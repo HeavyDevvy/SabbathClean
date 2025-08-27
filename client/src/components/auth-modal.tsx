@@ -249,9 +249,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               : 'Join Berry Events to book premium home services in South Africa.'
             }
           </DialogDescription>
-          <div id="auth-modal-description" className="sr-only">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
-          </div>
         </DialogHeader>
 
         <div className="space-y-6">
