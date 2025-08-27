@@ -1,8 +1,8 @@
 import { useState } from "react";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
-import EnhancedServices from "@/components/enhanced-services";
-import ComprehensiveBookingModal from "@/components/comprehensive-booking-modal";
+import ComprehensiveServices from "@/components/comprehensive-services";
+import AdvancedBookingModal from "@/components/advanced-booking-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
@@ -58,7 +58,7 @@ export default function EnhancedHome() {
         />
 
         {/* Comprehensive Services Section */}
-        <EnhancedServices onServiceSelect={handleServiceSelect} />
+        <ComprehensiveServices onServiceSelect={handleServiceSelect} />
 
         {/* How It Works Section */}
         <HowItWorksSection onBookNowClick={handleBookingClick} />
@@ -76,9 +76,9 @@ export default function EnhancedHome() {
       {/* Footer */}
       <Footer />
 
-      {/* Comprehensive Booking Modal */}
+      {/* Advanced Booking Modal */}
       {isBookingModalOpen && (
-        <ComprehensiveBookingModal
+        <AdvancedBookingModal
           isOpen={isBookingModalOpen}
           onClose={() => {
             setIsBookingModalOpen(false);

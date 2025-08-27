@@ -1,0 +1,417 @@
+# Berry Events - Complete Home Services Platform Workflow
+
+## Project Overview
+Transform Berry Events into a comprehensive home services marketplace with end-to-end booking capabilities for cleaning, plumbing, electrical, chef services, moving, and au pair services. Build a seamless platform with location-based booking, calendar integration, and secure payment processing.
+
+## Core Service Categories & Implementation
+
+### 1. CLEANING SERVICES
+**Service Types:**
+- Regular House Cleaning (Weekly/Bi-weekly/Monthly)
+- Deep Cleaning (Spring cleaning, move-in/move-out)
+- Office Cleaning (Daily/Weekly/Monthly contracts)
+- Carpet & Upholstery Cleaning
+- Window Cleaning (Interior/Exterior)
+- Post-Construction Cleaning
+- Event Cleanup Services
+
+**Booking Flow for Cleaning:**
+```
+Step 1: Service Selection
+- Choose cleaning type
+- Select property size (1-2 bed, 3-4 bed, 5+ bed, office space)
+- Frequency selection (one-time, weekly, bi-weekly, monthly)
+
+Step 2: Location & Property Details
+- GPS-based address input with map confirmation
+- Property type (house, apartment, office, retail)
+- Special requirements (pets, specific areas, supplies needed)
+- Access instructions and key information
+
+Step 3: Schedule Selection
+- Calendar widget showing available slots
+- Time preference (morning, afternoon, evening)
+- Recurring schedule setup for regular cleaning
+
+Step 4: Service Customization
+- Add-on services (inside oven, fridge, cabinets)
+- Supply preference (bring own supplies vs use client's)
+- Special instructions and preferences
+
+Step 5: Provider Selection & Confirmation
+- View matched cleaners with ratings, photos, reviews
+- Compare pricing and availability
+- Select preferred cleaner
+- Review booking details and confirm
+```
+
+### 2. PLUMBING SERVICES
+**Service Types:**
+- Emergency Repairs (24/7 availability)
+- Installation Services (taps, toilets, showers)
+- Drain Cleaning & Unblocking
+- Leak Detection & Repair
+- Water Heater Services
+- Pipe Replacement & Maintenance
+- Bathroom & Kitchen Plumbing
+
+**Booking Flow for Plumbing:**
+```
+Step 1: Problem Assessment
+- Issue type selection (leak, blockage, installation, emergency)
+- Urgency level (emergency, same-day, scheduled)
+- Photo upload for problem assessment
+
+Step 2: Location Details
+- Property address with GPS verification
+- Property type and age
+- Accessibility information
+- Preferred appointment time slots
+
+Step 3: Service Requirements
+- Detailed problem description
+- Parts/materials needed (provide estimate)
+- Insurance claim requirements if applicable
+
+Step 4: Plumber Selection
+- Emergency vs scheduled service options
+- Certified plumber profiles with specializations
+- Pricing transparency with call-out fees
+- Availability confirmation
+```
+
+### 3. ELECTRICAL SERVICES
+**Service Types:**
+- Emergency Electrical Repairs
+- Installation (lights, outlets, ceiling fans)
+- Electrical Inspections & Certificates
+- DB Board & Circuit Repairs
+- Smart Home Installation
+- Solar Panel Installation & Maintenance
+- Appliance Installation & Repair
+
+**Booking Flow for Electrical:**
+```
+Step 1: Service Type Selection
+- Emergency vs scheduled service
+- Installation, repair, or inspection
+- Safety assessment requirement
+
+Step 2: Safety & Compliance Check
+- Electrical certificate requirements
+- Insurance coverage verification
+- Property electrical system age
+- Compliance certificate needs
+
+Step 3: Detailed Requirements
+- Specific electrical work needed
+- Photos of electrical panels/problems
+- Preferred appointment scheduling
+- Access requirements and safety notes
+
+Step 4: Certified Electrician Matching
+- Licensed electrician verification
+- Specialization matching
+- Emergency response capability
+- Transparent pricing with material costs
+```
+
+### 4. CHEF & CATERING SERVICES
+**Cuisine Categories by Location:**
+
+**African Cuisines:**
+- South African (Braai, Potjiekos, Bobotie, Boerewors)
+- West African (Jollof Rice, Fufu, Egusi, Suya)
+- East African (Injera, Doro Wat, Ugali, Nyama Choma)
+- North African (Tagine, Couscous, Harira, Shakshuka)
+- Central African (Ndolé, Poulet DG, Banga Soup)
+
+**European Cuisines:**
+- Italian (Pasta, Risotto, Osso Buco, Tiramisu)
+- French (Coq au Vin, Bouillabaisse, Ratatouille, Crème Brûlée)
+- Spanish (Paella, Tapas, Gazpacho, Churros)
+- Greek (Moussaka, Souvlaki, Tzatziki, Baklava)
+- British (Fish & Chips, Shepherd's Pie, Bangers & Mash)
+
+**Asian Cuisines:**
+- Chinese (Dim Sum, Peking Duck, Kung Pao, Fried Rice)
+- Indian (Curry, Biryani, Tandoori, Masala)
+- Thai (Pad Thai, Tom Yum, Green Curry, Mango Sticky Rice)
+- Japanese (Sushi, Ramen, Tempura, Teriyaki)
+
+**Chef Service Booking Flow:**
+```
+Step 1: Service Type Selection
+- Personal Chef (daily/weekly meal prep)
+- Event Catering (parties, corporate events)
+- Cooking Classes (individual/group)
+- Special Dietary Requirements (vegan, keto, halaal, kosher)
+
+Step 2: Cuisine & Menu Selection
+- Location-based cuisine recommendations
+- Dietary restrictions and preferences
+- Guest count and serving style
+- Budget range selection
+
+Step 3: Event Details
+- Date and time selection
+- Venue address and kitchen facilities
+- Equipment availability assessment
+- Service duration and requirements
+
+Step 4: Chef Matching
+- Cuisine specialization matching
+- Chef portfolios with sample menus
+- Previous client reviews and ratings
+- Pricing options (per person/per event/hourly)
+```
+
+**Waitering Services Integration:**
+- Add waitering staff to catering bookings
+- Professional service staff for events
+- Bartending services for parties
+- Event setup and cleanup services
+
+### 5. HOME & OFFICE MOVING SERVICES
+**Service Types:**
+- Local Moving (same city)
+- Long-distance Moving (intercity/interstate)
+- Office Relocation
+- Furniture Moving & Assembly
+- Packing & Unpacking Services
+- Storage Solutions
+- Piano & Specialty Item Moving
+
+**Moving Service Booking Flow:**
+```
+Step 1: Moving Type & Distance
+- Local vs long-distance moving
+- Home vs office relocation
+- Moving date flexibility
+- Inventory size estimation
+
+Step 2: Location Details
+- Current address with access details
+- Destination address
+- Floor levels and accessibility
+- Parking availability for moving truck
+
+Step 3: Inventory & Services
+- Room-by-room inventory checklist
+- Special items (piano, artwork, fragile items)
+- Packing services required
+- Storage needs assessment
+
+Step 4: Service Customization
+- Full-service vs self-pack options
+- Insurance coverage options
+- Assembly/disassembly services
+- Cleaning services post-move
+
+Step 5: Quote & Team Selection
+- Transparent pricing with no hidden fees
+- Moving team profiles and experience
+- Vehicle size and equipment details
+- Moving date confirmation and scheduling
+```
+
+### 6. AU PAIR SERVICES
+**Service Types:**
+- Live-in Au Pair (6-12 month contracts)
+- Part-time Childcare
+- After-school Care
+- Weekend & Holiday Care
+- Overnight Babysitting
+- Educational Support & Tutoring
+- Activity Planning & Outings
+
+**Au Pair Booking Flow:**
+```
+Step 1: Care Requirements
+- Children's ages and number
+- Care schedule (full-time, part-time, occasional)
+- Duration of care needed
+- Language preferences
+
+Step 2: Family Profile
+- Household information and expectations
+- Children's activities and routines
+- Accommodation details (for live-in)
+- Family values and preferences
+
+Step 3: Au Pair Matching
+- Background check verification
+- Experience and qualification matching
+- Language skills and cultural fit
+- Reference check and interviews
+
+Step 4: Contract & Agreement
+- Service terms and expectations
+- Payment structure and schedule
+- Trial period arrangements
+- Emergency procedures and contacts
+```
+
+## PAYMENT SYSTEM IMPLEMENTATION
+
+### Payment Options:
+**Card Payments:**
+- Credit Cards (Visa, MasterCard, American Express)
+- Debit Cards with immediate processing
+- Secure tokenization for repeat bookings
+- 3D Secure authentication for fraud protection
+
+**Bank Transfer Options:**
+- Instant EFT (Electronic Funds Transfer)
+- Manual bank transfers with reference numbers
+- Payment confirmation upload system
+- Automated payment verification
+
+### Payment Flow Implementation:
+```
+Step 1: Payment Method Selection
+- Saved payment methods display
+- New card/bank account addition
+- Payment security information
+
+Step 2: Booking Summary & Costs
+- Service cost breakdown
+- Additional fees transparency
+- Tip option for service providers
+- Payment schedule for recurring services
+
+Step 3: Payment Processing
+- Secure payment gateway integration
+- Payment confirmation and receipt
+- Automatic booking confirmation
+- Provider notification system
+
+Step 4: Payment Management
+- Payment history tracking
+- Refund processing system
+- Dispute resolution workflow
+- Automatic recurring payment handling
+```
+
+## CALENDAR INTEGRATION SYSTEM
+
+### Calendar Features:
+**Customer Calendar Integration:**
+- Google Calendar sync
+- Outlook calendar integration
+- Apple Calendar compatibility
+- Custom booking calendar widget
+
+**Provider Availability Management:**
+- Real-time availability updates
+- Recurring availability patterns
+- Block-out dates and times
+- Emergency availability override
+
+### Calendar Booking Implementation:
+```
+Calendar Widget Features:
+- Month/week/day view options
+- Available time slots highlighting
+- Booking conflict prevention
+- Recurring appointment setup
+- Reminder notifications
+- Timezone handling for different locations
+
+Integration Code Structure:
+- Calendar API connections
+- Availability checking algorithms
+- Booking conflict resolution
+- Automatic reminder system
+- Schedule modification handling
+```
+
+## LOCATION-BASED BOOKING SYSTEM
+
+### Location Features:
+**GPS Integration:**
+- Automatic location detection
+- Manual address input with validation
+- Service area coverage mapping
+- Distance-based provider matching
+
+**Location Services Implementation:**
+```
+Location Workflow:
+Step 1: Location Detection
+- GPS coordinates capture
+- Address autocomplete functionality
+- Location verification with map display
+- Service area availability check
+
+Step 2: Provider Matching
+- Distance-based filtering
+- Service area coverage verification
+- Travel time calculation
+- Location-specific pricing
+
+Step 3: Service Delivery
+- Provider navigation integration
+- Real-time location sharing
+- Arrival time estimates
+- Check-in/check-out location verification
+```
+
+## TECHNICAL IMPLEMENTATION FOR REPLIT
+
+### Database Structure:
+```sql
+-- Core Tables Needed
+Users (customers, providers, admin)
+Services (service types and categories)
+Bookings (booking details and status)
+Payments (payment records and methods)
+Reviews (ratings and feedback)
+Locations (addresses and service areas)
+Calendar (availability and schedules)
+Notifications (alerts and messages)
+```
+
+### Frontend Components:
+- Service selection interface
+- Booking wizard with step-by-step flow
+- Calendar widget with availability
+- Payment processing forms
+- User dashboard and profile management
+- Provider management interface
+- Admin control panel
+
+### Backend API Endpoints:
+- User authentication and authorization
+- Service booking and management
+- Payment processing integration
+- Calendar and availability management
+- Location services and mapping
+- Notification system
+- Review and rating system
+
+### Mobile Responsiveness:
+- Touch-optimized interface design
+- Mobile-first booking flow
+- GPS integration for location services
+- Push notifications for booking updates
+- Offline capability for basic functions
+
+## SUCCESS METRICS & TESTING
+
+### Key Performance Indicators:
+- Booking completion rate target: >85%
+- Payment processing success rate: >98%
+- Customer satisfaction score: >4.5/5
+- Provider response time: <2 hours
+- Platform uptime: >99.5%
+
+### Testing Requirements:
+- Payment gateway testing with test cards
+- Location services accuracy testing
+- Calendar integration functionality
+- Cross-browser compatibility
+- Mobile device testing
+- Performance and load testing
+
+This workflow provides a complete roadmap for implementing a professional home services platform on Replit with all the specified features and functionality.
