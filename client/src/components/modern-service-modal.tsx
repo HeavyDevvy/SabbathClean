@@ -64,6 +64,8 @@ export default function ModernServiceModal({
     basePrice: 0,
     addOnsPrice: 0,
     materialsDiscount: 0,
+    recurringDiscount: 0,
+    timeDiscount: 0,
     totalPrice: 0
   });
 
@@ -224,16 +226,39 @@ export default function ModernServiceModal({
       ?.filter((addon: any) => formData.selectedAddOns.includes(addon.id))
       ?.reduce((sum: number, addon: any) => sum + addon.price, 0) || 0;
 
-    // Materials discount (15% if bringing own materials)
-    const materialsDiscount = formData.materials === "bring" ? Math.round(basePrice * 0.15) : 0;
+    // Enhanced discount calculations
+    let materialsDiscount = 0;
+    let recurringDiscount = 0;
+    let timeDiscount = 0;
 
-    const totalPrice = Math.round(basePrice + addOnsPrice - materialsDiscount);
+    // Materials discount (15% if customer provides materials)
+    if (formData.materials === "bring") {
+      materialsDiscount = Math.round((basePrice + addOnsPrice) * 0.15);
+    }
+
+    // Recurring service discounts
+    if (formData.recurringSchedule === "weekly") {
+      recurringDiscount = Math.round((basePrice + addOnsPrice) * 0.15);
+    } else if (formData.recurringSchedule === "bi-weekly") {
+      recurringDiscount = Math.round((basePrice + addOnsPrice) * 0.10);
+    } else if (formData.recurringSchedule === "monthly") {
+      recurringDiscount = Math.round((basePrice + addOnsPrice) * 0.08);
+    }
+
+    // Early bird discount (6 AM slots get 10% off)
+    if (formData.timePreference === "06:00") {
+      timeDiscount = Math.round((basePrice + addOnsPrice) * 0.10);
+    }
+
+    const totalPrice = Math.max(0, basePrice + addOnsPrice - materialsDiscount - recurringDiscount - timeDiscount);
 
     setPricing({
       basePrice: Math.round(basePrice),
       addOnsPrice,
       materialsDiscount,
-      totalPrice
+      recurringDiscount,
+      timeDiscount,
+      totalPrice: Math.round(totalPrice)
     });
   }, [formData, serviceId, currentConfig]);
 
@@ -692,10 +717,16 @@ export default function ModernServiceModal({
               <span>+R{pricing.addOnsPrice}</span>
             </div>
           )}
-          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && (
+          {pricing.recurringDiscount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Recurring Service Discount</span>
-              <span>-R{Math.round(pricing.basePrice * 0.1)}</span>
+              <span>Recurring Service Discount ({formData.recurringSchedule})</span>
+              <span>-R{pricing.recurringDiscount}</span>
+            </div>
+          )}
+          {pricing.timeDiscount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span>Early Bird Discount (6 AM)</span>
+              <span>-R{pricing.timeDiscount}</span>
             </div>
           )}
           {pricing.materialsDiscount > 0 && (
