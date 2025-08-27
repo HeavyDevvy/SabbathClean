@@ -54,11 +54,12 @@ interface ComprehensiveServicesProps {
   onServiceSelect: (serviceId: string) => void;
 }
 
-const services: Service[] = [
+// Organize services by categories for better display
+const indoorServices: Service[] = [
   // HOUSE CLEANING SERVICES
   {
     id: "cleaning",
-    category: "Home Services",
+    category: "Indoor Services",
     title: "House Cleaning",
     description: "Complete cleaning services from regular maintenance to deep cleaning with professional-grade equipment",
     price: "From R75/hour",
@@ -82,7 +83,7 @@ const services: Service[] = [
   // PLUMBING SERVICES
   {
     id: "plumbing",
-    category: "Maintenance",
+    category: "Indoor Services",
     title: "Plumbing Services",
     description: "Professional plumbing solutions from emergency repairs to complete installations with certified plumbers",
     price: "From R120/hour",
@@ -106,7 +107,7 @@ const services: Service[] = [
   // ELECTRICAL SERVICES
   {
     id: "electrical",
-    category: "Maintenance",
+    category: "Indoor Services",
     title: "Electrical Services",
     description: "Safe and certified electrical work including installations, repairs, and compliance certificates",
     price: "From R150/hour",
@@ -125,8 +126,10 @@ const services: Service[] = [
     icon: Zap,
     gradient: "from-yellow-500 to-orange-500",
     bookingSteps: 4
-  },
+  }
+];
 
+const outdoorServices: Service[] = [
   // GARDEN CARE
   {
     id: "garden-care",
@@ -148,12 +151,14 @@ const services: Service[] = [
     icon: TreePine,
     gradient: "from-green-600 to-emerald-600",
     bookingSteps: 4
-  },
+  }
+];
 
+const specializedServices: Service[] = [
   // CHEF & CATERING SERVICES
   {
     id: "chef-catering",
-    category: "Specialized",
+    category: "Specialized Services",
     title: "Chef & Catering",
     description: "Professional chefs specializing in African cuisine and international dishes for events and daily meals",
     price: "From R400/event",
@@ -174,10 +179,33 @@ const services: Service[] = [
     bookingSteps: 4
   },
 
+  // WAITERING SERVICES
+  {
+    id: "waitering",
+    category: "Specialized Services", 
+    title: "Waitering Services",
+    description: "Professional event staff and waitering services for parties, corporate events, and special occasions",
+    price: "From R85/hour",
+    duration: "4-12 hours",
+    serviceTypes: [
+      "Event Waitering Staff",
+      "Corporate Event Service",
+      "Private Party Servers",
+      "Bartending Services",
+      "Event Setup & Cleanup",
+      "Professional Table Service",
+      "Cocktail Party Staff"
+    ],
+    features: ["Trained professionals", "Event specialists", "Bar service", "Setup assistance"],
+    icon: Users,
+    gradient: "from-indigo-500 to-purple-500",
+    bookingSteps: 4
+  },
+
   // MOVING SERVICES
   {
     id: "moving",
-    category: "Specialized",
+    category: "Specialized Services",
     title: "Moving Services",
     description: "Complete moving solutions from local relocations to long-distance moves with professional teams",
     price: "From R600/day",
@@ -200,7 +228,7 @@ const services: Service[] = [
   // AU PAIR SERVICES
   {
     id: "au-pair",
-    category: "Specialized",
+    category: "Specialized Services",
     title: "Au Pair Services",
     description: "Trusted childcare providers offering flexible care solutions from occasional babysitting to live-in arrangements",
     price: "From R65/hour",
@@ -218,31 +246,11 @@ const services: Service[] = [
     icon: Baby,
     gradient: "from-pink-500 to-rose-500",
     bookingSteps: 4
-  },
-
-  // WAITERING SERVICES
-  {
-    id: "waitering",
-    category: "Specialized", 
-    title: "Waitering Services",
-    description: "Professional event staff and waitering services for parties, corporate events, and special occasions",
-    price: "From R85/hour",
-    duration: "4-12 hours",
-    serviceTypes: [
-      "Event Waitering Staff",
-      "Corporate Event Service",
-      "Private Party Servers",
-      "Bartending Services",
-      "Event Setup & Cleanup",
-      "Professional Table Service",
-      "Cocktail Party Staff"
-    ],
-    features: ["Trained professionals", "Event specialists", "Bar service", "Setup assistance"],
-    icon: Users,
-    gradient: "from-indigo-500 to-purple-500",
-    bookingSteps: 4
   }
 ];
+
+// Combine all services for compatibility
+const services: Service[] = [...indoorServices, ...outdoorServices, ...specializedServices];
 
 export default function ComprehensiveServices({ onServiceSelect }: ComprehensiveServicesProps) {
   const [showServiceModal, setShowServiceModal] = useState(false);
@@ -271,116 +279,367 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
 
 
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {services.map((service) => (
-            <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
-              setSelectedServiceId(service.id);
-              setShowServiceModal(true);
-            }}>
-              <CardContent className="p-6 flex flex-col h-full">
-                {/* Service Header - Compact */}
-                      <div className="relative mb-4">
-                        <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300 mx-auto`}>
-                          <service.icon className="h-8 w-8 text-white" />
-                        </div>
-                        {(service.popular || service.urgent) && (
-                          <div className="absolute -top-1 -right-1">
-                            {service.popular && (
-                              <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-1.5 py-0.5">
-                                <Star className="h-2 w-2 mr-0.5" />
-                                Hot
-                              </Badge>
-                            )}
-                            {service.urgent && (
-                              <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-xs px-1.5 py-0.5">
-                                24/7
-                              </Badge>
-                            )}
-                          </div>
+        {/* Indoor Services Section */}
+        <div className="mb-16">
+          <div className="flex items-center mb-8">
+            <Home className="h-8 w-8 mr-3 text-blue-600" />
+            <h3 className="text-3xl font-bold text-gray-900">Indoor Services</h3>
+            <Badge className="ml-4 bg-blue-100 text-blue-700 border-blue-200">
+              {indoorServices.length} services
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {indoorServices.map((service) => (
+              <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
+                setSelectedServiceId(service.id);
+                setShowServiceModal(true);
+              }}>
+                <CardContent className="p-6 flex flex-col h-full">
+                  {/* Service Header - Compact */}
+                  <div className="relative mb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300 mx-auto`}>
+                      <service.icon className="h-8 w-8 text-white" />
+                    </div>
+                    {(service.popular || service.urgent) && (
+                      <div className="absolute -top-1 -right-1">
+                        {service.popular && (
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            <Star className="h-2 w-2 mr-0.5" />
+                            Hot
+                          </Badge>
+                        )}
+                        {service.urgent && (
+                          <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            24/7
+                          </Badge>
                         )}
                       </div>
+                    )}
+                  </div>
 
-                      {/* Enhanced Service Info */}
-                      <div className="mb-4 text-center">
-                        <span className="text-xs bg-gradient-to-r from-primary/10 to-purple-600/10 text-primary px-3 py-1 rounded-full font-medium border border-primary/20 mb-3 inline-block">
-                          {service.category}
-                        </span>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{service.title}</h4>
-                        <p className="text-gray-600 text-sm leading-relaxed mb-3">{service.description}</p>
-                        
-                        <div className="bg-gradient-to-r from-primary/5 to-purple-600/5 rounded-lg py-2 px-3 mb-3">
-                          <div className="text-lg font-bold text-primary">{service.price}</div>
-                          <div className="text-xs text-gray-500">Duration: {service.duration}</div>
+                  {/* Enhanced Service Info */}
+                  <div className="mb-4 text-center">
+                    <span className="text-xs bg-gradient-to-r from-primary/10 to-purple-600/10 text-primary px-3 py-1 rounded-full font-medium border border-primary/20 mb-3 inline-block">
+                      {service.category}
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{service.title}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-3">{service.description}</p>
+                    
+                    <div className="bg-gradient-to-r from-primary/5 to-purple-600/5 rounded-lg py-2 px-3 mb-3">
+                      <div className="text-lg font-bold text-primary">{service.price}</div>
+                      <div className="text-xs text-gray-500">Duration: {service.duration}</div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Key Features and Badges */}
+                  <div className="space-y-3 mb-5">
+                    {/* Key features with modern icons */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <span className="flex items-center justify-center bg-green-50 text-green-700 py-1 px-2 rounded">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Same day
+                      </span>
+                      <span className="flex items-center justify-center bg-yellow-50 text-yellow-700 py-1 px-2 rounded">
+                        <Star className="h-3 w-3 mr-1" />
+                        4.8+ rated
+                      </span>
+                      <span className="flex items-center justify-center bg-blue-50 text-blue-700 py-1 px-2 rounded">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </span>
+                      <span className="flex items-center justify-center bg-purple-50 text-purple-700 py-1 px-2 rounded">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        20km
+                      </span>
+                    </div>
+
+                    {/* Discount highlights */}
+                    <div className="text-xs text-green-600 font-medium">
+                      Weekly: -15% | Materials: -15% | Early: -10%
+                    </div>
+
+                    {/* Service Types Preview */}
+                    <div className="space-y-1 max-h-16 overflow-y-auto">
+                      {service.serviceTypes.slice(0, 2).map((type, index) => (
+                        <div key={index} className="flex items-start text-xs text-gray-600">
+                          <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                          <span className="line-clamp-1">{type}</span>
                         </div>
+                      ))}
+                      {service.serviceTypes.length > 2 && (
+                        <div className="text-xs text-blue-600 font-medium text-center">
+                          +{service.serviceTypes.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Enhanced Book Now Button with Advanced Modal */}
+                  <div className="mt-auto space-y-2">
+                    <Button 
+                      onClick={() => {
+                        setSelectedServiceId(service.id);
+                        setShowServiceModal(true);
+                      }}
+                      className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      data-testid={`book-${service.id}`}
+                    >
+                      Book Now - Advanced Booking
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Button>
+                    <button
+                      className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary/20 hover:border-primary/40 text-sm"
+                      onClick={() => onServiceSelect(service.id)}
+                    >
+                      Quick Quote & Details
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Outdoor Services Section */}
+        <div className="mb-16">
+          <div className="flex items-center mb-8">
+            <TreePine className="h-8 w-8 mr-3 text-green-600" />
+            <h3 className="text-3xl font-bold text-gray-900">Outdoor Services</h3>
+            <Badge className="ml-4 bg-green-100 text-green-700 border-green-200">
+              {outdoorServices.length} services
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {outdoorServices.map((service) => (
+              <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
+                setSelectedServiceId(service.id);
+                setShowServiceModal(true);
+              }}>
+                <CardContent className="p-6 flex flex-col h-full">
+                  {/* Service Header - Compact */}
+                  <div className="relative mb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300 mx-auto`}>
+                      <service.icon className="h-8 w-8 text-white" />
+                    </div>
+                    {(service.popular || service.urgent) && (
+                      <div className="absolute -top-1 -right-1">
+                        {service.popular && (
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            <Star className="h-2 w-2 mr-0.5" />
+                            Hot
+                          </Badge>
+                        )}
+                        {service.urgent && (
+                          <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            24/7
+                          </Badge>
+                        )}
                       </div>
+                    )}
+                  </div>
 
-                      {/* Enhanced Key Features and Badges */}
-                      <div className="space-y-3 mb-5">
-                        {/* Key features with modern icons */}
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <span className="flex items-center justify-center bg-green-50 text-green-700 py-1 px-2 rounded">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Same day
-                          </span>
-                          <span className="flex items-center justify-center bg-yellow-50 text-yellow-700 py-1 px-2 rounded">
-                            <Star className="h-3 w-3 mr-1" />
-                            4.8+ rated
-                          </span>
-                          <span className="flex items-center justify-center bg-blue-50 text-blue-700 py-1 px-2 rounded">
-                            <Shield className="h-3 w-3 mr-1" />
-                            Verified
-                          </span>
-                          <span className="flex items-center justify-center bg-purple-50 text-purple-700 py-1 px-2 rounded">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            20km
-                          </span>
-                        </div>
+                  {/* Enhanced Service Info */}
+                  <div className="mb-4 text-center">
+                    <span className="text-xs bg-gradient-to-r from-primary/10 to-purple-600/10 text-primary px-3 py-1 rounded-full font-medium border border-primary/20 mb-3 inline-block">
+                      {service.category}
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{service.title}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-3">{service.description}</p>
+                    
+                    <div className="bg-gradient-to-r from-primary/5 to-purple-600/5 rounded-lg py-2 px-3 mb-3">
+                      <div className="text-lg font-bold text-primary">{service.price}</div>
+                      <div className="text-xs text-gray-500">Duration: {service.duration}</div>
+                    </div>
+                  </div>
 
-                        {/* Discount highlights */}
-                        <div className="text-xs text-green-600 font-medium">
-                          Weekly: -15% | Materials: -15% | Early: -10%
-                        </div>
+                  {/* Enhanced Key Features and Badges */}
+                  <div className="space-y-3 mb-5">
+                    {/* Key features with modern icons */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <span className="flex items-center justify-center bg-green-50 text-green-700 py-1 px-2 rounded">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Same day
+                      </span>
+                      <span className="flex items-center justify-center bg-yellow-50 text-yellow-700 py-1 px-2 rounded">
+                        <Star className="h-3 w-3 mr-1" />
+                        4.8+ rated
+                      </span>
+                      <span className="flex items-center justify-center bg-blue-50 text-blue-700 py-1 px-2 rounded">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </span>
+                      <span className="flex items-center justify-center bg-purple-50 text-purple-700 py-1 px-2 rounded">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        20km
+                      </span>
+                    </div>
 
-                        {/* Service Types Preview */}
-                        <div className="space-y-1 max-h-16 overflow-y-auto">
-                          {service.serviceTypes.slice(0, 2).map((type, index) => (
-                            <div key={index} className="flex items-start text-xs text-gray-600">
-                              <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
-                              <span className="line-clamp-1">{type}</span>
-                            </div>
-                          ))}
-                          {service.serviceTypes.length > 2 && (
-                            <div className="text-xs text-blue-600 font-medium text-center">
-                              +{service.serviceTypes.length - 2} more
-                            </div>
-                          )}
+                    {/* Discount highlights */}
+                    <div className="text-xs text-green-600 font-medium">
+                      Weekly: -15% | Materials: -15% | Early: -10%
+                    </div>
+
+                    {/* Service Types Preview */}
+                    <div className="space-y-1 max-h-16 overflow-y-auto">
+                      {service.serviceTypes.slice(0, 2).map((type, index) => (
+                        <div key={index} className="flex items-start text-xs text-gray-600">
+                          <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                          <span className="line-clamp-1">{type}</span>
                         </div>
+                      ))}
+                      {service.serviceTypes.length > 2 && (
+                        <div className="text-xs text-blue-600 font-medium text-center">
+                          +{service.serviceTypes.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Enhanced Book Now Button with Advanced Modal */}
+                  <div className="mt-auto space-y-2">
+                    <Button 
+                      onClick={() => {
+                        setSelectedServiceId(service.id);
+                        setShowServiceModal(true);
+                      }}
+                      className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      data-testid={`book-${service.id}`}
+                    >
+                      Book Now - Advanced Booking
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Button>
+                    <button
+                      className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary/20 hover:border-primary/40 text-sm"
+                      onClick={() => onServiceSelect(service.id)}
+                    >
+                      Quick Quote & Details
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Specialized Services Section */}
+        <div className="mb-16">
+          <div className="flex items-center mb-8">
+            <Star className="h-8 w-8 mr-3 text-purple-600" />
+            <h3 className="text-3xl font-bold text-gray-900">Specialized Services</h3>
+            <Badge className="ml-4 bg-purple-100 text-purple-700 border-purple-200">
+              {specializedServices.length} services
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {specializedServices.map((service) => (
+              <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
+                setSelectedServiceId(service.id);
+                setShowServiceModal(true);
+              }}>
+                <CardContent className="p-6 flex flex-col h-full">
+                  {/* Service Header - Compact */}
+                  <div className="relative mb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300 mx-auto`}>
+                      <service.icon className="h-8 w-8 text-white" />
+                    </div>
+                    {(service.popular || service.urgent) && (
+                      <div className="absolute -top-1 -right-1">
+                        {service.popular && (
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            <Star className="h-2 w-2 mr-0.5" />
+                            Hot
+                          </Badge>
+                        )}
+                        {service.urgent && (
+                          <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-xs px-1.5 py-0.5">
+                            24/7
+                          </Badge>
+                        )}
                       </div>
+                    )}
+                  </div>
 
-                      {/* Enhanced Book Now Button with Advanced Modal */}
-                      <div className="mt-auto space-y-2">
-                        <Button 
-                          onClick={() => {
-                            setSelectedServiceId(service.id);
-                            setShowServiceModal(true);
-                          }}
-                          className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                          data-testid={`book-${service.id}`}
-                        >
-                          Book Now - Advanced Booking
-                          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                        </Button>
-                        <button
-                          className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary/20 hover:border-primary/40 text-sm"
-                          onClick={() => onServiceSelect(service.id)}
-                        >
-                          Quick Quote & Details
-                        </button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  {/* Enhanced Service Info */}
+                  <div className="mb-4 text-center">
+                    <span className="text-xs bg-gradient-to-r from-primary/10 to-purple-600/10 text-primary px-3 py-1 rounded-full font-medium border border-primary/20 mb-3 inline-block">
+                      {service.category}
+                    </span>
+                    <h4 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{service.title}</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-3">{service.description}</p>
+                    
+                    <div className="bg-gradient-to-r from-primary/5 to-purple-600/5 rounded-lg py-2 px-3 mb-3">
+                      <div className="text-lg font-bold text-primary">{service.price}</div>
+                      <div className="text-xs text-gray-500">Duration: {service.duration}</div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Key Features and Badges */}
+                  <div className="space-y-3 mb-5">
+                    {/* Key features with modern icons */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <span className="flex items-center justify-center bg-green-50 text-green-700 py-1 px-2 rounded">
+                        <Clock className="h-3 w-3 mr-1" />
+                        Same day
+                      </span>
+                      <span className="flex items-center justify-center bg-yellow-50 text-yellow-700 py-1 px-2 rounded">
+                        <Star className="h-3 w-3 mr-1" />
+                        4.8+ rated
+                      </span>
+                      <span className="flex items-center justify-center bg-blue-50 text-blue-700 py-1 px-2 rounded">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Verified
+                      </span>
+                      <span className="flex items-center justify-center bg-purple-50 text-purple-700 py-1 px-2 rounded">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        20km
+                      </span>
+                    </div>
+
+                    {/* Discount highlights */}
+                    <div className="text-xs text-green-600 font-medium">
+                      Weekly: -15% | Materials: -15% | Early: -10%
+                    </div>
+
+                    {/* Service Types Preview */}
+                    <div className="space-y-1 max-h-16 overflow-y-auto">
+                      {service.serviceTypes.slice(0, 2).map((type, index) => (
+                        <div key={index} className="flex items-start text-xs text-gray-600">
+                          <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                          <span className="line-clamp-1">{type}</span>
+                        </div>
+                      ))}
+                      {service.serviceTypes.length > 2 && (
+                        <div className="text-xs text-blue-600 font-medium text-center">
+                          +{service.serviceTypes.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Enhanced Book Now Button with Advanced Modal */}
+                  <div className="mt-auto space-y-2">
+                    <Button 
+                      onClick={() => {
+                        setSelectedServiceId(service.id);
+                        setShowServiceModal(true);
+                      }}
+                      className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      data-testid={`book-${service.id}`}
+                    >
+                      Book Now - Advanced Booking
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                    </Button>
+                    <button
+                      className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary/20 hover:border-primary/40 text-sm"
+                      onClick={() => onServiceSelect(service.id)}
+                    >
+                      Quick Quote & Details
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         {/* Bottom CTA */}
