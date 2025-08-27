@@ -174,59 +174,9 @@ const services: Service[] = [
   }
 ];
 
-const categories = [
-  {
-    id: "indoor-services",
-    name: "Indoor Services",
-    description: "Professional cleaning and home organization",
-    color: "blue",
-    icon: Home
-  },
-  {
-    id: "outdoor-services", 
-    name: "Outdoor Services",
-    description: "Garden care and exterior maintenance",
-    color: "green",
-    icon: TreePine
-  },
-  {
-    id: "maintenance",
-    name: "Maintenance",
-    description: "Plumbing, electrical, and repair services",
-    color: "orange", 
-    icon: Wrench
-  },
-  {
-    id: "specialized",
-    name: "Specialized",
-    description: "Chef, moving, childcare, and event services",
-    color: "purple",
-    icon: Star
-  }
-];
-
 export default function ComprehensiveServices({ onServiceSelect }: ComprehensiveServicesProps) {
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
-  const getServicesByCategory = (categoryId: string) => {
-    const categoryMap: { [key: string]: string } = {
-      "indoor-services": "Indoor Services",
-      "outdoor-services": "Outdoor Services", 
-      "maintenance": "Maintenance",
-      "specialized": "Specialized"
-    };
-    return services.filter(service => service.category === categoryMap[categoryId]);
-  };
-
-  const getColorClasses = (color: string) => {
-    const colors: { [key: string]: string } = {
-      blue: "border-blue-200 bg-blue-50 text-blue-700",
-      green: "border-green-200 bg-green-50 text-green-700",
-      orange: "border-orange-200 bg-orange-50 text-orange-700", 
-      purple: "border-purple-200 bg-purple-50 text-purple-700"
-    };
-    return colors[color] || colors.blue;
-  };
 
   return (
     <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50" data-testid="comprehensive-services-section">
@@ -249,43 +199,17 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
           </p>
         </div>
 
-        {/* Service Categories - Compact Design */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
-          {categories.map((category) => (
-            <Card key={category.id} className={`border ${getColorClasses(category.color)} hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden`}>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-current to-current bg-opacity-20 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300">
-                  <category.icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-sm font-bold mb-1">{category.name}</h3>
-                <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                  {getServicesByCategory(category.id).length} services
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
-        {/* Services Grid by Category */}
-        {categories.map((category) => {
-          const categoryServices = getServicesByCategory(category.id);
-          if (categoryServices.length === 0) return null;
 
-          return (
-            <div key={category.id} className="mb-16">
-              <div className="flex items-center mb-8">
-                <category.icon className={`h-8 w-8 mr-3 ${getColorClasses(category.color).split(' ')[2]}`} />
-                <h3 className="text-3xl font-bold text-gray-900">{category.name}</h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {categoryServices.map((service) => (
-                  <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
-                    setSelectedServiceId(service.id);
-                    setShowServiceModal(true);
-                  }}>
-                    <CardContent className="p-6 flex flex-col h-full">
-                      {/* Service Header - Compact */}
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {services.map((service) => (
+            <Card key={service.id} className="bg-white border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 group cursor-pointer rounded-2xl overflow-hidden h-full flex flex-col hover:-translate-y-3 transform" data-testid={`service-card-${service.id}`} onClick={() => {
+              setSelectedServiceId(service.id);
+              setShowServiceModal(true);
+            }}>
+              <CardContent className="p-6 flex flex-col h-full">
+                {/* Service Header - Compact */}
                       <div className="relative mb-4">
                         <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:shadow-2xl transition-all duration-300 mx-auto`}>
                           <service.icon className="h-8 w-8 text-white" />
@@ -383,14 +307,11 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                         >
                           Quick Quote & Details
                         </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         {/* Bottom CTA */}
         <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 lg:p-12 text-white">
