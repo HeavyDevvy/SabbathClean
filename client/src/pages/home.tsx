@@ -48,7 +48,7 @@ export default function Home() {
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setIsBookingOpen(false);
-          setSelectedService("");
+          setSelectedService(""); // Clear selected service to prevent card interference
         }}
       />
       

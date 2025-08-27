@@ -490,7 +490,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setShowServiceModal(false);
-          onServiceSelect(selectedServiceId);
+          // Remove onServiceSelect call to prevent service card interference
         }}
       />
     </section>

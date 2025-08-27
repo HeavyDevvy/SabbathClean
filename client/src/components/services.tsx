@@ -280,7 +280,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setShowServiceModal(false);
-          onServiceSelect(selectedServiceId);
+          // Remove onServiceSelect call to prevent card interference
         }}
       />
     </section>

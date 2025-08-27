@@ -243,6 +243,7 @@ export default function ServicesPage() {
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setIsBookingModalOpen(false);
+          setSelectedServiceId(""); // Clear selected service to prevent card interference
         }}
       />
     </div>

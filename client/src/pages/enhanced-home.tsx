@@ -87,7 +87,7 @@ export default function EnhancedHome() {
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setIsBookingModalOpen(false);
-          setSelectedService("");
+          setSelectedService(""); // Clear selected service to prevent card interference
         }}
       />
     </div>
