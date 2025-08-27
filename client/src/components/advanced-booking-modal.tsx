@@ -479,7 +479,11 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="advanced-booking-modal">
+      <DialogContent 
+        className="sm:max-w-4xl max-h-[90vh] overflow-y-auto" 
+        data-testid="advanced-booking-modal"
+        aria-describedby="booking-modal-description"
+      >
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-2xl font-bold">
@@ -488,6 +492,9 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
             <Button variant="ghost" size="sm" onClick={onClose} data-testid="close-modal">
               <X className="h-4 w-4" />
             </Button>
+          </div>
+          <div id="booking-modal-description" className="sr-only">
+            Complete service booking form with step-by-step process
           </div>
         </DialogHeader>
 

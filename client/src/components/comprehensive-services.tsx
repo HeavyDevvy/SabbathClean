@@ -315,21 +315,18 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
           </p>
         </div>
 
-        {/* Service Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        {/* Service Categories - Compact Design */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
           {categories.map((category) => (
-            <Card key={category.id} className={`border-2 ${getColorClasses(category.color)} hover:shadow-xl transition-all duration-300 cursor-pointer group`}>
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-current to-current bg-opacity-20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <category.icon className="h-8 w-8" />
+            <Card key={category.id} className={`border ${getColorClasses(category.color)} hover:shadow-lg transition-all duration-300 cursor-pointer group overflow-hidden`}>
+              <CardContent className="p-4 text-center">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-current to-current bg-opacity-20 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300">
+                  <category.icon className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-bold mb-2">{category.name}</h3>
-                <p className="text-sm opacity-80">{category.description}</p>
-                <div className="mt-4">
-                  <Badge variant="secondary" className="text-xs">
-                    {getServicesByCategory(category.id).length} services
-                  </Badge>
-                </div>
+                <h3 className="text-sm font-bold mb-1">{category.name}</h3>
+                <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                  {getServicesByCategory(category.id).length} services
+                </Badge>
               </CardContent>
             </Card>
           ))}
@@ -347,99 +344,101 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                 <h3 className="text-3xl font-bold text-gray-900">{category.name}</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {categoryServices.map((service) => (
-                  <Card key={service.id} className="bg-white border-2 border-gray-100 hover:border-blue-200 hover:shadow-2xl transition-all duration-500 group cursor-pointer" data-testid={`service-card-${service.id}`}>
-                    <CardContent className="p-8">
-                      {/* Service Header */}
-                      <div className="flex items-start justify-between mb-6">
-                        <div className={`w-16 h-16 bg-gradient-to-r ${service.gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                          <service.icon className="h-8 w-8 text-white" />
+                  <Card key={service.id} className="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-400 group cursor-pointer rounded-xl overflow-hidden" data-testid={`service-card-${service.id}`}>
+                    <CardContent className="p-6">
+                      {/* Service Header - Compact */}
+                      <div className="relative mb-4">
+                        <div className={`w-12 h-12 bg-gradient-to-r ${service.gradient} rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300 mx-auto`}>
+                          <service.icon className="h-6 w-6 text-white" />
                         </div>
-                        <div className="flex flex-col items-end">
-                          {service.popular && (
-                            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 mb-2">
-                              <Star className="h-3 w-3 mr-1" />
-                              Popular
-                            </Badge>
-                          )}
-                          {service.urgent && (
-                            <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0">
-                              <Clock className="h-3 w-3 mr-1" />
-                              24/7
-                            </Badge>
-                          )}
-                        </div>
+                        {(service.popular || service.urgent) && (
+                          <div className="absolute -top-1 -right-1">
+                            {service.popular && (
+                              <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs px-1.5 py-0.5">
+                                <Star className="h-2 w-2 mr-0.5" />
+                                Hot
+                              </Badge>
+                            )}
+                            {service.urgent && (
+                              <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 text-xs px-1.5 py-0.5">
+                                24/7
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Service Info */}
-                      <div className="mb-6">
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h4>
-                        <p className="text-gray-600 text-sm leading-relaxed mb-4">{service.description}</p>
+                      {/* Service Info - Compact */}
+                      <div className="mb-4 text-center">
+                        <h4 className="text-lg font-bold text-gray-900 mb-2">{service.title}</h4>
+                        <p className="text-gray-600 text-xs leading-relaxed mb-3 line-clamp-2">{service.description}</p>
                         
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center text-green-600 font-semibold">
-                            <span>{service.price}</span>
+                        <div className="flex items-center justify-center space-x-4 text-xs">
+                          <div className="text-green-600 font-semibold">
+                            {service.price}
                           </div>
                           <div className="flex items-center text-gray-500">
-                            <Clock className="h-4 w-4 mr-1" />
+                            <Clock className="h-3 w-3 mr-1" />
                             <span>{service.duration}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Service Types */}
-                      <div className="mb-6">
-                        <h5 className="text-sm font-semibold text-gray-900 mb-3">Service Types:</h5>
-                        <div className="space-y-1 max-h-32 overflow-y-auto">
-                          {service.serviceTypes.slice(0, 4).map((type, index) => (
+                      {/* Service Types - Minimal */}
+                      <div className="mb-4">
+                        <div className="space-y-1 max-h-20 overflow-y-auto">
+                          {service.serviceTypes.slice(0, 3).map((type, index) => (
                             <div key={index} className="flex items-start text-xs text-gray-600">
-                              <CheckCircle2 className="h-3 w-3 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                              <span>{type}</span>
+                              <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5" />
+                              <span className="line-clamp-1">{type}</span>
                             </div>
                           ))}
-                          {service.serviceTypes.length > 4 && (
-                            <div className="text-xs text-blue-600 font-medium">
-                              +{service.serviceTypes.length - 4} more services
+                          {service.serviceTypes.length > 3 && (
+                            <div className="text-xs text-blue-600 font-medium text-center">
+                              +{service.serviceTypes.length - 3} more
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Features */}
-                      <div className="mb-6">
-                        <div className="grid grid-cols-2 gap-2">
-                          {service.features.map((feature, index) => (
+                      {/* Features - Compact Grid */}
+                      <div className="mb-4">
+                        <div className="grid grid-cols-1 gap-1">
+                          {service.features.slice(0, 2).map((feature, index) => (
                             <div key={index} className="flex items-center text-xs text-gray-600">
-                              <Shield className="h-3 w-3 text-blue-500 mr-1 flex-shrink-0" />
-                              <span>{feature}</span>
+                              <Shield className="h-2.5 w-2.5 text-blue-500 mr-1.5 flex-shrink-0" />
+                              <span className="line-clamp-1">{feature}</span>
                             </div>
                           ))}
+                          {service.features.length > 2 && (
+                            <div className="text-xs text-gray-500 text-center">
+                              +{service.features.length - 2} more features
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      {/* Booking Info */}
-                      <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center text-gray-600">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            <span>{service.bookingSteps}-step booking</span>
-                          </div>
-                          <div className="flex items-center text-gray-600">
-                            <MapPin className="h-4 w-4 mr-2" />
-                            <span>Location-based matching</span>
-                          </div>
+                      {/* Booking Info - Minimal */}
+                      <div className="bg-gray-50 rounded-md p-2 mb-4">
+                        <div className="flex items-center justify-center text-xs text-gray-600">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          <span>{service.bookingSteps} steps</span>
+                          <span className="mx-2">•</span>
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span>GPS match</span>
                         </div>
                       </div>
 
-                      {/* Book Now Button */}
+                      {/* Book Now Button - Compact */}
                       <Button 
                         onClick={() => onServiceSelect(service.id)}
-                        className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white font-semibold py-3 rounded-xl transition-all duration-300 group-hover:shadow-lg`}
+                        className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white font-semibold py-2 text-sm rounded-lg transition-all duration-300 group-hover:shadow-md`}
                         data-testid={`book-${service.id}`}
                       >
-                        Book {service.title}
-                        <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                        Book Now
+                        <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform duration-300" />
                       </Button>
                     </CardContent>
                   </Card>
