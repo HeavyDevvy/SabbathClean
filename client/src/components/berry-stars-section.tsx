@@ -161,7 +161,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                   <img 
                     src={provider.image} 
                     alt={provider.name}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300 rounded-t-xl"
                   />
                   
                   {/* Top Performer Badge */}
@@ -334,7 +334,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                 data-testid="button-browse-services"
               >
                 <Heart className="mr-2 h-5 w-5" />
-                Browse All Services
+                Service Catalog
               </Button>
             </div>
           </div>

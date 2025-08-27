@@ -94,33 +94,33 @@ export default function HowItWorksSection({ onBookNowClick }: HowItWorksSectionP
               )}
 
               {/* Step Card */}
-              <div className="relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-gray-200 hover:shadow-xl transition-all duration-300 group-hover:scale-105 z-10">
+              <div className="relative bg-white rounded-xl border-2 border-gray-100 p-4 hover:border-gray-200 hover:shadow-lg transition-all duration-300 group-hover:scale-105 z-10">
                 {/* Step Number */}
-                <div className="absolute -top-4 left-8">
-                  <div className={`w-8 h-8 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg`}>
+                <div className="absolute -top-3 left-4">
+                  <div className={`w-6 h-6 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
                     {step.id}
                   </div>
                 </div>
 
                 {/* Icon */}
-                <div className={`w-16 h-16 bg-gradient-to-r ${step.color} rounded-xl flex items-center justify-center mb-6 mx-auto shadow-lg`}>
-                  <step.icon className="h-8 w-8 text-white" />
+                <div className={`w-12 h-12 bg-gradient-to-r ${step.color} rounded-lg flex items-center justify-center mb-4 mx-auto shadow-md`}>
+                  <step.icon className="h-6 w-6 text-white" />
                 </div>
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  <p className="text-gray-600 text-xs leading-relaxed mb-3">
                     {step.description}
                   </p>
 
                   {/* Features */}
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {step.features.map((feature, featureIndex) => (
                       <div key={featureIndex} className="flex items-center justify-center text-xs text-gray-500">
-                        <CheckCircle2 className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
+                        <CheckCircle2 className="h-3 w-3 text-green-500 mr-1 flex-shrink-0" />
                         {feature}
                       </div>
                     ))}

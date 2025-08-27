@@ -55,77 +55,7 @@ interface ComprehensiveServicesProps {
 }
 
 const services: Service[] = [
-  // CLEANING SERVICES
-  {
-    id: "cleaning",
-    category: "Indoor Services",
-    title: "House Cleaning",
-    description: "Complete cleaning services from regular maintenance to deep cleaning with professional-grade equipment",
-    price: "From R75/hour",
-    duration: "2-6 hours",
-    popular: true,
-    serviceTypes: [
-      "Regular House Cleaning (Weekly/Bi-weekly/Monthly)",
-      "Deep Cleaning (Spring cleaning, move-in/move-out)", 
-      "Office Cleaning (Daily/Weekly/Monthly contracts)",
-      "Carpet & Upholstery Cleaning",
-      "Window Cleaning (Interior/Exterior)",
-      "Post-Construction Cleaning",
-      "Event Cleanup Services"
-    ],
-    features: ["Professional equipment", "Eco-friendly products", "Insured cleaners", "Flexible scheduling"],
-    icon: Home,
-    gradient: "from-blue-500 to-cyan-500",
-    bookingSteps: 5
-  },
 
-  // PLUMBING SERVICES
-  {
-    id: "plumbing",
-    category: "Maintenance",
-    title: "Plumbing Services",
-    description: "Professional plumbing solutions from emergency repairs to complete installations with certified plumbers",
-    price: "From R120/hour",
-    duration: "1-4 hours",
-    urgent: true,
-    serviceTypes: [
-      "Emergency Repairs (24/7 availability)",
-      "Installation Services (taps, toilets, showers)",
-      "Drain Cleaning & Unblocking",
-      "Leak Detection & Repair",
-      "Water Heater Services",
-      "Pipe Replacement & Maintenance",
-      "Bathroom & Kitchen Plumbing"
-    ],
-    features: ["24/7 emergency service", "Licensed plumbers", "Parts included", "Insurance coverage"],
-    icon: Droplet,
-    gradient: "from-cyan-500 to-blue-600",
-    bookingSteps: 4
-  },
-
-  // ELECTRICAL SERVICES
-  {
-    id: "electrical",
-    category: "Maintenance",
-    title: "Electrical Services",
-    description: "Safe and certified electrical work including installations, repairs, and compliance certificates",
-    price: "From R150/hour",
-    duration: "1-8 hours",
-    urgent: true,
-    serviceTypes: [
-      "Emergency Electrical Repairs",
-      "Installation (lights, outlets, ceiling fans)",
-      "Electrical Inspections & Certificates",
-      "DB Board & Circuit Repairs",
-      "Smart Home Installation",
-      "Solar Panel Installation & Maintenance",
-      "Appliance Installation & Repair"
-    ],
-    features: ["Licensed electricians", "Safety certificates", "Emergency response", "Code compliance"],
-    icon: Zap,
-    gradient: "from-yellow-500 to-orange-500",
-    bookingSteps: 4
-  },
 
   // CHEF & CATERING SERVICES
   {

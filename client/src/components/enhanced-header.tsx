@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, MessageCircle, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone } from "lucide-react";
+import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   DropdownMenu,
@@ -146,21 +146,7 @@ export default function EnhancedHeader({
 
             {isAuthenticated ? (
               <>
-                {/* Messages */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative"
-                  onClick={() => setLocation("/messages")}
-                  data-testid="button-messages"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                  {messageCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs p-0 flex items-center justify-center">
-                      {messageCount > 9 ? '9+' : messageCount}
-                    </Badge>
-                  )}
-                </Button>
+
 
                 {/* Notifications */}
                 <Button
@@ -406,7 +392,7 @@ export default function EnhancedHeader({
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium flex items-center"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <MessageSquare className="mr-2 h-4 w-4" />
                     Messages
                     {messageCount > 0 && (
                       <Badge className="ml-auto bg-green-500">{messageCount}</Badge>
