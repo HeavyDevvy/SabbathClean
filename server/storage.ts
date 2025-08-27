@@ -1,840 +1,1271 @@
-import type { 
-  User, ServiceProvider, Service, Booking, Payment, Review, 
-  Notification, PlatformStats, CreateUserInput, CreateBookingInput, 
-  CreateProviderInput, CreateReviewInput, ServiceCategory, BookingStatus, PaymentStatus 
+import { 
+  type User, 
+  type InsertUser,
+  type ServiceProvider,
+  type InsertServiceProvider,
+  type Service,
+  type InsertService,
+  type Booking,
+  type InsertBooking,
+  type Review,
+  type InsertReview,
+  type PaymentMethod,
+  type InsertPaymentMethod,
+  type ProviderLocation,
+  type InsertProviderLocation,
+  type JobQueue,
+  type InsertJobQueue,
+  type TrainingModule,
+  type InsertTrainingModule,
+  type ProviderTrainingProgress,
+  type InsertProviderTrainingProgress,
+  type Certification,
+  type InsertCertification,
+  type ProviderCertification,
+  type InsertProviderCertification,
+  type SkillAssessment,
+  type InsertSkillAssessment,
+  type ProviderAssessmentResult,
+  type InsertProviderAssessmentResult,
+  users,
+  serviceProviders,
+  services,
+  bookings,
+  reviews,
+  paymentMethods,
+  providerLocations,
+  jobQueue,
+  trainingModules,
+  providerTrainingProgress,
+  certifications,
+  providerCertifications,
+  skillAssessments,
+  providerAssessmentResults
 } from "@shared/schema";
-import { nanoid } from "nanoid";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // User Management
-  getUsers(): Promise<User[]>;
-  getUserById(id: string): Promise<User | null>;
-  getUserByEmail(email: string): Promise<User | null>;
-  createUser(userData: CreateUserInput): Promise<User>;
-  updateUser(id: string, data: Partial<User>): Promise<User>;
-  deleteUser(id: string): Promise<void>;
-
-  // Service Provider Management
-  getProviders(filters?: { serviceId?: string; location?: string; verified?: boolean }): Promise<ServiceProvider[]>;
-  getProviderById(id: string): Promise<ServiceProvider | null>;
-  getProviderByUserId(userId: string): Promise<ServiceProvider | null>;
-  createProvider(userId: string, providerData: CreateProviderInput): Promise<ServiceProvider>;
-  updateProvider(id: string, data: Partial<ServiceProvider>): Promise<ServiceProvider>;
-  verifyProvider(id: string): Promise<ServiceProvider>;
-
-  // Service Management
-  getServices(category?: ServiceCategory): Promise<Service[]>;
-  getServiceById(id: string): Promise<Service | null>;
-  createService(serviceData: Omit<Service, 'id'>): Promise<Service>;
-  updateService(id: string, data: Partial<Service>): Promise<Service>;
-
-  // Booking Management
-  getBookings(filters?: { customerId?: string; providerId?: string; status?: BookingStatus }): Promise<Booking[]>;
-  getBookingById(id: string): Promise<Booking | null>;
-  createBooking(customerId: string, bookingData: CreateBookingInput): Promise<Booking>;
-  updateBooking(id: string, data: Partial<Booking>): Promise<Booking>;
-  assignProvider(bookingId: string, providerId: string): Promise<Booking>;
-  completeBooking(bookingId: string, completionData: { completionNotes?: string; afterPhotos?: string[] }): Promise<Booking>;
-
-  // Payment Management
-  getPayments(bookingId?: string): Promise<Payment[]>;
-  createPayment(paymentData: Omit<Payment, 'id' | 'createdAt'>): Promise<Payment>;
-  updatePaymentStatus(id: string, status: PaymentStatus): Promise<Payment>;
-
-  // Review Management
-  getReviews(filters?: { revieweeId?: string; bookingId?: string }): Promise<Review[]>;
-  createReview(bookingId: string, reviewerId: string, revieweeId: string, reviewData: CreateReviewInput): Promise<Review>;
-  respondToReview(reviewId: string, response: string): Promise<Review>;
-
-  // Notification Management
-  getNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
-  createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification>;
-  markNotificationRead(id: string): Promise<void>;
-
-  // Analytics & Stats
-  getPlatformStats(): Promise<PlatformStats>;
-  getProviderEarnings(providerId: string, startDate?: Date, endDate?: Date): Promise<number>;
-  getCustomerBookingHistory(customerId: string): Promise<Booking[]>;
+  // User operations
+  getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Service Provider operations
+  getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
+  getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]>;
+  createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
+  updateServiceProviderRating(id: string, rating: number, totalReviews: number): Promise<ServiceProvider>;
+  
+  // Service operations
+  getAllServices(): Promise<Service[]>;
+  getServicesByCategory(category: string): Promise<Service[]>;
+  createService(service: InsertService): Promise<Service>;
+  
+  // Booking operations
+  getBooking(id: string): Promise<Booking | undefined>;
+  getBookingsByCustomer(customerId: string): Promise<Booking[]>;
+  getBookingsByProvider(providerId: string): Promise<Booking[]>;
+  createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBookingStatus(id: string, status: string): Promise<Booking>;
+  
+  // Review operations
+  getReviewsByProvider(providerId: string): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  
+  // Payment method operations
+  getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]>;
+  createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  deletePaymentMethod(id: string): Promise<void>;
+  
+  // Location operations (for future DB implementation)
+  getProviderLocation(providerId: string): Promise<ProviderLocation | undefined>;
+  updateProviderLocation(location: InsertProviderLocation): Promise<ProviderLocation>;
+  
+  // Job queue operations (for future DB implementation)
+  getJobQueueItem(id: string): Promise<JobQueue | undefined>;
+  createJobQueueItem(job: InsertJobQueue): Promise<JobQueue>;
+  
+  // Training system operations
+  getAllTrainingModules(): Promise<TrainingModule[]>;
+  getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]>;
+  getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]>;
+  updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress>;
+  createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress>;
+  
+  // Certification operations
+  getAllCertifications(): Promise<Certification[]>;
+  getCertificationsByService(serviceType: string): Promise<Certification[]>;
+  getProviderCertifications(providerId: string): Promise<ProviderCertification[]>;
+  createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification>;
+  
+  // Assessment operations
+  getSkillAssessments(serviceType: string): Promise<SkillAssessment[]>;
+  getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]>;
+  createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult>;
 }
 
-export class MemStorage implements IStorage {
-  private users: User[] = [];
-  private providers: ServiceProvider[] = [];
-  private services: Service[] = [];
-  private bookings: Booking[] = [];
-  private payments: Payment[] = [];
-  private reviews: Review[] = [];
-  private notifications: Notification[] = [];
-
-  constructor() {
-    this.initializeDefaultData();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
-  private initializeDefaultData() {
-    // Initialize services
-    const defaultServices: Service[] = [
-      {
-        id: 'house-cleaning',
-        name: 'House Cleaning',
-        description: 'Professional house cleaning service',
-        category: 'indoor',
-        subcategory: 'general-cleaning',
-        duration: 120,
-        basePrice: 350,
-        priceUnit: 'job',
-        requirements: ['Access to property', 'Cleaning supplies available'],
-        addons: [
-          { id: 'deep-clean', name: 'Deep Clean', description: 'Extra thorough cleaning', price: 100 },
-          { id: 'windows', name: 'Window Cleaning', description: 'Interior window cleaning', price: 50 }
-        ],
-        isActive: true,
-        icon: 'home'
-      },
-      {
-        id: 'garden-maintenance',
-        name: 'Garden Maintenance',
-        description: 'Complete garden care and maintenance',
-        category: 'outdoor',
-        subcategory: 'gardening',
-        duration: 180,
-        basePrice: 400,
-        priceUnit: 'job',
-        requirements: ['Garden tools provided', 'Water access'],
-        addons: [
-          { id: 'pruning', name: 'Tree Pruning', description: 'Professional tree pruning', price: 150 },
-          { id: 'fertilizing', name: 'Fertilizing', description: 'Garden fertilization', price: 80 }
-        ],
-        isActive: true,
-        icon: 'leaf'
-      },
-      {
-        id: 'laundry-ironing',
-        name: 'Laundry & Ironing',
-        description: 'Professional laundry and ironing service',
-        category: 'indoor',
-        subcategory: 'laundry',
-        duration: 150,
-        basePrice: 200,
-        priceUnit: 'job',
-        requirements: ['Washing machine available', 'Iron and board provided'],
-        addons: [
-          { id: 'dry-cleaning', name: 'Dry Clean Items', description: 'Special care items', price: 120 },
-          { id: 'folding', name: 'Professional Folding', description: 'Expert folding service', price: 30 }
-        ],
-        isActive: true,
-        icon: 'shirt'
-      },
-      {
-        id: 'plumbing-repairs',
-        name: 'Plumbing Repairs',
-        description: 'Professional plumbing services',
-        category: 'maintenance',
-        subcategory: 'plumbing',
-        duration: 120,
-        basePrice: 450,
-        priceUnit: 'hour',
-        requirements: ['Access to plumbing', 'Parts additional cost'],
-        addons: [
-          { id: 'emergency', name: 'Emergency Service', description: '24/7 emergency call-out', price: 200 },
-          { id: 'parts', name: 'Parts & Materials', description: 'Additional parts cost', price: 0 }
-        ],
-        isActive: true,
-        icon: 'wrench'
-      },
-      {
-        id: 'elder-care',
-        name: 'Elder Care',
-        description: 'Compassionate elder care services',
-        category: 'specialized',
-        subcategory: 'care',
-        duration: 240,
-        basePrice: 300,
-        priceUnit: 'hour',
-        requirements: ['Background check completed', 'First aid certification'],
-        addons: [
-          { id: 'medication', name: 'Medication Management', description: 'Medication assistance', price: 50 },
-          { id: 'transport', name: 'Transportation', description: 'Medical appointments transport', price: 100 }
-        ],
-        isActive: true,
-        icon: 'heart'
-      },
-      {
-        id: 'full-time-housekeeper',
-        name: 'Full-time Housekeeper',
-        description: 'Full-time residential housekeeping',
-        category: 'fulltime',
-        subcategory: 'housekeeper',
-        duration: 480,
-        basePrice: 15000,
-        priceUnit: 'job',
-        requirements: ['Live-in accommodation', 'Full background check'],
-        addons: [
-          { id: 'cooking', name: 'Cooking Services', description: 'Meal preparation included', price: 2000 },
-          { id: 'childcare', name: 'Child Care', description: 'Basic childcare assistance', price: 3000 }
-        ],
-        isActive: true,
-        icon: 'users'
-      }
-    ];
-
-    this.services = defaultServices;
-
-    // Create sample admin user
-    const adminUser: User = {
-      id: 'admin-1',
-      email: 'admin@homeservices.com',
-      firstName: 'System',
-      lastName: 'Admin',
-      phone: '+27123456789',
-      role: 'admin',
-      isVerified: true,
-      createdAt: new Date(),
-      preferences: {
-        notifications: true,
-        defaultLocation: 'Cape Town',
-        preferredProviders: [],
-      }
-    };
-
-    this.users = [adminUser];
-
-    // Create sample customers
-    const customers: User[] = [
-      {
-        id: 'customer-1',
-        email: 'sarah@email.com',
-        firstName: 'Sarah',
-        lastName: 'Johnson',
-        phone: '+27821234567',
-        role: 'customer',
-        isVerified: true,
-        createdAt: new Date(),
-        preferences: {
-          notifications: true,
-          defaultLocation: 'Cape Town CBD',
-          preferredProviders: [],
-        }
-      },
-      {
-        id: 'customer-2',
-        email: 'david@email.com',
-        firstName: 'David',
-        lastName: 'Smith',
-        phone: '+27829876543',
-        role: 'customer',
-        isVerified: true,
-        createdAt: new Date(),
-        preferences: {
-          notifications: true,
-          defaultLocation: 'Johannesburg',
-          preferredProviders: [],
-        }
-      }
-    ];
-
-    this.users.push(...customers);
-
-    // Create sample provider users
-    const providerUsers: User[] = [
-      {
-        id: 'provider-user-1',
-        email: 'maria@email.com',
-        firstName: 'Maria',
-        lastName: 'Santos',
-        phone: '+27834567890',
-        role: 'provider',
-        isVerified: true,
-        createdAt: new Date(),
-      },
-      {
-        id: 'provider-user-2',
-        email: 'john@email.com',
-        firstName: 'John',
-        lastName: 'Williams',
-        phone: '+27845678901',
-        role: 'provider',
-        isVerified: true,
-        createdAt: new Date(),
-      }
-    ];
-
-    this.users.push(...providerUsers);
-
-    // Create sample providers
-    const sampleProviders: ServiceProvider[] = [
-      {
-        id: 'provider-1',
-        userId: 'provider-user-1',
-        businessName: 'Maria\'s Cleaning Services',
-        bio: 'Professional cleaning specialist with 5 years experience. I take pride in delivering exceptional cleaning services for homes and offices across Cape Town.',
-        services: ['house-cleaning', 'laundry-ironing'],
-        serviceAreas: ['Cape Town CBD', 'Green Point', 'Sea Point', 'Camps Bay'],
-        hourlyRates: {
-          'house-cleaning': 280,
-          'laundry-ironing': 180
-        },
-        availability: {
-          schedule: {
-            monday: { available: true, start: '08:00', end: '17:00', breaks: [] },
-            tuesday: { available: true, start: '08:00', end: '17:00', breaks: [] },
-            wednesday: { available: true, start: '08:00', end: '17:00', breaks: [] },
-            thursday: { available: true, start: '08:00', end: '17:00', breaks: [] },
-            friday: { available: true, start: '08:00', end: '17:00', breaks: [] },
-            saturday: { available: true, start: '09:00', end: '15:00', breaks: [] },
-            sunday: { available: false, start: '', end: '', breaks: [] }
-          },
-          timeoff: [],
-          sameDay: true,
-          advance: 1
-        },
-        isVerified: true,
-        backgroundChecked: true,
-        insuranceVerified: true,
-        yearsExperience: 5,
-        rating: 4.8,
-        totalReviews: 127,
-        completedJobs: 245,
-        responseTime: 15,
-        profileImages: ['/api/placeholder/400/400'],
-        documents: [],
-        createdAt: new Date()
-      },
-      {
-        id: 'provider-2',
-        userId: 'provider-user-2',
-        businessName: 'JW Garden Solutions',
-        bio: 'Expert gardener and landscaper with over 8 years of experience. Specialized in garden maintenance, landscaping, and plant care for residential and commercial properties.',
-        services: ['garden-maintenance'],
-        serviceAreas: ['Johannesburg North', 'Sandton', 'Randburg', 'Roodepoort'],
-        hourlyRates: {
-          'garden-maintenance': 320
-        },
-        availability: {
-          schedule: {
-            monday: { available: true, start: '07:00', end: '16:00', breaks: [{ start: '12:00', end: '13:00' }] },
-            tuesday: { available: true, start: '07:00', end: '16:00', breaks: [{ start: '12:00', end: '13:00' }] },
-            wednesday: { available: true, start: '07:00', end: '16:00', breaks: [{ start: '12:00', end: '13:00' }] },
-            thursday: { available: true, start: '07:00', end: '16:00', breaks: [{ start: '12:00', end: '13:00' }] },
-            friday: { available: true, start: '07:00', end: '16:00', breaks: [{ start: '12:00', end: '13:00' }] },
-            saturday: { available: true, start: '08:00', end: '14:00', breaks: [] },
-            sunday: { available: false, start: '', end: '', breaks: [] }
-          },
-          timeoff: [],
-          sameDay: false,
-          advance: 2
-        },
-        isVerified: true,
-        backgroundChecked: true,
-        insuranceVerified: true,
-        yearsExperience: 8,
-        rating: 4.9,
-        totalReviews: 89,
-        completedJobs: 156,
-        responseTime: 8,
-        profileImages: ['/api/placeholder/400/400'],
-        documents: [],
-        createdAt: new Date()
-      }
-    ];
-
-    this.providers = sampleProviders;
-
-    // Create sample bookings
-    const sampleBookings: Booking[] = [
-      {
-        id: 'booking-1',
-        customerId: 'customer-1',
-        providerId: 'provider-1',
-        serviceId: 'house-cleaning',
-        status: 'confirmed',
-        type: 'recurring',
-        title: 'Weekly House Cleaning',
-        description: 'Regular house cleaning service',
-        duration: 120,
-        address: {
-          street: '123 Long Street',
-          city: 'Cape Town',
-          state: 'Western Cape',
-          zipCode: '8001',
-          country: 'South Africa',
-          propertyType: 'apartment',
-          propertySize: 85,
-          accessNotes: 'Apartment 4B, security code 1234'
-        },
-        scheduledDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        scheduledTime: '10:00',
-        basePrice: 350,
-        addons: [
-          { addonId: 'windows', name: 'Window Cleaning', price: 50, quantity: 1 }
-        ],
-        totalAmount: 400,
-        recurringSettings: {
-          frequency: 'weekly',
-          preferredProviderId: 'provider-1'
-        },
-        specialInstructions: 'Please focus on the kitchen and bathrooms',
-        messages: [],
-        beforePhotos: [],
-        afterPhotos: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-
-    this.bookings = sampleBookings;
-
-    // Create sample reviews
-    const sampleReviews: Review[] = [
-      {
-        id: 'review-1',
-        bookingId: 'booking-1',
-        reviewerId: 'customer-1',
-        revieweeId: 'provider-1',
-        reviewerRole: 'customer',
-        rating: 5,
-        comment: 'Maria did an excellent job! Very thorough and professional. Will definitely book again.',
-        categories: [
-          { category: 'Quality', rating: 5 },
-          { category: 'Punctuality', rating: 5 },
-          { category: 'Communication', rating: 4 }
-        ],
-        isPublic: true,
-        isHidden: false,
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      }
-    ];
-
-    this.reviews = sampleReviews;
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
   }
 
-  // User Management
-  async getUsers(): Promise<User[]> {
-    return this.users;
-  }
-
-  async getUserById(id: string): Promise<User | null> {
-    return this.users.find(u => u.id === id) || null;
-  }
-
-  async getUserByEmail(email: string): Promise<User | null> {
-    return this.users.find(u => u.email === email) || null;
-  }
-
-  async createUser(userData: CreateUserInput): Promise<User> {
-    const user: User = {
-      id: nanoid(),
-      ...userData,
-      isVerified: false,
-      createdAt: new Date(),
-      preferences: {
-        notifications: true,
-        preferredProviders: [],
-      }
-    };
-    this.users.push(user);
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
-  async updateUser(id: string, data: Partial<User>): Promise<User> {
-    const index = this.users.findIndex(u => u.id === id);
-    if (index === -1) throw new Error('User not found');
-    
-    this.users[index] = { ...this.users[index], ...data };
-    return this.users[index];
+  async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
+    const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.id, id));
+    return provider || undefined;
   }
 
-  async deleteUser(id: string): Promise<void> {
-    const index = this.users.findIndex(u => u.id === id);
-    if (index === -1) throw new Error('User not found');
-    
-    this.users.splice(index, 1);
-  }
-
-  // Service Provider Management
-  async getProviders(filters?: { serviceId?: string; location?: string; verified?: boolean }): Promise<ServiceProvider[]> {
-    let providers = this.providers;
-
-    if (filters?.serviceId) {
-      providers = providers.filter(p => p.services.includes(filters.serviceId!));
-    }
-
-    if (filters?.location) {
-      providers = providers.filter(p => 
-        p.serviceAreas.some(area => 
-          area.toLowerCase().includes(filters.location!.toLowerCase())
-        )
-      );
-    }
-
-    if (filters?.verified !== undefined) {
-      providers = providers.filter(p => p.isVerified === filters.verified);
-    }
-
+  async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {
+    const providers = await db.select().from(serviceProviders)
+      .where(eq(serviceProviders.servicesOffered, [serviceCategory]));
     return providers;
   }
 
-  async getProviderById(id: string): Promise<ServiceProvider | null> {
-    return this.providers.find(p => p.id === id) || null;
+  async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
+    const [newProvider] = await db.insert(serviceProviders).values(provider).returning();
+    return newProvider;
   }
 
-  async getProviderByUserId(userId: string): Promise<ServiceProvider | null> {
-    return this.providers.find(p => p.userId === userId) || null;
-  }
-
-  async createProvider(userId: string, providerData: CreateProviderInput): Promise<ServiceProvider> {
-    const provider: ServiceProvider = {
-      id: nanoid(),
-      userId,
-      ...providerData,
-      availability: {
-        ...providerData.availability,
-        timeoff: []
-      },
-      isVerified: false,
-      backgroundChecked: false,
-      insuranceVerified: false,
-      rating: 0,
-      totalReviews: 0,
-      completedJobs: 0,
-      responseTime: 60,
-      profileImages: [],
-      documents: [],
-      createdAt: new Date()
-    };
-
-    this.providers.push(provider);
+  async updateServiceProviderRating(id: string, rating: number, totalReviews: number): Promise<ServiceProvider> {
+    const [provider] = await db.update(serviceProviders)
+      .set({ rating: rating.toString(), totalReviews })
+      .where(eq(serviceProviders.id, id))
+      .returning();
     return provider;
   }
 
-  async updateProvider(id: string, data: Partial<ServiceProvider>): Promise<ServiceProvider> {
-    const index = this.providers.findIndex(p => p.id === id);
-    if (index === -1) throw new Error('Provider not found');
+  async getAllServices(): Promise<Service[]> {
+    const result = await db.select().from(services).where(eq(services.isActive, true));
     
-    this.providers[index] = { ...this.providers[index], ...data };
-    return this.providers[index];
-  }
-
-  async verifyProvider(id: string): Promise<ServiceProvider> {
-    return this.updateProvider(id, { 
-      isVerified: true, 
-      backgroundChecked: true, 
-      insuranceVerified: true 
-    });
-  }
-
-  // Service Management
-  async getServices(category?: ServiceCategory): Promise<Service[]> {
-    if (category) {
-      return this.services.filter(s => s.category === category && s.isActive);
+    // If no services exist, seed with default services
+    if (result.length === 0) {
+      await this.seedDefaultServices();
+      return await db.select().from(services).where(eq(services.isActive, true));
     }
-    return this.services.filter(s => s.isActive);
-  }
-
-  async getServiceById(id: string): Promise<Service | null> {
-    return this.services.find(s => s.id === id) || null;
-  }
-
-  async createService(serviceData: Omit<Service, 'id'>): Promise<Service> {
-    const service: Service = {
-      id: nanoid(),
-      ...serviceData
-    };
-    this.services.push(service);
-    return service;
-  }
-
-  async updateService(id: string, data: Partial<Service>): Promise<Service> {
-    const index = this.services.findIndex(s => s.id === id);
-    if (index === -1) throw new Error('Service not found');
     
-    this.services[index] = { ...this.services[index], ...data };
-    return this.services[index];
+    return result;
   }
 
-  // Booking Management
-  async getBookings(filters?: { customerId?: string; providerId?: string; status?: BookingStatus }): Promise<Booking[]> {
-    let bookings = this.bookings;
+  private async seedDefaultServices() {
+    const defaultServices = [
+      {
+        id: "chef-catering",
+        name: "Chef & Catering",
+        description: "Professional chef services for any occasion with authentic cuisine experiences",
+        category: "chef-catering",
+        basePrice: "550.00",
+        isActive: true,
+      },
+      {
+        id: "house-cleaning",
+        name: "House Cleaning",
+        description: "Professional eco-friendly cleaning solutions for your home",
+        category: "house-cleaning",
+        basePrice: "280.00",
+        isActive: true,
+      },
+      {
+        id: "plumbing",
+        name: "Plumbing Services",
+        description: "Certified plumbers available for repairs and installations",
+        category: "plumbing",
+        basePrice: "400.00",
+        isActive: true,
+      },
+      {
+        id: "electrical",
+        name: "Electrical Services",
+        description: "Safety-certified electrical repairs and installations",
+        category: "electrical",
+        basePrice: "450.00",
+        isActive: true,
+      },
+      {
+        id: "gardening",
+        name: "Garden Care",
+        description: "Sustainable garden maintenance and landscaping services",
+        category: "gardening",
+        basePrice: "320.00",
+        isActive: true,
+      },
+      {
+        id: "home-moving",
+        name: "Home Moving",
+        description: "Professional moving services with packing and transportation",
+        category: "home-moving",
+        basePrice: "800.00",
+        isActive: true,
+      },
+    ];
 
-    if (filters?.customerId) {
-      bookings = bookings.filter(b => b.customerId === filters.customerId);
-    }
-
-    if (filters?.providerId) {
-      bookings = bookings.filter(b => b.providerId === filters.providerId);
-    }
-
-    if (filters?.status) {
-      bookings = bookings.filter(b => b.status === filters.status);
-    }
-
-    return bookings.sort((a, b) => b.scheduledDate.getTime() - a.scheduledDate.getTime());
+    await db.insert(services).values(defaultServices).onConflictDoNothing();
   }
 
-  async getBookingById(id: string): Promise<Booking | null> {
-    return this.bookings.find(b => b.id === id) || null;
+  async getServicesByCategory(category: string): Promise<Service[]> {
+    return await db.select().from(services)
+      .where(and(eq(services.category, category), eq(services.isActive, true)));
   }
 
-  async createBooking(customerId: string, bookingData: CreateBookingInput): Promise<Booking> {
-    const service = await this.getServiceById(bookingData.serviceId);
-    if (!service) throw new Error('Service not found');
+  async createService(service: InsertService): Promise<Service> {
+    const [newService] = await db.insert(services).values(service).returning();
+    return newService;
+  }
 
-    const booking: Booking = {
-      id: nanoid(),
-      customerId,
-      serviceId: bookingData.serviceId,
-      status: 'pending',
-      type: bookingData.recurringSettings ? 'recurring' : 'one-time',
-      title: service.name,
-      description: bookingData.description,
-      duration: service.duration,
-      address: bookingData.address,
-      scheduledDate: new Date(bookingData.scheduledDate),
-      scheduledTime: bookingData.scheduledTime,
-      basePrice: service.basePrice,
-      addons: bookingData.addons.map(addon => {
-        const serviceAddon = service.addons.find(sa => sa.id === addon.addonId);
-        return {
-          addonId: addon.addonId,
-          name: serviceAddon?.name || '',
-          price: (serviceAddon?.price || 0) * addon.quantity,
-          quantity: addon.quantity
-        };
-      }),
-      totalAmount: service.basePrice + bookingData.addons.reduce((sum, addon) => {
-        const serviceAddon = service.addons.find(sa => sa.id === addon.addonId);
-        return sum + ((serviceAddon?.price || 0) * addon.quantity);
-      }, 0),
-      recurringSettings: bookingData.recurringSettings ? {
-        ...bookingData.recurringSettings,
-        endDate: bookingData.recurringSettings.endDate ? new Date(bookingData.recurringSettings.endDate) : undefined
-      } : undefined,
-      specialInstructions: bookingData.specialInstructions,
-      messages: [],
-      beforePhotos: [],
-      afterPhotos: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+  async getBooking(id: string): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking || undefined;
+  }
 
-    this.bookings.push(booking);
+  async getBookingsByCustomer(customerId: string): Promise<Booking[]> {
+    return await db.select().from(bookings)
+      .where(eq(bookings.customerId, customerId))
+      .orderBy(desc(bookings.scheduledDate));
+  }
+
+  async getBookingsByProvider(providerId: string): Promise<Booking[]> {
+    return await db.select().from(bookings)
+      .where(eq(bookings.providerId, providerId))
+      .orderBy(desc(bookings.scheduledDate));
+  }
+
+  async createBooking(booking: InsertBooking): Promise<Booking> {
+    const [newBooking] = await db.insert(bookings).values(booking).returning();
+    return newBooking;
+  }
+
+  async updateBookingStatus(id: string, status: string): Promise<Booking> {
+    const [booking] = await db.update(bookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
     return booking;
   }
 
-  async updateBooking(id: string, data: Partial<Booking>): Promise<Booking> {
-    const index = this.bookings.findIndex(b => b.id === id);
-    if (index === -1) throw new Error('Booking not found');
-    
-    this.bookings[index] = { 
-      ...this.bookings[index], 
-      ...data, 
-      updatedAt: new Date() 
-    };
-    return this.bookings[index];
+  async getReviewsByProvider(providerId: string): Promise<Review[]> {
+    return await db.select().from(reviews)
+      .where(eq(reviews.providerId, providerId))
+      .orderBy(desc(reviews.createdAt));
   }
 
-  async assignProvider(bookingId: string, providerId: string): Promise<Booking> {
-    return this.updateBooking(bookingId, { 
-      providerId, 
-      status: 'provider-assigned' 
-    });
+  async createReview(review: InsertReview): Promise<Review> {
+    const [newReview] = await db.insert(reviews).values(review).returning();
+    return newReview;
   }
 
-  async completeBooking(bookingId: string, completionData: { completionNotes?: string; afterPhotos?: string[] }): Promise<Booking> {
-    return this.updateBooking(bookingId, {
-      status: 'completed',
-      actualEndTime: new Date(),
-      completionNotes: completionData.completionNotes,
-      afterPhotos: completionData.afterPhotos || []
-    });
+  async getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]> {
+    return await db.select().from(paymentMethods)
+      .where(eq(paymentMethods.userId, userId));
   }
 
-  // Payment Management
-  async getPayments(bookingId?: string): Promise<Payment[]> {
-    if (bookingId) {
-      return this.payments.filter(p => p.bookingId === bookingId);
-    }
-    return this.payments;
+  async createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [newPaymentMethod] = await db.insert(paymentMethods).values(paymentMethod).returning();
+    return newPaymentMethod;
   }
 
-  async createPayment(paymentData: Omit<Payment, 'id' | 'createdAt'>): Promise<Payment> {
-    const payment: Payment = {
-      id: nanoid(),
-      ...paymentData,
-      createdAt: new Date()
-    };
-    this.payments.push(payment);
-    return payment;
+  async deletePaymentMethod(id: string): Promise<void> {
+    await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
   }
 
-  async updatePaymentStatus(id: string, status: PaymentStatus): Promise<Payment> {
-    const index = this.payments.findIndex(p => p.id === id);
-    if (index === -1) throw new Error('Payment not found');
-    
-    this.payments[index].status = status;
-    if (status === 'completed') {
-      this.payments[index].processedAt = new Date();
-    }
-    
-    return this.payments[index];
+  async getProviderLocation(providerId: string): Promise<ProviderLocation | undefined> {
+    const [location] = await db.select().from(providerLocations).where(eq(providerLocations.providerId, providerId));
+    return location || undefined;
   }
 
-  // Review Management
-  async getReviews(filters?: { revieweeId?: string; bookingId?: string }): Promise<Review[]> {
-    let reviews = this.reviews.filter(r => !r.isHidden);
-
-    if (filters?.revieweeId) {
-      reviews = reviews.filter(r => r.revieweeId === filters.revieweeId);
-    }
-
-    if (filters?.bookingId) {
-      reviews = reviews.filter(r => r.bookingId === filters.bookingId);
-    }
-
-    return reviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  async updateProviderLocation(location: InsertProviderLocation): Promise<ProviderLocation> {
+    const [newLocation] = await db.insert(providerLocations)
+      .values(location)
+      .onConflictDoUpdate({
+        target: providerLocations.providerId,
+        set: { latitude: location.latitude, longitude: location.longitude, updatedAt: new Date() }
+      })
+      .returning();
+    return newLocation;
   }
 
-  async createReview(bookingId: string, reviewerId: string, revieweeId: string, reviewData: CreateReviewInput): Promise<Review> {
-    const review: Review = {
-      id: nanoid(),
-      bookingId,
-      reviewerId,
-      revieweeId,
-      reviewerRole: 'customer', // Determine based on user role
-      ...reviewData,
-      isPublic: true,
-      isHidden: false,
-      createdAt: new Date()
-    };
-
-    this.reviews.push(review);
-
-    // Update provider rating
-    if (revieweeId.startsWith('provider-')) {
-      const providerReviews = this.reviews.filter(r => r.revieweeId === revieweeId);
-      const avgRating = providerReviews.reduce((sum, r) => sum + r.rating, 0) / providerReviews.length;
-      
-      const provider = this.providers.find(p => p.id === revieweeId);
-      if (provider) {
-        provider.rating = Math.round(avgRating * 10) / 10;
-        provider.totalReviews = providerReviews.length;
-      }
-    }
-
-    return review;
+  async getJobQueueItem(id: string): Promise<JobQueue | undefined> {
+    const [job] = await db.select().from(jobQueue).where(eq(jobQueue.id, id));
+    return job || undefined;
   }
 
-  async respondToReview(reviewId: string, response: string): Promise<Review> {
-    const index = this.reviews.findIndex(r => r.id === reviewId);
-    if (index === -1) throw new Error('Review not found');
-    
-    this.reviews[index].response = {
-      message: response,
-      respondedAt: new Date()
-    };
-    
-    return this.reviews[index];
+  async createJobQueueItem(job: InsertJobQueue): Promise<JobQueue> {
+    const [newJob] = await db.insert(jobQueue).values(job).returning();
+    return newJob;
   }
 
-  // Notification Management
-  async getNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]> {
-    let notifications = this.notifications.filter(n => n.userId === userId);
-    
-    if (unreadOnly) {
-      notifications = notifications.filter(n => !n.read);
-    }
-    
-    return notifications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  // Training system methods
+  async getAllTrainingModules(): Promise<TrainingModule[]> {
+    return await db.select().from(trainingModules)
+      .where(eq(trainingModules.isActive, true))
+      .orderBy(trainingModules.category, trainingModules.difficulty);
   }
 
-  async createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification> {
-    const newNotification: Notification = {
-      id: nanoid(),
-      ...notification,
-      createdAt: new Date()
-    };
-    
-    this.notifications.push(newNotification);
-    return newNotification;
+  async getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]> {
+    return await db.select().from(trainingModules)
+      .where(and(
+        eq(trainingModules.serviceType, serviceType),
+        eq(trainingModules.isActive, true)
+      ))
+      .orderBy(trainingModules.difficulty);
   }
 
-  async markNotificationRead(id: string): Promise<void> {
-    const notification = this.notifications.find(n => n.id === id);
-    if (notification) {
-      notification.read = true;
-    }
+  async getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]> {
+    return await db.select().from(providerTrainingProgress)
+      .where(eq(providerTrainingProgress.providerId, providerId))
+      .orderBy(desc(providerTrainingProgress.lastAccessedAt));
   }
 
-  // Analytics & Stats
-  async getPlatformStats(): Promise<PlatformStats> {
-    const totalUsers = this.users.filter(u => u.role === 'customer').length;
-    const totalProviders = this.providers.length;
-    const totalBookings = this.bookings.length;
-    const completedBookings = this.bookings.filter(b => b.status === 'completed').length;
-    const totalRevenue = this.payments
-      .filter(p => p.status === 'completed')
-      .reduce((sum, p) => sum + p.totalAmount, 0);
-
-    const allRatings = this.providers
-      .filter(p => p.totalReviews > 0)
-      .map(p => p.rating);
-    const averageRating = allRatings.length > 0 
-      ? allRatings.reduce((sum, rating) => sum + rating, 0) / allRatings.length 
-      : 0;
-
-    const activeProviders = this.providers.filter(p => p.isVerified).length;
-
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    
-    const bookingsToday = this.bookings.filter(b => 
-      b.scheduledDate >= startOfDay &&
-      b.scheduledDate < new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
-    ).length;
-
-    const revenueToday = this.payments
-      .filter(p => 
-        p.status === 'completed' &&
-        p.processedAt &&
-        p.processedAt >= startOfDay
-      )
-      .reduce((sum, p) => sum + p.totalAmount, 0);
-
-    return {
-      totalUsers,
-      totalProviders,
-      totalBookings,
-      completedBookings,
-      totalRevenue,
-      averageRating: Math.round(averageRating * 10) / 10,
-      activeProviders,
-      bookingsToday,
-      revenueToday
-    };
+  async updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress> {
+    const [updatedProgress] = await db.update(providerTrainingProgress)
+      .set({ ...progress, updatedAt: new Date() })
+      .where(eq(providerTrainingProgress.id, progressId))
+      .returning();
+    return updatedProgress;
   }
 
-  async getProviderEarnings(providerId: string, startDate?: Date, endDate?: Date): Promise<number> {
-    let payments = this.payments.filter(p => {
-      const booking = this.bookings.find(b => b.id === p.bookingId);
-      return booking?.providerId === providerId && p.status === 'completed';
-    });
-
-    if (startDate) {
-      payments = payments.filter(p => p.processedAt && p.processedAt >= startDate);
-    }
-
-    if (endDate) {
-      payments = payments.filter(p => p.processedAt && p.processedAt <= endDate);
-    }
-
-    const totalRevenue = payments.reduce((sum, p) => sum + p.totalAmount, 0);
-    return totalRevenue * 0.85; // 85% goes to provider, 15% platform fee
+  async createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress> {
+    const [newProgress] = await db.insert(providerTrainingProgress).values(progress).returning();
+    return newProgress;
   }
 
-  async getCustomerBookingHistory(customerId: string): Promise<Booking[]> {
-    return this.bookings
-      .filter(b => b.customerId === customerId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  async getAllCertifications(): Promise<Certification[]> {
+    return await db.select().from(certifications)
+      .where(eq(certifications.isActive, true))
+      .orderBy(certifications.serviceType, certifications.level);
+  }
+
+  async getCertificationsByService(serviceType: string): Promise<Certification[]> {
+    return await db.select().from(certifications)
+      .where(and(
+        eq(certifications.serviceType, serviceType),
+        eq(certifications.isActive, true)
+      ))
+      .orderBy(certifications.level);
+  }
+
+  async getProviderCertifications(providerId: string): Promise<ProviderCertification[]> {
+    return await db.select().from(providerCertifications)
+      .where(eq(providerCertifications.providerId, providerId))
+      .orderBy(desc(providerCertifications.earnedAt));
+  }
+
+  async createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification> {
+    const [newCertification] = await db.insert(providerCertifications).values(certification).returning();
+    return newCertification;
+  }
+
+  async getSkillAssessments(serviceType: string): Promise<SkillAssessment[]> {
+    return await db.select().from(skillAssessments)
+      .where(and(
+        eq(skillAssessments.serviceType, serviceType),
+        eq(skillAssessments.isActive, true)
+      ))
+      .orderBy(skillAssessments.title);
+  }
+
+  async getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]> {
+    return await db.select().from(providerAssessmentResults)
+      .where(eq(providerAssessmentResults.providerId, providerId))
+      .orderBy(desc(providerAssessmentResults.completedAt));
+  }
+
+  async createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult> {
+    const [newResult] = await db.insert(providerAssessmentResults).values(result).returning();
+    return newResult;
+  }
+
+  // Additional methods for comprehensive training system
+  async getTrainingModule(id: string): Promise<TrainingModule | undefined> {
+    const [module] = await db.select().from(trainingModules).where(eq(trainingModules.id, id));
+    return module || undefined;
+  }
+
+  async createTrainingModule(module: InsertTrainingModule): Promise<TrainingModule> {
+    const [newModule] = await db.insert(trainingModules).values(module).returning();
+    return newModule;
+  }
+
+  async getProviderModuleProgress(providerId: string, moduleId: string): Promise<ProviderTrainingProgress | undefined> {
+    const [progress] = await db.select().from(providerTrainingProgress)
+      .where(and(
+        eq(providerTrainingProgress.providerId, providerId),
+        eq(providerTrainingProgress.moduleId, moduleId)
+      ));
+    return progress || undefined;
+  }
+
+  async getCertification(id: string): Promise<Certification | undefined> {
+    const [certification] = await db.select().from(certifications).where(eq(certifications.id, id));
+    return certification || undefined;
+  }
+
+  async createCertification(certification: InsertCertification): Promise<Certification> {
+    const [newCertification] = await db.insert(certifications).values(certification).returning();
+    return newCertification;
+  }
+
+  async updateProviderCertificationStatus(id: string, status: string, earnedAt?: Date, expiresAt?: Date): Promise<ProviderCertification> {
+    const [certification] = await db.update(providerCertifications)
+      .set({ status, earnedAt, expiresAt })
+      .where(eq(providerCertifications.id, id))
+      .returning();
+    return certification;
+  }
+
+  async getSkillAssessment(id: string): Promise<SkillAssessment | undefined> {
+    const [assessment] = await db.select().from(skillAssessments).where(eq(skillAssessments.id, id));
+    return assessment || undefined;
+  }
+
+  async createSkillAssessment(assessment: InsertSkillAssessment): Promise<SkillAssessment> {
+    const [newAssessment] = await db.insert(skillAssessments).values(assessment).returning();
+    return newAssessment;
+  }
+
+  async getProviderAssessmentResult(providerId: string, assessmentId: string): Promise<ProviderAssessmentResult | undefined> {
+    const [result] = await db.select().from(providerAssessmentResults)
+      .where(and(
+        eq(providerAssessmentResults.providerId, providerId),
+        eq(providerAssessmentResults.assessmentId, assessmentId)
+      ))
+      .orderBy(desc(providerAssessmentResults.completedAt))
+      .limit(1);
+    return result || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export class MemStorage implements IStorage {
+  private users: Map<string, User> = new Map();
+  private serviceProviders: Map<string, ServiceProvider> = new Map();
+  private services: Map<string, Service> = new Map();
+  private bookings: Map<string, Booking> = new Map();
+  private reviews: Map<string, Review> = new Map();
+  private paymentMethods: Map<string, PaymentMethod> = new Map();
+  private providerLocations: Map<string, ProviderLocation> = new Map();
+  private jobQueue: Map<string, JobQueue> = new Map();
+
+  constructor() {
+    this.seedData();
+  }
+
+  private seedData() {
+    // Seed services
+    const services = [
+      {
+        id: "service-1",
+        name: "House Cleaning",
+        description: "Complete home cleaning including dusting, vacuuming, mopping, kitchen & bathroom sanitization, organizing",
+        category: "house-cleaning",
+        basePrice: "280.00",
+        isActive: true,
+      },
+      {
+        id: "service-2", 
+        name: "Deep Cleaning",
+        description: "Thorough cleaning for move-ins, move-outs including carpet cleaning, window washing, appliance cleaning",
+        category: "deep-cleaning",
+        basePrice: "450.00",
+        isActive: true,
+      },
+      {
+        id: "service-3",
+        name: "Plumbing Services",
+        description: "Pipe repairs, leak fixing, faucet installation, drain cleaning, toilet repairs, water heater maintenance",
+        category: "plumbing",
+        basePrice: "380.00",
+        isActive: true,
+      },
+      {
+        id: "service-4",
+        name: "Electrical Services",
+        description: "Wiring repairs, outlet installation, lighting setup, circuit breaker fixes, electrical safety inspections",
+        category: "electrical",
+        basePrice: "420.00",
+        isActive: true,
+      },
+      {
+        id: "service-5",
+        name: "Chef & Catering",
+        description: "Personal chef services, meal preparation, event catering, menu planning, dietary accommodations",
+        category: "chef-catering",
+        basePrice: "550.00",
+        isActive: true,
+      },
+      {
+        id: "service-6",
+        name: "Waitering Services",
+        description: "Professional waitstaff for events, table service, bar service, event coordination, cleanup assistance",
+        category: "waitering",
+        basePrice: "220.00",
+        isActive: true,
+      },
+      {
+        id: "service-7",
+        name: "Garden Care",
+        description: "Lawn maintenance, pruning, weeding, planting, irrigation setup, landscape design consultation",
+        category: "gardening",
+        basePrice: "320.00",
+        isActive: true,
+      },
+      {
+        id: "service-8",
+        name: "Home Moving",
+        description: "Packing services, furniture disassembly/assembly, loading/unloading, transportation, unpacking, storage solutions",
+        category: "home-moving",
+        basePrice: "450.00",
+        isActive: true,
+      },
+    ];
+
+    services.forEach(service => this.services.set(service.id, service as Service));
+
+    // Seed users and service providers
+    const providers = [
+      {
+        user: {
+          id: "user-1",
+          email: "maria@example.com",
+          username: "maria_santos",
+          password: "hashed_password",
+          firstName: "Maria",
+          lastName: "Santos",
+          phone: "+27123456789",
+          address: "Cape Town, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-1",
+          userId: "user-1",
+          firstName: "Maria",
+          lastName: "Santos",
+          email: "maria@example.com",
+          phone: "+27123456789",
+          bio: "500+ happy customers. Specializing in eco-friendly cleaning solutions.",
+          profileImage: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300",
+          hourlyRate: "280.00",
+          servicesOffered: ["house-cleaning", "deep-cleaning"],
+          experience: "experienced",
+          availability: { monday: ["9:00", "17:00"], tuesday: ["9:00", "17:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.9",
+          totalReviews: 127,
+          location: "Cape Town",
+          idDocument: "/uploads/id/maria-id.jpg",
+          qualificationCertificate: "/uploads/certs/maria-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-2",
+          email: "james@example.com",
+          username: "james_mitchell",
+          password: "hashed_password",
+          firstName: "James",
+          lastName: "Mitchell",
+          phone: "+27123456790",
+          address: "Johannesburg, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-2",
+          userId: "user-2",
+          firstName: "James",
+          lastName: "Mitchell",
+          email: "james@example.com",
+          phone: "+27123456790",
+          bio: "Certified electrician and plumber with 8 years experience.",
+          profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300",
+          hourlyRate: "400.00",
+          servicesOffered: ["plumbing", "electrical"],
+          experience: "expert",
+          availability: { monday: ["8:00", "18:00"], tuesday: ["8:00", "18:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.8",
+          totalReviews: 89,
+          location: "Johannesburg",
+          idDocument: "/uploads/id/james-id.jpg",
+          qualificationCertificate: "/uploads/certs/james-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-3",
+          email: "sarah@example.com",
+          username: "sarah_johnson",
+          password: "hashed_password",
+          firstName: "Sarah",
+          lastName: "Johnson",
+          phone: "+27123456791",
+          address: "Durban, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-3",
+          userId: "user-3",
+          firstName: "Sarah",
+          lastName: "Johnson", 
+          email: "sarah@example.com",
+          phone: "+27123456791",
+          bio: "Professional Italian chef and catering specialist with fine dining experience. Specializes in authentic Italian cuisine and Mediterranean flavors.",
+          profileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300",
+          hourlyRate: "385.00",
+          servicesOffered: ["chef-catering", "waitering"],
+          experience: "experienced",
+          availability: { monday: ["9:00", "16:00"], tuesday: ["9:00", "16:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "5.0",
+          totalReviews: 45,
+          location: "Durban",
+          idDocument: "/uploads/id/sarah-id.jpg",
+          qualificationCertificate: "/uploads/certs/sarah-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-4",
+          email: "david@example.com",
+          username: "david_chen",
+          password: "hashed_password",
+          firstName: "David",
+          lastName: "Chen",
+          phone: "+27123456792",
+          address: "Cape Town, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-4",
+          userId: "user-4",
+          firstName: "David",
+          lastName: "Chen",
+          email: "david@example.com",
+          phone: "+27123456792",
+          bio: "Landscape designer with sustainable gardening practices.",
+          profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300",
+          hourlyRate: "540.00",
+          servicesOffered: ["gardening"],
+          experience: "expert",
+          availability: { monday: ["8:00", "17:00"], tuesday: ["8:00", "17:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.9",
+          totalReviews: 67,
+          location: "Cape Town",
+          idDocument: "/uploads/id/david-id.jpg",
+          qualificationCertificate: "/uploads/certs/david-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-5",
+          email: "mike@example.com",
+          username: "mike_movers",
+          password: "hashed_password",
+          firstName: "Mike",
+          lastName: "Thompson",
+          phone: "+27123456793",
+          address: "Pretoria, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-5",
+          userId: "user-5",
+          firstName: "Mike",
+          lastName: "Thompson",
+          email: "mike@example.com",
+          phone: "+27123456793",
+          bio: "Professional moving services with 10+ years experience. Specialized in residential and office relocations.",
+          profileImage: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300",
+          hourlyRate: "450.00",
+          servicesOffered: ["home-moving"],
+          experience: "expert",
+          availability: { monday: ["7:00", "19:00"], tuesday: ["7:00", "19:00"], wednesday: ["7:00", "19:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.7",
+          totalReviews: 152,
+          location: "Pretoria",
+          idDocument: "/uploads/id/mike-id.jpg",
+          qualificationCertificate: "/uploads/certs/mike-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-6",
+          email: "chef.raj@example.com",
+          username: "chef_raj",
+          password: "hashed_password",
+          firstName: "Raj",
+          lastName: "Patel",
+          phone: "+27123456794",
+          address: "Cape Town, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-6",
+          userId: "user-6",
+          firstName: "Raj",
+          lastName: "Patel",
+          email: "chef.raj@example.com",
+          phone: "+27123456794",
+          bio: "Authentic Indian cuisine specialist with traditional spices and cooking techniques. Expert in curries, biryanis, and vegetarian Indian dishes.",
+          profileImage: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300",
+          hourlyRate: "420.00",
+          servicesOffered: ["chef-catering"],
+          experience: "expert",
+          availability: { monday: ["10:00", "18:00"], tuesday: ["10:00", "18:00"], wednesday: ["10:00", "18:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.8",
+          totalReviews: 73,
+          location: "Cape Town",
+          idDocument: "/uploads/id/raj-id.jpg",
+          qualificationCertificate: "/uploads/certs/raj-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-7",
+          email: "chef.lila@example.com",
+          username: "chef_lila",
+          password: "hashed_password",
+          firstName: "Lila",
+          lastName: "Mbeki",
+          phone: "+27123456795",
+          address: "Johannesburg, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-7",
+          userId: "user-7",
+          firstName: "Lila",
+          lastName: "Mbeki",
+          email: "chef.lila@example.com",
+          phone: "+27123456795",
+          bio: "Traditional African cuisine chef specializing in South African heritage dishes, modern African fusion, and indigenous ingredients.",
+          profileImage: "https://images.unsplash.com/photo-1594736797933-d0401ba4fcc9?w=300",
+          hourlyRate: "380.00",
+          servicesOffered: ["chef-catering"],
+          experience: "experienced",
+          availability: { monday: ["9:00", "17:00"], tuesday: ["9:00", "17:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.9",
+          totalReviews: 56,
+          location: "Johannesburg",
+          idDocument: "/uploads/id/lila-id.jpg",
+          qualificationCertificate: "/uploads/certs/lila-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-8",
+          email: "chef.akiko@example.com",
+          username: "chef_akiko",
+          password: "hashed_password",
+          firstName: "Akiko",
+          lastName: "Tanaka",
+          phone: "+27123456796",
+          address: "Durban, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-8",
+          userId: "user-8",
+          firstName: "Akiko",
+          lastName: "Tanaka",
+          email: "chef.akiko@example.com",
+          phone: "+27123456796",
+          bio: "Asian fusion chef specializing in Japanese, Thai, and contemporary Asian cuisine. Expert in sushi, ramen, and Thai curries.",
+          profileImage: "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=300",
+          hourlyRate: "450.00",
+          servicesOffered: ["chef-catering"],
+          experience: "expert",
+          availability: { monday: ["11:00", "19:00"], tuesday: ["11:00", "19:00"], wednesday: ["11:00", "19:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "5.0",
+          totalReviews: 42,
+          location: "Durban",
+          idDocument: "/uploads/id/akiko-id.jpg",
+          qualificationCertificate: "/uploads/certs/akiko-cert.pdf",
+          createdAt: new Date(),
+        }
+      },
+      {
+        user: {
+          id: "user-9",
+          email: "chef.maria@example.com",
+          username: "chef_maria_med",
+          password: "hashed_password",
+          firstName: "Maria",
+          lastName: "Konstantinou",
+          phone: "+27123456797",
+          address: "Cape Town, South Africa",
+          isProvider: true,
+          createdAt: new Date(),
+        },
+        provider: {
+          id: "provider-9",
+          userId: "user-9",
+          firstName: "Maria",
+          lastName: "Konstantinou",
+          email: "chef.maria@example.com",
+          phone: "+27123456797",
+          bio: "Mediterranean cuisine specialist with expertise in Greek, Turkish, and Middle Eastern flavors. Fresh ingredients and healthy cooking methods.",
+          profileImage: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300",
+          hourlyRate: "400.00",
+          servicesOffered: ["chef-catering"],
+          experience: "experienced",
+          availability: { monday: ["10:00", "18:00"], tuesday: ["10:00", "18:00"] },
+          isVerified: true,
+          insuranceVerified: true,
+          backgroundCheckVerified: true,
+          hasInsurance: true,
+          backgroundCheckConsent: true,
+          rating: "4.7",
+          totalReviews: 61,
+          location: "Cape Town",
+          idDocument: "/uploads/id/maria-k-id.jpg",
+          qualificationCertificate: "/uploads/certs/maria-k-cert.pdf",
+          createdAt: new Date(),
+        }
+      }
+    ];
+
+    providers.forEach(({ user, provider }) => {
+      this.users.set(user.id, user as User);
+      this.serviceProviders.set(provider.id, provider as ServiceProvider);
+    });
+
+    // Seed provider locations
+    const providerLocations = [
+      {
+        id: randomUUID(),
+        providerId: "provider-1",
+        latitude: -33.9249,
+        longitude: 18.4241,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-2", 
+        latitude: -26.2041,
+        longitude: 28.0473,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-3",
+        latitude: -29.8587,
+        longitude: 31.0218,
+        isOnline: false,
+        lastSeen: new Date(Date.now() - 3600000), // 1 hour ago
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-4",
+        latitude: -33.9289,
+        longitude: 18.4194,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-5", // New moving provider
+        latitude: -25.7479,
+        longitude: 28.2293,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-6", // Indian chef Raj
+        latitude: -33.9249,
+        longitude: 18.4241,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-7", // African chef Lila
+        latitude: -26.2041,
+        longitude: 28.0473,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-8", // Asian chef Akiko
+        latitude: -29.8587,
+        longitude: 31.0218,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: randomUUID(),
+        providerId: "provider-9", // Mediterranean chef Maria
+        latitude: -33.9289,
+        longitude: 18.4194,
+        isOnline: true,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    providerLocations.forEach(location => {
+      this.providerLocations.set(location.id, location as ProviderLocation);
+    });
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = randomUUID();
+    const user: User = { 
+      ...insertUser, 
+      id,
+      address: insertUser.address || null,
+      phone: insertUser.phone || null,
+      isProvider: insertUser.isProvider || false,
+      createdAt: new Date()
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
+    return this.serviceProviders.get(id);
+  }
+
+  async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {
+    return Array.from(this.serviceProviders.values()).filter(
+      provider => provider.servicesOffered.includes(serviceCategory)
+    );
+  }
+
+  async createServiceProvider(insertProvider: InsertServiceProvider): Promise<ServiceProvider> {
+    const id = randomUUID();
+    const provider: ServiceProvider = {
+      ...insertProvider,
+      id,
+      firstName: insertProvider.firstName || null,
+      lastName: insertProvider.lastName || null,
+      email: insertProvider.email || null,
+      phone: insertProvider.phone || null,
+      bio: insertProvider.bio || null,
+      profileImage: insertProvider.profileImage || null,
+      experience: insertProvider.experience || null,
+      availability: insertProvider.availability || {},
+      isVerified: insertProvider.isVerified || false,
+      insuranceVerified: insertProvider.insuranceVerified || false,
+      backgroundCheckVerified: insertProvider.backgroundCheckVerified || false,
+      hasInsurance: insertProvider.hasInsurance || false,
+      backgroundCheckConsent: insertProvider.backgroundCheckConsent || false,
+      rating: "0",
+      totalReviews: 0,
+      idDocument: insertProvider.idDocument || null,
+      qualificationCertificate: insertProvider.qualificationCertificate || null,
+      createdAt: new Date()
+    };
+    this.serviceProviders.set(id, provider);
+    return provider;
+  }
+
+  async updateServiceProviderRating(id: string, rating: number, totalReviews: number): Promise<ServiceProvider> {
+    const provider = this.serviceProviders.get(id);
+    if (!provider) throw new Error("Provider not found");
+    
+    const updatedProvider = {
+      ...provider,
+      rating: rating.toFixed(2),
+      totalReviews
+    };
+    this.serviceProviders.set(id, updatedProvider);
+    return updatedProvider;
+  }
+
+  async getAllServices(): Promise<Service[]> {
+    return Array.from(this.services.values()).filter(service => service.isActive);
+  }
+
+  async getServicesByCategory(category: string): Promise<Service[]> {
+    return Array.from(this.services.values()).filter(
+      service => service.category === category && service.isActive
+    );
+  }
+
+  async createService(insertService: InsertService): Promise<Service> {
+    const id = randomUUID();
+    const service: Service = { 
+      ...insertService, 
+      id,
+      isActive: insertService.isActive !== undefined ? insertService.isActive : true
+    };
+    this.services.set(id, service);
+    return service;
+  }
+
+  async getBooking(id: string): Promise<Booking | undefined> {
+    return this.bookings.get(id);
+  }
+
+  async getBookingsByCustomer(customerId: string): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).filter(
+      booking => booking.customerId === customerId
+    );
+  }
+
+  async getBookingsByProvider(providerId: string): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).filter(
+      booking => booking.providerId === providerId
+    );
+  }
+
+  async createBooking(insertBooking: InsertBooking): Promise<Booking> {
+    const id = randomUUID();
+    const booking: Booking = {
+      ...insertBooking,
+      id,
+      status: insertBooking.status || "pending",
+      specialInstructions: insertBooking.specialInstructions || null,
+      isRecurring: insertBooking.isRecurring || false,
+      recurringFrequency: insertBooking.recurringFrequency || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.bookings.set(id, booking);
+    return booking;
+  }
+
+  async updateBookingStatus(id: string, status: string): Promise<Booking> {
+    const booking = this.bookings.get(id);
+    if (!booking) throw new Error("Booking not found");
+    
+    const updatedBooking = {
+      ...booking,
+      status,
+      updatedAt: new Date()
+    };
+    this.bookings.set(id, updatedBooking);
+    return updatedBooking;
+  }
+
+  async getReviewsByProvider(providerId: string): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(
+      review => review.providerId === providerId
+    );
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const id = randomUUID();
+    const review: Review = {
+      ...insertReview,
+      id,
+      serviceQuality: insertReview.serviceQuality || null,
+      punctuality: insertReview.punctuality || null,
+      professionalism: insertReview.professionalism || null,
+      comment: insertReview.comment || null,
+      wouldRecommend: insertReview.wouldRecommend || true,
+      createdAt: new Date()
+    };
+    this.reviews.set(id, review);
+    return review;
+  }
+
+  // Payment method operations
+  async getPaymentMethodsByUser(userId: string): Promise<PaymentMethod[]> {
+    return Array.from(this.paymentMethods.values()).filter(pm => pm.userId === userId && pm.isActive);
+  }
+
+  async createPaymentMethod(paymentMethodData: InsertPaymentMethod): Promise<PaymentMethod> {
+    const paymentMethod: PaymentMethod = {
+      id: randomUUID(),
+      type: paymentMethodData.type,
+      userId: paymentMethodData.userId,
+      cardNumber: paymentMethodData.cardNumber || null,
+      cardHolderName: paymentMethodData.cardHolderName || null,
+      expiryMonth: paymentMethodData.expiryMonth || null,
+      expiryYear: paymentMethodData.expiryYear || null,
+      bankName: paymentMethodData.bankName || null,
+      cardType: paymentMethodData.cardType || null,
+      isActive: paymentMethodData.isActive ?? true,
+      isDefault: paymentMethodData.isDefault ?? false,
+      createdAt: new Date(),
+    };
+    this.paymentMethods.set(paymentMethod.id, paymentMethod);
+    return paymentMethod;
+  }
+
+  async deletePaymentMethod(id: string): Promise<void> {
+    const paymentMethod = this.paymentMethods.get(id);
+    if (paymentMethod) {
+      paymentMethod.isActive = false;
+      this.paymentMethods.set(id, paymentMethod);
+    }
+  }
+
+  // Location operations (placeholder for now)
+  async getProviderLocation(providerId: string): Promise<ProviderLocation | undefined> {
+    return Array.from(this.providerLocations.values()).find(loc => loc.providerId === providerId);
+  }
+
+  async updateProviderLocation(locationData: InsertProviderLocation): Promise<ProviderLocation> {
+    const existingLocation = Array.from(this.providerLocations.values()).find(loc => loc.providerId === locationData.providerId);
+    
+    if (existingLocation) {
+      const updatedLocation = { ...existingLocation, ...locationData, updatedAt: new Date() };
+      this.providerLocations.set(existingLocation.id, updatedLocation);
+      return updatedLocation;
+    } else {
+      const location: ProviderLocation = {
+        id: randomUUID(),
+        ...locationData,
+        isOnline: locationData.isOnline ?? false,
+        lastSeen: new Date(),
+        updatedAt: new Date(),
+      };
+      this.providerLocations.set(location.id, location);
+      return location;
+    }
+  }
+
+  // Job queue operations (placeholder for now)
+  async getJobQueueItem(id: string): Promise<JobQueue | undefined> {
+    return this.jobQueue.get(id);
+  }
+
+  async createJobQueueItem(jobData: InsertJobQueue): Promise<JobQueue> {
+    const job: JobQueue = {
+      id: randomUUID(),
+      ...jobData,
+      status: jobData.status ?? "pending",
+      maxRadius: jobData.maxRadius ?? 20,
+      priority: jobData.priority ?? 1,
+      assignedProviderId: jobData.assignedProviderId ?? null,
+      createdAt: new Date(),
+    };
+    this.jobQueue.set(job.id, job);
+    return job;
+  }
+
+  // Training system methods (stub implementations for MemStorage)
+  async getAllTrainingModules(): Promise<TrainingModule[]> {
+    return [];
+  }
+
+  async getTrainingModulesByService(serviceType: string): Promise<TrainingModule[]> {
+    return [];
+  }
+
+  async getProviderTrainingProgress(providerId: string): Promise<ProviderTrainingProgress[]> {
+    return [];
+  }
+
+  async updateTrainingProgress(progressId: string, progress: Partial<ProviderTrainingProgress>): Promise<ProviderTrainingProgress> {
+    throw new Error("Training progress update not implemented in MemStorage");
+  }
+
+  async createTrainingProgress(progress: InsertProviderTrainingProgress): Promise<ProviderTrainingProgress> {
+    throw new Error("Training progress creation not implemented in MemStorage");
+  }
+
+  async getAllCertifications(): Promise<Certification[]> {
+    return [];
+  }
+
+  async getCertificationsByService(serviceType: string): Promise<Certification[]> {
+    return [];
+  }
+
+  async getProviderCertifications(providerId: string): Promise<ProviderCertification[]> {
+    return [];
+  }
+
+  async createProviderCertification(certification: InsertProviderCertification): Promise<ProviderCertification> {
+    throw new Error("Provider certification creation not implemented in MemStorage");
+  }
+
+  async getSkillAssessments(serviceType: string): Promise<SkillAssessment[]> {
+    return [];
+  }
+
+  async getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]> {
+    return [];
+  }
+
+  async createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult> {
+    throw new Error("Assessment result creation not implemented in MemStorage");
+  }
+}
+
+// Switch to database storage for production
+export const storage = new DatabaseStorage();
