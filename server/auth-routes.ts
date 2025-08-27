@@ -238,13 +238,30 @@ export function registerAuthRoutes(app: Express) {
     try {
       // Mock Google user data for demo - in production use actual OAuth
       const mockGoogleUser = {
-        id: `google_${Date.now()}`,
         email: 'demo.google@berryevents.com',
         firstName: 'Google',
         lastName: 'User',
         profileImage: 'https://via.placeholder.com/150/4285F4/white?text=G',
         authProvider: 'google',
-        isProvider: false
+        isProvider: false,
+        password: null,
+        phone: null,
+        address: null,
+        city: null,
+        province: null,
+        postalCode: null,
+        latitude: null,
+        longitude: null,
+        username: null,
+        isVerified: true,
+        googleId: `google_${Date.now()}`,
+        appleId: null,
+        twitterId: null,
+        instagramId: null,
+        rememberToken: null,
+        rememberTokenExpiresAt: null,
+        preferences: null,
+        lastLoginAt: null
       };
       
       // Check if user exists, create if not
@@ -295,13 +312,30 @@ export function registerAuthRoutes(app: Express) {
   app.get('/api/auth/apple', async (req, res) => {
     try {
       const mockAppleUser = {
-        id: `apple_${Date.now()}`,
         email: 'demo.apple@berryevents.com',
         firstName: 'Apple',
         lastName: 'User',
         profileImage: 'https://via.placeholder.com/150/000000/white?text=A',
         authProvider: 'apple',
-        isProvider: false
+        isProvider: false,
+        password: null,
+        phone: null,
+        address: null,
+        city: null,
+        province: null,
+        postalCode: null,
+        latitude: null,
+        longitude: null,
+        username: null,
+        isVerified: true,
+        googleId: null,
+        appleId: `apple_${Date.now()}`,
+        twitterId: null,
+        instagramId: null,
+        rememberToken: null,
+        rememberTokenExpiresAt: null,
+        preferences: null,
+        lastLoginAt: null
       };
       
       let user = await storage.getUserByEmail(mockAppleUser.email);
@@ -347,13 +381,30 @@ export function registerAuthRoutes(app: Express) {
   app.get('/api/auth/twitter', async (req, res) => {
     try {
       const mockTwitterUser = {
-        id: `twitter_${Date.now()}`,
         email: 'demo.twitter@berryevents.com',
         firstName: 'Twitter',
         lastName: 'User',
         profileImage: 'https://via.placeholder.com/150/1DA1F2/white?text=T',
         authProvider: 'twitter',
-        isProvider: false
+        isProvider: false,
+        password: null,
+        phone: null,
+        address: null,
+        city: null,
+        province: null,
+        postalCode: null,
+        latitude: null,
+        longitude: null,
+        username: null,
+        isVerified: true,
+        googleId: null,
+        appleId: null,
+        twitterId: `twitter_${Date.now()}`,
+        instagramId: null,
+        rememberToken: null,
+        rememberTokenExpiresAt: null,
+        preferences: null,
+        lastLoginAt: null
       };
       
       let user = await storage.getUserByEmail(mockTwitterUser.email);
@@ -399,13 +450,30 @@ export function registerAuthRoutes(app: Express) {
   app.get('/api/auth/instagram', async (req, res) => {
     try {
       const mockInstagramUser = {
-        id: `instagram_${Date.now()}`,
         email: 'demo.instagram@berryevents.com',
         firstName: 'Instagram',
         lastName: 'User',
         profileImage: 'https://via.placeholder.com/150/E4405F/white?text=I',
         authProvider: 'instagram',
-        isProvider: false
+        isProvider: false,
+        password: null,
+        phone: null,
+        address: null,
+        city: null,
+        province: null,
+        postalCode: null,
+        latitude: null,
+        longitude: null,
+        username: null,
+        isVerified: true,
+        googleId: null,
+        appleId: null,
+        twitterId: null,
+        instagramId: `instagram_${Date.now()}`,
+        rememberToken: null,
+        rememberTokenExpiresAt: null,
+        preferences: null,
+        lastLoginAt: null
       };
       
       let user = await storage.getUserByEmail(mockInstagramUser.email);
