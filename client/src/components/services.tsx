@@ -249,7 +249,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                   {/* Enhanced CTA buttons */}
                   <div className="space-y-2">
                     <button 
-                      className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-bold text-lg py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedServiceId(service.id);

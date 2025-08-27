@@ -218,7 +218,7 @@ export default function ServicesPage() {
                   <Button
                     size="sm"
                     onClick={() => handleBookService(service.id)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white text-base font-semibold"
                     data-testid={`book-${service.id}`}
                   >
                     Book Now
