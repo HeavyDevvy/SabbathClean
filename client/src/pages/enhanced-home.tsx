@@ -2,7 +2,7 @@ import { useState } from "react";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
 import ComprehensiveServices from "@/components/comprehensive-services";
-import AdvancedBookingModal from "@/components/advanced-booking-modal";
+import ModernServiceModal from "@/components/modern-service-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
@@ -76,17 +76,20 @@ export default function EnhancedHome() {
       {/* Footer */}
       <Footer />
 
-      {/* Advanced Booking Modal */}
-      {isBookingModalOpen && (
-        <AdvancedBookingModal
-          isOpen={isBookingModalOpen}
-          onClose={() => {
-            setIsBookingModalOpen(false);
-            setSelectedService("");
-          }}
-          preSelectedService={selectedService}
-        />
-      )}
+      {/* Standardized Modern Service Modal */}
+      <ModernServiceModal
+        isOpen={isBookingModalOpen}
+        onClose={() => {
+          setIsBookingModalOpen(false);
+          setSelectedService("");
+        }}
+        serviceId={selectedService || "house-cleaning"}
+        onBookingComplete={(bookingData) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingModalOpen(false);
+          setSelectedService("");
+        }}
+      />
     </div>
   );
 }

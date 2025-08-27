@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import EnhancedHeader from "@/components/enhanced-header";
-import AdvancedBookingModal from "@/components/advanced-booking-modal";
+import ModernServiceModal from "@/components/modern-service-modal";
 import { 
   Home as HomeIcon, 
   Wrench, 
@@ -236,10 +236,14 @@ export default function ServicesPage() {
         )}
       </div>
 
-      <AdvancedBookingModal
+      <ModernServiceModal
         isOpen={isBookingModalOpen}
         onClose={() => setIsBookingModalOpen(false)}
-        preSelectedService={selectedServiceId}
+        serviceId={selectedServiceId || "house-cleaning"}
+        onBookingComplete={(bookingData) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingModalOpen(false);
+        }}
       />
     </div>
   );

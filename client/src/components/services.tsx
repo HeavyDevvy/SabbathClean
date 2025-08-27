@@ -68,7 +68,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
       price: "R420/hour",
       basePrice: 420,
       icon: Zap,
-      gradient: "from-gradient-start to-gradient-end",
+      gradient: "from-yellow-500 to-orange-600",
       iconBg: "bg-gradient-to-br from-yellow-500 to-orange-600",
       modernIcon: true,
       features: ["Certified electricians", "Safety compliant", "Free estimates", "4.7+ star rating"],

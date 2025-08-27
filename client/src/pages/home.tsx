@@ -5,32 +5,24 @@ import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 import BerryStarsSection from "@/components/berry-stars-section";
 import Footer from "@/components/footer";
-import QuickBookingModal from "@/components/quick-booking-modal";
-import ServiceSelectionModal from "@/components/service-selection-modal";
+import ModernServiceModal from "@/components/modern-service-modal";
 import ProviderOnboarding from "@/components/provider-onboarding";
 import { useState } from "react";
 
 export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isServiceSelectionOpen, setIsServiceSelectionOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
-  const [selectedOption, setSelectedOption] = useState<string>("");
   const [isProviderOnboardingOpen, setIsProviderOnboardingOpen] = useState(false);
 
   const openBooking = (service?: string) => {
-    if (service === 'all-services') {
-      setIsServiceSelectionOpen(true);
-    } else if (service) {
+    if (service && service !== 'all-services') {
       setSelectedService(service);
       setIsBookingOpen(true);
+    } else {
+      // Default to house cleaning for general bookings
+      setSelectedService('house-cleaning');
+      setIsBookingOpen(true);
     }
-  };
-
-  const handleServiceSelection = (serviceId: string, optionId: string) => {
-    setSelectedService(serviceId);
-    setSelectedOption(optionId);
-    setIsServiceSelectionOpen(false);
-    setIsBookingOpen(true);
   };
 
   return (
@@ -45,21 +37,20 @@ export default function Home() {
       </main>
       <Footer />
 
-      {/* Modals */}
-      {isServiceSelectionOpen && (
-        <ServiceSelectionModal 
-          onClose={() => setIsServiceSelectionOpen(false)}
-          onServiceSelect={handleServiceSelection}
-        />
-      )}
-      
-      {isBookingOpen && (
-        <QuickBookingModal 
-          selectedService={selectedService}
-          selectedOption={selectedOption}
-          onClose={() => setIsBookingOpen(false)}
-        />
-      )}
+      {/* Standardized Modern Service Modal */}
+      <ModernServiceModal
+        isOpen={isBookingOpen}
+        onClose={() => {
+          setIsBookingOpen(false);
+          setSelectedService("");
+        }}
+        serviceId={selectedService || "house-cleaning"}
+        onBookingComplete={(bookingData) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingOpen(false);
+          setSelectedService("");
+        }}
+      />
       
       {isProviderOnboardingOpen && (
         <ProviderOnboarding 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import ServiceSpecificBooking from "@/components/service-specific-booking";
+import ModernServiceModal from "@/components/modern-service-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -208,10 +208,14 @@ export default function Booking() {
       </main>
       <Footer />
       
-      <ServiceSpecificBooking 
+      <ModernServiceModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        serviceId={selectedService}
+        serviceId={selectedService || "house-cleaning"}
+        onBookingComplete={(bookingData) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingOpen(false);
+        }}
       />
     </div>
   );
