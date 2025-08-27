@@ -79,6 +79,77 @@ const services: Service[] = [
     bookingSteps: 5
   },
 
+  // PLUMBING SERVICES
+  {
+    id: "plumbing",
+    category: "Maintenance",
+    title: "Plumbing Services",
+    description: "Professional plumbing solutions from emergency repairs to complete installations with certified plumbers",
+    price: "From R120/hour",
+    duration: "1-4 hours",
+    urgent: true,
+    serviceTypes: [
+      "Emergency Repairs (24/7 availability)",
+      "Installation Services (taps, toilets, showers)",
+      "Drain Cleaning & Unblocking",
+      "Leak Detection & Repair",
+      "Water Heater Services",
+      "Pipe Replacement & Maintenance",
+      "Bathroom & Kitchen Plumbing"
+    ],
+    features: ["24/7 emergency service", "Licensed plumbers", "Parts included", "Insurance coverage"],
+    icon: Droplet,
+    gradient: "from-cyan-500 to-blue-600",
+    bookingSteps: 4
+  },
+
+  // ELECTRICAL SERVICES
+  {
+    id: "electrical",
+    category: "Maintenance",
+    title: "Electrical Services",
+    description: "Safe and certified electrical work including installations, repairs, and compliance certificates",
+    price: "From R150/hour",
+    duration: "1-8 hours",
+    urgent: true,
+    serviceTypes: [
+      "Emergency Electrical Repairs",
+      "Installation (lights, outlets, ceiling fans)",
+      "Electrical Inspections & Certificates",
+      "DB Board & Circuit Repairs",
+      "Smart Home Installation",
+      "Solar Panel Installation & Maintenance",
+      "Appliance Installation & Repair"
+    ],
+    features: ["Licensed electricians", "Safety certificates", "Emergency response", "Code compliance"],
+    icon: Zap,
+    gradient: "from-yellow-500 to-orange-500",
+    bookingSteps: 4
+  },
+
+  // GARDEN CARE
+  {
+    id: "garden-care",
+    category: "Outdoor Services",
+    title: "Garden Care",
+    description: "Professional garden maintenance and landscaping services to keep your outdoor spaces beautiful",
+    price: "From R90/hour",
+    duration: "2-8 hours",
+    serviceTypes: [
+      "Regular Garden Maintenance",
+      "Landscaping Design & Installation",
+      "Tree Trimming & Removal",
+      "Lawn Care & Mowing",
+      "Irrigation System Installation",
+      "Garden Cleanup Services",
+      "Plant Care & Consultation"
+    ],
+    features: ["Garden specialists", "Professional tools", "Plant expertise", "Design consultation"],
+    icon: TreePine,
+    gradient: "from-green-600 to-emerald-600",
+    bookingSteps: 4
+  },
+
   // CHEF & CATERING SERVICES
   {
     id: "chef-catering",
