@@ -346,8 +346,8 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {categoryServices.map((service) => (
-                  <Card key={service.id} className="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-400 group cursor-pointer rounded-xl overflow-hidden" data-testid={`service-card-${service.id}`}>
-                    <CardContent className="p-6">
+                  <Card key={service.id} className="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xl transition-all duration-400 group cursor-pointer rounded-xl overflow-hidden h-full flex flex-col" data-testid={`service-card-${service.id}`}>
+                    <CardContent className="p-6 flex flex-col h-full">
                       {/* Service Header - Compact */}
                       <div className="relative mb-4">
                         <div className={`w-12 h-12 bg-gradient-to-r ${service.gradient} rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-300 mx-auto`}>
@@ -432,14 +432,16 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                       </div>
 
                       {/* Book Now Button - Compact */}
-                      <Button 
-                        onClick={() => onServiceSelect(service.id)}
-                        className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white font-semibold py-2 text-sm rounded-lg transition-all duration-300 group-hover:shadow-md`}
-                        data-testid={`book-${service.id}`}
-                      >
-                        Book Now
-                        <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform duration-300" />
-                      </Button>
+                      <div className="mt-auto">
+                        <Button 
+                          onClick={() => onServiceSelect(service.id)}
+                          className={`w-full bg-gradient-to-r ${service.gradient} hover:opacity-90 text-white font-semibold py-2 text-sm rounded-lg transition-all duration-300 group-hover:shadow-md`}
+                          data-testid={`book-${service.id}`}
+                        >
+                          Book Now
+                          <ArrowRight className="h-3 w-3 ml-1 group-hover:translate-x-0.5 transition-transform duration-300" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

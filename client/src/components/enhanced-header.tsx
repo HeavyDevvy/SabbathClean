@@ -83,13 +83,16 @@ export default function EnhancedHeader({
               <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
-            <Link 
-              href="/how-it-works" 
+            <button 
+              onClick={() => {
+                const howItWorksSection = document.getElementById('how-it-works');
+                howItWorksSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
               data-testid="nav-how-it-works"
             >
               How it Works
-            </Link>
+            </button>
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
