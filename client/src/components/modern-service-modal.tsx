@@ -191,38 +191,39 @@ export default function ModernServiceModal({
 
   // Calculate pricing whenever form data changes
   useEffect(() => {
-    let basePrice = currentConfig.basePrice;
+    const config = serviceConfigs[serviceId] || serviceConfigs["house-cleaning"];
+    let basePrice = config.basePrice;
     
     // Property type multiplier
-    const propertyType = currentConfig.propertyTypes?.find((p: any) => p.value === formData.propertyType);
+    const propertyType = config.propertyTypes?.find((p: any) => p.value === formData.propertyType);
     if (propertyType) {
       basePrice *= propertyType.multiplier;
     }
 
     // Service-specific multipliers
     if (serviceId === "house-cleaning") {
-      const cleaningType = currentConfig.cleaningTypes?.find((t: any) => t.value === formData.cleaningType);
+      const cleaningType = config.cleaningTypes?.find((t: any) => t.value === formData.cleaningType);
       if (cleaningType) basePrice = cleaningType.price;
       
-      const propertySize = currentConfig.propertySizes?.find((s: any) => s.value === formData.propertySize);
+      const propertySize = config.propertySizes?.find((s: any) => s.value === formData.propertySize);
       if (propertySize) basePrice *= propertySize.multiplier;
     }
 
     if (serviceId === "garden-care") {
-      const gardenSize = currentConfig.gardenSizes?.find((s: any) => s.value === formData.gardenSize);
+      const gardenSize = config.gardenSizes?.find((s: any) => s.value === formData.gardenSize);
       if (gardenSize) basePrice *= gardenSize.multiplier;
       
-      const condition = currentConfig.gardenConditions?.find((c: any) => c.value === formData.gardenCondition);
+      const condition = config.gardenConditions?.find((c: any) => c.value === formData.gardenCondition);
       if (condition) basePrice *= condition.multiplier;
     }
 
     if (serviceId === "plumbing") {
-      const urgency = currentConfig.urgencyLevels?.find((u: any) => u.value === formData.urgency);
+      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
       if (urgency) basePrice *= urgency.multiplier;
     }
 
     // Add-ons pricing
-    const addOnsPrice = currentConfig.addOns
+    const addOnsPrice = config.addOns
       ?.filter((addon: any) => formData.selectedAddOns.includes(addon.id))
       ?.reduce((sum: number, addon: any) => sum + addon.price, 0) || 0;
 
@@ -260,7 +261,7 @@ export default function ModernServiceModal({
       timeDiscount,
       totalPrice: Math.round(totalPrice)
     });
-  }, [formData, serviceId, currentConfig]);
+  }, [formData, serviceId]);
 
   const handleAddressChange = (address: string) => {
     setFormData(prev => ({ ...prev, address }));
@@ -754,13 +755,13 @@ export default function ModernServiceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="booking-description">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="dialog-description">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <currentConfig.icon className="h-6 w-6" />
             <span>{currentConfig.title}</span>
           </DialogTitle>
-          <DialogDescription id="booking-description">
+          <DialogDescription id="dialog-description">
             Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
           </DialogDescription>
         </DialogHeader>

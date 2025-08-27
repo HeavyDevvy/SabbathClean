@@ -211,7 +211,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                   </div>
                   
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{service.name}</h3>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">{service.description}</p>
+                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{service.description}</p>
                   
                   {/* Enhanced features showcase */}
                   <div className="space-y-3 mb-5">
