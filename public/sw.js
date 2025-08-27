@@ -1,9 +1,16 @@
 const CACHE_NAME = 'berry-events-v1';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
   '/manifest.json'
+];
+
+const CACHE_FIRST_RESOURCES = [
+  '/icons/',
+  '/favicon.ico'
+];
+
+const NETWORK_FIRST_RESOURCES = [
+  '/api/'
 ];
 
 // Install event
@@ -30,16 +37,63 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event
+// Fetch event with strategy-based routing
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-  );
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip cross-origin requests
+  if (url.origin !== location.origin) {
+    return;
+  }
+
+  // Network first for API requests
+  if (NETWORK_FIRST_RESOURCES.some(resource => url.pathname.startsWith(resource))) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Cache first for static assets
+  if (CACHE_FIRST_RESOURCES.some(resource => url.pathname.startsWith(resource))) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Default: network first with fallback
+  event.respondWith(networkFirst(request));
 });
+
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || new Response('Offline', { status: 503 });
+  }
+}
+
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    return new Response('Resource not found', { status: 404 });
+  }
+}
 
 // Push notification event
 self.addEventListener('push', (event) => {

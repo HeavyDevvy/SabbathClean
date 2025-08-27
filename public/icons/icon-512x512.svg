@@ -1,8 +1,14 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="64" fill="#3B82F6"/>
-  <path d="M256 128C220.654 128 192 156.654 192 192V224C192 235.046 200.954 244 212 244H300C311.046 244 320 235.046 320 224V192C320 156.654 291.346 128 256 128Z" fill="white"/>
-  <path d="M170.667 288C170.667 270.327 185.327 256 203 256H309C326.673 256 341.333 270.327 341.333 288V352C341.333 369.673 326.673 384 309 384H203C185.327 384 170.667 369.673 170.667 352V288Z" fill="white"/>
-  <circle cx="256" cy="320" r="21.333" fill="#3B82F6"/>
-  <text x="256" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">Berry Events</text>
-  <text x="256" y="480" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18">Home Services</text>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="88" fill="url(#bg)"/>
+  <circle cx="256" cy="200" r="64" fill="white" opacity="0.9"/>
+  <rect x="192" y="290" width="128" height="20" rx="10" fill="white" opacity="0.8"/>
+  <rect x="160" y="330" width="192" height="16" rx="8" fill="white" opacity="0.7"/>
+  <rect x="224" y="370" width="64" height="16" rx="8" fill="white" opacity="0.6"/>
+  <text x="256" y="440" text-anchor="middle" fill="white" font-size="36" font-weight="600" font-family="Arial">Berry Events</text>
 </svg>
