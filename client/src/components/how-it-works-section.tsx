@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Search, 
   UserCheck, 
@@ -10,7 +12,16 @@ import {
   ArrowRight,
   Star,
   Clock,
-  Shield
+  Shield,
+  Home,
+  Droplet,
+  Zap,
+  Leaf,
+  ChefHat,
+  Users,
+  Truck,
+  Heart,
+  X
 } from "lucide-react";
 
 const steps = [
@@ -56,11 +67,125 @@ const steps = [
   }
 ];
 
+// Service interface matching comprehensive-services
+interface Service {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  price: string;
+  duration: string;
+  popular?: boolean;
+  urgent?: boolean;
+  icon: React.ComponentType<any>;
+  gradient: string;
+}
+
+// All services data - imported from comprehensive-services structure
+const allServices: Service[] = [
+  // INDOOR SERVICES
+  {
+    id: "cleaning",
+    category: "Indoor Services",
+    title: "House Cleaning",
+    description: "Complete cleaning services from regular maintenance to deep cleaning",
+    price: "From R75/hour",
+    duration: "2-6 hours",
+    popular: true,
+    icon: Home,
+    gradient: "from-blue-500 to-cyan-500"
+  },
+  {
+    id: "plumbing",
+    category: "Indoor Services", 
+    title: "Plumbing Services",
+    description: "Professional plumbing solutions from emergency repairs to installations",
+    price: "From R120/hour",
+    duration: "1-4 hours",
+    urgent: true,
+    icon: Droplet,
+    gradient: "from-cyan-500 to-blue-600"
+  },
+  {
+    id: "electrical",
+    category: "Indoor Services",
+    title: "Electrical Services", 
+    description: "Safe and certified electrical work including installations and repairs",
+    price: "From R150/hour",
+    duration: "1-8 hours",
+    urgent: true,
+    icon: Zap,
+    gradient: "from-yellow-500 to-orange-500"
+  },
+
+  // OUTDOOR SERVICES
+  {
+    id: "garden-care",
+    category: "Outdoor Services",
+    title: "Garden Care",
+    description: "Complete garden maintenance from landscaping to regular upkeep",
+    price: "From R85/hour", 
+    duration: "2-8 hours",
+    popular: true,
+    icon: Leaf,
+    gradient: "from-green-500 to-emerald-600"
+  },
+
+  // SPECIALIZED SERVICES
+  {
+    id: "chef-catering",
+    category: "Specialized Services",
+    title: "Chef & Catering",
+    description: "Professional cooking services specializing in African cuisine",
+    price: "From R200/hour",
+    duration: "2-8 hours",
+    popular: true,
+    icon: ChefHat,
+    gradient: "from-orange-500 to-red-500"
+  },
+  {
+    id: "waitering",
+    category: "Specialized Services",
+    title: "Waitering Services", 
+    description: "Professional waitering staff for events and special occasions",
+    price: "From R90/hour",
+    duration: "4-12 hours",
+    icon: Users,
+    gradient: "from-purple-500 to-pink-500"
+  },
+  {
+    id: "moving",
+    category: "Specialized Services",
+    title: "Moving Services",
+    description: "Reliable moving and relocation services for homes and offices",
+    price: "From R150/hour",
+    duration: "4-8 hours",
+    icon: Truck,
+    gradient: "from-indigo-500 to-purple-600"
+  },
+  {
+    id: "au-pair",
+    category: "Specialized Services", 
+    title: "Au Pair Services",
+    description: "Trusted childcare and family support services",
+    price: "From R60/hour",
+    duration: "4-12 hours",
+    icon: Heart,
+    gradient: "from-pink-500 to-rose-500"
+  }
+];
+
 interface HowItWorksSectionProps {
-  onBookNowClick?: () => void;
+  onBookNowClick?: (serviceId?: string) => void;
 }
 
 export default function HowItWorksSection({ onBookNowClick }: HowItWorksSectionProps) {
+  const [showServiceSelector, setShowServiceSelector] = useState(false);
+
+  const handleServiceSelect = (serviceId: string) => {
+    setShowServiceSelector(false);
+    onBookNowClick?.(serviceId);
+  };
   return (
     <section className="py-16 lg:py-24 bg-white" id="how-it-works">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,7 +296,7 @@ export default function HowItWorksSection({ onBookNowClick }: HowItWorksSectionP
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  onClick={onBookNowClick || (() => {})}
+                  onClick={() => setShowServiceSelector(true)}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                   data-testid="button-book-now-demo"
                 >
@@ -282,6 +407,114 @@ export default function HowItWorksSection({ onBookNowClick }: HowItWorksSectionP
             </div>
           </div>
         </div>
+
+        {/* Service Selection Modal */}
+        <Dialog open={showServiceSelector} onOpenChange={setShowServiceSelector}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl font-bold">Choose Your Service</DialogTitle>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowServiceSelector(false)}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-gray-600 mt-2">
+                Select from our complete range of professional home services
+              </p>
+            </DialogHeader>
+
+            <div className="mt-6 space-y-8">
+              {/* Group services by category */}
+              {["Indoor Services", "Outdoor Services", "Specialized Services"].map((category) => {
+                const categoryServices = allServices.filter(s => s.category === category);
+                const categoryInfo = {
+                  "Indoor Services": { icon: Home, color: "from-blue-500 to-cyan-500" },
+                  "Outdoor Services": { icon: Leaf, color: "from-green-500 to-emerald-500" },
+                  "Specialized Services": { icon: Star, color: "from-purple-500 to-pink-500" }
+                };
+                const info = categoryInfo[category as keyof typeof categoryInfo];
+                
+                return (
+                  <div key={category}>
+                    <div className="flex items-center mb-4">
+                      <div className={`w-8 h-8 bg-gradient-to-r ${info.color} rounded-lg flex items-center justify-center mr-3`}>
+                        <info.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900">{category}</h3>
+                      <Badge className="ml-3 bg-gray-100 text-gray-700">
+                        {categoryServices.length} services
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {categoryServices.map((service) => (
+                        <div
+                          key={service.id}
+                          onClick={() => handleServiceSelect(service.id)}
+                          className="bg-white border border-gray-200 rounded-xl p-4 hover:border-primary/30 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                          data-testid={`service-selector-${service.id}`}
+                        >
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className={`w-12 h-12 bg-gradient-to-r ${service.gradient} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                              <service.icon className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                                {service.title}
+                              </h4>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <span className="text-sm font-medium text-primary">
+                                  {service.price}
+                                </span>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-500">
+                                  {service.duration}
+                                </span>
+                              </div>
+                            </div>
+                            {(service.popular || service.urgent) && (
+                              <div className="flex flex-col space-y-1">
+                                {service.popular && (
+                                  <Badge className="bg-green-100 text-green-700 text-xs px-2 py-1">
+                                    Popular
+                                  </Badge>
+                                )}
+                                {service.urgent && (
+                                  <Badge className="bg-red-100 text-red-700 text-xs px-2 py-1">
+                                    24/7
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">
+                            {service.description}
+                          </p>
+                          <Button
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleServiceSelect(service.id);
+                            }}
+                          >
+                            Book Now
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );

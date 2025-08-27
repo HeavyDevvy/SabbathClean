@@ -25,7 +25,10 @@ export default function EnhancedHome() {
   const [notificationCount] = useState(3);
   const [messageCount] = useState(1);
 
-  const handleBookingClick = () => {
+  const handleBookingClick = (serviceId?: string) => {
+    if (serviceId) {
+      setSelectedService(serviceId);
+    }
     setIsBookingModalOpen(true);
   };
 
