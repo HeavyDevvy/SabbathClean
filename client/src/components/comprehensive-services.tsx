@@ -55,7 +55,29 @@ interface ComprehensiveServicesProps {
 }
 
 const services: Service[] = [
-
+  // HOUSE CLEANING SERVICES
+  {
+    id: "cleaning",
+    category: "Home Services",
+    title: "House Cleaning",
+    description: "Complete cleaning services from regular maintenance to deep cleaning with professional-grade equipment",
+    price: "From R75/hour",
+    duration: "2-6 hours",
+    popular: true,
+    serviceTypes: [
+      "Regular House Cleaning (Weekly/Bi-weekly/Monthly)",
+      "Deep Cleaning (Spring cleaning, move-in/move-out)", 
+      "Office Cleaning (Daily/Weekly/Monthly contracts)",
+      "Carpet & Upholstery Cleaning",
+      "Window Cleaning (Interior/Exterior)",
+      "Post-Construction Cleaning",
+      "Event Cleanup Services"
+    ],
+    features: ["Professional equipment", "Eco-friendly products", "Insured cleaners", "Flexible scheduling"],
+    icon: Home,
+    gradient: "from-blue-500 to-cyan-500",
+    bookingSteps: 5
+  },
 
   // CHEF & CATERING SERVICES
   {
