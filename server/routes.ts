@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { registerTrainingRoutes } from "./training-routes";
 import { registerAuthRoutes } from "./auth-routes";
 import { registerPaymentRoutes } from "./payment-routes";
+import { registerPushNotificationRoutes } from "./push-notification-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -804,6 +805,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register training center routes
   registerTrainingRoutes(app);
+  
+  // Register push notification routes
+  registerPushNotificationRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

@@ -21,6 +21,7 @@ import Bookings from "@/pages/bookings";
 import NotificationSettings from "@/components/notification-settings";
 import ServicesPage from "@/pages/services";
 import PaymentPage from "@/pages/payment";
+import MobileApp from "@/pages/mobile-app";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/provider-dashboard" component={ProviderDashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/notifications" component={NotificationSettings} />
+      <Route path="/mobile-app" component={MobileApp} />
       <Route path="/offline" component={Offline} />
       <Route component={NotFound} />
     </Switch>

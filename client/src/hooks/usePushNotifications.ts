@@ -1,226 +1,188 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-interface PushNotificationState {
-  isSupported: boolean;
-  permission: NotificationPermission | null;
-  isSubscribed: boolean;
-  subscription: PushSubscription | null;
+interface PushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
 
 export function usePushNotifications() {
-  const [state, setState] = useState<PushNotificationState>({
-    isSupported: false,
-    permission: null,
-    isSubscribed: false,
-    subscription: null,
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if push notifications are supported
-    const isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
-    
-    if (isSupported) {
-      setState(prev => ({ ...prev, isSupported: true }));
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setIsSupported(true);
       checkExistingSubscription();
     }
   }, []);
 
   const checkExistingSubscription = async () => {
     try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      
-      setState(prev => ({
-        ...prev,
-        permission: Notification.permission,
-        isSubscribed: !!subscription,
-        subscription: subscription,
-      }));
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          setSubscription(subscription.toJSON() as PushSubscription);
+          setIsSubscribed(true);
+        }
+      }
     } catch (error) {
       console.error('Error checking existing subscription:', error);
     }
   };
 
-  const requestPermission = async () => {
-    if (!state.isSupported) {
-      toast({
-        title: "Not Supported",
-        description: "Push notifications are not supported in this browser",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const permission = await Notification.requestPermission();
-      
-      setState(prev => ({ ...prev, permission }));
-
-      if (permission === 'granted') {
-        toast({
-          title: "Notifications Enabled",
-          description: "You'll receive updates about your bookings and services",
-        });
-        return true;
-      } else if (permission === 'denied') {
-        toast({
-          title: "Notifications Blocked",
-          description: "Please enable notifications in your browser settings to receive updates",
-          variant: "destructive",
-        });
-        return false;
-      }
-    } catch (error) {
-      console.error('Error requesting permission:', error);
-      toast({
-        title: "Permission Error",
-        description: "Could not request notification permission",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-
-    return false;
-  };
-
-  const subscribe = async () => {
-    if (!state.isSupported || state.permission !== 'granted') {
-      const permissionGranted = await requestPermission();
-      if (!permissionGranted) return null;
-    }
-
-    setIsLoading(true);
-
+  const subscribeToPush = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       
-      // In production, you would use your own VAPID keys
-      const vapidPublicKey = process.env.VITE_VAPID_PUBLIC_KEY || 
-        'BEl62iUYgUivxIkv69yViEuiBIa40HI8YlisLP7L1gqSV7h-P2zg7c9hqR9JhlL4MJFQ-Z2z7w8qM0dZV6OqYNo';
+      // Request notification permission
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        toast({
+          title: "Notifications Blocked",
+          description: "Please enable notifications to receive booking updates",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      // Generate VAPID keys (in production, these should be stored securely)
+      const vapidPublicKey = await getVapidPublicKey();
       
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       });
+
+      const subscriptionJson = subscription.toJSON() as PushSubscription;
+      setSubscription(subscriptionJson);
+      setIsSubscribed(true);
 
       // Send subscription to server
-      await sendSubscriptionToServer(subscription);
-
-      setState(prev => ({
-        ...prev,
-        isSubscribed: true,
-        subscription: subscription,
-      }));
-
-      toast({
-        title: "Subscribed!",
-        description: "You'll now receive push notifications for booking updates",
+      await fetch('/api/push-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(subscriptionJson)
       });
 
-      return subscription;
+      toast({
+        title: "Notifications Enabled",
+        description: "You'll receive updates about your bookings and services"
+      });
+
+      return true;
     } catch (error) {
-      console.error('Error subscribing to push:', error);
+      console.error('Error subscribing to push notifications:', error);
       toast({
         title: "Subscription Failed",
-        description: "Could not subscribe to push notifications",
-        variant: "destructive",
+        description: "Unable to enable notifications. Please try again.",
+        variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
+      return false;
     }
-
-    return null;
   };
 
-  const unsubscribe = async () => {
-    if (!state.subscription) return;
-
-    setIsLoading(true);
-
+  const unsubscribeFromPush = async () => {
     try {
-      await state.subscription.unsubscribe();
-      
-      // Remove subscription from server
-      await removeSubscriptionFromServer(state.subscription);
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+          setSubscription(null);
+          setIsSubscribed(false);
 
-      setState(prev => ({
-        ...prev,
-        isSubscribed: false,
-        subscription: null,
-      }));
+          // Remove subscription from server
+          await fetch('/api/push-subscription', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subscription.toJSON())
+          });
 
-      toast({
-        title: "Unsubscribed",
-        description: "You will no longer receive push notifications",
-      });
+          toast({
+            title: "Notifications Disabled",
+            description: "You won't receive push notifications anymore"
+          });
+        }
+      }
     } catch (error) {
-      console.error('Error unsubscribing from push:', error);
-      toast({
-        title: "Unsubscribe Failed",
-        description: "Could not unsubscribe from push notifications",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      console.error('Error unsubscribing from push notifications:', error);
     }
   };
 
   const sendTestNotification = async () => {
-    if (!state.isSubscribed || !state.subscription) {
+    if (!isSubscribed || !subscription) {
       toast({
         title: "Not Subscribed",
-        description: "Please subscribe to notifications first",
-        variant: "destructive",
+        description: "Please enable notifications first",
+        variant: "destructive"
       });
       return;
     }
 
     try {
-      await fetch('/api/notifications/test', {
+      await fetch('/api/send-notification', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          subscription: state.subscription,
-        }),
+          subscription,
+          title: 'Berry Events Test',
+          body: 'This is a test notification from your home services app!'
+        })
       });
 
       toast({
-        title: "Test Sent",
-        description: "Check for a test notification",
+        title: "Test Notification Sent",
+        description: "Check your device for the notification"
       });
     } catch (error) {
       console.error('Error sending test notification:', error);
       toast({
-        title: "Test Failed",
-        description: "Could not send test notification",
-        variant: "destructive",
+        title: "Failed to Send",
+        description: "Unable to send test notification",
+        variant: "destructive"
       });
     }
   };
 
   return {
-    ...state,
-    isLoading,
-    requestPermission,
-    subscribe,
-    unsubscribe,
-    sendTestNotification,
+    isSupported,
+    isSubscribed,
+    subscription,
+    subscribeToPush,
+    unsubscribeFromPush,
+    sendTestNotification
   };
 }
 
-// Helper functions
+async function getVapidPublicKey(): Promise<string> {
+  try {
+    const response = await fetch('/api/vapid-public-key');
+    const data = await response.json();
+    return data.publicKey;
+  } catch (error) {
+    console.error('Error getting VAPID public key:', error);
+    // Fallback public key for development
+    return 'BEl62iUYgUivxIkv69yViEuiBIa40HI50P8uo26xpgcNdNBNMwFm5oUiXdcWpxZXTQB7GDu1RMPajRO9N8TOwUo';
+  }
+}
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
-    .replace(/-/g, '+')
+    .replace(/\-/g, '+')
     .replace(/_/g, '/');
 
   const rawData = window.atob(base64);
@@ -230,32 +192,4 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
-}
-
-async function sendSubscriptionToServer(subscription: PushSubscription) {
-  try {
-    await fetch('/api/push-subscriptions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(subscription),
-    });
-  } catch (error) {
-    console.error('Error sending subscription to server:', error);
-  }
-}
-
-async function removeSubscriptionFromServer(subscription: PushSubscription) {
-  try {
-    await fetch('/api/push-subscriptions', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(subscription),
-    });
-  } catch (error) {
-    console.error('Error removing subscription from server:', error);
-  }
 }

@@ -1,6 +1,6 @@
 # Overview
 
-Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform connecting customers with verified service providers for various home services, including cleaning, plumbing, electrical work, chef/catering, waitering, and garden care. The platform aims to be a leading premium service provider in South Africa, emphasizing quality, security, and specialized services like African cuisine catering. It offers a dynamic pricing model, an advanced booking system with geolocation, provider matching, reviews, and secure payment processing via Stripe, with all payments flowing through "Berry Events Bank" to ensure trust and security. The platform also includes an AI-powered recommendation engine, an interactive onboarding tutorial, and a Progressive Web App (PWA) for mobile accessibility.
+Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform connecting customers with verified service providers for various home services, including cleaning, plumbing, electrical work, chef/catering, waitering, and garden care. The platform aims to be a leading premium service provider in South Africa, emphasizing quality, security, and specialized services like African cuisine catering. It offers a dynamic pricing model, an advanced booking system with geolocation, provider matching, reviews, and secure payment processing via Stripe, with all payments flowing through "Berry Events Bank" to ensure trust and security. The platform also includes an AI-powered recommendation engine, an interactive onboarding tutorial, and a comprehensive Progressive Web App (PWA) with mobile companion features including push notifications, offline functionality, and native app-like experience.
 
 # User Preferences
 
@@ -36,6 +36,7 @@ The platform features a clean, modern design with enhanced visual elements. It i
 - **Training & Certification**: A comprehensive system for providers including multi-level training modules, progress tracking, service-specific certifications with expiration dates, and skill assessments.
 - **Recommendation Engine**: AI-powered service matching based on user preferences, location, ratings, and history, with contextual suggestions and real-time scoring.
 - **Dynamic Pricing**: Market-comparable pricing with service-specific surcharges, customizations, and competitive positioning against industry benchmarks.
+- **Mobile App Companion**: Complete Progressive Web App implementation with push notifications, offline functionality, service worker caching, PWA manifest, installable mobile experience, and native app features including background sync and notification management.
 
 # External Dependencies
 
