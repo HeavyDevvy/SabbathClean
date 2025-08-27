@@ -148,20 +148,20 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
         </div>
 
         {/* Featured Providers Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {featuredProviders.map((provider) => (
             <Card 
               key={provider.id} 
-              className="bg-white border-2 border-gray-100 hover:border-gray-200 hover:shadow-2xl transition-all duration-500 group overflow-hidden"
+              className="bg-white border-2 border-gray-100 hover:border-gray-200 hover:shadow-2xl transition-all duration-500 group overflow-hidden rounded-2xl h-full flex flex-col"
               data-testid={`provider-card-${provider.id}`}
             >
-              <CardContent className="p-0">
+              <CardContent className="p-0 flex flex-col h-full">
                 {/* Header Image & Badge */}
-                <div className="relative">
+                <div className="relative aspect-square overflow-hidden">
                   <img 
                     src={provider.image} 
                     alt={provider.name}
-                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300 rounded-t-xl"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                   />
                   
                   {/* Top Performer Badge */}
@@ -187,92 +187,91 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 flex-1 flex flex-col">
                   {/* Name & Rating */}
-                  <div className="mb-4">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  <div className="mb-3">
+                    <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">
                       {provider.name}
                     </h3>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center">
                       <div className="flex items-center">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${
-                                i < Math.floor(provider.rating) 
-                                  ? 'text-yellow-400 fill-current' 
-                                  : 'text-gray-300'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                        <span className="ml-2 text-sm text-gray-600">
-                          {provider.rating} ({provider.totalReviews})
-                        </span>
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className={`h-3 w-3 ${
+                              i < Math.floor(provider.rating) 
+                                ? 'text-yellow-400 fill-current' 
+                                : 'text-gray-300'
+                            }`} 
+                          />
+                        ))}
                       </div>
+                      <span className="ml-2 text-xs text-gray-600">
+                        {provider.rating} ({provider.totalReviews})
+                      </span>
                     </div>
                   </div>
 
                   {/* Specialties */}
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
+                  <div className="mb-3">
+                    <div className="flex flex-wrap gap-1">
                       {provider.specialties.slice(0, 2).map((specialty, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge key={index} variant="outline" className="text-xs px-2 py-0.5">
                           {specialty}
                         </Badge>
                       ))}
                       {provider.specialties.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{provider.specialties.length - 2} more
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">
+                          +{provider.specialties.length - 2}
                         </Badge>
                       )}
                     </div>
                   </div>
 
                   {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-3 mb-3 text-xs text-gray-600">
                     <div>
-                      <div className="font-semibold text-gray-900">{provider.completedJobs}</div>
-                      <div className="text-xs">Jobs Completed</div>
+                      <div className="font-semibold text-gray-900 text-sm">{provider.completedJobs}</div>
+                      <div>Jobs Done</div>
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">{provider.experience}</div>
-                      <div className="text-xs">Experience</div>
+                      <div className="font-semibold text-gray-900 text-sm">{provider.experience}</div>
+                      <div>Experience</div>
                     </div>
                   </div>
 
                   {/* Location & Availability */}
-                  <div className="space-y-2 mb-6 text-sm text-gray-600">
+                  <div className="space-y-1 mb-3 text-xs text-gray-600">
                     <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                       <span className="truncate">{provider.location}</span>
                     </div>
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                       <span className="text-green-600 font-medium">{provider.nextAvailable}</span>
                     </div>
                   </div>
 
                   {/* Verification Badges */}
-                  <div className="flex flex-wrap gap-1 mb-6">
-                    {provider.verificationBadges.slice(0, 3).map((badge, index) => (
-                      <div key={index} className="flex items-center text-xs text-green-600 bg-green-50 rounded-full px-2 py-1">
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {provider.verificationBadges.slice(0, 2).map((badge, index) => (
+                      <div key={index} className="flex items-center text-xs text-green-600 bg-green-50 rounded-full px-2 py-0.5">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
-                        {badge}
+                        <span className="truncate">{badge}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Pricing & CTA */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">R{provider.hourlyRate}</div>
+                      <div className="text-lg font-bold text-blue-600">R{provider.hourlyRate}</div>
                       <div className="text-xs text-gray-500">per hour</div>
                     </div>
                     <Button
                       onClick={() => onBookService(getServiceForProvider(provider.specialties))}
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 group-hover:scale-105"
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-3 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs"
                       data-testid={`button-book-${provider.id}`}
                     >
                       Book Now
