@@ -256,7 +256,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                         setShowServiceModal(true);
                       }}
                     >
-                      Book Now - Advanced Booking
+                      Book Now
                     </button>
                     <button
                       className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-primary/20 hover:border-primary/40"
