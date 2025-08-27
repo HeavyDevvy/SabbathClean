@@ -18,7 +18,8 @@ import {
   Droplets, 
   Star,
   CheckCircle,
-  CreditCard
+  CreditCard,
+  Building
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,7 +58,16 @@ export default function ModernServiceModal({
     
     // Selections
     selectedAddOns: [] as string[],
-    selectedProvider: null as any
+    selectedProvider: null as any,
+    
+    // Payment information
+    paymentMethod: "card",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
+    bankAccount: "",
+    bankBranch: ""
   });
 
   const [pricing, setPricing] = useState({
@@ -107,7 +117,7 @@ export default function ModernServiceModal({
       title: "House Cleaning Service",
       icon: Sparkles,
       basePrice: 280,
-      steps: 4,
+      steps: 5,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.2 },
@@ -135,7 +145,7 @@ export default function ModernServiceModal({
       title: "Garden Care Service",
       icon: Scissors,
       basePrice: 320,
-      steps: 4,
+      steps: 5,
       propertyTypes: [
         { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
         { value: "house", label: "House Garden", multiplier: 1.0 },
@@ -165,7 +175,7 @@ export default function ModernServiceModal({
       title: "Plumbing Service",
       icon: Droplets,
       basePrice: 380,
-      steps: 4,
+      steps: 5,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.1 },
@@ -753,15 +763,182 @@ export default function ModernServiceModal({
     </div>
   );
 
+  const renderStep5 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Method</h3>
+        <p className="text-gray-600">Choose your preferred payment method to complete the booking</p>
+      </div>
+
+      {/* Payment Method Selection */}
+      <div className="space-y-4">
+        <Label className="text-base font-medium">Select Payment Method</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <Card 
+            className={`cursor-pointer border-2 transition-all ${
+              formData.paymentMethod === "card" ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setFormData(prev => ({ ...prev, paymentMethod: "card" }))}
+          >
+            <CardContent className="p-4 text-center">
+              <CreditCard className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <h4 className="font-semibold">Credit/Debit Card</h4>
+              <p className="text-sm text-gray-600">Secure card payment</p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className={`cursor-pointer border-2 transition-all ${
+              formData.paymentMethod === "bank" ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+            }`}
+            onClick={() => setFormData(prev => ({ ...prev, paymentMethod: "bank" }))}
+          >
+            <CardContent className="p-4 text-center">
+              <Building className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <h4 className="font-semibold">Bank Transfer</h4>
+              <p className="text-sm text-gray-600">Direct bank transfer</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Card Payment Form */}
+      {formData.paymentMethod === "card" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <CreditCard className="h-5 w-5 mr-2" />
+              Card Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="cardholderName">Cardholder Name</Label>
+              <Input
+                id="cardholderName"
+                placeholder="John Doe"
+                value={formData.cardholderName}
+                onChange={(e) => setFormData(prev => ({ ...prev, cardholderName: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cardNumber">Card Number</Label>
+              <Input
+                id="cardNumber"
+                placeholder="1234 5678 9012 3456"
+                value={formData.cardNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, cardNumber: e.target.value }))}
+                maxLength={19}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="expiryDate">Expiry Date</Label>
+                <Input
+                  id="expiryDate"
+                  placeholder="MM/YY"
+                  value={formData.expiryDate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+                  maxLength={5}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cvv">CVV</Label>
+                <Input
+                  id="cvv"
+                  placeholder="123"
+                  value={formData.cvv}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cvv: e.target.value }))}
+                  maxLength={4}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Bank Transfer Form */}
+      {formData.paymentMethod === "bank" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Building className="h-5 w-5 mr-2" />
+              Bank Transfer Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="bankAccount">Bank Account Number</Label>
+              <Input
+                id="bankAccount"
+                placeholder="1234567890"
+                value={formData.bankAccount}
+                onChange={(e) => setFormData(prev => ({ ...prev, bankAccount: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="bankBranch">Branch Code</Label>
+              <Input
+                id="bankBranch"
+                placeholder="123456"
+                value={formData.bankBranch}
+                onChange={(e) => setFormData(prev => ({ ...prev, bankBranch: e.target.value }))}
+              />
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-blue-700">
+                <strong>Note:</strong> You will receive payment instructions via email after confirming this booking. 
+                Your service will be scheduled once payment is received.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Booking Summary */}
+      <Card className="bg-gray-50">
+        <CardHeader>
+          <CardTitle className="text-lg">Final Booking Summary</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex justify-between">
+            <span>Service</span>
+            <span className="font-medium">{currentConfig.title}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Provider</span>
+            <span className="font-medium">{formData.selectedProvider?.name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Date & Time</span>
+            <span className="font-medium">{formData.preferredDate} at {formData.timePreference}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Address</span>
+            <span className="font-medium">{formData.address}</span>
+          </div>
+          <Separator />
+          <div className="flex justify-between font-semibold text-lg">
+            <span>Total Amount</span>
+            <span className="text-primary">R{pricing.totalPrice}</span>
+          </div>
+          <p className="text-xs text-gray-500 text-center">
+            Secured by Berry Events Bank - Your satisfaction guaranteed
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="dialog-description">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <currentConfig.icon className="h-6 w-6" />
             <span>{currentConfig.title}</span>
           </DialogTitle>
-          <DialogDescription id="dialog-description">
+          <DialogDescription>
             Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
           </DialogDescription>
         </DialogHeader>
@@ -784,6 +961,7 @@ export default function ModernServiceModal({
           {step === 2 && renderStep2()}
           {step === 3 && renderStep3()}
           {step === 4 && renderStep4()}
+          {step === 5 && renderStep5()}
         </div>
 
         {/* Navigation */}
@@ -802,7 +980,9 @@ export default function ModernServiceModal({
               disabled={
                 (step === 1 && (!formData.propertyType || !formData.address)) ||
                 (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
-                (step === 4 && !formData.selectedProvider)
+                (step === 4 && !formData.selectedProvider) ||
+                (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
+                (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
               }
             >
               Next
@@ -811,10 +991,14 @@ export default function ModernServiceModal({
             <Button 
               onClick={handleBookingConfirm}
               className="bg-gradient-to-r from-primary to-purple-600"
-              disabled={!formData.selectedProvider}
+              disabled={
+                formData.paymentMethod === "card" 
+                  ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
+                  : (!formData.bankAccount || !formData.bankBranch)
+              }
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Proceed to Payment - R{pricing.totalPrice}
+              Complete Booking - R{pricing.totalPrice}
             </Button>
           )}
         </div>
