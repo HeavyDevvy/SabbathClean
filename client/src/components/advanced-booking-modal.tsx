@@ -108,7 +108,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         id: "problem-assessment",
         title: "Problem Assessment",
         description: "Describe your plumbing issue",
-        fields: ["issueType", "urgency", "photos"]
+        fields: ["issueType", "urgency", "emergencyService", "photos"]
       },
       {
         id: "location-details",
@@ -142,7 +142,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         id: "service-type",
         title: "Service Type Selection",
         description: "Emergency, installation, or inspection",
-        fields: ["serviceType", "emergency", "safety"]
+        fields: ["issueType", "emergency", "safety"]
       },
       {
         id: "compliance",
@@ -182,7 +182,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         id: "cuisine-menu",
         title: "Cuisine & Menu Selection",
         description: "Choose cuisine, menu preferences, and dietary requirements",
-        fields: ["cuisine", "menu", "dietaryRequirements", "ingredientSource", "budget"]
+        fields: ["cuisineType", "menu", "dietaryRequirements", "ingredientSource", "budget"]
       },
       {
         id: "event-details",
@@ -210,7 +210,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         id: "moving-type",
         title: "Moving Type & Distance",
         description: "Local or long-distance moving",
-        fields: ["movingType", "distance", "flexibility"]
+        fields: ["serviceType", "distance", "flexibility"]
       },
       {
         id: "locations",
@@ -250,7 +250,7 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         id: "care-requirements",
         title: "Care Requirements",
         description: "Children's needs and schedule",
-        fields: ["childrenAges", "schedule", "duration"]
+        fields: ["careType", "childrenAges", "schedule", "duration"]
       },
       {
         id: "family-profile",
@@ -269,6 +269,74 @@ const serviceConfigs: { [key: string]: ServiceConfig } = {
         title: "Contract & Agreement",
         description: "Terms, payment, and trial period",
         fields: ["terms", "payment", "trial"]
+      }
+    ]
+  },
+  "garden-care": {
+    id: "garden-care",
+    name: "Garden Care",
+    icon: MapPin,
+    gradient: "from-green-500 to-teal-500",
+    estimatedDuration: "2-8 hours",
+    priceRange: "R180-R1200",
+    steps: [
+      {
+        id: "service-type",
+        title: "Garden Service Type",
+        description: "What type of garden work do you need?",
+        fields: ["serviceType", "gardenSize", "frequency"]
+      },
+      {
+        id: "garden-details",
+        title: "Garden Details",
+        description: "Property and garden information",
+        fields: ["address", "gardenCondition", "equipment"]
+      },
+      {
+        id: "scheduling",
+        title: "Schedule Service",
+        description: "When would you like the service?",
+        fields: ["preferredDate", "timePreference", "seasonalNeeds"]
+      },
+      {
+        id: "gardener-selection",
+        title: "Gardener Selection",
+        description: "Choose your garden care specialist",
+        fields: ["gardener", "specialization", "pricing"]
+      }
+    ]
+  },
+  "waitering": {
+    id: "waitering",
+    name: "Waitering Services",
+    icon: MapPin,
+    gradient: "from-indigo-500 to-purple-500",
+    estimatedDuration: "4-12 hours",
+    priceRange: "R340-R2000",
+    steps: [
+      {
+        id: "event-type",
+        title: "Event Type",
+        description: "What type of event do you need waiters for?",
+        fields: ["eventType", "guestCount", "duration"]
+      },
+      {
+        id: "event-details",
+        title: "Event Details",
+        description: "Date, venue, and service requirements",
+        fields: ["eventDate", "venue", "serviceLevel"]
+      },
+      {
+        id: "requirements",
+        title: "Service Requirements",
+        description: "Specific needs and uniform requirements",
+        fields: ["uniform", "experience", "languages"]
+      },
+      {
+        id: "staff-selection",
+        title: "Staff Selection",
+        description: "Choose your waitering team",
+        fields: ["staffCount", "teamLead", "pricing"]
       }
     ]
   }
@@ -344,7 +412,7 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
       if (data.propertySize === 'large' || data.propertySize === 'mansion') {
         additionalCosts += 50; // Large property surcharge
       }
-      if (data.frequency === 'one-time-deep') {
+      if (data.frequency === 'one-time-deep' || data.cleaningType === 'deep-clean') {
         additionalCosts += 75; // Deep cleaning surcharge
       }
     }
@@ -355,8 +423,29 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
     }
     
     // Moving distance surcharge
-    if (selectedService === 'moving' && data.distance === 'long-distance') {
-      additionalCosts += 200; // Long distance surcharge
+    if (selectedService === 'moving') {
+      if (data.distance === 'long-distance' || data.distance === 'provincial') {
+        additionalCosts += 200; // Long distance surcharge
+      }
+      if (data.serviceType === 'long-distance') {
+        additionalCosts += 200; // Service type long distance surcharge
+      }
+    }
+    
+    // Guest count surcharge for chef/catering and waitering
+    if ((selectedService === 'chef-catering' || selectedService === 'waitering') && data.guestCount) {
+      const guestRange = data.guestCount;
+      if (guestRange === '11-20' || guestRange === '21-50' || guestRange === '50+') {
+        // Calculate additional cost for guests over 10
+        let extraGuests = 0;
+        if (guestRange === '11-20') extraGuests = 15; // Average 15 guests
+        else if (guestRange === '21-50') extraGuests = 35; // Average 35 guests
+        else if (guestRange === '50+') extraGuests = 60; // Average 60 guests
+        
+        if (extraGuests > 10) {
+          additionalCosts += (extraGuests - 10) * 25; // R25 per guest over 10
+        }
+      }
     }
     
     return basePrice + additionalCosts;
@@ -534,6 +623,226 @@ export default function AdvancedBookingModal({ isOpen, onClose, preSelectedServi
                     <SelectItem value="vegan">Vegan</SelectItem>
                     <SelectItem value="kosher">Kosher</SelectItem>
                     <SelectItem value="none">No Restrictions</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'issueType' && selectedService === 'plumbing' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select plumbing issue type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="burst-pipe">Burst Pipe (Emergency)</SelectItem>
+                    <SelectItem value="toilet-blockage">Toilet Blockage/Repair</SelectItem>
+                    <SelectItem value="tap-leak">Leaking Tap/Faucet</SelectItem>
+                    <SelectItem value="geyser-issue">Geyser Problems</SelectItem>
+                    <SelectItem value="drain-blockage">Drain Blockage</SelectItem>
+                    <SelectItem value="pipe-installation">Pipe Installation</SelectItem>
+                    <SelectItem value="shower-repair">Shower/Bath Repair</SelectItem>
+                    <SelectItem value="sink-repair">Kitchen Sink Issues</SelectItem>
+                    <SelectItem value="valve-replacement">Valve Replacement</SelectItem>
+                    <SelectItem value="water-pressure">Water Pressure Issues</SelectItem>
+                    <SelectItem value="other">Other (Please Specify)</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'issueType' && selectedService === 'electrical' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select electrical issue type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="power-outage">Power Outage/No Electricity</SelectItem>
+                    <SelectItem value="circuit-breaker">Circuit Breaker Issues</SelectItem>
+                    <SelectItem value="outlet-installation">Outlet Installation/Repair</SelectItem>
+                    <SelectItem value="light-fixture">Light Fixture Installation</SelectItem>
+                    <SelectItem value="wiring-repair">Electrical Wiring Repair</SelectItem>
+                    <SelectItem value="ceiling-fan">Ceiling Fan Installation</SelectItem>
+                    <SelectItem value="electrical-panel">Electrical Panel Upgrade</SelectItem>
+                    <SelectItem value="safety-inspection">Electrical Safety Inspection</SelectItem>
+                    <SelectItem value="outdoor-lighting">Outdoor Lighting Setup</SelectItem>
+                    <SelectItem value="appliance-connection">Appliance Connection</SelectItem>
+                    <SelectItem value="other">Other (Please Specify)</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'cleaningType' && selectedService === 'cleaning' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select cleaning type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="regular-clean">Regular House Clean</SelectItem>
+                    <SelectItem value="deep-clean">Deep Cleaning (+R75)</SelectItem>
+                    <SelectItem value="move-in-out">Move In/Out Cleaning</SelectItem>
+                    <SelectItem value="post-construction">Post-Construction Clean</SelectItem>
+                    <SelectItem value="carpet-clean">Carpet & Upholstery</SelectItem>
+                    <SelectItem value="window-clean">Window Cleaning</SelectItem>
+                    <SelectItem value="office-clean">Office/Commercial Clean</SelectItem>
+                    <SelectItem value="eco-friendly">Eco-Friendly Cleaning</SelectItem>
+                    <SelectItem value="disinfection">Deep Disinfection</SelectItem>
+                    <SelectItem value="custom">Custom Cleaning Plan</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'serviceType' && selectedService === 'garden-care' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select garden service type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lawn-mowing">Lawn Mowing & Edging</SelectItem>
+                    <SelectItem value="hedge-trimming">Hedge Trimming & Pruning</SelectItem>
+                    <SelectItem value="garden-cleanup">General Garden Cleanup</SelectItem>
+                    <SelectItem value="landscaping">Garden Landscaping</SelectItem>
+                    <SelectItem value="tree-removal">Tree Removal/Trimming</SelectItem>
+                    <SelectItem value="irrigation">Irrigation System Setup</SelectItem>
+                    <SelectItem value="plant-care">Plant Care & Maintenance</SelectItem>
+                    <SelectItem value="pest-control">Garden Pest Control</SelectItem>
+                    <SelectItem value="seasonal-prep">Seasonal Garden Prep</SelectItem>
+                    <SelectItem value="design-consultation">Garden Design Consultation</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'serviceType' && selectedService === 'moving' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select moving service type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="local-residential">Local Residential Move</SelectItem>
+                    <SelectItem value="long-distance">Long Distance Move (+R200)</SelectItem>
+                    <SelectItem value="office-move">Office/Commercial Move</SelectItem>
+                    <SelectItem value="packing-only">Packing Services Only</SelectItem>
+                    <SelectItem value="furniture-move">Furniture Moving Only</SelectItem>
+                    <SelectItem value="piano-move">Piano/Specialty Items</SelectItem>
+                    <SelectItem value="storage-move">Move to Storage</SelectItem>
+                    <SelectItem value="same-day">Same Day Emergency Move</SelectItem>
+                    <SelectItem value="assembly">Furniture Assembly/Disassembly</SelectItem>
+                    <SelectItem value="full-service">Full Service Move (Pack+Move)</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'careType' && selectedService === 'au-pair' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select childcare type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="babysitting">Occasional Babysitting</SelectItem>
+                    <SelectItem value="daily-care">Daily Childcare</SelectItem>
+                    <SelectItem value="live-in">Live-in Au Pair</SelectItem>
+                    <SelectItem value="after-school">After School Care</SelectItem>
+                    <SelectItem value="weekend-care">Weekend Care</SelectItem>
+                    <SelectItem value="overnight-care">Overnight Care</SelectItem>
+                    <SelectItem value="newborn-care">Newborn/Infant Care</SelectItem>
+                    <SelectItem value="special-needs">Special Needs Care</SelectItem>
+                    <SelectItem value="tutoring">Tutoring & Homework Help</SelectItem>
+                    <SelectItem value="emergency-care">Emergency Childcare</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'eventType' && selectedService === 'waitering' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select event type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="wedding">Wedding Reception</SelectItem>
+                    <SelectItem value="corporate">Corporate Event</SelectItem>
+                    <SelectItem value="birthday-party">Birthday Party</SelectItem>
+                    <SelectItem value="dinner-party">Private Dinner Party</SelectItem>
+                    <SelectItem value="cocktail-party">Cocktail Party</SelectItem>
+                    <SelectItem value="family-gathering">Family Gathering</SelectItem>
+                    <SelectItem value="holiday-party">Holiday Celebration</SelectItem>
+                    <SelectItem value="graduation">Graduation Party</SelectItem>
+                    <SelectItem value="baby-shower">Baby Shower</SelectItem>
+                    <SelectItem value="conference">Business Conference</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'cuisineType' && selectedService === 'chef-catering' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select cuisine type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="south-african">South African Traditional</SelectItem>
+                    <SelectItem value="west-african">West African (Nigerian, Ghanaian)</SelectItem>
+                    <SelectItem value="east-african">East African (Ethiopian, Kenyan)</SelectItem>
+                    <SelectItem value="north-african">North African (Moroccan, Egyptian)</SelectItem>
+                    <SelectItem value="central-african">Central African</SelectItem>
+                    <SelectItem value="indian-fusion">Indian Fusion</SelectItem>
+                    <SelectItem value="continental">Continental/European</SelectItem>
+                    <SelectItem value="asian-fusion">Asian Fusion</SelectItem>
+                    <SelectItem value="mediterranean">Mediterranean</SelectItem>
+                    <SelectItem value="custom-menu">Custom Menu Design</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'urgency' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select urgency level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immediate">Immediate (Within 2 hours)</SelectItem>
+                    <SelectItem value="same-day">Same Day Service</SelectItem>
+                    <SelectItem value="next-day">Next Day Service</SelectItem>
+                    <SelectItem value="within-week">Within This Week</SelectItem>
+                    <SelectItem value="flexible">Flexible Timing</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'propertySize' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select property size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small (1-2 bedrooms)</SelectItem>
+                    <SelectItem value="medium">Medium (3-4 bedrooms)</SelectItem>
+                    <SelectItem value="large">Large (5+ bedrooms) (+R50)</SelectItem>
+                    <SelectItem value="mansion">Mansion/Estate (+R50)</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'frequency' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Select service frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one-time">One-time Service</SelectItem>
+                    <SelectItem value="one-time-deep">One-time Deep Clean (+R75)</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="bi-weekly">Every 2 Weeks</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="seasonal">Seasonal</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'emergencyService' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Emergency service needed?" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="yes">Yes - Emergency (+R80)</SelectItem>
+                    <SelectItem value="no">No - Regular Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'guestCount' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Number of guests" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-5">1-5 guests</SelectItem>
+                    <SelectItem value="6-10">6-10 guests</SelectItem>
+                    <SelectItem value="11-20">11-20 guests (+R25 per guest over 10)</SelectItem>
+                    <SelectItem value="21-50">21-50 guests (+R25 per guest over 10)</SelectItem>
+                    <SelectItem value="50+">50+ guests (+R25 per guest over 10)</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : field === 'distance' ? (
+                <Select value={formData[field] || ''} onValueChange={(value) => handleFormChange(field, value)}>
+                  <SelectTrigger data-testid={`select-${field}`}>
+                    <SelectValue placeholder="Moving distance" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="local">Local (Same city)</SelectItem>
+                    <SelectItem value="regional">Regional (Under 100km)</SelectItem>
+                    <SelectItem value="long-distance">Long Distance (100km+) (+R200)</SelectItem>
+                    <SelectItem value="provincial">Different Province (+R200)</SelectItem>
                   </SelectContent>
                 </Select>
               ) : field === 'ingredientSource' ? (
