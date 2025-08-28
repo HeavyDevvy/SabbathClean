@@ -61,6 +61,14 @@ export default function ModernServiceModal({
     gardenCondition: "",
     urgency: "standard",
     
+    // Chef & Catering specific
+    cuisineType: "",
+    menuSelection: "popular", // "popular" or "custom"
+    selectedMenu: "",
+    customMenuItems: [] as string[],
+    dietaryRequirements: [] as string[],
+    eventSize: "",
+    
     // Selections
     selectedAddOns: [] as string[],
     selectedProvider: null as any,
@@ -266,23 +274,87 @@ export default function ModernServiceModal({
         { value: "villa", label: "Villa/Large Kitchen", multiplier: 1.3 }
       ],
       cuisineTypes: [
-        { value: "south-african", label: "South African Traditional", multiplier: 1.0 },
-        { value: "west-african", label: "West African", multiplier: 1.1 },
-        { value: "east-african", label: "East African", multiplier: 1.1 },
-        { value: "north-african", label: "North African", multiplier: 1.2 },
-        { value: "halal", label: "Halal Certified", multiplier: 1.1 }
+        { 
+          value: "south-african", 
+          label: "🇿🇦 South African Traditional", 
+          multiplier: 1.0,
+          popularMenus: [
+            { name: "Traditional Braai", items: ["Boerewors", "Lamb Chops", "Chicken", "Pap & Morogo", "Chakalaka", "Potato Salad"], price: 850 },
+            { name: "Heritage Feast", items: ["Bobotie", "Yellow Rice", "Green Beans", "Sambals", "Milk Tart"], price: 920 },
+            { name: "Potjiekos Experience", items: ["Traditional Potjie", "Steamed Bread", "Roasted Vegetables", "Koeksisters"], price: 780 }
+          ],
+          customItems: ["Boerewors", "Sosaties", "Bobotie", "Potjiekos", "Biltong", "Droëwors", "Koeksisters", "Milk Tart", "Malva Pudding", "Pap & Morogo", "Chakalaka", "Roosterkoek"]
+        },
+        { 
+          value: "west-african", 
+          label: "🌍 West African", 
+          multiplier: 1.1,
+          popularMenus: [
+            { name: "Nigerian Feast", items: ["Jollof Rice", "Suya", "Plantain", "Pepper Soup", "Chin Chin"], price: 950 },
+            { name: "Ghanaian Special", items: ["Banku", "Tilapia", "Kelewele", "Groundnut Soup", "Fufu"], price: 920 },
+            { name: "Senegalese Delight", items: ["Thieboudienne", "Yassa Chicken", "Bissap Drink", "Pastels"], price: 890 }
+          ],
+          customItems: ["Jollof Rice", "Fufu", "Banku", "Suya", "Kelewele", "Plantain", "Yassa", "Thieboudienne", "Bissap", "Chin Chin", "Pepper Soup", "Palm Nut Soup"]
+        },
+        { 
+          value: "east-african", 
+          label: "🌍 East African", 
+          multiplier: 1.1,
+          popularMenus: [
+            { name: "Ethiopian Experience", items: ["Injera", "Doro Wat", "Kitfo", "Vegetarian Combo", "Ethiopian Coffee"], price: 940 },
+            { name: "Kenyan Safari", items: ["Nyama Choma", "Ugali", "Sukuma Wiki", "Pilau Rice", "Mandazi"], price: 880 },
+            { name: "Tanzanian Taste", items: ["Pilau", "Mishkaki", "Chapati", "Coconut Rice", "Urojo Soup"], price: 910 }
+          ],
+          customItems: ["Injera", "Doro Wat", "Kitfo", "Ugali", "Nyama Choma", "Sukuma Wiki", "Pilau", "Mishkaki", "Chapati", "Mandazi", "Coconut Rice", "Ethiopian Coffee"]
+        },
+        { 
+          value: "north-african", 
+          label: "🌍 North African", 
+          multiplier: 1.2,
+          popularMenus: [
+            { name: "Moroccan Royal", items: ["Tagine", "Couscous", "Pastilla", "Harira Soup", "Mint Tea", "Baklava"], price: 1050 },
+            { name: "Egyptian Pharaoh", items: ["Koshari", "Molokhia", "Fattah", "Basbousa", "Hibiscus Juice"], price: 980 },
+            { name: "Tunisian Treasure", items: ["Couscous Tunisien", "Brik", "Harissa Chicken", "Makroudh"], price: 920 }
+          ],
+          customItems: ["Tagine", "Couscous", "Pastilla", "Harira", "Koshari", "Molokhia", "Brik", "Harissa", "Mint Tea", "Baklava", "Makroudh", "Basbousa"]
+        },
+        { 
+          value: "central-african", 
+          label: "🌍 Central African", 
+          multiplier: 1.15,
+          popularMenus: [
+            { name: "Congolese Celebration", items: ["Fufu", "Ndolé", "Grilled Fish", "Plantain", "Palm Wine"], price: 890 },
+            { name: "Cameroonian Combo", items: ["Jollof Rice", "Pepper Soup", "Banga Soup", "Puff Puff"], price: 860 }
+          ],
+          customItems: ["Fufu", "Ndolé", "Banga Soup", "Pepper Soup", "Cassava", "Plantain", "Palm Wine", "Puff Puff", "Grilled Fish"]
+        }
+      ],
+      dietaryRequirements: [
+        { value: "halaal", label: "🕌 Halaal Certified", description: "Strictly Halaal ingredients and preparation" },
+        { value: "kosher", label: "✡️ Kosher Certified", description: "Kosher ingredients and supervision" },
+        { value: "vegan", label: "🌱 Vegan", description: "Plant-based ingredients only" },
+        { value: "vegetarian", label: "🥬 Vegetarian", description: "No meat, fish allowed" },
+        { value: "gluten-free", label: "🌾 Gluten-Free", description: "No wheat, barley, rye products" },
+        { value: "keto", label: "🥑 Keto-Friendly", description: "Low-carb, high-fat diet" },
+        { value: "diabetic", label: "🩺 Diabetic-Friendly", description: "Low sugar, controlled carbs" },
+        { value: "nut-free", label: "🥜 Nut-Free", description: "No tree nuts or peanuts" },
+        { value: "dairy-free", label: "🥛 Dairy-Free", description: "No milk products" }
       ],
       eventSizes: [
-        { value: "intimate", label: "Intimate (2-8 people)", multiplier: 1.0 },
-        { value: "small", label: "Small (9-15 people)", multiplier: 1.5 },
-        { value: "medium", label: "Medium (16-30 people)", multiplier: 2.2 },
-        { value: "large", label: "Large (31-50 people)", multiplier: 3.5 }
+        { value: "intimate", label: "Intimate Dining (2-8 people)", multiplier: 1.0 },
+        { value: "small", label: "Small Gathering (9-15 people)", multiplier: 1.5 },
+        { value: "medium", label: "Medium Event (16-30 people)", multiplier: 2.2 },
+        { value: "large", label: "Large Celebration (31-50 people)", multiplier: 3.5 },
+        { value: "corporate", label: "Corporate Event (50+ people)", multiplier: 5.0 }
       ],
       addOns: [
-        { id: "ingredient-sourcing", name: "Premium Ingredient Sourcing", price: 200 },
-        { id: "table-service", name: "Table Service & Cleanup", price: 300 },
-        { id: "dietary-customization", name: "Dietary Customization", price: 150 },
-        { id: "cooking-demonstration", name: "Live Cooking Demonstration", price: 250 }
+        { id: "premium-ingredients", name: "🥩 Premium Ingredient Sourcing", price: 200, description: "Organic, free-range, premium quality ingredients" },
+        { id: "full-service", name: "👥 Full Service Experience", price: 400, description: "Professional waitering, bartending, setup & cleanup" },
+        { id: "dietary-specialist", name: "🥗 Dietary Specialist Chef", price: 250, description: "Specialized chef for dietary requirements" },
+        { id: "cooking-demo", name: "👨‍🍳 Live Cooking Demonstration", price: 300, description: "Interactive cooking experience with guests" },
+        { id: "recipe-cards", name: "📝 Custom Recipe Cards", price: 150, description: "Take-home recipe cards for prepared dishes" },
+        { id: "wine-pairing", name: "🍷 Wine & Beverage Pairing", price: 350, description: "Professional sommelier and beverage selection" },
+        { id: "traditional-setup", name: "🎭 Traditional Cultural Setup", price: 280, description: "Authentic cultural decorations and presentation" }
       ]
     },
     "event-staff": {
@@ -413,11 +485,27 @@ export default function ModernServiceModal({
     }
 
     if (serviceId === "chef-catering") {
-      const cuisineType = config.cuisineTypes?.find((c: any) => c.value === formData.cleaningType);
-      if (cuisineType) basePrice *= cuisineType.multiplier;
+      // Handle menu selection pricing
+      if (formData.menuSelection === "popular" && formData.selectedMenu && formData.cuisineType) {
+        const selectedCuisine = config.cuisineTypes?.find((c: any) => c.value === formData.cuisineType);
+        const selectedMenuData = selectedCuisine?.popularMenus?.find((m: any) => m.name === formData.selectedMenu);
+        if (selectedMenuData) {
+          basePrice = selectedMenuData.price;
+        }
+      } else {
+        // Apply cuisine type multiplier for custom menu or when no popular menu selected
+        const cuisineType = config.cuisineTypes?.find((c: any) => c.value === formData.cuisineType);
+        if (cuisineType) basePrice *= cuisineType.multiplier;
+      }
       
-      const eventSize = config.eventSizes?.find((s: any) => s.value === formData.propertySize);
+      // Apply event size multiplier
+      const eventSize = config.eventSizes?.find((s: any) => s.value === formData.eventSize);
       if (eventSize) basePrice *= eventSize.multiplier;
+      
+      // Additional pricing for custom menu items (base price per item for custom menus)
+      if (formData.menuSelection === "custom" && formData.customMenuItems.length > 0) {
+        basePrice += formData.customMenuItems.length * 45; // R45 per custom menu item
+      }
     }
 
     if (serviceId === "event-staff") {
@@ -667,6 +755,178 @@ export default function ModernServiceModal({
               </SelectContent>
             </Select>
           </div>
+        )}
+
+        {serviceId === "chef-catering" && (
+          <>
+            <div>
+              <Label>Cuisine Type *</Label>
+              <Select value={formData.cuisineType} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, cuisineType: value, selectedMenu: "", customMenuItems: [] }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select cuisine type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.cuisineTypes?.map((cuisine: any) => (
+                    <SelectItem key={cuisine.value} value={cuisine.value}>
+                      {cuisine.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Event Size *</Label>
+              <Select value={formData.eventSize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, eventSize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.eventSizes?.map((size: any) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Dietary Requirements</Label>
+              <div className="grid grid-cols-1 gap-2 mt-2 max-h-48 overflow-y-auto">
+                {currentConfig.dietaryRequirements?.map((req: any) => (
+                  <div key={req.value} className="flex items-start space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                    <Checkbox
+                      checked={formData.dietaryRequirements.includes(req.value)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            dietaryRequirements: [...prev.dietaryRequirements, req.value]
+                          }));
+                        } else {
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            dietaryRequirements: prev.dietaryRequirements.filter(r => r !== req.value)
+                          }));
+                        }
+                      }}
+                    />
+                    <div className="flex-1">
+                      <label className="text-sm font-medium cursor-pointer">{req.label}</label>
+                      <p className="text-xs text-gray-500">{req.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {formData.cuisineType && (
+              <div>
+                <Label>Menu Selection *</Label>
+                <div className="space-y-3 mt-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div 
+                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                        formData.menuSelection === "popular" 
+                          ? "border-primary bg-primary/5" 
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, menuSelection: "popular", customMenuItems: [] }))}
+                    >
+                      <h4 className="font-semibold text-sm">Popular Menus</h4>
+                      <p className="text-xs text-gray-500">Pre-designed menu combinations</p>
+                    </div>
+                    <div 
+                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                        formData.menuSelection === "custom" 
+                          ? "border-primary bg-primary/5" 
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, menuSelection: "custom", selectedMenu: "" }))}
+                    >
+                      <h4 className="font-semibold text-sm">Custom Menu</h4>
+                      <p className="text-xs text-gray-500">Build your own menu</p>
+                    </div>
+                  </div>
+
+                  {formData.menuSelection === "popular" && (
+                    <div>
+                      <Label>Choose Popular Menu *</Label>
+                      <div className="space-y-2 mt-2 max-h-64 overflow-y-auto">
+                        {currentConfig.cuisineTypes
+                          ?.find((c: any) => c.value === formData.cuisineType)
+                          ?.popularMenus?.map((menu: any, index: number) => (
+                          <div 
+                            key={index}
+                            className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                              formData.selectedMenu === menu.name
+                                ? "border-primary bg-primary/5"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setFormData(prev => ({ ...prev, selectedMenu: menu.name }))}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <h5 className="font-semibold text-sm">{menu.name}</h5>
+                                <p className="text-xs text-gray-600 mt-1">
+                                  {menu.items.join(", ")}
+                                </p>
+                              </div>
+                              <span className="text-sm font-bold text-primary">R{menu.price}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.menuSelection === "custom" && (
+                    <div>
+                      <Label>Build Custom Menu *</Label>
+                      <div className="grid grid-cols-2 gap-2 mt-2 max-h-64 overflow-y-auto">
+                        {currentConfig.cuisineTypes
+                          ?.find((c: any) => c.value === formData.cuisineType)
+                          ?.customItems?.map((item: string, index: number) => (
+                          <div key={index} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                            <Checkbox
+                              checked={formData.customMenuItems.includes(item)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setFormData(prev => ({ 
+                                    ...prev, 
+                                    customMenuItems: [...prev.customMenuItems, item]
+                                  }));
+                                } else {
+                                  setFormData(prev => ({ 
+                                    ...prev, 
+                                    customMenuItems: prev.customMenuItems.filter(i => i !== item)
+                                  }));
+                                }
+                              }}
+                            />
+                            <label className="text-sm cursor-pointer flex-1">{item}</label>
+                          </div>
+                        ))}
+                      </div>
+                      {formData.customMenuItems.length > 0 && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <h6 className="font-semibold text-sm text-blue-800">Selected Items:</h6>
+                          <p className="text-xs text-blue-600 mt-1">
+                            {formData.customMenuItems.join(", ")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

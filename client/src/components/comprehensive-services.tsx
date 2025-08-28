@@ -160,20 +160,26 @@ const specializedServices: Service[] = [
     id: "chef-catering",
     category: "Specialized Services",
     title: "Chef & Catering",
-    description: "Professional chefs specializing in African cuisine and international dishes for events and daily meals",
+    description: "Professional chefs specializing in authentic African cuisine and international dishes for events and daily meals with complete dietary accommodation",
     price: "From R400/event",
     duration: "2-12 hours",
     popular: true,
     serviceTypes: [
-      "Personal Chef (daily/weekly meal prep)",
-      "Event Catering (parties, corporate events)",
-      "Cooking Classes (individual/group)",
-      "African Cuisine Specialists",
-      "Dietary Requirements (vegan, keto, halaal, kosher)",
-      "Waitering Services",
-      "Bartending Services"
+      "🍽️ Personal Chef (daily/weekly meal prep)",
+      "🎉 Event Catering (parties, corporate events, weddings)",
+      "👨‍🍳 Private Cooking Classes (individual/group sessions)",
+      "🌍 African Cuisine Specialists (South African, West African, East African, North African, Central African)",
+      "🥗 Dietary Requirements (Halaal, Kosher, Vegan, Vegetarian, Keto, Gluten-Free, Diabetic-Friendly)",
+      "🍷 Full Service Experience (waitering, bartending, setup)",
+      "📋 Custom Menu Design & Consultation"
     ],
-    features: ["African cuisine expertise", "Event specialists", "Dietary accommodations", "Full service teams"],
+    features: [
+      "🍖 Traditional African Cuisine Experts", 
+      "🥘 Popular Menu Items: Braai, Bobotie, Potjiekos, Boerewors, Chakalaka, Pap & Morogo, Jollof Rice, Injera, Tagine",
+      "✅ Dietary Accommodations: Halaal/Kosher certified chefs available",
+      "🛒 Ingredient Sourcing: Fresh local ingredients, specialty African spices and imported items",
+      "👥 Full Service Teams: Professional waitering, bartending, and event setup staff"
+    ],
     icon: ChefHat,
     gradient: "from-green-500 to-emerald-500",
     bookingSteps: 4
