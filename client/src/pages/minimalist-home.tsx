@@ -4,11 +4,9 @@ import MinimalistServices from "@/components/minimalist-services";
 import ModernServiceModal from "@/components/modern-service-modal";
 import BookingConfirmation from "@/components/booking-confirmation";
 import DemoVideoModal from "@/components/demo-video-modal";
-import VisualCuisineExplorer from "@/components/visual-cuisine-explorer";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
-import CompetitiveAdvantageSection from "@/components/competitive-advantage-section";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { 
@@ -75,7 +73,6 @@ export default function MinimalistHome() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</a>
               <a href="#how-it-works" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">How it works</a>
               <a href="#contact" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Contact</a>
               <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
@@ -100,7 +97,6 @@ export default function MinimalistHome() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100">
             <div className="px-4 py-3 space-y-3">
-              <a href="#services" className="block text-gray-600 font-medium">Services</a>
               <a href="#how-it-works" className="block text-gray-600 font-medium">How it works</a>
               <a href="#contact" className="block text-gray-600 font-medium">Contact</a>
               <div className="pt-3 space-y-3">
@@ -121,9 +117,6 @@ export default function MinimalistHome() {
           <MinimalistServices onServiceSelect={handleServiceSelect} />
         </div>
 
-        {/* Visual Cuisine Explorer Section */}
-        <VisualCuisineExplorer onBookCuisine={handleServiceSelect} />
-
         {/* How It Works Section */}
         <HowItWorksSection onBookNowClick={handleBookingClick} />
 
@@ -132,9 +125,6 @@ export default function MinimalistHome() {
 
         {/* Trust & Safety Section */}
         <TrustSafetySection />
-
-        {/* Competitive Advantage Section */}
-        <CompetitiveAdvantageSection />
       </main>
 
       {/* Footer */}
