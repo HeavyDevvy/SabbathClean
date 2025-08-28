@@ -62,6 +62,7 @@ export default function ModernServiceModal({
     gardenSize: editBookingData?.gardenSize || "",
     gardenCondition: editBookingData?.gardenCondition || "",
     urgency: editBookingData?.urgency || "standard",
+    electricalIssue: editBookingData?.electricalIssue || "",
     
     // Chef & Catering specific
     cuisineType: editBookingData?.cuisineType || "",
@@ -221,6 +222,20 @@ export default function ModernServiceModal({
         { value: "townhouse", label: "Townhouse", multiplier: 1.1 },
         { value: "villa", label: "Villa", multiplier: 1.4 }
       ],
+      electricalIssues: [
+        { value: "power-outage", label: "Power Outage/No Electricity", price: 450, description: "Complete loss of power or electrical supply issues" },
+        { value: "flickering-lights", label: "Flickering or Dim Lights", price: 320, description: "Light fixtures flickering, dimming, or not working properly" },
+        { value: "outlet-not-working", label: "Outlets Not Working", price: 280, description: "Power outlets not functioning or sparking" },
+        { value: "circuit-breaker", label: "Circuit Breaker Issues", price: 380, description: "Breakers tripping frequently or not resetting" },
+        { value: "wiring-problems", label: "Faulty Wiring", price: 650, description: "Old, damaged, or unsafe electrical wiring" },
+        { value: "electrical-panel", label: "Electrical Panel Problems", price: 800, description: "Main electrical panel issues or upgrades needed" },
+        { value: "appliance-installation", label: "Appliance Installation", price: 350, description: "Installing new electrical appliances or fixtures" },
+        { value: "ceiling-fan", label: "Ceiling Fan Issues", price: 420, description: "Ceiling fan installation, repair, or replacement" },
+        { value: "light-fixture", label: "Light Fixture Problems", price: 300, description: "Installing or repairing light fixtures" },
+        { value: "electrical-safety", label: "Electrical Safety Check", price: 250, description: "Complete electrical system inspection and safety assessment" },
+        { value: "generator-issues", label: "Generator Problems", price: 550, description: "Generator installation, repair, or maintenance" },
+        { value: "other", label: "Other Electrical Issue", price: 450, description: "Custom electrical problem not listed above" }
+      ],
       urgencyLevels: [
         { value: "emergency", label: "Emergency (24/7)", multiplier: 2.5 },
         { value: "urgent", label: "Urgent (Same Day)", multiplier: 1.8 },
@@ -228,10 +243,13 @@ export default function ModernServiceModal({
         { value: "scheduled", label: "Scheduled (Flexible)", multiplier: 0.9 }
       ],
       addOns: [
-        { id: "outlet-install", name: "Outlet Installation", price: 180 },
-        { id: "light-fixture", name: "Light Fixture Installation", price: 220 },
-        { id: "ceiling-fan", name: "Ceiling Fan Installation", price: 350 },
-        { id: "electrical-panel", name: "Electrical Panel Service", price: 800 }
+        { id: "outlet-install", name: "Additional Outlet Installation", price: 180 },
+        { id: "light-fixture", name: "Extra Light Fixture", price: 220 },
+        { id: "ceiling-fan", name: "Additional Ceiling Fan", price: 350 },
+        { id: "electrical-panel", name: "Panel Upgrade", price: 800 },
+        { id: "surge-protection", name: "Surge Protection Installation", price: 400 },
+        { id: "gfci-outlets", name: "GFCI Outlet Installation", price: 150 },
+        { id: "electrical-inspection", name: "Full Electrical Inspection", price: 300 }
       ]
     },
     "garden-maintenance": {
@@ -481,7 +499,17 @@ export default function ModernServiceModal({
       if (condition) basePrice *= condition.multiplier;
     }
 
-    if (serviceId === "plumbing" || serviceId === "electrical" || serviceId === "handyman") {
+    if (serviceId === "plumbing" || serviceId === "handyman") {
+      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
+      if (urgency) basePrice *= urgency.multiplier;
+    }
+
+    if (serviceId === "electrical") {
+      // Use the specific electrical issue price as base price
+      const electricalIssue = config.electricalIssues?.find((i: any) => i.value === formData.electricalIssue);
+      if (electricalIssue) basePrice = electricalIssue.price;
+      
+      // Apply urgency multiplier
       const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
       if (urgency) basePrice *= urgency.multiplier;
     }
@@ -765,6 +793,29 @@ export default function ModernServiceModal({
                 {currentConfig.urgencyLevels?.map((level: any) => (
                   <SelectItem key={level.value} value={level.value}>
                     {level.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {serviceId === "electrical" && (
+          <div>
+            <Label htmlFor="electrical-issue">What needs to be fixed? *</Label>
+            <Select value={formData.electricalIssue} onValueChange={(value) =>
+              setFormData(prev => ({ ...prev, electricalIssue: value }))
+            }>
+              <SelectTrigger data-testid="select-electrical-issue">
+                <SelectValue placeholder="Select the electrical issue" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72 overflow-y-auto">
+                {currentConfig.electricalIssues?.map((issue: any) => (
+                  <SelectItem key={issue.value} value={issue.value}>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{issue.label} - R{issue.price}</span>
+                      <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
