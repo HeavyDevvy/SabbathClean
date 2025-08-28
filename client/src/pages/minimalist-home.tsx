@@ -72,9 +72,7 @@ export default function MinimalistHome() {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <a href="#how-it-works" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">How it works</a>
-              <a href="#contact" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Contact</a>
+            <nav className="hidden md:flex items-center space-x-4">
               <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
                 Sign In
               </Button>
@@ -97,12 +95,8 @@ export default function MinimalistHome() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100">
             <div className="px-4 py-3 space-y-3">
-              <a href="#how-it-works" className="block text-gray-600 font-medium">How it works</a>
-              <a href="#contact" className="block text-gray-600 font-medium">Contact</a>
-              <div className="pt-3 space-y-3">
-                <Button variant="outline" className="w-full">Sign In</Button>
-                <Button className="w-full bg-blue-600">Get Started</Button>
-              </div>
+              <Button variant="outline" className="w-full">Sign In</Button>
+              <Button className="w-full bg-blue-600">Get Started</Button>
             </div>
           </div>
         )}
