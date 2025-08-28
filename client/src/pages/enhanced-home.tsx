@@ -7,7 +7,6 @@ import ModernServiceModal from "@/components/modern-service-modal";
 import BookingConfirmation from "@/components/booking-confirmation";
 import DemoVideoModal from "@/components/demo-video-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
-import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 
 import Footer from "@/components/footer";
@@ -81,8 +80,6 @@ export default function EnhancedHome() {
 
 
 
-        {/* How It Works Section */}
-        <HowItWorksSection onBookNowClick={handleBookingClick} />
 
         {/* Featured Providers Section */}
         <BerryStarsSection onBookService={handleServiceSelect} />
