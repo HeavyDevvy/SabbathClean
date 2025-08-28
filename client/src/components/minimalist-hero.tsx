@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, Calendar, Star } from "lucide-react";
+import berryLogo from "@assets/PHOTO-2025-08-13-13-21-07_1756396475295.jpg";
 
 interface MinimalistHeroProps {
   onGetStarted: () => void;
@@ -273,76 +274,19 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                   transition: { duration: 0.6 }
                 }}
               >
-                {/* Background Image/Illustration */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.svg
-                    className="w-full h-full opacity-20"
-                    viewBox="0 0 400 500"
-                    fill="none"
+                {/* Berry Events Logo Background */}
+                <div className="absolute inset-0 flex items-center justify-center p-12">
+                  <motion.img
+                    src={berryLogo}
+                    alt="Berry Events Logo"
+                    className="w-full h-full object-contain opacity-30 rounded-2xl"
                     initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 0.2 }}
+                    animate={{ scale: 1, opacity: 0.3 }}
                     transition={{ delay: 1.2, duration: 0.8 }}
-                  >
-                    {/* Professional cleaner illustration */}
-                    <motion.g
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      {/* Person */}
-                      <circle cx="200" cy="120" r="25" fill="#3b82f6" fillOpacity="0.6" />
-                      <rect x="185" y="145" width="30" height="60" rx="15" fill="#3b82f6" fillOpacity="0.5" />
-                      
-                      {/* Cleaning supplies */}
-                      <rect x="150" y="220" width="20" height="40" rx="10" fill="#10b981" fillOpacity="0.6" />
-                      <rect x="180" y="230" width="15" height="30" rx="7" fill="#f59e0b" fillOpacity="0.6" />
-                      <rect x="210" y="225" width="18" height="35" rx="9" fill="#ef4444" fillOpacity="0.6" />
-                      <rect x="240" y="235" width="25" height="25" rx="12" fill="#8b5cf6" fillOpacity="0.6" />
-                    </motion.g>
-                    
-                    {/* Sparkle effects */}
-                    {[...Array(8)].map((_, i) => (
-                      <motion.circle
-                        key={i}
-                        cx={120 + i * 35}
-                        cy={300 + (i % 2) * 30}
-                        r="3"
-                        fill="#fbbf24"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ 
-                          opacity: [0, 1, 0], 
-                          scale: [0, 1.2, 0],
-                          rotate: 360 
-                        }}
-                        transition={{ 
-                          duration: 2, 
-                          repeat: Infinity, 
-                          delay: i * 0.2 
-                        }}
-                      />
-                    ))}
-                    
-                    {/* House outline */}
-                    <motion.path
-                      d="M80 380 L200 320 L320 380 L320 450 L80 450 Z"
-                      stroke="#3b82f6"
-                      strokeWidth="3"
-                      fill="none"
-                      strokeOpacity="0.4"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 2, delay: 1.5 }}
-                    />
-                    <motion.path
-                      d="M80 380 L200 320 L320 380"
-                      stroke="#3b82f6"
-                      strokeWidth="3"
-                      fill="none"
-                      strokeOpacity="0.4"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ duration: 1.5, delay: 2 }}
-                    />
-                  </motion.svg>
+                  />
+                  
+                  {/* Overlay gradient to ensure text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-100/50 via-transparent to-blue-100/50 rounded-3xl" />
                 </div>
 
                 {/* Content overlay */}
