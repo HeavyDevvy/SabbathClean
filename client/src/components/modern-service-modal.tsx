@@ -27,6 +27,7 @@ import {
   Wrench
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import BookingConfirmationModal from "./booking-confirmation-modal";
 
 interface ModernServiceModalProps {
   isOpen: boolean;
@@ -45,6 +46,8 @@ export default function ModernServiceModal({
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmedBookingData, setConfirmedBookingData] = useState<any>(null);
   
   const [formData, setFormData] = useState({
     // Core fields
@@ -638,17 +641,52 @@ export default function ModernServiceModal({
 
     console.log("Processing booking:", bookingData);
     
-    toast({
-      title: "Booking Confirmed!",
-      description: `${currentConfig.title} booked for ${formData.preferredDate} at ${formData.timePreference}`,
-      duration: 3000,
-    });
+    // Store booking data and show confirmation modal
+    setConfirmedBookingData(bookingData);
+    setShowConfirmation(true);
     
-    // Close modal and trigger confirmation
+    // Call the original completion handler for data persistence
+    onBookingComplete(bookingData);
+  };
+
+  const handleConfirmationClose = () => {
+    setShowConfirmation(false);
+    setConfirmedBookingData(null);
+    // Close the main modal after confirmation modal is closed
     onClose();
-    setTimeout(() => {
-      onBookingComplete(bookingData);
-    }, 300);
+    // Reset form state
+    setStep(1);
+    setFormData({
+      // Reset all form data
+      propertyType: "",
+      address: "",
+      preferredDate: "",
+      timePreference: "",
+      recurringSchedule: "one-time",
+      materials: "supply",
+      insurance: false,
+      cleaningType: "",
+      propertySize: "",
+      gardenSize: "",
+      gardenCondition: "",
+      urgency: "standard",
+      electricalIssue: "",
+      cuisineType: "",
+      eventSize: "",
+      menuSelection: "popular",
+      selectedMenu: "",
+      customMenuItems: [],
+      selectedAddOns: [],
+      selectedProvider: null,
+      specialRequests: "",
+      paymentMethod: "card",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      bankAccount: "",
+      bankBranch: ""
+    });
   };
 
   const renderStep1 = () => (
@@ -1436,83 +1474,93 @@ export default function ModernServiceModal({
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <currentConfig.icon className="h-6 w-6" />
-            <span>{currentConfig.title}</span>
-          </DialogTitle>
-          <DialogDescription>
-            Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <currentConfig.icon className="h-6 w-6" />
+              <span>{currentConfig.title}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Progress indicator */}
-        <div className="flex space-x-2 mb-6">
-          {Array.from({ length: currentConfig.steps }, (_, i) => (
-            <div
-              key={i}
-              className={`flex-1 h-2 rounded-full transition-all ${
-                i + 1 <= step ? 'bg-primary' : 'bg-gray-200'
-              }`}
-            />
-          ))}
-        </div>
+          {/* Progress indicator */}
+          <div className="flex space-x-2 mb-6">
+            {Array.from({ length: currentConfig.steps }, (_, i) => (
+              <div
+                key={i}
+                className={`flex-1 h-2 rounded-full transition-all ${
+                  i + 1 <= step ? 'bg-primary' : 'bg-gray-200'
+                }`}
+              />
+            ))}
+          </div>
 
-        {/* Step content */}
-        <div className="min-h-[400px]">
-          {step === 1 && renderStep1()}
-          {step === 2 && renderStep2()}
-          {step === 3 && renderStep3()}
-          {step === 4 && renderStep4()}
-          {step === 5 && renderStep5()}
-        </div>
+          {/* Step content */}
+          <div className="min-h-[400px]">
+            {step === 1 && renderStep1()}
+            {step === 2 && renderStep2()}
+            {step === 3 && renderStep3()}
+            {step === 4 && renderStep4()}
+            {step === 5 && renderStep5()}
+          </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between pt-6 border-t">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={step === 1}
-          >
-            Back
-          </Button>
-
-          {step < currentConfig.steps ? (
-            <Button 
-              onClick={handleNext}
-              disabled={
-                (step === 1 && (!formData.propertyType || !formData.address || 
-                  (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
-                  (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
-                  (serviceId === "plumbing" && !formData.urgency) ||
-                  (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
-                )) ||
-                (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
-                (step === 4 && !formData.selectedProvider) ||
-                (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
-                (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
-              }
+          {/* Navigation */}
+          <div className="flex justify-between pt-6 border-t">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={step === 1}
             >
-              Next
+              Back
             </Button>
-          ) : (
-            <Button 
-              onClick={handleBookingConfirm}
-              className="bg-gradient-to-r from-primary to-purple-600"
-              disabled={
-                formData.paymentMethod === "card" 
-                  ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
-                  : (!formData.bankAccount || !formData.bankBranch)
-              }
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              Complete Booking - R{pricing.totalPrice}
-            </Button>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+
+            {step < currentConfig.steps ? (
+              <Button 
+                onClick={handleNext}
+                disabled={
+                  (step === 1 && (!formData.propertyType || !formData.address || 
+                    (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
+                    (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
+                    (serviceId === "plumbing" && !formData.urgency) ||
+                    (serviceId === "electrical" && !formData.electricalIssue) ||
+                    (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
+                  )) ||
+                  (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
+                  (step === 4 && !formData.selectedProvider) ||
+                  (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
+                  (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
+                }
+              >
+                Next
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleBookingConfirm}
+                className="bg-gradient-to-r from-primary to-purple-600"
+                disabled={
+                  formData.paymentMethod === "card" 
+                    ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
+                    : (!formData.bankAccount || !formData.bankBranch)
+                }
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Complete Booking - R{pricing.totalPrice}
+              </Button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Booking Confirmation Modal */}
+      <BookingConfirmationModal
+        isOpen={showConfirmation}
+        onClose={handleConfirmationClose}
+        bookingData={confirmedBookingData}
+      />
+    </>
   );
 }
