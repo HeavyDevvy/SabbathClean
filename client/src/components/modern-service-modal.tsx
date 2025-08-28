@@ -470,6 +470,77 @@ export default function ModernServiceModal({
         { id: "travel-kit", name: "Professional Travel Kit", price: 100 },
         { id: "follow-up-care", name: "Follow-up Care Package", price: 80 }
       ]
+    },
+    "moving": {
+      title: "Moving Services",
+      icon: Wrench,
+      basePrice: 600,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment/1-2 Bedrooms", multiplier: 1.0 },
+        { value: "house", label: "House/3-4 Bedrooms", multiplier: 1.4 },
+        { value: "townhouse", label: "Townhouse/2-3 Bedrooms", multiplier: 1.2 },
+        { value: "villa", label: "Villa/5+ Bedrooms", multiplier: 1.8 }
+      ],
+      movingTypes: [
+        { value: "local", label: "Local Moving (Same City)", price: 600, description: "Moving within the same city or nearby areas" },
+        { value: "long-distance", label: "Long-Distance Moving", price: 1200, description: "Intercity or interstate moving" },
+        { value: "office", label: "Office Relocation", price: 800, description: "Business and office moving services" },
+        { value: "furniture", label: "Furniture Moving & Assembly", price: 400, description: "Specialized furniture transport and setup" },
+        { value: "packing", label: "Packing & Unpacking Services", price: 350, description: "Professional packing and unpacking assistance" },
+        { value: "piano", label: "Piano & Specialty Items", price: 900, description: "Special handling for delicate items" }
+      ],
+      movingDistance: [
+        { value: "local", label: "Local (0-50km)", multiplier: 1.0 },
+        { value: "regional", label: "Regional (50-200km)", multiplier: 1.5 },
+        { value: "long-distance", label: "Long Distance (200km+)", multiplier: 2.2 }
+      ],
+      addOns: [
+        { id: "packing-materials", name: "Packing Materials Supply", price: 200 },
+        { id: "storage", name: "Temporary Storage (1 month)", price: 300 },
+        { id: "insurance", name: "Premium Moving Insurance", price: 150 },
+        { id: "disassembly", name: "Furniture Disassembly/Assembly", price: 250 },
+        { id: "cleaning", name: "Post-Move Cleaning", price: 400 }
+      ]
+    },
+    "au-pair": {
+      title: "Au Pair Services",
+      icon: Users,
+      basePrice: 65,
+      steps: 5,
+      propertyTypes: [
+        { value: "apartment", label: "Apartment", multiplier: 1.0 },
+        { value: "house", label: "House", multiplier: 1.1 },
+        { value: "townhouse", label: "Townhouse", multiplier: 1.05 },
+        { value: "villa", label: "Villa", multiplier: 1.2 }
+      ],
+      careTypes: [
+        { value: "live-in", label: "Live-in Au Pair (6-12 months)", price: 3500, description: "Full-time live-in childcare provider" },
+        { value: "part-time", label: "Part-time Childcare", price: 65, description: "Flexible part-time childcare hours" },
+        { value: "after-school", label: "After-school Care", price: 80, description: "Care and supervision after school hours" },
+        { value: "weekend", label: "Weekend & Holiday Care", price: 90, description: "Weekend and special occasion care" },
+        { value: "overnight", label: "Overnight Babysitting", price: 120, description: "Extended overnight care services" },
+        { value: "educational", label: "Educational Support & Tutoring", price: 95, description: "Homework help and educational activities" }
+      ],
+      childrenCount: [
+        { value: "1", label: "1 Child", multiplier: 1.0 },
+        { value: "2", label: "2 Children", multiplier: 1.4 },
+        { value: "3", label: "3 Children", multiplier: 1.7 },
+        { value: "4+", label: "4+ Children", multiplier: 2.0 }
+      ],
+      childrenAges: [
+        { value: "infant", label: "Infant (0-1 year)", multiplier: 1.3 },
+        { value: "toddler", label: "Toddler (1-3 years)", multiplier: 1.2 },
+        { value: "preschool", label: "Preschool (3-5 years)", multiplier: 1.1 },
+        { value: "school", label: "School Age (6+ years)", multiplier: 1.0 }
+      ],
+      addOns: [
+        { id: "background-check", name: "Enhanced Background Check", price: 120 },
+        { id: "first-aid", name: "Certified First Aid Training", price: 80 },
+        { id: "transport", name: "Child Transportation Service", price: 100 },
+        { id: "meal-prep", name: "Meal Preparation for Children", price: 60 },
+        { id: "overnight", name: "Overnight Care Available", price: 150 }
+      ]
     }
   };
 
@@ -482,7 +553,9 @@ export default function ModernServiceModal({
     "chef-catering": "chef-catering",
     "waitering": "event-staff", // waitering maps to event-staff config
     "handyman": "handyman",
-    "beauty-wellness": "beauty-wellness"
+    "beauty-wellness": "beauty-wellness",
+    "moving": "moving",
+    "au-pair": "au-pair"
   };
 
   const mappedServiceId = serviceIdMapping[serviceId] || serviceId;
@@ -574,6 +647,25 @@ export default function ModernServiceModal({
       
       const duration = config.sessionDuration?.find((d: any) => d.value === formData.propertySize);
       if (duration) basePrice *= duration.multiplier;
+    }
+
+    if (mappedServiceId === "moving") {
+      const movingType = config.movingTypes?.find((t: any) => t.value === formData.cleaningType);
+      if (movingType) basePrice = movingType.price;
+      
+      const distance = config.movingDistance?.find((d: any) => d.value === formData.propertySize);
+      if (distance) basePrice *= distance.multiplier;
+    }
+
+    if (mappedServiceId === "au-pair") {
+      const careType = config.careTypes?.find((t: any) => t.value === formData.cleaningType);
+      if (careType) basePrice = careType.price;
+      
+      const childrenCount = config.childrenCount?.find((c: any) => c.value === formData.propertySize);
+      if (childrenCount) basePrice *= childrenCount.multiplier;
+      
+      const childrenAge = config.childrenAges?.find((a: any) => a.value === formData.gardenSize);
+      if (childrenAge) basePrice *= childrenAge.multiplier;
     }
 
     // Add-ons pricing
@@ -874,6 +966,150 @@ export default function ModernServiceModal({
               </SelectContent>
             </Select>
           </div>
+        )}
+
+        {serviceId === "waitering" && (
+          <>
+            <div>
+              <Label>Staff Type *</Label>
+              <Select value={formData.cleaningType} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, cleaningType: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select staff type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.staffTypes?.map((type: any) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label} - R{type.price}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Event Size *</Label>
+              <Select value={formData.propertySize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, propertySize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.eventSizes?.map((size: any) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
+        {serviceId === "moving" && (
+          <>
+            <div>
+              <Label>Moving Type *</Label>
+              <Select value={formData.cleaningType} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, cleaningType: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select moving type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.movingTypes?.map((type: any) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{type.label} - R{type.price}</span>
+                        <span className="text-xs text-gray-500">{type.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Moving Distance *</Label>
+              <Select value={formData.propertySize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, propertySize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select moving distance" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.movingDistance?.map((distance: any) => (
+                    <SelectItem key={distance.value} value={distance.value}>
+                      {distance.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
+        {serviceId === "au-pair" && (
+          <>
+            <div>
+              <Label>Care Type *</Label>
+              <Select value={formData.cleaningType} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, cleaningType: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select care type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.careTypes?.map((type: any) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{type.label} - R{type.price}</span>
+                        <span className="text-xs text-gray-500">{type.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Number of Children *</Label>
+              <Select value={formData.propertySize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, propertySize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select number of children" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.childrenCount?.map((count: any) => (
+                    <SelectItem key={count.value} value={count.value}>
+                      {count.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Children's Age Range *</Label>
+              <Select value={formData.gardenSize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, gardenSize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select age range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.childrenAges?.map((age: any) => (
+                    <SelectItem key={age.value} value={age.value}>
+                      {age.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
         )}
 
         {serviceId === "chef-catering" && (
