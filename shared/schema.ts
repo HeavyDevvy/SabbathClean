@@ -127,7 +127,9 @@ export const bookings = pgTable("bookings", {
   parentBookingId: varchar("parent_booking_id"), // for recurring bookings - self reference
   remindersSent: integer("reminders_sent").default(0),
   customerRating: integer("customer_rating"), // 1-5 stars given by customer
+  customerRatingBreakdown: jsonb("customer_rating_breakdown"), // detailed ratings from customer
   providerRating: integer("provider_rating"), // 1-5 stars given by provider
+  providerRatingBreakdown: jsonb("provider_rating_breakdown"), // detailed ratings from provider
   notes: text("notes"), // internal notes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -144,6 +146,25 @@ export const reviews = pgTable("reviews", {
   professionalism: integer("professionalism"), // 1-5 stars
   comment: text("comment"),
   wouldRecommend: boolean("would_recommend").default(true),
+  reviewType: text("review_type").notNull(), // customer_to_provider, provider_to_customer
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Customer reviews from providers - for rating customers
+export const customerReviews = pgTable("customer_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bookingId: varchar("booking_id").references(() => bookings.id).notNull(),
+  customerId: varchar("customer_id").references(() => users.id).notNull(),
+  providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars overall
+  communication: integer("communication"), // 1-5 stars - how well customer communicated
+  courtesy: integer("courtesy"), // 1-5 stars - customer politeness and respect  
+  cleanliness: integer("cleanliness"), // 1-5 stars - how clean/organized customer's space was
+  accessibility: integer("accessibility"), // 1-5 stars - how easy it was to access property
+  instructions: integer("instructions"), // 1-5 stars - clarity of customer instructions
+  comment: text("comment"),
+  wouldWorkAgain: boolean("would_work_again").default(true),
+  isPrivate: boolean("is_private").default(false), // private feedback not shown to customer
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -459,6 +480,21 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const customerReviewsRelations = relations(customerReviews, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [customerReviews.bookingId],
+    references: [bookings.id],
+  }),
+  customer: one(users, {
+    fields: [customerReviews.customerId],
+    references: [users.id],
+  }),
+  provider: one(serviceProviders, {
+    fields: [customerReviews.providerId],
+    references: [serviceProviders.id],
+  }),
+}));
+
 export const providerLocationsRelations = relations(providerLocations, ({ one }) => ({
   provider: one(serviceProviders, {
     fields: [providerLocations.providerId],
@@ -558,6 +594,11 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+export const insertCustomerReviewSchema = createInsertSchema(customerReviews).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Training system insert schemas
 export const insertTrainingModuleSchema = createInsertSchema(trainingModules).omit({
   id: true,
@@ -641,6 +682,9 @@ export type InsertBooking = z.infer<typeof insertBookingSchema>;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+export type CustomerReview = typeof customerReviews.$inferSelect;
+export type InsertCustomerReview = z.infer<typeof insertCustomerReviewSchema>;
 
 export type ProviderLocation = typeof providerLocations.$inferSelect;
 export type InsertProviderLocation = z.infer<typeof insertProviderLocationSchema>;
