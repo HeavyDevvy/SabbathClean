@@ -237,7 +237,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
               transition={{ delay: 1.6, duration: 0.5 }}
             >
               {[
-                { value: "2hrs", label: "Average booking time" },
+                { value: "<2mins", label: "Average booking time" },
                 { value: "4.9★", label: "Customer rating" },
                 { value: "24/7", label: "Support available" }
               ].map((stat, index) => (
@@ -266,38 +266,148 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
             <div className="relative">
               {/* Main Image Placeholder */}
               <motion.div 
-                className="aspect-[4/5] bg-gradient-to-br from-blue-100 to-blue-50 rounded-3xl shadow-2xl flex items-center justify-center"
+                className="aspect-[4/5] bg-gradient-to-br from-blue-100 to-blue-50 rounded-3xl shadow-2xl overflow-hidden relative"
                 whileHover={{ 
                   scale: 1.02,
                   rotate: [0, 1, -1, 0],
                   transition: { duration: 0.6 }
                 }}
               >
-                <div className="text-center space-y-4 p-8">
-                  <motion.div 
-                    className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                {/* Background Image/Illustration */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.svg
+                    className="w-full h-full opacity-20"
+                    viewBox="0 0 400 500"
+                    fill="none"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 0.2 }}
+                    transition={{ delay: 1.2, duration: 0.8 }}
                   >
-                    <Star className="w-12 h-12 text-white fill-current" />
+                    {/* Professional cleaner illustration */}
+                    <motion.g
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      {/* Person */}
+                      <circle cx="200" cy="120" r="25" fill="#3b82f6" fillOpacity="0.6" />
+                      <rect x="185" y="145" width="30" height="60" rx="15" fill="#3b82f6" fillOpacity="0.5" />
+                      
+                      {/* Cleaning supplies */}
+                      <rect x="150" y="220" width="20" height="40" rx="10" fill="#10b981" fillOpacity="0.6" />
+                      <rect x="180" y="230" width="15" height="30" rx="7" fill="#f59e0b" fillOpacity="0.6" />
+                      <rect x="210" y="225" width="18" height="35" rx="9" fill="#ef4444" fillOpacity="0.6" />
+                      <rect x="240" y="235" width="25" height="25" rx="12" fill="#8b5cf6" fillOpacity="0.6" />
+                    </motion.g>
+                    
+                    {/* Sparkle effects */}
+                    {[...Array(8)].map((_, i) => (
+                      <motion.circle
+                        key={i}
+                        cx={120 + i * 35}
+                        cy={300 + (i % 2) * 30}
+                        r="3"
+                        fill="#fbbf24"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ 
+                          opacity: [0, 1, 0], 
+                          scale: [0, 1.2, 0],
+                          rotate: 360 
+                        }}
+                        transition={{ 
+                          duration: 2, 
+                          repeat: Infinity, 
+                          delay: i * 0.2 
+                        }}
+                      />
+                    ))}
+                    
+                    {/* House outline */}
+                    <motion.path
+                      d="M80 380 L200 320 L320 380 L320 450 L80 450 Z"
+                      stroke="#3b82f6"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeOpacity="0.4"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 2, delay: 1.5 }}
+                    />
+                    <motion.path
+                      d="M80 380 L200 320 L320 380"
+                      stroke="#3b82f6"
+                      strokeWidth="3"
+                      fill="none"
+                      strokeOpacity="0.4"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 1.5, delay: 2 }}
+                    />
+                  </motion.svg>
+                </div>
+
+                {/* Content overlay */}
+                <div className="relative z-10 text-center space-y-6 p-8 h-full flex flex-col justify-center">
+                  <motion.div 
+                    className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg"
+                    animate={{ 
+                      boxShadow: ["0 4px 20px rgba(59, 130, 246, 0.3)", "0 8px 30px rgba(59, 130, 246, 0.5)", "0 4px 20px rgba(59, 130, 246, 0.3)"]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Star className="w-10 h-10 text-white fill-current" />
+                    </motion.div>
                   </motion.div>
+                  
                   <motion.h3 
                     className="text-2xl font-bold text-blue-900"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.4 }}
                   >
                     Quality Guaranteed
                   </motion.h3>
+                  
                   <motion.p 
-                    className="text-blue-700"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    className="text-blue-700 text-lg"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.6 }}
                   >
                     Professional services you can trust
                   </motion.p>
+
+                  {/* Achievement badges */}
+                  <motion.div 
+                    className="flex justify-center space-x-4 mt-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.8 }}
+                  >
+                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-blue-900">
+                      Verified ✓
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-blue-900">
+                      Insured ✓
+                    </div>
+                  </motion.div>
                 </div>
+
+                {/* Animated border effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl"
+                  style={{
+                    background: "linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent, rgba(59, 130, 246, 0.1), transparent)",
+                    backgroundSize: "400% 400%"
+                  }}
+                  animate={{
+                    backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"]
+                  }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                />
               </motion.div>
 
               {/* Floating Cards */}
