@@ -78,6 +78,7 @@ export default function ModernServiceModal({
     // Selections
     selectedAddOns: editBookingData?.selectedAddOns || [] as string[],
     selectedProvider: editBookingData?.selectedProvider || null as any,
+    specialRequests: editBookingData?.specialRequests || "",
     
     // Payment information
     paymentMethod: "card",
@@ -472,11 +473,24 @@ export default function ModernServiceModal({
     }
   };
 
-  const currentConfig = serviceConfigs[serviceId] || serviceConfigs["cleaning"];
+  // Map service IDs to their correct configurations
+  const serviceIdMapping: Record<string, string> = {
+    "cleaning": "cleaning",
+    "garden-care": "garden-care", 
+    "plumbing": "plumbing",
+    "electrical": "electrical",
+    "chef-catering": "chef-catering",
+    "waitering": "event-staff", // waitering maps to event-staff config
+    "handyman": "handyman",
+    "beauty-wellness": "beauty-wellness"
+  };
+
+  const mappedServiceId = serviceIdMapping[serviceId] || serviceId;
+  const currentConfig = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
 
   // Calculate pricing whenever form data changes
   useEffect(() => {
-    const config = serviceConfigs[serviceId] || serviceConfigs["cleaning"];
+    const config = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
     let basePrice = config.basePrice;
     
     // Property type multiplier
@@ -486,7 +500,7 @@ export default function ModernServiceModal({
     }
 
     // Service-specific multipliers
-    if (serviceId === "cleaning") {
+    if (mappedServiceId === "cleaning") {
       const cleaningType = config.cleaningTypes?.find((t: any) => t.value === formData.cleaningType);
       if (cleaningType) basePrice = cleaningType.price;
       
@@ -494,7 +508,7 @@ export default function ModernServiceModal({
       if (propertySize) basePrice *= propertySize.multiplier;
     }
 
-    if (serviceId === "garden-care" || serviceId === "garden-maintenance") {
+    if (mappedServiceId === "garden-care" || mappedServiceId === "garden-maintenance") {
       const gardenSize = config.gardenSizes?.find((s: any) => s.value === formData.gardenSize);
       if (gardenSize) basePrice *= gardenSize.multiplier;
       
@@ -502,12 +516,12 @@ export default function ModernServiceModal({
       if (condition) basePrice *= condition.multiplier;
     }
 
-    if (serviceId === "plumbing" || serviceId === "handyman") {
+    if (mappedServiceId === "plumbing" || mappedServiceId === "handyman") {
       const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
       if (urgency) basePrice *= urgency.multiplier;
     }
 
-    if (serviceId === "electrical") {
+    if (mappedServiceId === "electrical") {
       // Use the specific electrical issue price as base price
       const electricalIssue = config.electricalIssues?.find((i: any) => i.value === formData.electricalIssue);
       if (electricalIssue) basePrice = electricalIssue.price;
@@ -517,7 +531,7 @@ export default function ModernServiceModal({
       if (urgency) basePrice *= urgency.multiplier;
     }
 
-    if (serviceId === "chef-catering") {
+    if (mappedServiceId === "chef-catering") {
       // Handle menu selection pricing
       if (formData.menuSelection === "popular" && formData.selectedMenu && formData.cuisineType) {
         const selectedCuisine = config.cuisineTypes?.find((c: any) => c.value === formData.cuisineType);
@@ -541,7 +555,7 @@ export default function ModernServiceModal({
       }
     }
 
-    if (serviceId === "event-staff") {
+    if (mappedServiceId === "event-staff") {
       const staffType = config.staffTypes?.find((s: any) => s.value === formData.cleaningType);
       if (staffType) basePrice = staffType.price;
       
@@ -549,12 +563,12 @@ export default function ModernServiceModal({
       if (eventSize) basePrice *= eventSize.multiplier;
     }
 
-    if (serviceId === "handyman") {
+    if (mappedServiceId === "handyman") {
       const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
       if (serviceType) basePrice *= serviceType.multiplier;
     }
 
-    if (serviceId === "beauty-wellness") {
+    if (mappedServiceId === "beauty-wellness") {
       const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
       if (serviceType) basePrice = serviceType.price;
       
@@ -601,7 +615,7 @@ export default function ModernServiceModal({
       timeDiscount,
       totalPrice: Math.round(totalPrice)
     });
-  }, [formData, serviceId]);
+  }, [formData, mappedServiceId]);
 
   const handleAddressChange = (address: string) => {
     setFormData(prev => ({ ...prev, address }));
@@ -676,6 +690,7 @@ export default function ModernServiceModal({
       menuSelection: "popular",
       selectedMenu: "",
       customMenuItems: [],
+      dietaryRequirements: [],
       selectedAddOns: [],
       selectedProvider: null,
       specialRequests: "",
