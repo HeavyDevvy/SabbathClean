@@ -675,11 +675,11 @@ export default function ModernServiceModal({
         {serviceId === "house-cleaning" && (
           <>
             <div>
-              <Label>Cleaning Type *</Label>
+              <Label htmlFor="cleaning-type">Cleaning Type *</Label>
               <Select value={formData.cleaningType} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, cleaningType: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-cleaning-type">
                   <SelectValue placeholder="Select cleaning type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -693,11 +693,11 @@ export default function ModernServiceModal({
             </div>
 
             <div>
-              <Label>Property Size *</Label>
+              <Label htmlFor="property-size">Property Size *</Label>
               <Select value={formData.propertySize} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, propertySize: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-property-size">
                   <SelectValue placeholder="Select property size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1432,7 +1432,12 @@ export default function ModernServiceModal({
             <Button 
               onClick={handleNext}
               disabled={
-                (step === 1 && (!formData.propertyType || !formData.address)) ||
+                (step === 1 && (!formData.propertyType || !formData.address || 
+                  (serviceId === "house-cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
+                  (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
+                  (serviceId === "plumbing" && !formData.urgency) ||
+                  (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
+                )) ||
                 (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
                 (step === 4 && !formData.selectedProvider) ||
                 (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
