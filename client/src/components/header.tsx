@@ -22,9 +22,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <a href="#services" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-services">
-                Services
-              </a>
+
               <Link href="/providers" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-providers">
                 Our Home Experts
               </Link>

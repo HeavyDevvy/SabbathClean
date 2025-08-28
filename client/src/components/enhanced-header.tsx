@@ -164,46 +164,7 @@ export default function EnhancedHeader({
                   )}
                 </Button>
 
-                {/* Service Request Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-                      data-testid="button-service-request"
-                    >
-                      Service Request
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64" align="end">
-                    <div className="px-3 py-2 border-b">
-                      <p className="text-sm font-medium text-gray-900">Select a Service</p>
-                      <p className="text-xs text-gray-500">Choose from our available services</p>
-                    </div>
-                    {services.map((service) => {
-                      const IconComponent = service.icon;
-                      return (
-                        <DropdownMenuItem 
-                          key={service.id}
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex items-center w-full">
-                            <div className="mr-3 p-1.5 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
-                              <IconComponent className="h-4 w-4 text-blue-600" />
-                            </div>
-                            <span className="text-sm">{service.name}</span>
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onBookingClick} className="cursor-pointer text-blue-600">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Browse All Services
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -264,45 +225,7 @@ export default function EnhancedHeader({
                   Sign In
                 </Button>
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-                      data-testid="button-service-request"
-                    >
-                      Service Request
-                      <ChevronDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64" align="end">
-                    <div className="px-3 py-2 border-b">
-                      <p className="text-sm font-medium text-gray-900">Select a Service</p>
-                      <p className="text-xs text-gray-500">Choose from our available services</p>
-                    </div>
-                    {services.map((service) => {
-                      const IconComponent = service.icon;
-                      return (
-                        <DropdownMenuItem 
-                          key={service.id}
-                          onClick={() => handleServiceSelect(service.id)}
-                          className="cursor-pointer"
-                        >
-                          <div className="flex items-center w-full">
-                            <div className="mr-3 p-1.5 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
-                              <IconComponent className="h-4 w-4 text-blue-600" />
-                            </div>
-                            <span className="text-sm">{service.name}</span>
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onBookingClick} className="cursor-pointer text-blue-600">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Browse All Services
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+
 
                 <div className="border-l border-gray-200 pl-4 ml-4">
                   <span className="text-sm text-gray-600 mr-2">Service provider?</span>

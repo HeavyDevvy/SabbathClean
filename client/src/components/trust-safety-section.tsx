@@ -277,71 +277,7 @@ export default function TrustSafetySection() {
           </div>
         </div>
 
-        {/* Certifications */}
-        <div className="bg-white rounded-3xl p-8 lg:p-12 border border-gray-200 shadow-lg">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Industry Certifications
-            </h3>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              We maintain the highest industry standards and certifications for your protection
-            </p>
-          </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {certifications.map((cert, index) => (
-              <div key={index} className="text-center group">
-                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors duration-300">
-                  <cert.icon className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="text-lg font-bold text-gray-900 mb-2">
-                  {cert.name}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {cert.description}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Emergency Support */}
-          <div className="mt-12 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-8 border border-red-100">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center">
-                <Phone className="h-8 w-8 text-white" />
-              </div>
-            </div>
-            <div className="text-center">
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">
-                Emergency Support Available
-              </h4>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Need immediate assistance? Our emergency support team is available 24/7 
-                to handle any urgent situations or safety concerns.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <div className="bg-white rounded-lg p-4 shadow-md">
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-red-500" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Emergency Hotline</p>
-                      <p className="text-sm text-gray-600">0800 BERRY (23779)</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="h-5 w-5 text-blue-500" />
-                    <div>
-                      <p className="font-semibold text-gray-900">Response Time</p>
-                      <p className="text-sm text-gray-600">Under 5 minutes</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );

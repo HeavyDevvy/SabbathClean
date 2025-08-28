@@ -2,14 +2,14 @@ import { useState } from "react";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
 import ComprehensiveServices from "@/components/comprehensive-services";
-import VisualCuisineExplorer from "@/components/visual-cuisine-explorer";
+
 import ModernServiceModal from "@/components/modern-service-modal";
 import BookingConfirmation from "@/components/booking-confirmation";
 import DemoVideoModal from "@/components/demo-video-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
-import CompetitiveAdvantageSection from "@/components/competitive-advantage-section";
+
 import Footer from "@/components/footer";
 
 export default function EnhancedHome() {
@@ -79,8 +79,7 @@ export default function EnhancedHome() {
         {/* Comprehensive Services Section */}
         <ComprehensiveServices onServiceSelect={handleServiceSelect} />
 
-        {/* Visual Cuisine Explorer Section */}
-        <VisualCuisineExplorer onBookCuisine={handleServiceSelect} />
+
 
         {/* How It Works Section */}
         <HowItWorksSection onBookNowClick={handleBookingClick} />
@@ -91,8 +90,7 @@ export default function EnhancedHome() {
         {/* Trust & Safety Section */}
         <TrustSafetySection />
 
-        {/* Competitive Advantage Section */}
-        <CompetitiveAdvantageSection />
+
       </main>
 
       {/* Footer */}
