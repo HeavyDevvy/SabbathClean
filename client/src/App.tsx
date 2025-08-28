@@ -27,8 +27,8 @@ import MobileApp from "@/pages/mobile-app";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={MinimalistHome} />
-      <Route path="/enhanced" component={EnhancedHome} />
+      <Route path="/" component={EnhancedHome} />
+      <Route path="/minimalist" component={MinimalistHome} />
       <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/booking" component={Booking} />
