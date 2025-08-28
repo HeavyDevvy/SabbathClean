@@ -5,6 +5,7 @@ import ComprehensiveServices from "@/components/comprehensive-services";
 import VisualCuisineExplorer from "@/components/visual-cuisine-explorer";
 import ModernServiceModal from "@/components/modern-service-modal";
 import BookingConfirmation from "@/components/booking-confirmation";
+import DemoVideoModal from "@/components/demo-video-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
@@ -14,6 +15,7 @@ import Footer from "@/components/footer";
 export default function EnhancedHome() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [isDemoVideoOpen, setIsDemoVideoOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
   const [completedBookingData, setCompletedBookingData] = useState<any>(null);
   
@@ -48,6 +50,10 @@ export default function EnhancedHome() {
 
   const handleEditBooking = () => {
     setIsConfirmationOpen(false);
+    // Retain the selected service to open the correct service card
+    if (completedBookingData?.serviceId) {
+      setSelectedService(completedBookingData.serviceId);
+    }
     setIsBookingModalOpen(true);
   };
 
@@ -67,7 +73,7 @@ export default function EnhancedHome() {
         {/* Enhanced Hero Section */}
         <EnhancedHero 
           onBookingClick={handleBookingClick}
-          onDemoClick={handleDemoClick}
+          onDemoClick={() => setIsDemoVideoOpen(true)}
         />
 
         {/* Comprehensive Services Section */}
@@ -101,6 +107,7 @@ export default function EnhancedHome() {
             setSelectedService("");
           }}
           serviceId={selectedService || "house-cleaning"}
+          editBookingData={completedBookingData}
           onBookingComplete={(bookingData) => {
             console.log("Booking completed:", bookingData);
             
@@ -132,6 +139,12 @@ export default function EnhancedHome() {
           bookingData={completedBookingData}
         />
       )}
+
+      {/* Demo Video Modal */}
+      <DemoVideoModal
+        isOpen={isDemoVideoOpen}
+        onClose={() => setIsDemoVideoOpen(false)}
+      />
     </div>
   );
 }

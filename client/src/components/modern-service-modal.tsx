@@ -33,45 +33,47 @@ interface ModernServiceModalProps {
   onClose: () => void;
   serviceId: string;
   onBookingComplete: (bookingData: any) => void;
+  editBookingData?: any; // For editing existing bookings
 }
 
 export default function ModernServiceModal({
   isOpen,
   onClose,
   serviceId,
-  onBookingComplete
+  onBookingComplete,
+  editBookingData
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   
   const [formData, setFormData] = useState({
     // Core fields
-    propertyType: "",
-    address: "",
-    preferredDate: "",
-    timePreference: "",
-    recurringSchedule: "one-time",
-    materials: "supply",
-    insurance: false,
+    propertyType: editBookingData?.propertyType || "",
+    address: editBookingData?.address || "",
+    preferredDate: editBookingData?.preferredDate || "",
+    timePreference: editBookingData?.timePreference || "",
+    recurringSchedule: editBookingData?.recurringSchedule || "one-time",
+    materials: editBookingData?.materials || "supply",
+    insurance: editBookingData?.insurance || false,
     
     // Service-specific
-    cleaningType: "",
-    propertySize: "",
-    gardenSize: "",
-    gardenCondition: "",
-    urgency: "standard",
+    cleaningType: editBookingData?.cleaningType || "",
+    propertySize: editBookingData?.propertySize || "",
+    gardenSize: editBookingData?.gardenSize || "",
+    gardenCondition: editBookingData?.gardenCondition || "",
+    urgency: editBookingData?.urgency || "standard",
     
     // Chef & Catering specific
-    cuisineType: "",
-    menuSelection: "popular", // "popular" or "custom"
-    selectedMenu: "",
-    customMenuItems: [] as string[],
-    dietaryRequirements: [] as string[],
-    eventSize: "",
+    cuisineType: editBookingData?.cuisineType || "",
+    menuSelection: editBookingData?.menuSelection || "popular", // "popular" or "custom"
+    selectedMenu: editBookingData?.selectedMenu || "",
+    customMenuItems: editBookingData?.customMenuItems || [] as string[],
+    dietaryRequirements: editBookingData?.dietaryRequirements || [] as string[],
+    eventSize: editBookingData?.eventSize || "",
     
     // Selections
-    selectedAddOns: [] as string[],
-    selectedProvider: null as any,
+    selectedAddOns: editBookingData?.selectedAddOns || [] as string[],
+    selectedProvider: editBookingData?.selectedProvider || null as any,
     
     // Payment information
     paymentMethod: "card",
@@ -824,7 +826,7 @@ export default function ModernServiceModal({
                         } else {
                           setFormData(prev => ({ 
                             ...prev, 
-                            dietaryRequirements: prev.dietaryRequirements.filter(r => r !== req.value)
+                            dietaryRequirements: prev.dietaryRequirements.filter((r: string) => r !== req.value)
                           }));
                         }
                       }}
@@ -873,9 +875,9 @@ export default function ModernServiceModal({
                       <div className="space-y-2 mt-2 max-h-64 overflow-y-auto">
                         {currentConfig.cuisineTypes
                           ?.find((c: any) => c.value === formData.cuisineType)
-                          ?.popularMenus?.map((menu: any, index: number) => (
+                          ?.popularMenus?.map((menu: any, i: number) => (
                           <div 
-                            key={index}
+                            key={i}
                             className={`p-3 border rounded-lg cursor-pointer transition-all ${
                               formData.selectedMenu === menu.name
                                 ? "border-primary bg-primary/5"
@@ -917,7 +919,7 @@ export default function ModernServiceModal({
                                 } else {
                                   setFormData(prev => ({ 
                                     ...prev, 
-                                    customMenuItems: prev.customMenuItems.filter(i => i !== item)
+                                    customMenuItems: prev.customMenuItems.filter((i: string) => i !== item)
                                   }));
                                 }
                               }}
@@ -1086,7 +1088,7 @@ export default function ModernServiceModal({
                   } else {
                     setFormData(prev => ({
                       ...prev,
-                      selectedAddOns: prev.selectedAddOns.filter(id => id !== addon.id)
+                      selectedAddOns: prev.selectedAddOns.filter((id: string) => id !== addon.id)
                     }));
                   }
                 }}
