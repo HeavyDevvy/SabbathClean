@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import EnhancedHome from "@/pages/enhanced-home";
+import MinimalistHome from "@/pages/minimalist-home";
 import Auth from "@/pages/auth";
 import Booking from "@/pages/booking";
 import BookingConfirmation from "@/pages/booking-confirmation";
@@ -26,7 +27,8 @@ import MobileApp from "@/pages/mobile-app";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={EnhancedHome} />
+      <Route path="/" component={MinimalistHome} />
+      <Route path="/enhanced" component={EnhancedHome} />
       <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/booking" component={Booking} />

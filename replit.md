@@ -26,7 +26,19 @@ The system includes basic user management and is designed to support comprehensi
 
 ## UI/UX Decisions
 
-The platform features a clean, modern design with enhanced visual elements. It incorporates gradient icon backgrounds, redesigned floating action buttons, and upgraded component icons for improved consistency and aesthetics. A professional hero section, comprehensive services section, trust & safety section, and a "How-it-works" section with an interactive animated demo are central to the user experience. A competitive pricing analysis section highlights "Better Value" badges and transparent pricing.
+**Major Design Overhaul (Dec 2024):** Completely redesigned to mirror SweepSouth's minimalistic approach with clean, spacious layouts and simplified user flows. Removed redundant features and focused on core functionality. 
+
+The platform now features:
+- Minimalistic hero section with focused quick-booking flow
+- Streamlined services grid (6 core services vs previous 8+ categories)  
+- Clean navigation with reduced menu items
+- Spacious card layouts with ample white space
+- Simplified trust indicators and testimonials
+- Single-path user journeys without complex branching
+- Removed animated elements that added visual noise
+- Consolidated multiple similar components into unified, clean interfaces
+
+Previous comprehensive features are still available at `/enhanced` route for comparison.
 
 ## Feature Specifications
 
