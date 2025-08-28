@@ -4,6 +4,7 @@ import EnhancedHero from "@/components/enhanced-hero";
 import ComprehensiveServices from "@/components/comprehensive-services";
 import VisualCuisineExplorer from "@/components/visual-cuisine-explorer";
 import ModernServiceModal from "@/components/modern-service-modal";
+import BookingConfirmation from "@/components/booking-confirmation";
 import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
@@ -12,7 +13,9 @@ import Footer from "@/components/footer";
 
 export default function EnhancedHome() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [completedBookingData, setCompletedBookingData] = useState<any>(null);
   
   // Mock user data - replace with actual auth
   const [user] = useState({
@@ -41,6 +44,11 @@ export default function EnhancedHome() {
   const handleDemoClick = () => {
     const howItWorksSection = document.getElementById('how-it-works');
     howItWorksSection?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleEditBooking = () => {
+    setIsConfirmationOpen(false);
+    setIsBookingModalOpen(true);
   };
 
   return (
@@ -95,9 +103,33 @@ export default function EnhancedHome() {
           serviceId={selectedService || "house-cleaning"}
           onBookingComplete={(bookingData) => {
             console.log("Booking completed:", bookingData);
+            
+            // Generate booking ID and enhance booking data
+            const enhancedBookingData = {
+              ...bookingData,
+              bookingId: `BE${Date.now().toString().slice(-6)}`,
+              timestamp: new Date().toISOString(),
+              status: 'confirmed'
+            };
+            
+            setCompletedBookingData(enhancedBookingData);
             setIsBookingModalOpen(false);
-            setSelectedService(""); // Clear selected service to prevent card interference
+            setIsConfirmationOpen(true);
           }}
+        />
+      )}
+
+      {/* Booking Confirmation Modal */}
+      {isConfirmationOpen && completedBookingData && (
+        <BookingConfirmation
+          isOpen={isConfirmationOpen}
+          onClose={() => {
+            setIsConfirmationOpen(false);
+            setCompletedBookingData(null);
+            setSelectedService("");
+          }}
+          onEditBooking={handleEditBooking}
+          bookingData={completedBookingData}
         />
       )}
     </div>
