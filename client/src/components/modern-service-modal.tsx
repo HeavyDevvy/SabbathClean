@@ -128,7 +128,7 @@ export default function ModernServiceModal({
   ]);
 
   const serviceConfigs: any = {
-    "house-cleaning": {
+    "cleaning": {
       title: "House Cleaning Service",
       icon: Sparkles,
       basePrice: 280,
@@ -451,11 +451,11 @@ export default function ModernServiceModal({
     }
   };
 
-  const currentConfig = serviceConfigs[serviceId] || serviceConfigs["house-cleaning"];
+  const currentConfig = serviceConfigs[serviceId] || serviceConfigs["cleaning"];
 
   // Calculate pricing whenever form data changes
   useEffect(() => {
-    const config = serviceConfigs[serviceId] || serviceConfigs["house-cleaning"];
+    const config = serviceConfigs[serviceId] || serviceConfigs["cleaning"];
     let basePrice = config.basePrice;
     
     // Property type multiplier
@@ -465,7 +465,7 @@ export default function ModernServiceModal({
     }
 
     // Service-specific multipliers
-    if (serviceId === "house-cleaning") {
+    if (serviceId === "cleaning") {
       const cleaningType = config.cleaningTypes?.find((t: any) => t.value === formData.cleaningType);
       if (cleaningType) basePrice = cleaningType.price;
       
@@ -672,7 +672,7 @@ export default function ModernServiceModal({
           </div>
         </div>
 
-        {serviceId === "house-cleaning" && (
+        {serviceId === "cleaning" && (
           <>
             <div>
               <Label htmlFor="cleaning-type">Cleaning Type *</Label>
@@ -1433,7 +1433,7 @@ export default function ModernServiceModal({
               onClick={handleNext}
               disabled={
                 (step === 1 && (!formData.propertyType || !formData.address || 
-                  (serviceId === "house-cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
+                  (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
                   (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
                   (serviceId === "plumbing" && !formData.urgency) ||
                   (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
