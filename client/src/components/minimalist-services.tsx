@@ -10,7 +10,9 @@ import {
   Droplet, 
   Zap, 
   ChefHat, 
-  Coffee,
+  Users,
+  Truck,
+  Baby,
   Wrench,
   Shield,
   ArrowRight,
@@ -73,13 +75,13 @@ const services = [
     features: ["Traditional recipes", "Fresh ingredients", "Event planning"]
   },
   {
-    id: "handyman",
-    title: "Handyman",
-    description: "General repairs and home maintenance",
-    price: "From R250/hour", 
-    duration: "1-5 hours",
-    icon: Wrench,
-    features: ["Furniture assembly", "Wall mounting", "General repairs"]
+    id: "waitering",
+    title: "Waitering",
+    description: "Professional event staff and waitering services",
+    price: "From R85/hour",
+    duration: "4-12 hours", 
+    icon: Users,
+    features: ["Event specialists", "Bar service", "Professional setup"]
   }
 ];
 
