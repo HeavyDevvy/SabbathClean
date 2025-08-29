@@ -296,7 +296,10 @@ export function registerAuthRoutes(app: Express) {
         <html>
         <body>
           <script>
-            window.opener.postMessage(${JSON.stringify(responseData)}, '*');
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_SUCCESS',
+              payload: ${JSON.stringify(responseData)}
+            }, '*');
             window.close();
           </script>
         </body>
@@ -305,7 +308,21 @@ export function registerAuthRoutes(app: Express) {
       res.send(htmlResponse);
     } catch (error) {
       console.error('Google auth error:', error);
-      res.status(500).json({ message: 'Google authentication failed' });
+      const errorResponse = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_ERROR',
+              error: 'Google authentication failed'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `;
+      res.send(errorResponse);
     }
   });
 
@@ -365,7 +382,10 @@ export function registerAuthRoutes(app: Express) {
         <html>
         <body>
           <script>
-            window.opener.postMessage(${JSON.stringify(responseData)}, '*');
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_SUCCESS',
+              payload: ${JSON.stringify(responseData)}
+            }, '*');
             window.close();
           </script>
         </body>
@@ -374,7 +394,21 @@ export function registerAuthRoutes(app: Express) {
       res.send(htmlResponse);
     } catch (error) {
       console.error('Apple auth error:', error);
-      res.status(500).json({ message: 'Apple authentication failed' });
+      const errorResponse = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_ERROR',
+              error: 'Apple authentication failed'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `;
+      res.send(errorResponse);
     }
   });
 
@@ -434,7 +468,10 @@ export function registerAuthRoutes(app: Express) {
         <html>
         <body>
           <script>
-            window.opener.postMessage(${JSON.stringify(responseData)}, '*');
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_SUCCESS',
+              payload: ${JSON.stringify(responseData)}
+            }, '*');
             window.close();
           </script>
         </body>
@@ -443,7 +480,21 @@ export function registerAuthRoutes(app: Express) {
       res.send(htmlResponse);
     } catch (error) {
       console.error('Twitter auth error:', error);
-      res.status(500).json({ message: 'Twitter authentication failed' });
+      const errorResponse = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_ERROR',
+              error: 'Twitter authentication failed'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `;
+      res.send(errorResponse);
     }
   });
 
@@ -503,7 +554,10 @@ export function registerAuthRoutes(app: Express) {
         <html>
         <body>
           <script>
-            window.opener.postMessage(${JSON.stringify(responseData)}, '*');
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_SUCCESS',
+              payload: ${JSON.stringify(responseData)}
+            }, '*');
             window.close();
           </script>
         </body>
@@ -512,7 +566,21 @@ export function registerAuthRoutes(app: Express) {
       res.send(htmlResponse);
     } catch (error) {
       console.error('Instagram auth error:', error);
-      res.status(500).json({ message: 'Instagram authentication failed' });
+      const errorResponse = `
+        <!DOCTYPE html>
+        <html>
+        <body>
+          <script>
+            window.opener.postMessage({
+              type: 'SOCIAL_LOGIN_ERROR',
+              error: 'Instagram authentication failed'
+            }, '*');
+            window.close();
+          </script>
+        </body>
+        </html>
+      `;
+      res.send(errorResponse);
     }
   });
 

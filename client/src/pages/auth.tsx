@@ -5,12 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import { User, Mail, Phone, Lock, UserPlus, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
+import EnhancedSocialLogin from "@/components/enhanced-social-login";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [showSocialLogin, setShowSocialLogin] = useState(false);
   
   const [signUpData, setSignUpData] = useState({
     firstName: "",
@@ -26,6 +29,58 @@ export default function Auth() {
     password: ""
   });
 
+  // Registration mutation
+  const registerMutation = useMutation({
+    mutationFn: async (userData: typeof signUpData) => {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phone: userData.phone,
+          password: userData.password
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Welcome to Berry Events!",
+        description: "Your account has been created successfully. You can now book services.",
+      });
+      
+      // Store authentication data if needed
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
+        }
+      }
+      
+      // Redirect to home after successful signup
+      setTimeout(() => {
+        setLocation("/");
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Failed to create account. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -38,28 +93,75 @@ export default function Auth() {
       return;
     }
 
-    // Simulate successful signup
-    toast({
-      title: "Welcome to Berry Events!",
-      description: "Your account has been created successfully. You can now book services.",
-    });
-    
-    // Redirect to home after successful signup
-    setTimeout(() => {
-      setLocation("/");
-    }, 1000);
+    registerMutation.mutate(signUpData);
   };
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (loginData: typeof signInData) => {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Welcome back!",
+        description: "You have been signed in successfully.",
+      });
+      
+      // Store authentication data
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
+        }
+      }
+      
+      // Redirect to home after successful signin
+      setTimeout(() => {
+        setLocation("/");
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid email or password. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Simulate successful signin
+    loginMutation.mutate(signInData);
+  };
+
+  const handleSocialLoginSuccess = (data: any) => {
     toast({
-      title: "Welcome back!",
+      title: "Welcome!",
       description: "You have been signed in successfully.",
     });
     
-    // Redirect to home after successful signin
+    // Store authentication data
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+    }
+    
+    setShowSocialLogin(false);
     setTimeout(() => {
       setLocation("/");
     }, 1000);
@@ -123,10 +225,36 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" data-testid="button-signin">
-                  Sign In
+                <Button 
+                  type="submit" 
+                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  disabled={loginMutation.isPending}
+                  data-testid="button-signin"
+                >
+                  {loginMutation.isPending ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
+              
+              {/* Social Login Button */}
+              <div className="mt-4">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-3"
+                  onClick={() => setShowSocialLogin(true)}
+                  data-testid="button-social-login"
+                >
+                  Social Login
+                </Button>
+              </div>
             </TabsContent>
 
             <TabsContent value="signup">
@@ -228,10 +356,36 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" data-testid="button-signup">
-                  Create Account
+                <Button 
+                  type="submit" 
+                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  disabled={registerMutation.isPending}
+                  data-testid="button-signup"
+                >
+                  {registerMutation.isPending ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
+              
+              {/* Social Login Button for Sign Up */}
+              <div className="mt-4">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">Or sign up with</span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-3"
+                  onClick={() => setShowSocialLogin(true)}
+                  data-testid="button-social-signup"
+                >
+                  Social Login
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
 
@@ -247,6 +401,13 @@ export default function Auth() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Social Login Modal */}
+      <EnhancedSocialLogin
+        isOpen={showSocialLogin}
+        onClose={() => setShowSocialLogin(false)}
+        onSuccess={handleSocialLoginSuccess}
+      />
     </div>
   );
 }

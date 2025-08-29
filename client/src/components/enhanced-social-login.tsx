@@ -58,7 +58,7 @@ export default function EnhancedSocialLogin({ isOpen, onClose, onSuccess }: Enha
       
       // Create popup window for OAuth flow
       const popup = window.open(
-        `/api/auth/social/${provider}`,
+        `/api/auth/${provider}`,
         'socialLogin',
         'width=500,height=600,scrollbars=yes,resizable=yes'
       );
