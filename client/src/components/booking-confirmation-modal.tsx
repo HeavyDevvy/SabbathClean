@@ -17,6 +17,7 @@ import {
   Share2,
   MessageCircle
 } from "lucide-react";
+import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
 
 interface BookingConfirmationModalProps {
   isOpen: boolean;
@@ -52,6 +53,15 @@ export default function BookingConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pb-6">
+          {/* Berry Events Logo */}
+          <div className="mx-auto mb-4">
+            <img 
+              src={berryLogoPath} 
+              alt="Berry Events Logo" 
+              className="h-16 w-auto mx-auto mb-3"
+              data-testid="berry-logo-modal"
+            />
+          </div>
           <div className="mx-auto mb-4 h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
@@ -279,6 +289,12 @@ export default function BookingConfirmationModal({
             <MessageCircle className="h-4 w-4 mr-2" />
             Got it, Thanks!
           </Button>
+        </div>
+
+        {/* Berry Events Customer Service */}
+        <div className="text-center text-sm text-gray-500 pt-4 border-t mt-6">
+          <p className="mb-2 font-medium text-gray-700">Berry Events Customer Service</p>
+          <p>Need help? Contact us at <strong>customerservice@berryevents.co.za</strong> or <strong>+27 61 279 6476</strong></p>
         </div>
       </DialogContent>
     </Dialog>

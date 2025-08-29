@@ -19,6 +19,7 @@ import {
   Download,
   Share2
 } from "lucide-react";
+import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
 
 interface BookingDetails {
   id: string;
@@ -123,6 +124,15 @@ export default function PaymentPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Success Header */}
         <div className="text-center mb-8">
+          {/* Berry Events Logo */}
+          <div className="mx-auto mb-4">
+            <img 
+              src={berryLogoPath} 
+              alt="Berry Events Logo" 
+              className="h-20 w-auto mx-auto mb-3"
+              data-testid="berry-logo-payment"
+            />
+          </div>
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
@@ -284,6 +294,12 @@ export default function PaymentPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Berry Events Customer Service */}
+        <div className="text-center text-sm text-gray-500 pt-8 border-t mt-8">
+          <p className="mb-2 font-medium text-gray-700">Berry Events Customer Service</p>
+          <p>Need help? Contact us at <strong>customerservice@berryevents.co.za</strong> or <strong>+27 61 279 6476</strong></p>
         </div>
       </div>
     </div>

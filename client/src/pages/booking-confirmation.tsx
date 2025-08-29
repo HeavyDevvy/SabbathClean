@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
@@ -30,6 +31,15 @@ export default function BookingConfirmation() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
+          {/* Berry Events Logo */}
+          <div className="mx-auto mb-4">
+            <img 
+              src={berryLogoPath} 
+              alt="Berry Events Logo" 
+              className="h-20 w-auto mx-auto mb-3"
+              data-testid="berry-logo"
+            />
+          </div>
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
@@ -190,9 +200,10 @@ export default function BookingConfirmation() {
             </Button>
           </div>
 
-          {/* Support */}
+          {/* Berry Events Customer Service */}
           <div className="text-center text-sm text-gray-500 pt-4 border-t">
-            <p>Need help? Contact us at <strong>support@berryevents.co.za</strong> or <strong>+27 21 123 4567</strong></p>
+            <p className="mb-2 font-medium text-gray-700">Berry Events Customer Service</p>
+            <p>Need help? Contact us at <strong>customerservice@berryevents.co.za</strong> or <strong>+27 61 279 6476</strong></p>
           </div>
         </CardContent>
       </Card>
