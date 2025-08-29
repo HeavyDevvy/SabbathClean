@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
@@ -69,6 +71,11 @@ type ProfileFormData = z.infer<typeof profileFormSchema>;
 export default function Profile() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // For demo purposes, using a demo user ID. In a real app, this would come from authentication
+  const userId = "demo-user-123";
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -83,9 +90,70 @@ export default function Profile() {
     }
   });
 
+  // Load existing user data
+  const { data: userData, isLoading: isLoadingUser } = useQuery({
+    queryKey: [`/api/users/${userId}`],
+    retry: false,
+  });
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (userData) {
+      form.reset({
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+        province: userData.province || "",
+        city: userData.city || "",
+        address: userData.address || ""
+      });
+      
+      // Set selected province for the city dropdown
+      if (userData.province) {
+        setSelectedProvince(userData.province);
+      }
+    }
+  }, [userData, form]);
+
+  // Mutation to update user profile
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: ProfileFormData) => {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update profile');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Profile Updated!",
+        description: "Your profile information has been saved successfully.",
+      });
+      
+      // Invalidate and refetch user data
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}`] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const onSubmit = (data: ProfileFormData) => {
-    console.log("Profile data:", data);
-    // Here you would typically save the data to your backend
+    updateProfileMutation.mutate(data);
   };
 
   const openBooking = () => {
@@ -299,12 +367,23 @@ export default function Profile() {
                     />
 
                     <div className="flex justify-end space-x-3 pt-4">
-                      <Button type="button" variant="outline" onClick={() => form.reset()} data-testid="button-reset">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => form.reset()}
+                        disabled={updateProfileMutation.isPending}
+                        data-testid="button-reset"
+                      >
                         Reset
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700" data-testid="button-save-profile">
+                      <Button 
+                        type="submit" 
+                        className="bg-blue-600 hover:bg-blue-700" 
+                        disabled={updateProfileMutation.isPending}
+                        data-testid="button-save-profile"
+                      >
                         <Save className="h-4 w-4 mr-2" />
-                        Save Profile
+                        {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
                       </Button>
                     </div>
                   </form>

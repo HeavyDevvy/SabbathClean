@@ -47,6 +47,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { firstName, lastName, email, phone, province, city, address } = req.body;
+      
+      // Validate required fields
+      if (!firstName || !lastName || !email) {
+        return res.status(400).json({ message: "First name, last name, and email are required" });
+      }
+      
+      // Check if user exists, if not create them first
+      let user = await storage.getUser(userId);
+      if (!user) {
+        // Create new user with the provided ID
+        user = await storage.createUser({
+          id: userId,
+          firstName,
+          lastName,
+          email,
+          phone,
+          province,
+          city,
+          address
+        });
+        
+        res.json({ 
+          message: "Profile created successfully", 
+          user: user 
+        });
+      } else {
+        // Update existing user
+        const updatedUser = await storage.updateUser(userId, {
+          firstName,
+          lastName,
+          email,
+          phone,
+          province,
+          city,
+          address,
+          updatedAt: new Date()
+        });
+        
+        res.json({ 
+          message: "Profile updated successfully", 
+          user: updatedUser 
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Service routes
   app.get("/api/services", async (req, res) => {
     try {
