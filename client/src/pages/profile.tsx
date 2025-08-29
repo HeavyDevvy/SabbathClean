@@ -4,14 +4,98 @@ import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin } from "lucide-react";
+
+// South African Provinces and Cities Data
+const SOUTH_AFRICAN_PROVINCES = {
+  "Western Cape": [
+    "Cape Town", "Stellenbosch", "Paarl", "George", "Mossel Bay", "Hermanus", 
+    "Knysna", "Worcester", "Oudtshoorn", "Swellendam", "Caledon", "Robertson"
+  ],
+  "Gauteng": [
+    "Johannesburg", "Pretoria", "Soweto", "Sandton", "Randburg", "Centurion", 
+    "Midrand", "Roodepoort", "Germiston", "Benoni", "Boksburg", "Springs"
+  ],
+  "KwaZulu-Natal": [
+    "Durban", "Pietermaritzburg", "Newcastle", "Richards Bay", "Ladysmith", 
+    "Pinetown", "Chatsworth", "Umlazi", "Port Shepstone", "Empangeni", "Scottburgh"
+  ],
+  "Eastern Cape": [
+    "Port Elizabeth", "East London", "Uitenhage", "King William's Town", 
+    "Mthatha", "Grahamstown", "Queenstown", "Jeffreys Bay", "Port Alfred", "Cradock"
+  ],
+  "Limpopo": [
+    "Polokwane", "Tzaneen", "Thohoyandou", "Phalaborwa", "Louis Trichardt", 
+    "Musina", "Giyani", "Mokopane", "Bela-Bela", "Thabazimbi"
+  ],
+  "Mpumalanga": [
+    "Nelspruit", "Witbank", "Secunda", "Standerton", "Middelburg", "Ermelo", 
+    "Barberton", "White River", "Sabie", "Hazyview"
+  ],
+  "North West": [
+    "Rustenburg", "Mahikeng", "Potchefstroom", "Klerksdorp", "Brits", 
+    "Vryburg", "Lichtenburg", "Zeerust", "Stilfontein", "Hartbeespoort"
+  ],
+  "Free State": [
+    "Bloemfontein", "Welkom", "Kroonstad", "Bethlehem", "Sasolburg", 
+    "Virginia", "Phuthaditjhaba", "Odendaalsrus", "Parys", "Heilbron"
+  ],
+  "Northern Cape": [
+    "Kimberley", "Upington", "Kuruman", "De Aar", "Springbok", "Alexander Bay", 
+    "Calvinia", "Carnarvon", "Fraserburg", "Sutherland"
+  ]
+};
+
+const profileFormSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().min(10, "Please enter a valid phone number"),
+  province: z.string().min(1, "Please select a province"),
+  city: z.string().min(1, "Please select a city"),
+  address: z.string().min(5, "Please enter your full address")
+});
+
+type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 export default function Profile() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedProvince, setSelectedProvince] = useState<string>("");
+
+  const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      province: "",
+      city: "",
+      address: ""
+    }
+  });
+
+  const onSubmit = (data: ProfileFormData) => {
+    console.log("Profile data:", data);
+    // Here you would typically save the data to your backend
+  };
 
   const openBooking = () => {
     setIsBookingOpen(true);
+  };
+
+  const handleProvinceChange = (province: string) => {
+    setSelectedProvince(province);
+    form.setValue("province", province);
+    form.setValue("city", ""); // Reset city when province changes
   };
 
   return (
@@ -75,7 +159,156 @@ export default function Profile() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-neutral">Profile management features will be available here.</p>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>First Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your first name" {...field} data-testid="input-first-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your last name" {...field} data-testid="input-last-name" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="your.email@example.com" {...field} data-testid="input-email" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+27 12 345 6789" {...field} data-testid="input-phone" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="province"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              Province
+                            </FormLabel>
+                            <Select onValueChange={handleProvinceChange} value={field.value} data-testid="select-province">
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select your province" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {Object.keys(SOUTH_AFRICAN_PROVINCES).map((province) => (
+                                  <SelectItem key={province} value={province}>
+                                    {province}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              City
+                            </FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                              disabled={!selectedProvince}
+                              data-testid="select-city"
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={selectedProvince ? "Select your city" : "Select province first"} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {selectedProvince && SOUTH_AFRICAN_PROVINCES[selectedProvince as keyof typeof SOUTH_AFRICAN_PROVINCES]?.map((city) => (
+                                  <SelectItem key={city} value={city}>
+                                    {city}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Address</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123 Main Street, Suburb, Postal Code" {...field} data-testid="input-address" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <Button type="button" variant="outline" onClick={() => form.reset()} data-testid="button-reset">
+                        Reset
+                      </Button>
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700" data-testid="button-save-profile">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Profile
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
