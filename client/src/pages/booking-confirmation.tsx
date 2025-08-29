@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Navigation } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
 
@@ -179,11 +179,36 @@ export default function BookingConfirmation() {
             </div>
           </div>
 
+          {/* Live Tracking Banner */}
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Navigation className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-blue-900">Live Provider Tracking</h3>
+                    <p className="text-sm text-blue-700">Track your provider's location when they're en route</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setLocation(`/tracking/${bookingDetails.bookingId}`)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  data-testid="button-track-provider"
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Track Provider
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Button
               onClick={() => setLocation("/")}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1 bg-gray-600 hover:bg-gray-700"
               data-testid="button-home"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />

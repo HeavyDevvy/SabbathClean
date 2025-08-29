@@ -23,6 +23,7 @@ import NotificationSettings from "@/components/notification-settings";
 import ServicesPage from "@/pages/services";
 import PaymentPage from "@/pages/payment";
 import MobileApp from "@/pages/mobile-app";
+import TrackingPage from "@/pages/tracking";
 
 function Router() {
   return (
@@ -43,6 +44,8 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/notifications" component={NotificationSettings} />
       <Route path="/mobile-app" component={MobileApp} />
+      <Route path="/tracking" component={TrackingPage} />
+      <Route path="/tracking/:bookingId" component={TrackingPage} />
       <Route path="/offline" component={Offline} />
       <Route component={NotFound} />
     </Switch>

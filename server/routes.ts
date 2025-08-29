@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { registerTrainingRoutes } from "./training-routes";
 import { registerAuthRoutes } from "./auth-routes";
 import { registerPaymentRoutes } from "./payment-routes";
@@ -155,6 +156,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const providers = await storage.getServiceProvidersByService(req.params.category);
       res.json(providers);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Location Tracking Routes
+  
+  // Update provider location (for providers to share their real-time location)
+  app.post("/api/providers/:id/location", async (req, res) => {
+    try {
+      const { latitude, longitude, isOnline = true } = req.body;
+      const providerId = req.params.id;
+      
+      if (!latitude || !longitude) {
+        return res.status(400).json({ message: "Latitude and longitude are required" });
+      }
+      
+      const location = await LocationService.updateProviderLocation(
+        providerId,
+        { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+        isOnline
+      );
+      
+      res.json({ message: "Location updated successfully", location });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get provider's current location (for customers to track provider)
+  app.get("/api/providers/:id/location", async (req, res) => {
+    try {
+      const providerId = req.params.id;
+      const location = await LocationService.getProviderLocation(providerId);
+      
+      if (!location) {
+        return res.status(404).json({ message: "Provider location not found" });
+      }
+      
+      res.json(location);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Set provider online/offline status
+  app.put("/api/providers/:id/status", async (req, res) => {
+    try {
+      const { isOnline } = req.body;
+      const providerId = req.params.id;
+      
+      await LocationService.setProviderOnlineStatus(providerId, isOnline);
+      
+      res.json({ message: `Provider status updated to ${isOnline ? 'online' : 'offline'}` });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Get live tracking information for a booking
+  app.get("/api/bookings/:id/tracking", async (req, res) => {
+    try {
+      const bookingId = req.params.id;
+      const booking = await storage.getBooking(bookingId);
+      
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      if (!booking.providerId) {
+        return res.json({ message: "No provider assigned yet", tracking: null });
+      }
+      
+      const providerLocation = await LocationService.getProviderLocation(booking.providerId);
+      const provider = await storage.getServiceProvider(booking.providerId);
+      
+      if (!providerLocation) {
+        return res.json({ message: "Provider location not available", tracking: null });
+      }
+      
+      const trackingInfo = {
+        booking: {
+          id: booking.id,
+          status: booking.status,
+          customerAddress: booking.customerAddress
+        },
+        provider: {
+          id: provider?.id,
+          name: `${provider?.firstName} ${provider?.lastName}`,
+          phone: provider?.phoneNumber,
+          rating: provider?.rating
+        },
+        location: {
+          latitude: providerLocation.latitude,
+          longitude: providerLocation.longitude,
+          isOnline: providerLocation.isOnline,
+          lastSeen: providerLocation.lastSeen
+        },
+        estimatedArrival: providerLocation.isOnline ? "Calculating..." : "Provider offline"
+      };
+      
+      res.json({ tracking: trackingInfo });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Set provider enroute status for a specific booking
+  app.post("/api/bookings/:id/enroute", async (req, res) => {
+    try {
+      const bookingId = req.params.id;
+      const { providerId, latitude, longitude } = req.body;
+      
+      // Update provider location
+      if (latitude && longitude) {
+        await LocationService.updateProviderLocation(
+          providerId,
+          { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+          true
+        );
+      }
+      
+      // Update booking status to enroute
+      await storage.updateBooking(bookingId, { status: 'enroute' });
+      
+      // TODO: Send push notification to customer
+      // This will be implemented when we integrate with push notification system
+      
+      res.json({ message: "Provider enroute status updated successfully" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
@@ -814,5 +944,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerCustomerReviewRoutes(app);
 
   const httpServer = createServer(app);
+
+  // WebSocket server for real-time tracking updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // Store active WebSocket connections for tracking
+  const trackingConnections = new Map<string, Set<WebSocket>>();
+
+  wss.on('connection', (ws: WebSocket, req) => {
+    console.log('WebSocket connection established');
+
+    ws.on('message', (message: string) => {
+      try {
+        const data = JSON.parse(message);
+        
+        if (data.type === 'subscribe_tracking' && data.bookingId) {
+          // Subscribe to tracking updates for a specific booking
+          if (!trackingConnections.has(data.bookingId)) {
+            trackingConnections.set(data.bookingId, new Set());
+          }
+          trackingConnections.get(data.bookingId)?.add(ws);
+          console.log(`Client subscribed to tracking for booking: ${data.bookingId}`);
+        }
+      } catch (error) {
+        console.error('WebSocket message parsing error:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      // Remove this connection from all tracking subscriptions
+      trackingConnections.forEach((connections) => {
+        connections.delete(ws);
+      });
+      console.log('WebSocket connection closed');
+    });
+  });
+
+  // Function to broadcast tracking updates
+  const broadcastTrackingUpdate = (bookingId: string, trackingData: any) => {
+    const connections = trackingConnections.get(bookingId);
+    if (connections) {
+      const message = JSON.stringify({
+        type: 'tracking_update',
+        bookingId,
+        data: trackingData
+      });
+      
+      connections.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(message);
+        }
+      });
+    }
+  };
+
+  // Enhance location update endpoint to broadcast WebSocket updates
+  const originalUpdateLocation = app._router.stack.find((layer: any) => 
+    layer.route && layer.route.path === '/api/providers/:id/location' && layer.route.methods.post
+  );
+
   return httpServer;
 }

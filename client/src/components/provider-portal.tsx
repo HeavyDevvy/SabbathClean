@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import TrainingCenter from "@/components/training-center";
+import ProviderLiveTracking from "@/components/provider-live-tracking";
 import { 
   User,
   Calendar,
@@ -18,7 +19,8 @@ import {
   Shield,
   BarChart3,
   MapPin,
-  Clock
+  Clock,
+  Navigation
 } from "lucide-react";
 
 interface ProviderPortalProps {
@@ -107,9 +109,13 @@ export default function ProviderPortal({
 
       {/* Main Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="tracking">
+            <Navigation className="h-4 w-4 mr-2" />
+            Live Tracking
+          </TabsTrigger>
           <TabsTrigger value="earnings">Earnings</TabsTrigger>
           <TabsTrigger value="training">
             <GraduationCap className="h-4 w-4 mr-2" />
@@ -283,6 +289,11 @@ export default function ProviderPortal({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Live Tracking */}
+        <TabsContent value="tracking" className="space-y-6">
+          <ProviderLiveTracking providerId={providerId} />
         </TabsContent>
 
         {/* Training Center */}
