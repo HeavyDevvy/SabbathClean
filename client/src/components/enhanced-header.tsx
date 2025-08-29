@@ -110,16 +110,13 @@ export default function EnhancedHeader({
               <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
-            <button 
-              onClick={() => {
-                const howItWorksSection = document.getElementById('how-it-works');
-                howItWorksSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
+            <Link 
+              href="/auth"
               className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-              data-testid="nav-how-it-works"
+              data-testid="nav-sign-in"
             >
-              How it Works
-            </button>
+              Sign In
+            </Link>
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
@@ -294,11 +291,11 @@ export default function EnhancedHeader({
                 Services
               </Link>
               <Link 
-                href="/how-it-works" 
+                href="/auth" 
                 className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                How it Works
+                Sign In
               </Link>
 
               {isAuthenticated ? (

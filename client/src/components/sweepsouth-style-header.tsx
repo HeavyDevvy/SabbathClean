@@ -35,10 +35,10 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
               Services
             </Link>
             <Link 
-              href="/how-it-works" 
+              href="/auth" 
               className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
             >
-              How it Works
+              Sign In
             </Link>
             <Link 
               href="/pricing" 
@@ -110,11 +110,11 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 Services
               </Link>
               <Link 
-                href="/how-it-works" 
+                href="/auth" 
                 className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                How it Works
+                Sign In
               </Link>
               <Link 
                 href="/pricing" 
