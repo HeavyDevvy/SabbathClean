@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
 import ComprehensiveServices from "@/components/comprehensive-services";
@@ -18,17 +19,22 @@ export default function EnhancedHome() {
   const [selectedService, setSelectedService] = useState<string>("");
   const [completedBookingData, setCompletedBookingData] = useState<any>(null);
   
-  // Mock user data - replace with actual auth
-  const [user] = useState({
-    firstName: "John",
-    lastName: "Doe", 
-    profileImage: "",
-    isProvider: false,
-  });
-  
-  const [isAuthenticated] = useState(true);
+  // Use real authentication state
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [notificationCount] = useState(3);
   const [messageCount] = useState(1);
+
+  // Show loading state while auth is loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleBookingClick = (serviceId?: string) => {
     if (serviceId) {
