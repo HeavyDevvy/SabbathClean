@@ -137,9 +137,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
           }
 
           try {
-            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+            const messageData = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
             
-            if (data && data.user && data.accessToken) {
+            if (messageData.type === 'SOCIAL_LOGIN_SUCCESS' && messageData.payload) {
+              const data = messageData.payload;
+              
               // Store auth data
               localStorage.setItem('accessToken', data.accessToken);
               if (data.refreshToken) {
@@ -148,6 +150,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
               
               window.removeEventListener('message', handleMessage);
               resolve(data);
+            } else if (messageData.type === 'SOCIAL_LOGIN_ERROR') {
+              window.removeEventListener('message', handleMessage);
+              reject(new Error(messageData.error || 'Social authentication failed'));
             }
           } catch (error) {
             reject(new Error('Authentication failed'));
