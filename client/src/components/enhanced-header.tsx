@@ -213,17 +213,6 @@ export default function EnhancedHeader({
               </>
             ) : (
               <>
-                <Button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  variant="ghost"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
-                  data-testid="button-sign-in"
-                >
-                  Sign In
-                </Button>
-                
-
-
                 <div className="border-l border-gray-200 pl-4 ml-4">
                   <span className="text-sm text-gray-600 mr-2">Service provider?</span>
                   <Button
