@@ -30,7 +30,7 @@ const generateTokens = (userId: string, rememberMe: boolean = false) => {
   const accessToken = jwt.sign(
     { userId, type: 'access' },
     JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '24h' }
   );
 
   const refreshToken = rememberMe ? jwt.sign(
