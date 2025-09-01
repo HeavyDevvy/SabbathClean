@@ -44,9 +44,11 @@ export class AuthClient {
   private refreshToken: string | null = null;
 
   constructor() {
-    // Load tokens from localStorage on initialization
-    this.accessToken = localStorage.getItem('accessToken');
-    this.refreshToken = localStorage.getItem('refreshToken');
+    // Load tokens from localStorage on initialization (only in browser)
+    if (typeof window !== 'undefined') {
+      this.accessToken = localStorage.getItem('accessToken');
+      this.refreshToken = localStorage.getItem('refreshToken');
+    }
   }
 
   async login(data: LoginData): Promise<AuthResponse> {
