@@ -30,6 +30,12 @@ export const users = pgTable("users", {
   // Password storage for remember me functionality
   rememberToken: text("remember_token"),
   rememberTokenExpiresAt: timestamp("remember_token_expires_at"),
+  // Email verification tokens
+  emailVerificationToken: text("email_verification_token"),
+  emailVerificationExpiresAt: timestamp("email_verification_expires_at"),
+  // Password reset tokens
+  passwordResetToken: text("password_reset_token"),
+  passwordResetExpiresAt: timestamp("password_reset_expires_at"),
   // User preferences and settings
   preferences: jsonb("preferences"), // UI preferences, notification settings
   notificationSettings: jsonb("notification_settings").default('{"email": true, "sms": true, "push": true, "marketing": false}'),

@@ -3,9 +3,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { storage } from "./storage";
 import { z } from "zod";
+import sgMail from "@sendgrid/mail";
+import crypto from "crypto";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
 const REMEMBER_TOKEN_EXPIRES = 30 * 24 * 60 * 60 * 1000; // 30 days
+const EMAIL_VERIFICATION_EXPIRES = 24 * 60 * 60 * 1000; // 24 hours
+const PASSWORD_RESET_EXPIRES = 1 * 60 * 60 * 1000; // 1 hour
+
+// Initialize SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Validation schemas
 const loginSchema = z.object({
@@ -25,6 +34,19 @@ const registerSchema = z.object({
   province: z.string().optional()
 });
 
+const emailVerificationSchema = z.object({
+  token: z.string()
+});
+
+const passwordResetRequestSchema = z.object({
+  email: z.string().email()
+});
+
+const passwordResetSchema = z.object({
+  token: z.string(),
+  newPassword: z.string().min(6)
+});
+
 // JWT token generation
 const generateTokens = (userId: string, rememberMe: boolean = false) => {
   const accessToken = jwt.sign(
@@ -40,6 +62,83 @@ const generateTokens = (userId: string, rememberMe: boolean = false) => {
   ) : null;
 
   return { accessToken, refreshToken };
+};
+
+// Email sending utility functions
+const sendVerificationEmail = async (email: string, firstName: string, verificationToken: string) => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('SendGrid not configured, skipping email verification');
+    return;
+  }
+
+  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
+  
+  const msg = {
+    to: email,
+    from: 'noreply@berryevents.co.za',
+    subject: 'Verify your Berry Events account',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Welcome to Berry Events, ${firstName}!</h2>
+        <p>Please verify your email address to complete your registration.</p>
+        <a href="${verificationUrl}" 
+           style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          Verify Email Address
+        </a>
+        <p>If the button doesn't work, copy and paste this link in your browser:</p>
+        <p>${verificationUrl}</p>
+        <p>This link will expire in 24 hours.</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">Berry Events - Your trusted home services platform</p>
+      </div>
+    `
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Verification email sent to:', email);
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+  }
+};
+
+const sendPasswordResetEmail = async (email: string, firstName: string, resetToken: string) => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('SendGrid not configured, skipping password reset email');
+    return;
+  }
+
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+  
+  const msg = {
+    to: email,
+    from: 'noreply@berryevents.co.za',
+    subject: 'Reset your Berry Events password',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2563eb;">Password Reset Request</h2>
+        <p>Hi ${firstName},</p>
+        <p>We received a request to reset your password for your Berry Events account.</p>
+        <a href="${resetUrl}" 
+           style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0;">
+          Reset Password
+        </a>
+        <p>If the button doesn't work, copy and paste this link in your browser:</p>
+        <p>${resetUrl}</p>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">Berry Events - Your trusted home services platform</p>
+      </div>
+    `
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Password reset email sent to:', email);
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+  }
 };
 
 // Middleware to verify JWT token
@@ -123,12 +222,22 @@ export function registerAuthRoutes(app: Express) {
       // Hash password
       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
-      // Create user
+      // Generate email verification token
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+      const emailVerificationExpiresAt = new Date(Date.now() + EMAIL_VERIFICATION_EXPIRES);
+
+      // Create user with verification token
       const newUser = await storage.createUser({
         ...validatedData,
         password: hashedPassword,
-        authProvider: 'email'
+        authProvider: 'email',
+        isVerified: false,
+        emailVerificationToken,
+        emailVerificationExpiresAt
       });
+
+      // Send verification email
+      await sendVerificationEmail(newUser.email, newUser.firstName, emailVerificationToken);
 
       // Generate tokens
       const { accessToken, refreshToken } = generateTokens(newUser.id, false);
@@ -137,17 +246,19 @@ export function registerAuthRoutes(app: Express) {
       await storage.updateUserLastLogin(newUser.id);
 
       res.status(201).json({
-        message: 'Registration successful',
+        message: 'Registration successful. Please check your email to verify your account.',
         user: {
           id: newUser.id,
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
           profileImage: newUser.profileImage,
-          isProvider: newUser.isProvider
+          isProvider: newUser.isProvider,
+          isVerified: newUser.isVerified
         },
         accessToken,
-        refreshToken
+        refreshToken,
+        requiresEmailVerification: true
       });
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -897,6 +1008,108 @@ export function registerAuthRoutes(app: Express) {
     } catch (error) {
       console.error('Logout error:', error);
       res.status(500).json({ message: 'Logout failed' });
+    }
+  });
+
+  // Email verification endpoint
+  app.post('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = emailVerificationSchema.parse(req.body);
+      
+      // Find user by verification token
+      const user = await storage.getUserByEmailVerificationToken(token);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired verification token' });
+      }
+
+      // Check if token is expired
+      if (user.emailVerificationExpiresAt && new Date() > user.emailVerificationExpiresAt) {
+        return res.status(400).json({ message: 'Verification token has expired. Please request a new one.' });
+      }
+
+      // Verify the user
+      await storage.verifyUserEmail(user.id);
+
+      res.json({
+        message: 'Email verified successfully! You can now access all features.',
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isVerified: true
+        }
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: 'Invalid input data', errors: error.errors });
+      }
+      console.error('Email verification error:', error);
+      res.status(500).json({ message: 'Email verification failed' });
+    }
+  });
+
+  // Password reset request endpoint
+  app.post('/api/auth/request-password-reset', async (req, res) => {
+    try {
+      const { email } = passwordResetRequestSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Return success even if user doesn't exist (security best practice)
+        return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+      }
+
+      // Generate password reset token
+      const passwordResetToken = crypto.randomBytes(32).toString('hex');
+      const passwordResetExpiresAt = new Date(Date.now() + PASSWORD_RESET_EXPIRES);
+
+      // Save reset token
+      await storage.setPasswordResetToken(user.id, passwordResetToken, passwordResetExpiresAt);
+
+      // Send password reset email
+      await sendPasswordResetEmail(user.email, user.firstName, passwordResetToken);
+
+      res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: 'Invalid input data', errors: error.errors });
+      }
+      console.error('Password reset request error:', error);
+      res.status(500).json({ message: 'Password reset request failed' });
+    }
+  });
+
+  // Password reset endpoint
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = passwordResetSchema.parse(req.body);
+      
+      // Find user by reset token
+      const user = await storage.getUserByPasswordResetToken(token);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      // Check if token is expired
+      if (user.passwordResetExpiresAt && new Date() > user.passwordResetExpiresAt) {
+        return res.status(400).json({ message: 'Reset token has expired. Please request a new one.' });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password and clear reset token
+      await storage.resetUserPassword(user.id, hashedPassword);
+
+      res.json({ message: 'Password reset successfully. You can now sign in with your new password.' });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: 'Invalid input data', errors: error.errors });
+      }
+      console.error('Password reset error:', error);
+      res.status(500).json({ message: 'Password reset failed' });
     }
   });
 }

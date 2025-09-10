@@ -1,0 +1,331 @@
+# Comprehensive Berry Events Platform Development Instructions for Replit
+
+## 🚀 PRIORITY 1: Authentication System Overhaul
+
+### Fix Sign Up/Sign In Functionality
+**Current Issues**: Direct and social authentication not working
+**Requirements**:
+
+1. **Direct Authentication**:
+   - Fix user registration with email/password
+   - Implement proper form validation and error handling
+   - Add email verification system
+   - Fix password reset functionality
+   - Ensure secure password hashing (bcrypt/argon2)
+
+2. **Social Authentication Integration**:
+   Integrate with the following OAuth providers:
+   - **Gmail/Google**: Use Google OAuth 2.0 API
+   - **Facebook**: Facebook Login API
+   - **Twitter**: Twitter API v2 OAuth
+   - **Instagram**: Instagram Basic Display API
+   - **Apple**: Sign in with Apple
+
+3. **Sign Out Functionality**:
+   - Implement secure logout across all authentication methods
+   - Clear session tokens and cookies
+   - Redirect to homepage after logout
+   - Handle social provider logout where applicable
+
+### Implementation Steps:
+```javascript
+// Example OAuth configuration needed
+const authProviders = {
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    scope: ['email', 'profile']
+  },
+  facebook: {
+    appId: process.env.FACEBOOK_APP_ID,
+    appSecret: process.env.FACEBOOK_APP_SECRET
+  },
+  twitter: {
+    apiKey: process.env.TWITTER_API_KEY,
+    apiSecret: process.env.TWITTER_API_SECRET
+  },
+  instagram: {
+    clientId: process.env.INSTAGRAM_CLIENT_ID,
+    clientSecret: process.env.INSTAGRAM_CLIENT_SECRET
+  },
+  apple: {
+    clientId: process.env.APPLE_CLIENT_ID,
+    teamId: process.env.APPLE_TEAM_ID,
+    keyId: process.env.APPLE_KEY_ID
+  }
+}
+```
+
+## 🎛️ PRIORITY 2: Admin CRM Portal Development
+
+### Admin Portal Access
+- **Login URL**: `/admin` or `/admin-portal`
+- **Admin Email**: admin@berryevents.co.za
+- **Admin Password**: 12345
+- **Security**: Implement role-based access control
+
+### CRM Features to Build
+
+#### 1. Dashboard Overview
+- Total users (consumers & providers)
+- Active bookings and revenue metrics
+- Pending applications for approval
+- System health monitoring
+- Recent activity feed
+
+#### 2. User Management
+- **Consumer Management**:
+  - View all registered consumers
+  - Search and filter functionality
+  - Account status management (active/suspended/banned)
+  - Booking history per consumer
+  - Support ticket resolution
+
+- **Provider Management**:
+  - View all service providers
+  - Application approval/decline workflow
+  - Provider verification status
+  - Performance metrics and ratings
+  - Commission and payment tracking
+
+#### 3. Application Processing System
+**Automated Workflow Features**:
+- Application queue with priority sorting
+- Document verification checklist
+- Background check integration points
+- Approval/decline with reason codes
+- Automated email notifications
+- Appeal process management
+
+#### 4. External Verification Integration
+**Individual Verification Services**:
+- ID document verification API integration
+- Background check service connections
+- Reference verification systems
+- Skills/qualification verification
+
+**Business Verification Services**:
+- Business registration verification
+- Tax compliance checks
+- Insurance verification
+- License and permit validation
+
+#### 5. Booking Management
+- Real-time booking overview
+- Dispute resolution system
+- Refund and cancellation management
+- Service quality monitoring
+- Revenue tracking and reporting
+
+#### 6. Communication Center
+- Bulk email/SMS campaigns
+- Customer support ticket system
+- Provider communication tools
+- Automated notification management
+- Template management system
+
+#### 7. Analytics & Reporting
+- Revenue and commission reports
+- User growth analytics
+- Service performance metrics
+- Geographic service distribution
+- Seasonal trend analysis
+- Export functionality (PDF/Excel)
+
+#### 8. System Configuration
+- Platform settings management
+- Commission rate configuration
+- Service category management
+- Pricing structure controls
+- Feature toggles and A/B testing
+
+## 📄 PRIORITY 3: Booking System Fixes
+
+### Fix Booking Confirmation Receipt
+**Current Issue**: Receipt downloads 20 pages instead of booking details only
+
+**Fix Requirements**:
+1. Create a clean, single-page receipt template
+2. Include only essential booking information:
+   - Booking reference number
+   - Service details and provider info
+   - Date, time, and location
+   - Customer information
+   - Payment summary
+   - Terms and conditions (concise)
+3. Implement PDF generation with proper formatting
+4. Ensure receipt is mobile-friendly
+
+```html
+<!-- Receipt Template Structure -->
+<div class="receipt-template">
+  <header>Berry Events - Booking Receipt</header>
+  <div class="booking-details">
+    <!-- Essential booking info only -->
+  </div>
+  <div class="payment-summary">
+    <!-- Payment breakdown -->
+  </div>
+  <footer>Contact & Terms</footer>
+</div>
+```
+
+### Fix Share Booking Functionality
+**Current Issue**: Share booking option not working properly
+
+**Requirements**:
+1. **WhatsApp Integration**:
+   - Generate shareable booking link
+   - Pre-populate WhatsApp message with booking details
+   - Use WhatsApp Business API or Web API
+
+2. **Email Sharing**:
+   - Send booking details via email
+   - Include PDF receipt as attachment
+   - Professional email template
+
+```javascript
+// WhatsApp Share Implementation
+const shareViaWhatsApp = (bookingDetails) => {
+  const message = `Berry Events Booking: ${bookingDetails.service} on ${bookingDetails.date}. Reference: ${bookingDetails.ref}`;
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
+};
+```
+
+## 🛠️ PRIORITY 4: Custom Service Contact Fix
+
+### Fix "Contact Us for Custom Solutions" Button
+**Current Issue**: Button not functioning properly
+
+**Requirements**:
+1. **Email Option**: Direct to customercare@berryevents.co.za
+2. **WhatsApp Option**: Link to +27612796476
+3. **Implementation**: Create modal with both contact options
+
+```javascript
+// Contact Options Implementation
+const customServiceContact = {
+  email: 'customercare@berryevents.co.za',
+  whatsapp: '+27612796476',
+  whatsappUrl: 'https://api.whatsapp.com/send?phone=27612796476&text=Hi, I need a custom service solution...'
+};
+```
+
+## 🔧 Implementation Timeline
+
+### Week 1: Authentication & Security
+- [ ] Fix direct authentication system
+- [ ] Implement OAuth for all 5 social providers
+- [ ] Add secure logout functionality
+- [ ] Test authentication flow end-to-end
+
+### Week 2: Admin CRM Development
+- [ ] Build admin portal structure
+- [ ] Implement user management features
+- [ ] Create application processing workflow
+- [ ] Add basic analytics dashboard
+
+### Week 3: Advanced CRM Features
+- [ ] Integrate external verification services
+- [ ] Build communication center
+- [ ] Add advanced reporting features
+- [ ] Implement system configuration tools
+
+### Week 4: Booking System & Polish
+- [ ] Fix receipt generation and formatting
+- [ ] Implement share booking functionality
+- [ ] Fix custom service contact options
+- [ ] Comprehensive testing and bug fixes
+
+## 📋 Testing Requirements
+
+### Authentication Testing
+- Test all social login providers
+- Verify email verification process
+- Test password reset functionality
+- Confirm secure logout across all methods
+
+### CRM Testing
+- Admin portal access and security
+- Application workflow testing
+- User management functionality
+- Reporting accuracy verification
+
+### Booking System Testing
+- Receipt generation and download
+- Share functionality (WhatsApp & Email)
+- Contact options functionality
+- Mobile responsiveness
+
+## 🔐 Security Considerations
+
+1. **Admin Portal Security**:
+   - Multi-factor authentication for admin access
+   - Session timeout management
+   - Audit logging for all admin actions
+   - IP restrictions for admin access
+
+2. **Data Protection**:
+   - Encrypt sensitive user data
+   - GDPR/POPIA compliance
+   - Secure API endpoints
+   - Regular security audits
+
+## 📞 Contact Integration Details
+
+### WhatsApp Business Integration
+- Use WhatsApp Business API for professional messaging
+- Implement webhook for message handling
+- Create template messages for different scenarios
+
+### Email System
+- Use professional SMTP service (SendGrid/Mailgun)
+- Create responsive email templates
+- Implement email tracking and analytics
+
+## 🚀 Deployment & Environment Variables
+
+Set up the following environment variables in Replit:
+
+```bash
+# OAuth Configuration
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+FACEBOOK_APP_ID=your_facebook_app_id
+FACEBOOK_APP_SECRET=your_facebook_app_secret
+TWITTER_API_KEY=your_twitter_api_key
+TWITTER_API_SECRET=your_twitter_api_secret
+INSTAGRAM_CLIENT_ID=your_instagram_client_id
+INSTAGRAM_CLIENT_SECRET=your_instagram_client_secret
+APPLE_CLIENT_ID=your_apple_client_id
+APPLE_TEAM_ID=your_apple_team_id
+APPLE_KEY_ID=your_apple_key_id
+
+# Email Configuration
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+
+# Admin Configuration
+ADMIN_EMAIL=admin@berryevents.co.za
+ADMIN_PASSWORD_HASH=hashed_version_of_12345
+
+# Business Contact
+CUSTOMER_CARE_EMAIL=customercare@berryevents.co.za
+WHATSAPP_NUMBER=27612796476
+```
+
+## ✅ Success Criteria
+
+Each feature must meet these requirements:
+- ✅ Functions correctly on desktop and mobile
+- ✅ Handles errors gracefully with user feedback
+- ✅ Loads within 3 seconds
+- ✅ Follows security best practices
+- ✅ Includes proper logging and monitoring
+- ✅ Works across all major browsers
+- ✅ Responsive design implementation
+
+**Complete these tasks in the specified priority order and test thoroughly before proceeding to the next phase.**

@@ -56,6 +56,13 @@ export interface IStorage {
   updateUserLastLogin(id: string): Promise<void>;
   updateRememberToken(id: string, token: string, expiresAt: Date): Promise<void>;
   clearRememberToken(id: string): Promise<void>;
+  // Email verification methods
+  getUserByEmailVerificationToken(token: string): Promise<User | undefined>;
+  verifyUserEmail(userId: string): Promise<void>;
+  // Password reset methods
+  setPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  getUserByPasswordResetToken(token: string): Promise<User | undefined>;
+  resetUserPassword(userId: string, hashedPassword: string): Promise<void>;
   
   // Service Provider operations
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
@@ -165,6 +172,50 @@ export class DatabaseStorage implements IStorage {
         rememberTokenExpiresAt: null 
       })
       .where(eq(users.id, id));
+  }
+
+  // Email verification methods
+  async getUserByEmailVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
+    return user || undefined;
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        isVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiresAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  // Password reset methods
+  async setPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await db.update(users)
+      .set({ 
+        passwordResetToken: token,
+        passwordResetExpiresAt: expiresAt,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async getUserByPasswordResetToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.passwordResetToken, token));
+    return user || undefined;
+  }
+
+  async resetUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
