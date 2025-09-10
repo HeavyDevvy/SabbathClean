@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import ModernServiceModal from "@/components/modern-service-modal";
 import AnimatedServiceCard from "@/components/animated-service-card";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { 
   Home, 
   TreePine, 
@@ -25,7 +26,9 @@ import {
   Users,
   Sparkles,
   Calendar,
-  MapPin
+  MapPin,
+  Search,
+  Filter
 } from "lucide-react";
 
 interface ServiceType {
@@ -262,6 +265,37 @@ const services: Service[] = [...indoorServices, ...outdoorServices, ...specializ
 export default function ComprehensiveServices({ onServiceSelect }: ComprehensiveServicesProps) {
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Categories for filtering
+  const categories = ["All", "Indoor Services", "Outdoor Services", "Specialized Services"];
+
+  // Filter services based on search term and category
+  const filteredServices = useMemo(() => {
+    let filtered = services;
+
+    // Filter by category
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter(service => service.category === selectedCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(service => 
+        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.serviceTypes.some(type => type.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    return filtered;
+  }, [searchTerm, selectedCategory]);
+
+  // Group filtered services by category for display
+  const filteredIndoorServices = filteredServices.filter(s => s.category === "Indoor Services");
+  const filteredOutdoorServices = filteredServices.filter(s => s.category === "Outdoor Services");
+  const filteredSpecializedServices = filteredServices.filter(s => s.category === "Specialized Services");
 
   return (
     <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50" data-testid="comprehensive-services-section">
@@ -284,7 +318,45 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
           </p>
         </div>
 
+        {/* Search and Filter Controls */}
+        <div className="mb-12 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:space-x-4">
+          <div className="relative flex-1 max-w-md mx-auto sm:mx-0">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search services, features, or descriptions..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-12"
+              data-testid="search-services-homepage"
+            />
+          </div>
+          
+          <div className="flex space-x-2 justify-center sm:justify-start">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+                data-testid={`filter-${category.toLowerCase().replace(' ', '-')}`}
+                className="h-12"
+              >
+                <Filter className="h-3 w-3 mr-1" />
+                {category}
+              </Button>
+            ))}
+          </div>
+        </div>
 
+        {/* Results Summary */}
+        {searchTerm && (
+          <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-blue-800">
+              <strong>{filteredServices.length}</strong> service{filteredServices.length !== 1 ? 's' : ''} found for "{searchTerm}"
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+            </p>
+          </div>
+        )}
 
         {/* Indoor Services Section */}
         <div className="mb-16">
@@ -292,11 +364,12 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             <Home className="h-8 w-8 mr-3 text-blue-600" />
             <h3 className="text-3xl font-bold text-gray-900">Indoor Services</h3>
             <Badge className="ml-4 bg-blue-100 text-blue-700 border-blue-200">
-              {indoorServices.length} services
+              {filteredIndoorServices.length} services
             </Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {indoorServices.map((service, index) => (
+          {filteredIndoorServices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredIndoorServices.map((service, index) => (
               <AnimatedServiceCard
                 key={service.id}
                 service={service}
@@ -308,8 +381,11 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                   setShowServiceModal(true);
                 }}
               />
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <Card><CardContent className="p-6 text-center text-gray-600">No Indoor services match your search/filter.</CardContent></Card>
+          )}
         </div>
 
         {/* Outdoor Services Section */}
@@ -318,11 +394,12 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             <TreePine className="h-8 w-8 mr-3 text-green-600" />
             <h3 className="text-3xl font-bold text-gray-900">Outdoor Services</h3>
             <Badge className="ml-4 bg-green-100 text-green-700 border-green-200">
-              {outdoorServices.length} services
+              {filteredOutdoorServices.length} services
             </Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {outdoorServices.map((service, index) => (
+          {filteredOutdoorServices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredOutdoorServices.map((service, index) => (
               <AnimatedServiceCard
                 key={service.id}
                 service={service}
@@ -334,8 +411,11 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                   setShowServiceModal(true);
                 }}
               />
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <Card><CardContent className="p-6 text-center text-gray-600">No Outdoor services match your search/filter.</CardContent></Card>
+          )}
         </div>
 
         {/* Specialized Services Section */}
@@ -344,11 +424,12 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             <Star className="h-8 w-8 mr-3 text-purple-600" />
             <h3 className="text-3xl font-bold text-gray-900">Specialized Services</h3>
             <Badge className="ml-4 bg-purple-100 text-purple-700 border-purple-200">
-              {specializedServices.length} services
+              {filteredSpecializedServices.length} services
             </Badge>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {specializedServices.map((service, index) => (
+          {filteredSpecializedServices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredSpecializedServices.map((service, index) => (
               <AnimatedServiceCard
                 key={service.id}
                 service={service}
@@ -360,8 +441,11 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
                   setShowServiceModal(true);
                 }}
               />
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <Card><CardContent className="p-6 text-center text-gray-600">No Specialized services match your search/filter.</CardContent></Card>
+          )}
         </div>
 
         {/* Bottom CTA */}

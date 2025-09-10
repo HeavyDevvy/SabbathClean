@@ -1,0 +1,184 @@
+# Replit Testing & Fix Instructions for Berry Events Platform
+
+## CRITICAL PRIORITY FIXES (Must Complete First)
+
+### 1. Homepage Search & Filter System
+**Issue**: Search and filter system only works on "Service" page, not on homepage
+**Fix Required**:
+- Debug homepage search functionality
+- Ensure search by service type, location, availability, and price works on main homepage
+- Test filter dropdowns and search input fields
+- Verify results display correctly on homepage
+
+### 2. User Registration System
+**Issue**: Sign-up form displays error message preventing registration completion
+**Fix Required**:
+- Debug registration endpoint and form validation
+- Fix email verification process
+- Test social login integration (Google, Facebook if implemented)
+- Ensure registration confirmation emails are sent
+- Test password reset functionality
+
+### 3. Contact System
+**Issue**: Contact form not functioning, Support page shows 404 error
+**Fix Required**:
+- Fix contact form submission and email delivery
+- Create missing support page (currently 404)
+- Implement contact form validation and success messaging
+- Add support ticket system or help desk integration
+
+### 4. Footer Navigation
+**Issue**: All footer buttons (Services, Company, Providers, Support) not working
+**Fix Required**:
+- Fix all footer navigation links
+- Create missing pages: Company/About Us, Support
+- Ensure Services and Providers pages are accessible
+- Test all footer links on desktop and mobile
+
+## HIGH PRIORITY FUNCTIONALITY TO IMPLEMENT
+
+### 5. Provider Dashboard & Profile Management
+**Missing Features**:
+- Create provider dashboard interface
+- Implement profile creation/editing for service providers
+- Add calendar/availability settings
+- Set up booking notification system
+- Create accept/decline job functionality
+- Test provider registration confirmation emails
+
+### 6. Consumer Dashboard
+**Missing Features**:
+- Build consumer dashboard for booking management
+- Implement booking history and tracking
+- Add review/rating system interface
+- Create booking modification and cancellation features
+
+### 7. Payment System Integration
+**Missing Features**:
+- Complete payment gateway integration (Stripe/PayPal)
+- Test credit/debit card transactions
+- Implement refund and cancellation processing
+- Add payment confirmation and receipt system
+
+### 8. Quote System Fix
+**Issue**: Quote form leads to payment instead of providing quote
+**Fix Required**:
+- Fix quote request flow to provide estimates first
+- Separate quote process from booking/payment
+- Add quote comparison feature
+- Implement quote approval before booking
+
+## MEDIUM PRIORITY IMPROVEMENTS
+
+### 9. Trust & Branding Elements
+**Add/Fix**:
+- Create comprehensive About Us page explaining Berry Events' role
+- Add FAQ section for consumers and providers
+- Implement testimonials/reviews display system
+- Add customer support channels (chat, email, phone)
+- Verify social media links are working
+
+### 10. Legal & Compliance Pages
+**Create**:
+- Privacy Policy page
+- Terms & Conditions page
+- Cancellation Policy page
+- GDPR/POPIA compliance features
+- Cookie consent system
+
+### 11. Technical Optimizations
+**Complete**:
+- Test mobile responsiveness on Android devices
+- Create custom 404 error page
+- Implement SEO meta tags, titles, alt text
+- Create and submit sitemap to Google
+- Install Google Analytics and Facebook Pixel
+- Test website across different browsers
+
+## TESTING REQUIREMENTS
+
+### End-to-End Testing Protocol
+1. **Consumer Journey Test**:
+   - Register new account → Browse services → Select provider → Book service → Make payment → Receive confirmation
+   
+2. **Provider Journey Test**:
+   - Register as provider → Create profile → Set availability → Receive booking → Accept job → Complete service
+
+3. **Multi-User Stress Test**:
+   - Simulate multiple concurrent users
+   - Test booking conflicts and availability updates
+   - Verify system stability under load
+
+### Email/SMS Testing
+- Registration confirmations
+- Booking confirmations
+- Booking reminders
+- Payment receipts
+- Cancellation notices
+
+## IMPLEMENTATION CHECKLIST
+
+### Phase 1 - Critical Fixes (Week 1)
+- [ ] Fix homepage search and filter
+- [ ] Resolve registration errors
+- [ ] Fix contact form and create support page
+- [ ] Repair footer navigation
+- [ ] Test quote system flow
+
+### Phase 2 - Core Features (Week 2)
+- [ ] Build provider dashboard
+- [ ] Create consumer dashboard
+- [ ] Implement payment processing
+- [ ] Add review/rating system
+- [ ] Set up booking notifications
+
+### Phase 3 - Polish & Launch Prep (Week 3)
+- [ ] Add legal pages and compliance features
+- [ ] Complete SEO optimization
+- [ ] Conduct stress testing
+- [ ] Set up analytics tracking
+- [ ] Brief support team for launch
+
+## TESTING COMMANDS FOR REPLIT
+
+```bash
+# Test all forms
+npm test -- --grep "forms"
+
+# Test API endpoints
+npm run test:api
+
+# Test user authentication
+npm run test:auth
+
+# Test payment integration
+npm run test:payments
+
+# Run mobile responsiveness tests
+npm run test:mobile
+
+# Performance testing
+npm run test:performance
+```
+
+## SUCCESS CRITERIA
+
+Each feature must pass these requirements:
+- ✅ Functions correctly on desktop and mobile
+- ✅ Handles errors gracefully with user-friendly messages
+- ✅ Loads within 3 seconds
+- ✅ Follows security best practices
+- ✅ Includes proper form validation
+- ✅ Sends appropriate email notifications
+- ✅ Works across Chrome, Firefox, Safari, and Edge browsers
+
+## REPORTING
+
+After each fix, document:
+1. Issue addressed
+2. Solution implemented
+3. Testing results
+4. Any remaining edge cases
+5. Performance impact
+
+**Priority Order**: Address Critical Priority fixes first, then High Priority, then Medium Priority items. Test each fix thoroughly before moving to the next item.
