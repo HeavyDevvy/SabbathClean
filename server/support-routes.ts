@@ -24,6 +24,24 @@ const contactFormSchema = z.object({
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
+// Feedback form schema  
+const feedbackFormSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Valid email is required"),
+  feedbackType: z.enum([
+    "general",
+    "service_quality",
+    "app_experience", 
+    "feature_request",
+    "complaint",
+    "compliment",
+    "suggestion"
+  ]),
+  subject: z.string().min(1, "Subject is required"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
+  rating: z.string().optional(),
+});
+
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export function registerSupportRoutes(app: Express) {
@@ -46,16 +64,11 @@ export function registerSupportRoutes(app: Express) {
       // Generate a ticket number
       const ticketNumber = `BERRY-${Date.now()}-${nanoid(6).toUpperCase()}`;
 
-      // For now, we'll log the contact form submission
-      // In a full implementation, you might create a support ticket or send an email
+      // Log the contact form submission (redacted for privacy)
       console.log('📨 Contact form submission received:', {
         ticketNumber,
-        name,
-        email,
-        phone,
         category,
-        subject,
-        message,
+        hasPhone: !!phone,
         timestamp: new Date().toISOString()
       });
 
@@ -145,6 +158,51 @@ export function registerSupportRoutes(app: Express) {
     } catch (error: any) {
       console.error('❌ FAQ retrieval error:', error);
       res.status(500).json({ message: 'Failed to retrieve FAQ data' });
+    }
+  });
+
+  // Feedback form submission endpoint
+  app.post('/api/support/feedback', async (req, res) => {
+    try {
+      // Validate the request body
+      const validationResult = feedbackFormSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: 'Invalid feedback data',
+          errors: validationResult.error.errors
+        });
+      }
+
+      const { name, email, feedbackType, subject, message, rating } = validationResult.data;
+
+      // Generate a feedback ID
+      const feedbackId = `FB-${Date.now()}-${nanoid(6).toUpperCase()}`;
+
+      // Log the feedback submission (redacted for privacy)
+      console.log('💬 Feedback submission received:', {
+        feedbackId,
+        feedbackType,
+        hasRating: !!rating,
+        timestamp: new Date().toISOString()
+      });
+
+      // TODO: In a full implementation, you might:
+      // 1. Save to a feedback table in the database
+      // 2. Send email notification to feedback team
+      // 3. Send confirmation email to user
+      // 4. Integrate with feedback analysis system
+
+      res.status(201).json({ 
+        message: 'Thank you for your feedback! We appreciate you taking the time to help us improve.',
+        feedbackId: feedbackId
+      });
+
+    } catch (error: any) {
+      console.error('❌ Feedback submission error:', error);
+      res.status(500).json({ 
+        message: 'Failed to submit feedback. Please try again or contact us directly.' 
+      });
     }
   });
 }

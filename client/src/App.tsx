@@ -26,6 +26,15 @@ import MobileApp from "@/pages/mobile-app";
 import TrackingPage from "@/pages/tracking";
 import Contact from "@/pages/contact";
 import Support from "@/pages/support";
+import Help from "@/pages/help";
+import About from "@/pages/about";
+import Safety from "@/pages/safety";
+import Feedback from "@/pages/feedback";
+import Careers from "@/pages/careers";
+import Press from "@/pages/press";
+import ProviderSupport from "@/pages/provider-support";
+import BerryStars from "@/pages/berry-stars";
+import ProviderEarnings from "@/pages/provider-earnings";
 
 function Router() {
   return (
@@ -50,6 +59,15 @@ function Router() {
       <Route path="/tracking/:bookingId" component={TrackingPage} />
       <Route path="/contact" component={Contact} />
       <Route path="/support" component={Support} />
+      <Route path="/help" component={Help} />
+      <Route path="/about" component={About} />
+      <Route path="/safety" component={Safety} />
+      <Route path="/feedback" component={Feedback} />
+      <Route path="/careers" component={Careers} />
+      <Route path="/press" component={Press} />
+      <Route path="/provider-support" component={ProviderSupport} />
+      <Route path="/berry-stars" component={BerryStars} />
+      <Route path="/provider-earnings" component={ProviderEarnings} />
       <Route path="/offline" component={Offline} />
       <Route component={NotFound} />
     </Switch>

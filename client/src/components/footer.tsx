@@ -33,7 +33,7 @@ export default function Footer() {
       links: [
         { name: "About Us", href: "/about" },
         { name: "How It Works", href: "/#how-it-works" },
-        { name: "Trust & Safety", href: "/#trust-safety" },
+        { name: "Trust & Safety", href: "/safety" },
         { name: "Careers", href: "/careers" },
         { name: "Press", href: "/press" },
         { name: "Contact", href: "/contact" },
@@ -57,7 +57,7 @@ export default function Footer() {
         { name: "Customer Support", href: "/support" },
         { name: "Emergency Hotline", href: "tel:0800237779" },
         { name: "Safety Resources", href: "/safety" },
-        { name: "Report Issue", href: "/report" },
+        { name: "Report Issue", href: "/support" },
         { name: "Feedback", href: "/feedback" },
       ]
     }
