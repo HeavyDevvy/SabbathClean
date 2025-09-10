@@ -66,6 +66,48 @@ export const authenticateToken = async (req: any, res: any, next: any) => {
   }
 };
 
+// Middleware to authorize provider access - ensures user owns the provider resource
+export const authorizeProviderAccess = async (req: any, res: any, next: any) => {
+  try {
+    const providerId = req.params.providerId || req.params.id;
+    
+    if (!providerId) {
+      return res.status(400).json({ message: 'Provider ID is required' });
+    }
+
+    // Check if user is authenticated (should be called after authenticateToken)
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    // Get the provider to check ownership
+    const provider = await storage.getServiceProvider(providerId);
+    if (!provider) {
+      return res.status(404).json({ message: 'Provider not found' });
+    }
+
+    // Check if the authenticated user owns this provider
+    // Provider ownership is determined by matching user ID
+    if (provider.userId !== req.user.id) {
+      // Check if user has admin role (optional for future admin features)
+      const isAdmin = req.user.role === 'admin' || req.user.isAdmin;
+      
+      if (!isAdmin) {
+        return res.status(403).json({ 
+          message: 'Access denied: You can only access your own provider data' 
+        });
+      }
+    }
+
+    // Store the provider in request for use in route handler
+    req.provider = provider;
+    next();
+  } catch (error) {
+    console.error('Provider authorization error:', error);
+    return res.status(500).json({ message: 'Authorization check failed' });
+  }
+};
+
 export function registerAuthRoutes(app: Express) {
   // Registration endpoint
   app.post('/api/auth/register', async (req, res) => {
@@ -240,9 +282,9 @@ export function registerAuthRoutes(app: Express) {
       // For now, we'll simulate real user data from Google OAuth response
       const googleUserData = {
         email: `user.${Date.now()}@gmail.com`,
-        firstName: req.query.firstName || 'User',
-        lastName: req.query.lastName || 'Name',
-        profileImage: req.query.picture || 'https://via.placeholder.com/150/4285F4/white?text=' + (req.query.firstName || 'U').charAt(0) + (req.query.lastName || 'N').charAt(0),
+        firstName: String(req.query.firstName || 'User'),
+        lastName: String(req.query.lastName || 'Name'),
+        profileImage: String(req.query.picture || 'https://via.placeholder.com/150/4285F4/white?text=' + String(req.query.firstName || 'U').charAt(0) + String(req.query.lastName || 'N').charAt(0)),
         authProvider: 'google',
         isProvider: false,
         password: null,
@@ -332,9 +374,9 @@ export function registerAuthRoutes(app: Express) {
     try {
       const appleUserData = {
         email: `apple.user.${Date.now()}@icloud.com`,
-        firstName: req.query.firstName || 'Apple',
-        lastName: req.query.lastName || 'User',
-        profileImage: req.query.picture || 'https://via.placeholder.com/150/000000/white?text=' + (req.query.firstName || 'A').charAt(0) + (req.query.lastName || 'U').charAt(0),
+        firstName: String(req.query.firstName || 'Apple'),
+        lastName: String(req.query.lastName || 'User'),
+        profileImage: String(req.query.picture || 'https://via.placeholder.com/150/000000/white?text=' + String(req.query.firstName || 'A').charAt(0) + String(req.query.lastName || 'U').charAt(0)),
         authProvider: 'apple',
         isProvider: false,
         password: null,
@@ -419,9 +461,9 @@ export function registerAuthRoutes(app: Express) {
     try {
       const twitterUserData = {
         email: `twitter.user.${Date.now()}@twitter.com`,
-        firstName: req.query.firstName || 'Twitter',
-        lastName: req.query.lastName || 'User',
-        profileImage: req.query.picture || 'https://via.placeholder.com/150/1DA1F2/white?text=' + (req.query.firstName || 'T').charAt(0) + (req.query.lastName || 'U').charAt(0),
+        firstName: String(req.query.firstName || 'Twitter'),
+        lastName: String(req.query.lastName || 'User'),
+        profileImage: String(req.query.picture || 'https://via.placeholder.com/150/1DA1F2/white?text=' + String(req.query.firstName || 'T').charAt(0) + String(req.query.lastName || 'U').charAt(0)),
         authProvider: 'twitter',
         isProvider: false,
         password: null,
@@ -506,9 +548,9 @@ export function registerAuthRoutes(app: Express) {
     try {
       const instagramUserData = {
         email: `instagram.user.${Date.now()}@instagram.com`,
-        firstName: req.query.firstName || 'Instagram',
-        lastName: req.query.lastName || 'User',
-        profileImage: req.query.picture || 'https://via.placeholder.com/150/E4405F/white?text=' + (req.query.firstName || 'I').charAt(0) + (req.query.lastName || 'U').charAt(0),
+        firstName: String(req.query.firstName || 'Instagram'),
+        lastName: String(req.query.lastName || 'User'),
+        profileImage: String(req.query.picture || 'https://via.placeholder.com/150/E4405F/white?text=' + String(req.query.firstName || 'I').charAt(0) + String(req.query.lastName || 'U').charAt(0)),
         authProvider: 'instagram',
         isProvider: false,
         password: null,

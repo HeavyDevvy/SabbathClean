@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { registerTrainingRoutes } from "./training-routes";
-import { registerAuthRoutes } from "./auth-routes";
+import { registerAuthRoutes, authenticateToken, authorizeProviderAccess } from "./auth-routes";
 import { registerPaymentRoutes } from "./payment-routes";
 import { registerPushNotificationRoutes } from "./push-notification-routes";
 import { registerCustomerReviewRoutes } from "./customer-review-routes";
@@ -215,10 +215,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Provider-specific bookings endpoint (requires authentication and ownership)
+  app.get("/api/providers/:providerId/bookings", authenticateToken, authorizeProviderAccess, async (req: any, res) => {
+    try {
+      const { status } = req.query;
+      const providerId = req.params.providerId;
+      
+      let bookings = await storage.getBookingsByProvider(providerId);
+      
+      // Filter by status if provided
+      if (status) {
+        bookings = bookings.filter(booking => booking.status === status);
+      }
+      
+      res.json(bookings);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Provider active bookings for live tracking (requires authentication and ownership)
+  app.get("/api/providers/:providerId/bookings/active", authenticateToken, authorizeProviderAccess, async (req: any, res) => {
+    try {
+      const providerId = req.params.providerId;
+      
+      const activeBookings = await storage.getBookingsByProvider(providerId);
+      const filtered = activeBookings.filter(booking => 
+        booking.status === 'in-progress' || 
+        booking.status === 'enroute' || 
+        booking.status === 'confirmed'
+      );
+      
+      res.json(filtered);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Provider earnings endpoint (real data calculation, requires authentication and ownership)
+  app.get("/api/providers/:providerId/earnings", authenticateToken, authorizeProviderAccess, async (req: any, res) => {
+    try {
+      const providerId = req.params.providerId;
+      
+      // Get all completed bookings for this provider
+      const allBookings = await storage.getBookingsByProvider(providerId);
+      const completedBookings = allBookings.filter(booking => booking.status === 'completed');
+      
+      // Calculate total earnings (total amount - platform commission)
+      const totalRevenue = completedBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+      const platformCommission = totalRevenue * 0.15; // 15% commission
+      const totalEarnings = totalRevenue - platformCommission;
+      
+      // Calculate pending payouts (completed but not yet paid)
+      const pendingBookings = allBookings.filter(booking => 
+        booking.status === 'completed' && booking.paymentStatus !== 'paid'
+      );
+      const pendingPayouts = pendingBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0) * 0.85;
+      
+      res.json({
+        totalEarnings: Math.round(totalEarnings * 100) / 100,
+        pendingPayouts: Math.round(pendingPayouts * 100) / 100,
+        completedJobs: completedBookings.length,
+        totalRevenue: Math.round(totalRevenue * 100) / 100,
+        platformCommission: Math.round(platformCommission * 100) / 100
+      });
+    } catch (error: any) {
+      console.error('Error calculating provider earnings:', error);
+      res.status(500).json({ message: 'Failed to calculate earnings' });
+    }
+  });
+
   // Location Tracking Routes
   
   // Update provider location (for providers to share their real-time location)
-  app.post("/api/providers/:id/location", async (req, res) => {
+  app.post("/api/providers/:id/location", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const { latitude, longitude, isOnline = true } = req.body;
       const providerId = req.params.id;
@@ -256,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Set provider online/offline status
-  app.put("/api/providers/:id/status", async (req, res) => {
+  app.put("/api/providers/:id/status", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const { isOnline } = req.body;
       const providerId = req.params.id;
@@ -364,7 +434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/bookings/provider/:providerId", async (req, res) => {
+  app.get("/api/bookings/provider/:providerId", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const bookings = await storage.getBookingsByProvider(req.params.providerId);
       res.json(bookings);
@@ -469,7 +539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/training/progress/:providerId", async (req, res) => {
+  app.get("/api/training/progress/:providerId", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const progress = await storage.getProviderTrainingProgress(req.params.providerId);
       res.json(progress);
@@ -515,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/certifications/provider/:providerId", async (req, res) => {
+  app.get("/api/certifications/provider/:providerId", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const certifications = await storage.getProviderCertifications(req.params.providerId);
       res.json(certifications);
@@ -549,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/assessments/results/:providerId", async (req, res) => {
+  app.get("/api/assessments/results/:providerId", authenticateToken, authorizeProviderAccess, async (req, res) => {
     try {
       const results = await storage.getProviderAssessmentResults(req.params.providerId);
       res.json(results);

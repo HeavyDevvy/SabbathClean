@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { storage } from "./storage";
+import { authenticateToken } from "./auth-routes";
 
 // Training module data - would typically come from database
 const trainingModules = [
@@ -289,28 +290,54 @@ export function registerTrainingRoutes(app: Express) {
     }
   });
 
-  // Get provider social score (including training impact)
-  app.get('/api/providers/:providerId/social-score', async (req, res) => {
+  // Get provider social score (real data calculation, requires authentication)
+  app.get('/api/providers/:providerId/social-score', authenticateToken, async (req: any, res) => {
     try {
       const { providerId } = req.params;
       
-      // Calculate social score with training bonuses
-      const baseScore = 750; // Base provider score
-      const trainingBonus = Math.floor(Math.random() * 300); // Training points
-      const certificationBonus = Math.floor(Math.random() * 200); // Certification bonus
-      const totalScore = baseScore + trainingBonus + certificationBonus;
+      // Get real training progress data
+      const trainingProgress = await storage.getProviderTrainingProgress(providerId);
+      const certifications = await storage.getProviderCertifications(providerId);
+      const assessmentResults = await storage.getProviderAssessmentResults(providerId);
+      
+      // Calculate social score based on real factors
+      const baseScore = 500; // Starting score for all providers
+      
+      // Training bonus: 10 points per completed module
+      const completedModules = trainingProgress.filter(p => p.completedAt !== null).length;
+      const trainingBonus = completedModules * 10;
+      
+      // Certification bonus: 50 points per valid certification
+      const validCertifications = certifications.filter(c => 
+        !c.expiresAt || new Date(c.expiresAt) > new Date()
+      ).length;
+      const certificationBonus = validCertifications * 50;
+      
+      // Assessment bonus: Average score * 2 (max 200 points)
+      const avgAssessmentScore = assessmentResults.length > 0 
+        ? assessmentResults.reduce((sum, r) => sum + r.score, 0) / assessmentResults.length
+        : 0;
+      const assessmentBonus = Math.min(avgAssessmentScore * 2, 200);
+      
+      const totalScore = baseScore + trainingBonus + certificationBonus + assessmentBonus;
       
       // Calculate queue priority bonus (higher score = better queue position)
       const queueBonus = Math.min(Math.floor(totalScore / 50), 25); // Max 25% bonus
+      
+      // Determine tier based on score
+      const tier = totalScore > 1000 ? 'Gold' : totalScore > 800 ? 'Silver' : 'Bronze';
       
       res.json({
         score: totalScore,
         baseScore,
         trainingBonus,
         certificationBonus,
+        assessmentBonus,
         queueBonus,
-        ranking: Math.floor(Math.random() * 50) + 1, // Provider ranking
-        tier: totalScore > 1000 ? 'Gold' : totalScore > 800 ? 'Silver' : 'Bronze'
+        tier,
+        completedModules,
+        validCertifications,
+        avgAssessmentScore: Math.round(avgAssessmentScore * 10) / 10
       });
     } catch (error) {
       console.error('Error calculating social score:', error);
