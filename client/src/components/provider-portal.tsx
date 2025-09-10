@@ -29,6 +29,29 @@ interface ProviderPortalProps {
   isAdmin?: boolean;
 }
 
+interface ProviderData {
+  id?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  rating?: number;
+  servicesOffered?: string[];
+}
+
+interface SocialScoreData {
+  score: number;
+  queueBonus: number;
+  trainingBonus: number;
+  tier: string;
+}
+
+interface EarningsData {
+  totalEarnings: number;
+  pendingPayouts: number;
+  completedJobs: number;
+}
+
 export default function ProviderPortal({ 
   providerId, 
   providerType = 'individual',
@@ -36,7 +59,7 @@ export default function ProviderPortal({
 }: ProviderPortalProps) {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const { data: providerData = { name: 'Service Provider' }, isLoading } = useQuery({
+  const { data: providerData, isLoading } = useQuery<ProviderData>({
     queryKey: [`/api/providers/${providerId}`],
     retry: false,
   });
@@ -46,15 +69,20 @@ export default function ProviderPortal({
     retry: false,
   });
 
-  const { data: earnings = {} } = useQuery({
+  const { data: earnings } = useQuery<EarningsData>({
     queryKey: [`/api/providers/${providerId}/earnings`],
     retry: false,
   });
 
-  const { data: socialScore = { score: 0, queueBonus: 0, trainingBonus: 0, tier: 'Bronze' } } = useQuery({
+  const { data: socialScore } = useQuery<SocialScoreData>({
     queryKey: [`/api/providers/${providerId}/social-score`],
     retry: false,
   });
+
+  // Provide safe defaults for data
+  const provider: ProviderData = providerData || { name: 'Service Provider', firstName: 'Service', lastName: 'Provider' };
+  const providerEarnings: EarningsData = earnings || { totalEarnings: 0, pendingPayouts: 0, completedJobs: 0 };
+  const score: SocialScoreData = socialScore || { score: 0, queueBonus: 0, trainingBonus: 0, tier: 'Bronze' };
 
   if (isLoading) {
     return (
@@ -79,7 +107,7 @@ export default function ProviderPortal({
               {isAdmin ? 'Admin Portal' : 'Provider Portal'}
             </h1>
             <p className="text-gray-600">
-              {providerData?.name || 'Service Provider'} • {providerType === 'company' ? 'Company' : 'Individual'}
+              {provider.name || `${provider.firstName || ''} ${provider.lastName || ''}`.trim() || 'Service Provider'} • {providerType === 'company' ? 'Company' : 'Individual'}
             </p>
           </div>
         </div>
@@ -93,7 +121,7 @@ export default function ProviderPortal({
                 <div>
                   <div className="text-xs text-gray-600">Social Score</div>
                   <div className="font-bold text-purple-600">
-                    {socialScore?.score || 0}
+                    {score.score}
                   </div>
                 </div>
               </div>
@@ -172,7 +200,7 @@ export default function ProviderPortal({
                   <div>
                     <div className="text-sm text-gray-600">Queue Priority</div>
                     <div className="text-xl font-bold text-green-600">
-                      +{socialScore?.queueBonus || 0}%
+                      +{score.queueBonus}%
                     </div>
                   </div>
                 </div>
@@ -192,21 +220,21 @@ export default function ProviderPortal({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <Shield className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-blue-600">+{socialScore?.trainingBonus || 0}</div>
+                  <div className="text-2xl font-bold text-blue-600">+{score.trainingBonus}</div>
                   <div className="text-sm text-gray-600">Social Score Bonus</div>
                   <div className="text-xs text-gray-500 mt-1">From completed training</div>
                 </div>
                 
                 <div className="text-center p-4 bg-green-50 rounded-lg">
                   <TrendingUp className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-green-600">+{socialScore?.queueBonus || 0}%</div>
+                  <div className="text-2xl font-bold text-green-600">+{score.queueBonus}%</div>
                   <div className="text-sm text-gray-600">Queue Priority</div>
                   <div className="text-xs text-gray-500 mt-1">Higher booking chances</div>
                 </div>
                 
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <Award className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-yellow-600">{socialScore?.tier || 'Bronze'}</div>
+                  <div className="text-2xl font-bold text-yellow-600">{score.tier}</div>
                   <div className="text-sm text-gray-600">Provider Tier</div>
                   <div className="text-xs text-gray-500 mt-1">Based on training & performance</div>
                 </div>
