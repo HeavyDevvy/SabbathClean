@@ -6,6 +6,7 @@ import { registerAuthRoutes } from "./auth-routes";
 import { registerPaymentRoutes } from "./payment-routes";
 import { registerPushNotificationRoutes } from "./push-notification-routes";
 import { registerCustomerReviewRoutes } from "./customer-review-routes";
+import { registerSupportRoutes } from "./support-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -995,6 +996,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register customer review routes
   registerCustomerReviewRoutes(app);
+  
+  // Register support routes
+  registerSupportRoutes(app);
 
   const httpServer = createServer(app);
 

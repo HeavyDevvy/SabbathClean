@@ -24,6 +24,8 @@ import ServicesPage from "@/pages/services";
 import PaymentPage from "@/pages/payment";
 import MobileApp from "@/pages/mobile-app";
 import TrackingPage from "@/pages/tracking";
+import Contact from "@/pages/contact";
+import Support from "@/pages/support";
 
 function Router() {
   return (
@@ -46,6 +48,8 @@ function Router() {
       <Route path="/mobile-app" component={MobileApp} />
       <Route path="/tracking" component={TrackingPage} />
       <Route path="/tracking/:bookingId" component={TrackingPage} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/support" component={Support} />
       <Route path="/offline" component={Offline} />
       <Route component={NotFound} />
     </Switch>
