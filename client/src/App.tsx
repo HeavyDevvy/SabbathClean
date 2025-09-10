@@ -36,6 +36,9 @@ import ProviderSupport from "@/pages/provider-support";
 import BerryStars from "@/pages/berry-stars";
 import ProviderEarnings from "@/pages/provider-earnings";
 import Quote from "@/pages/quote";
+import AdminPortal from "@/pages/admin-portal";
+import VerifyEmail from "@/pages/verify-email";
+import ResetPassword from "@/pages/reset-password";
 
 function Router() {
   return (
@@ -50,6 +53,10 @@ function Router() {
       <Route path="/services" component={ServicesPage} />
       <Route path="/quote" component={Quote} />
       <Route path="/payment" component={PaymentPage} />
+      <Route path="/admin" component={AdminPortal} />
+      <Route path="/admin-portal" component={AdminPortal} />
+      <Route path="/verify-email" component={VerifyEmail} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/providers" component={Providers} />
       <Route path="/provider-onboarding" component={EnhancedProviderOnboarding} />
       <Route path="/provider-training" component={ProviderTraining} />

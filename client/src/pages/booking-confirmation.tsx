@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Navigation } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Navigation, Share2, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   // In a real app, this would come from the booking data
   const bookingDetails = {
@@ -25,6 +27,134 @@ export default function BookingConfirmation() {
     providerPhone: "+27 82 123 4567",
     customerEmail: "john.doe@example.com",
     customerPhone: "+27 123 456 7890"
+  };
+
+  // Clean, single-page receipt generation
+  const generateCleanReceipt = () => {
+    const receiptContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Berry Events Booking Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
+          .logo { width: 80px; height: auto; margin-bottom: 10px; }
+          .booking-id { font-size: 24px; color: #2563eb; font-weight: bold; }
+          .section { margin: 20px 0; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
+          .section h3 { margin: 0 0 10px 0; color: #374151; }
+          .detail-row { display: flex; justify-content: space-between; margin: 8px 0; }
+          .total { font-size: 20px; font-weight: bold; color: #059669; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Berry Events</h1>
+          <h2>Booking Receipt</h2>
+          <div class="booking-id">Reference: ${bookingDetails.bookingId}</div>
+        </div>
+        
+        <div class="section">
+          <h3>Service Details</h3>
+          <div class="detail-row"><span>Service:</span><span>${bookingDetails.service}</span></div>
+          <div class="detail-row"><span>Date:</span><span>${bookingDetails.date}</span></div>
+          <div class="detail-row"><span>Time:</span><span>${bookingDetails.time} (${bookingDetails.duration})</span></div>
+          <div class="detail-row"><span>Location:</span><span>${bookingDetails.address}</span></div>
+        </div>
+        
+        <div class="section">
+          <h3>Service Provider</h3>
+          <div class="detail-row"><span>Provider:</span><span>${bookingDetails.providerName}</span></div>
+          <div class="detail-row"><span>Contact:</span><span>${bookingDetails.providerPhone}</span></div>
+        </div>
+        
+        <div class="section">
+          <h3>Payment Summary</h3>
+          <div class="detail-row"><span>Service Amount:</span><span>R${bookingDetails.amount}</span></div>
+          <div class="detail-row"><span>Platform Fee:</span><span>Included</span></div>
+          <div class="detail-row total"><span>Total Paid:</span><span>R${bookingDetails.amount}</span></div>
+          <div style="margin-top: 10px; font-size: 12px; color: #059669;">✓ Payment processed securely via Berry Events Bank</div>
+        </div>
+        
+        <div class="footer">
+          <p><strong>Berry Events</strong> - Your trusted home services platform</p>
+          <p>Customer Service: customercare@berryevents.co.za | +27 61 279 6476</p>
+          <p>Terms & Conditions apply. All services backed by Berry Events guarantee.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([receiptContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `berry-events-receipt-${bookingDetails.bookingId}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Receipt Downloaded!",
+      description: "Clean booking receipt saved to your downloads folder.",
+    });
+  };
+
+  // WhatsApp sharing functionality
+  const shareViaWhatsApp = () => {
+    const message = `🏡 Berry Events Booking Confirmed!
+
+📋 Reference: ${bookingDetails.bookingId}
+🛠️ Service: ${bookingDetails.service}
+📅 Date: ${bookingDetails.date}
+⏰ Time: ${bookingDetails.time}
+📍 Location: ${bookingDetails.address}
+👤 Provider: ${bookingDetails.providerName}
+💰 Amount: R${bookingDetails.amount}
+
+✅ Booking confirmed and payment processed securely!
+
+Powered by Berry Events - Your trusted home services platform`;
+    
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+
+    toast({
+      title: "WhatsApp Opened!",
+      description: "Share your booking details with friends and family.",
+    });
+  };
+
+  // Email sharing functionality
+  const shareViaEmail = () => {
+    const subject = `Berry Events Booking Confirmation - ${bookingDetails.bookingId}`;
+    const body = `Dear Friend,
+
+I wanted to share my Berry Events booking details with you:
+
+Booking Reference: ${bookingDetails.bookingId}
+Service: ${bookingDetails.service}
+Date & Time: ${bookingDetails.date} at ${bookingDetails.time}
+Location: ${bookingDetails.address}
+Provider: ${bookingDetails.providerName}
+Amount Paid: R${bookingDetails.amount}
+
+Berry Events made it so easy to book reliable home services!
+
+Check them out: https://berryevents.co.za
+
+Best regards`;
+    
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+
+    toast({
+      title: "Email App Opened!",
+      description: "Share your booking confirmation via email.",
+    });
   };
 
   return (
@@ -205,24 +335,57 @@ export default function BookingConfirmation() {
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button
-              onClick={() => setLocation("/")}
-              className="flex-1 bg-gray-600 hover:bg-gray-700"
-              data-testid="button-home"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="flex-1 border-gray-300"
-              data-testid="button-download"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download Receipt
-            </Button>
+          <div className="space-y-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => setLocation("/")}
+                className="flex-1 bg-gray-600 hover:bg-gray-700"
+                data-testid="button-home"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+              
+              <Button
+                onClick={generateCleanReceipt}
+                variant="outline"
+                className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50"
+                data-testid="button-download"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Receipt
+              </Button>
+            </div>
+
+            {/* Share Booking Section */}
+            <Card className="bg-purple-50 border-purple-200">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-purple-900 mb-3 flex items-center">
+                  <Share2 className="h-5 w-5 mr-2" />
+                  Share Your Booking
+                </h3>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    onClick={shareViaWhatsApp}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    data-testid="button-share-whatsapp"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Share via WhatsApp
+                  </Button>
+                  <Button
+                    onClick={shareViaEmail}
+                    variant="outline"
+                    className="flex-1 border-purple-300 text-purple-600 hover:bg-purple-50"
+                    data-testid="button-share-email"
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Share via Email
+                  </Button>
+                </div>
+                <p className="text-sm text-purple-700 mt-2">Share your booking details with friends and family!</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Berry Events Customer Service */}

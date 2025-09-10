@@ -3,6 +3,10 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import { config } from "dotenv";
+
+// Load environment variables from .env file
+config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

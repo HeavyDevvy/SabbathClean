@@ -1112,4 +1112,123 @@ export function registerAuthRoutes(app: Express) {
       res.status(500).json({ message: 'Password reset failed' });
     }
   });
+
+  // Admin authentication endpoints
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Get admin credentials from environment variables
+      const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@berryevents.co.za';
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+      
+      // Ensure admin password is set in environment
+      if (!ADMIN_PASSWORD) {
+        console.error('ADMIN_PASSWORD environment variable not set');
+        return res.status(500).json({ message: 'Admin authentication not configured' });
+      }
+      
+      // Check admin credentials
+      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+      }
+
+      // Generate admin token
+      const adminToken = jwt.sign(
+        { userId: 'admin', type: 'admin', role: 'admin' },
+        JWT_SECRET,
+        { expiresIn: '8h' }
+      );
+
+      res.json({
+        message: 'Admin login successful',
+        token: adminToken,
+        user: {
+          id: 'admin',
+          email: ADMIN_EMAIL,
+          role: 'admin'
+        }
+      });
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ message: 'Admin login failed' });
+    }
+  });
+
+  // Admin middleware
+  const authenticateAdmin = async (req: any, res: any, next: any) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'Admin token required' });
+    }
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      if (decoded.role !== 'admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      req.admin = decoded;
+      next();
+    } catch (error) {
+      return res.status(403).json({ message: 'Invalid admin token' });
+    }
+  };
+
+  // Admin stats endpoint
+  app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Admin stats error:', error);
+      res.status(500).json({ message: 'Failed to fetch admin stats' });
+    }
+  });
+
+  // Admin users endpoint
+  app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Admin users error:', error);
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  // Admin providers endpoint
+  app.get('/api/admin/providers', authenticateAdmin, async (req, res) => {
+    try {
+      const providers = await storage.getAllProviders();
+      res.json(providers);
+    } catch (error) {
+      console.error('Admin providers error:', error);
+      res.status(500).json({ message: 'Failed to fetch providers' });
+    }
+  });
+
+  // Provider approval endpoints
+  app.post('/api/admin/providers/:providerId/approve', authenticateAdmin, async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      await storage.updateProviderVerificationStatus(providerId, 'approved');
+      res.json({ message: 'Provider approved successfully' });
+    } catch (error) {
+      console.error('Provider approval error:', error);
+      res.status(500).json({ message: 'Failed to approve provider' });
+    }
+  });
+
+  app.post('/api/admin/providers/:providerId/decline', authenticateAdmin, async (req, res) => {
+    try {
+      const { providerId } = req.params;
+      await storage.updateProviderVerificationStatus(providerId, 'rejected');
+      res.json({ message: 'Provider declined successfully' });
+    } catch (error) {
+      console.error('Provider decline error:', error);
+      res.status(500).json({ message: 'Failed to decline provider' });
+    }
+  });
 }

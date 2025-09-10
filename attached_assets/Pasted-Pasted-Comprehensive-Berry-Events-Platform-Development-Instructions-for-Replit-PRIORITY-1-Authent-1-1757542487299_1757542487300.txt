@@ -1,0 +1,174 @@
+Pasted--Comprehensive-Berry-Events-Platform-Development-Instructions-for-Replit-PRIORITY-1-Authent-1757541969686_1757541969687.txt
+# Comprehensive Berry Events Platform Development Instructions for Replit
+
+## 🚀 PRIORITY 1: Authentication System Overhaul
+
+### Fix Sign Up/Sign In Functionality
+**Current Issues**: Direct and social authentication not working
+**Requirements**:
+
+1. **Direct Authentication**:
+   - Fix user registration with email/password
+   - Implement proper form validation and error handling
+   - Add email verification system
+   - Fix password reset functionality
+   - Ensure secure password hashing (bcrypt/argon2)
+
+2. **Social Authentication Integration**:
+   Integrate with the following OAuth providers:
+   - **Gmail/Google**: Use Google OAuth 2.0 API
+   - **Facebook**: Facebook Login API
+   - **Twitter**: Twitter API v2 OAuth
+   - **Instagram**: Instagram Basic Display API
+   - **Apple**: Sign in with Apple
+
+3. **Sign Out Functionality**:
+   - Implement secure logout across all authentication methods
+   - Clear session tokens and cookies
+   - Redirect to homepage after logout
+   - Handle social provider logout where applicable
+
+### Implementation Steps:
+```javascript
+// Example OAuth configuration needed
+const authProviders = {
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    scope: ['email', 'profile']
+  },
+  facebook: {
+    appId: process.env.FACEBOOK_APP_ID,
+    appSecret: process.env.FACEBOOK_APP_SECRET
+  },
+  twitter: {
+    apiKey: process.env.TWITTER_API_KEY,
+    apiSecret: process.env.TWITTER_API_SECRET
+  },
+  instagram: {
+    clientId: process.env.INSTAGRAM_CLIENT_ID,
+    clientSecret: process.env.INSTAGRAM_CLIENT_SECRET
+  },
+  apple: {
+    clientId: process.env.APPLE_CLIENT_ID,
+    teamId: process.env.APPLE_TEAM_ID,
+    keyId: process.env.APPLE_KEY_ID
+  }
+}
+```
+
+## 🎛️ PRIORITY 2: Admin CRM Portal Development
+
+### Admin Portal Access
+- **Login URL**: `/admin` or `/admin-portal`
+- **Admin Email**: admin@berryevents.co.za
+- **Admin Password**: 12345
+- **Security**: Implement role-based access control
+
+### CRM Features to Build
+
+#### 1. Dashboard Overview
+- Total users (consumers & providers)
+- Active bookings and revenue metrics
+- Pending applications for approval
+- System health monitoring
+- Recent activity feed
+
+#### 2. User Management
+- **Consumer Management**:
+  - View all registered consumers
+  - Search and filter functionality
+  - Account status management (active/suspended/banned)
+  - Booking history per consumer
+  - Support ticket resolution
+
+- **Provider Management**:
+  - View all service providers
+  - Application approval/decline workflow
+  - Provider verification status
+  - Performance metrics and ratings
+  - Commission and payment tracking
+
+#### 3. Application Processing System
+**Automated Workflow Features**:
+- Application queue with priority sorting
+- Document verification checklist
+- Background check integration points
+- Approval/decline with reason codes
+- Automated email notifications
+- Appeal process management
+
+#### 4. External Verification Integration
+**Individual Verification Services**:
+- ID document verification API integration
+- Background check service connections
+- Reference verification systems
+- Skills/qualification verification
+
+**Business Verification Services**:
+- Business registration verification
+- Tax compliance checks
+- Insurance verification
+- License and permit validation
+
+#### 5. Booking Management
+- Real-time booking overview
+- Dispute resolution system
+- Refund and cancellation management
+- Service quality monitoring
+- Revenue tracking and reporting
+
+#### 6. Communication Center
+- Bulk email/SMS campaigns
+- Customer support ticket system
+- Provider communication tools
+- Automated notification management
+- Template management system
+
+#### 7. Analytics & Reporting
+- Revenue and commission reports
+- User growth analytics
+- Service performance metrics
+- Geographic service distribution
+- Seasonal trend analysis
+- Export functionality (PDF/Excel)
+
+#### 8. System Configuration
+- Platform settings management
+- Commission rate configuration
+- Service category management
+- Pricing structure controls
+- Feature toggles and A/B testing
+
+## 📄 PRIORITY 3: Booking System Fixes
+
+### Fix Booking Confirmation Receipt
+**Current Issue**: Receipt downloads 20 pages instead of booking details only
+
+**Fix Requirements**:
+1. Create a clean, single-page receipt template
+2. Include only essential booking information:
+   - Booking reference number
+   - Service details and provider info
+   - Date, time, and location
+   - Customer information
+   - Payment summary
+   - Terms and conditions (concise)
+3. Implement PDF generation with proper formatting
+4. Ensure receipt is mobile-friendly
+
+```html
+<!-- Receipt Template Structure -->
+<div class="receipt-template">
+  <header>Berry Events - Booking Receipt</header>
+  <div class="booking-details">
+    <!-- Essential booking info only -->
+  </div>
+  <div class="payment-summary">
+    <!-- Payment breakdown -->
+  </div>
+  <footer>Contact & Terms</footer>
+</div>
+```
+
+### Fix Share Booking Functionality...

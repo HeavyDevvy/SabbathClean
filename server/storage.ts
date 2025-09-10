@@ -43,7 +43,7 @@ import {
   providerAssessmentResults
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -63,6 +63,11 @@ export interface IStorage {
   setPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
   getUserByPasswordResetToken(token: string): Promise<User | undefined>;
   resetUserPassword(userId: string, hashedPassword: string): Promise<void>;
+  // Admin methods
+  getAdminStats(): Promise<any>;
+  getAllUsers(): Promise<User[]>;
+  getAllProviders(): Promise<ServiceProvider[]>;
+  updateProviderVerificationStatus(providerId: string, status: string): Promise<void>;
   
   // Service Provider operations
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
@@ -216,6 +221,58 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
+  }
+
+  // Admin methods implementation
+  async getAdminStats(): Promise<any> {
+    try {
+      const totalUsersResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const totalProvidersResult = await db.select({ count: sql<number>`count(*)` }).from(serviceProviders);
+      const activeBookingsResult = await db.select({ count: sql<number>`count(*)` }).from(bookings).where(eq(bookings.status, 'confirmed'));
+      const pendingApplicationsResult = await db.select({ count: sql<number>`count(*)` }).from(serviceProviders).where(eq(serviceProviders.verificationStatus, 'pending'));
+      
+      // Calculate total revenue (sum of completed bookings)
+      const revenueResult = await db.select({ 
+        total: sql<number>`COALESCE(SUM(CAST(total_price AS DECIMAL)), 0)` 
+      }).from(bookings).where(eq(bookings.status, 'completed'));
+
+      return {
+        totalUsers: totalUsersResult[0]?.count || 0,
+        totalProviders: totalProvidersResult[0]?.count || 0,
+        activeBookings: activeBookingsResult[0]?.count || 0,
+        pendingApplications: pendingApplicationsResult[0]?.count || 0,
+        totalRevenue: parseFloat(revenueResult[0]?.total?.toString() || '0')
+      };
+    } catch (error) {
+      console.error('Error fetching admin stats:', error);
+      return {
+        totalUsers: 0,
+        totalProviders: 0,
+        activeBookings: 0,
+        pendingApplications: 0,
+        totalRevenue: 0
+      };
+    }
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const result = await db.select().from(users).orderBy(desc(users.createdAt));
+    return result;
+  }
+
+  async getAllProviders(): Promise<ServiceProvider[]> {
+    const result = await db.select().from(serviceProviders).orderBy(desc(serviceProviders.createdAt));
+    return result;
+  }
+
+  async updateProviderVerificationStatus(providerId: string, status: string): Promise<void> {
+    await db.update(serviceProviders)
+      .set({ 
+        verificationStatus: status,
+        isVerified: status === 'approved',
+        updatedAt: new Date()
+      })
+      .where(eq(serviceProviders.id, providerId));
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
