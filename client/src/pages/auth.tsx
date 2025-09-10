@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { User, Mail, Phone, Lock, UserPlus, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import EnhancedSocialLogin from "@/components/enhanced-social-login";
+import { authClient } from "@/lib/auth-client";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -29,29 +30,16 @@ export default function Auth() {
     password: ""
   });
 
-  // Registration mutation
+  // Registration mutation using unified auth client
   const registerMutation = useMutation({
     mutationFn: async (userData: typeof signUpData) => {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          email: userData.email,
-          phone: userData.phone,
-          password: userData.password
-        }),
+      return await authClient.register({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone || undefined, // Make phone optional
+        password: userData.password
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-      
-      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -72,10 +60,23 @@ export default function Auth() {
         setLocation("/");
       }, 1000);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error('Registration error:', error);
+      
+      // Handle specific error types for better user feedback
+      let errorMessage = error.message || "Failed to create account. Please try again.";
+      
+      if (error.message?.includes('Email already registered')) {
+        errorMessage = "This email is already registered. Please try signing in instead.";
+      } else if (error.message?.includes('Invalid input data')) {
+        errorMessage = "Please check your information and try again. Make sure all required fields are filled correctly.";
+      } else if (error.message?.includes('password')) {
+        errorMessage = "Password must be at least 6 characters long.";
+      }
+      
       toast({
         title: "Registration Failed",
-        description: error.message || "Failed to create account. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -96,23 +97,14 @@ export default function Auth() {
     registerMutation.mutate(signUpData);
   };
 
-  // Login mutation
+  // Login mutation using unified auth client
   const loginMutation = useMutation({
     mutationFn: async (loginData: typeof signInData) => {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
+      return await authClient.login({
+        email: loginData.email,
+        password: loginData.password,
+        rememberMe: false
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-      
-      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -133,10 +125,20 @@ export default function Auth() {
         setLocation("/");
       }, 1000);
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error('Login error:', error);
+      
+      let errorMessage = error.message || "Login failed. Please try again.";
+      
+      if (error.message?.includes('Invalid email or password')) {
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
+      } else if (error.message?.includes('User not found')) {
+        errorMessage = "No account found with this email. Please check your email or sign up instead.";
+      }
+      
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -306,18 +308,17 @@ export default function Auth() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Phone Number (Optional)</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="+27 123 456 7890"
+                      placeholder="+27 123 456 7890 (Optional)"
                       className="pl-10"
                       value={signUpData.phone}
                       onChange={(e) => setSignUpData({...signUpData, phone: e.target.value})}
-                      required
-                      data-testid="input-phone"
+                      data-testid="input-signup-phone"
                     />
                   </div>
                 </div>
