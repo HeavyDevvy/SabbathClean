@@ -35,6 +35,7 @@ import Press from "@/pages/press";
 import ProviderSupport from "@/pages/provider-support";
 import BerryStars from "@/pages/berry-stars";
 import ProviderEarnings from "@/pages/provider-earnings";
+import Quote from "@/pages/quote";
 
 function Router() {
   return (
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/booking-confirmation" component={BookingConfirmation} />
       <Route path="/bookings" component={Bookings} />
       <Route path="/services" component={ServicesPage} />
+      <Route path="/quote" component={Quote} />
       <Route path="/payment" component={PaymentPage} />
       <Route path="/providers" component={Providers} />
       <Route path="/provider-onboarding" component={EnhancedProviderOnboarding} />

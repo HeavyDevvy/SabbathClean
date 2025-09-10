@@ -221,7 +221,38 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
   };
 
   const onSubmit = (data: BookingFormData) => {
-    createBookingMutation.mutate(data);
+    // Generate quote instead of immediate booking
+    generateQuote(data);
+  };
+
+  const generateQuote = (data: BookingFormData) => {
+    const provider = selectedMovingProvider || nearbyProviders.find(p => p.id === selectedProvider) || nearbyProviders[0];
+    
+    // Prepare quote parameters
+    const quoteParams = new URLSearchParams({
+      service: currentService?.name || "Service",
+      category: serviceId || "",
+      date: data.scheduledDate || "",
+      time: data.scheduledTime || "",
+      location: data.address || "",
+      customerName: (data as any).customerName || "",
+      customerEmail: (data as any).customerEmail || "",
+      customerPhone: (data as any).customerPhone || "",
+      baseRate: calculateTotalPrice(),
+      duration: serviceId === "waitering" ? `${(data as any).duration || 4} hours` : "2-3 hours",
+      // Add service-specific details
+      propertySize: (data as any).propertySize || "",
+      specialRequests: data.specialInstructions || "",
+      frequency: (data as any).frequency || "One-time",
+      guestCount: (data as any).guestCount || (data as any).guests || "",
+      eventType: (data as any).eventType || "",
+      cuisineType: selectedCuisine || "",
+      menuType: menuType || ""
+    });
+
+    // Close modal and redirect to quote page
+    onClose();
+    window.location.href = `/quote?${quoteParams.toString()}`;
   };
 
   const calculateTotalPrice = () => {
@@ -966,13 +997,10 @@ export default function ServiceSpecificBooking({ isOpen, onClose, serviceId }: S
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider) || 
-                    (paymentDetails.paymentMethod === "card" && (!paymentDetails.cardNumber || !paymentDetails.cardholderName || !paymentDetails.expiryDate || !paymentDetails.cvv))}
+                  disabled={createBookingMutation.isPending || (!selectedProvider && !selectedMovingProvider)}
                   className="min-w-[120px]"
                 >
-                  {createBookingMutation.isPending ? "Processing Payment..." : 
-                    paymentDetails.paymentMethod === "bank_transfer" ? `Book Service & Get Payment Details` :
-                    `Pay R${(parseFloat(calculateTotalPrice()) + 15).toFixed(2)} & Book`}
+                  {createBookingMutation.isPending ? "Generating Quote..." : "Get Quote"}
                 </Button>
               </div>
             </form>
