@@ -95,6 +95,12 @@ export class AuthClient {
 
   async getCurrentUser(): Promise<User | null> {
     try {
+      // Ensure we have the latest token from localStorage
+      if (typeof window !== 'undefined') {
+        this.accessToken = localStorage.getItem('accessToken');
+        this.refreshToken = localStorage.getItem('refreshToken');
+      }
+
       if (!this.accessToken) {
         return null;
       }
@@ -106,8 +112,8 @@ export class AuthClient {
         },
       });
 
-      if (response.status === 401) {
-        // Token expired, try to refresh
+      if (response.status === 401 || response.status === 403) {
+        // Token expired or invalid, try to refresh
         if (this.refreshToken) {
           const refreshed = await this.refreshAccessToken();
           if (refreshed) {
@@ -127,6 +133,7 @@ export class AuthClient {
       return await response.json();
     } catch (error) {
       console.error('Get current user error:', error);
+      this.clearTokens(); // Clear tokens on error
       return null;
     }
   }
