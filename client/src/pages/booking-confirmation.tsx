@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Share2, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 import berryLogoPath from "@assets/PHOTO-2025-07-11-15-55-28_1757585084424.jpg";
 
 export default function BookingConfirmation() {
@@ -29,74 +30,101 @@ export default function BookingConfirmation() {
     customerPhone: "+27 123 456 7890"
   };
 
-  // Clean, single-page receipt generation
+  // Generate PDF receipt
   const generateCleanReceipt = () => {
-    const receiptContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Berry Events Booking Receipt</title>
-        <style>
-          body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 20px; }
-          .booking-id { font-size: 24px; color: #2563eb; font-weight: bold; }
-          .section { margin: 20px 0; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
-          .section h3 { margin: 0 0 10px 0; color: #374151; }
-          .detail-row { display: flex; justify-content: space-between; margin: 8px 0; }
-          .total { font-size: 20px; font-weight: bold; color: #059669; }
-          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #6b7280; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <img src="data:image/jpeg;base64,${btoa('Berry Events Logo')}" alt="Berry Events" style="width: 120px; height: auto; margin: 0 auto 15px auto; display: block; border-radius: 8px;">
-          <h1 style="color: #7c3aed; margin: 0;">Berry Events</h1>
-          <h2 style="margin: 5px 0 15px 0;">Booking Receipt</h2>
-          <div class="booking-id">Reference: ${bookingDetails.bookingId}</div>
-        </div>
-        
-        <div class="section">
-          <h3>Service Details</h3>
-          <div class="detail-row"><span>Service:</span><span>${bookingDetails.service}</span></div>
-          <div class="detail-row"><span>Date:</span><span>${bookingDetails.date}</span></div>
-          <div class="detail-row"><span>Time:</span><span>${bookingDetails.time} (${bookingDetails.duration})</span></div>
-          <div class="detail-row"><span>Location:</span><span>${bookingDetails.address}</span></div>
-        </div>
-        
-        <div class="section">
-          <h3>Service Provider</h3>
-          <div class="detail-row"><span>Provider:</span><span>${bookingDetails.providerName}</span></div>
-          <div class="detail-row"><span>Contact:</span><span>${bookingDetails.providerPhone}</span></div>
-        </div>
-        
-        <div class="section">
-          <h3>Payment Summary</h3>
-          <div class="detail-row total"><span>Total Paid:</span><span>R${bookingDetails.amount}</span></div>
-          <div style="margin-top: 10px; font-size: 12px; color: #059669;">✓ Payment processed securely</div>
-        </div>
-        
-        <div class="footer">
-          <p><strong>Berry Events</strong> - Your trusted home services platform</p>
-          <p>Customer Service: customercare@berryevents.co.za | +27 61 279 6476</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([receiptContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `berry-events-receipt-${bookingDetails.bookingId}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    const pdf = new jsPDF();
+    
+    // Set up the PDF
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    let currentY = 30;
+    
+    // Header - Berry Events branding
+    pdf.setFontSize(24);
+    pdf.setTextColor(124, 58, 237); // Purple color matching logo
+    pdf.text('BERRY EVENTS', pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 15;
+    pdf.setFontSize(16);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Booking Receipt', pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 20;
+    
+    // Booking Reference
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(`Booking Reference: ${bookingDetails.bookingId}`, pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 25;
+    
+    // Service Details Section
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    pdf.text('Service Details', margin, currentY);
+    
+    currentY += 10;
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Service: ${bookingDetails.service}`, margin, currentY);
+    
+    currentY += 8;
+    pdf.text(`Date: ${bookingDetails.date}`, margin, currentY);
+    
+    currentY += 8;
+    pdf.text(`Time: ${bookingDetails.time} (${bookingDetails.duration})`, margin, currentY);
+    
+    currentY += 8;
+    pdf.text(`Location: ${bookingDetails.address}`, margin, currentY);
+    
+    currentY += 20;
+    
+    // Service Provider Section
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Service Provider', margin, currentY);
+    
+    currentY += 10;
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Provider: ${bookingDetails.providerName}`, margin, currentY);
+    
+    currentY += 8;
+    pdf.text(`Contact: ${bookingDetails.providerPhone}`, margin, currentY);
+    
+    currentY += 20;
+    
+    // Payment Summary Section
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Payment Summary', margin, currentY);
+    
+    currentY += 15;
+    pdf.setFontSize(16);
+    pdf.setTextColor(5, 150, 105); // Green color
+    pdf.text(`Total Paid: R${bookingDetails.amount}`, pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 10;
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('✓ Payment processed securely via Berry Events Bank', pageWidth / 2, currentY, { align: 'center' });
+    
+    // Footer
+    currentY = pdf.internal.pageSize.getHeight() - 40;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    pdf.text('Berry Events - Your trusted home services platform', pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 8;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.text('Customer Service: customercare@berryevents.co.za | +27 61 279 6476', pageWidth / 2, currentY, { align: 'center' });
+    
+    currentY += 8;
+    pdf.text('Terms & Conditions apply. All services backed by Berry Events guarantee.', pageWidth / 2, currentY, { align: 'center' });
+    
+    // Save the PDF
+    pdf.save(`berry-events-receipt-${bookingDetails.bookingId}.pdf`);
+    
     toast({
-      title: "Receipt Downloaded!",
-      description: "Clean booking receipt saved to your downloads folder.",
+      title: "PDF Receipt Downloaded!",
+      description: "Your booking receipt has been saved as a PDF.",
     });
   };
 
