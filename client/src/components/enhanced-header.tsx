@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare } from "lucide-react";
+import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +45,33 @@ export default function EnhancedHeader({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(user);
+  const { toast } = useToast();
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await authClient.logout();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+      setLocation("/");
+      window.location.reload();
+    },
+    onError: () => {
+      toast({
+        title: "Logout Error",
+        description: "There was an error signing out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const services = [
     { id: "house-cleaning", name: "House Cleaning", icon: Sparkles },
@@ -110,13 +140,24 @@ export default function EnhancedHeader({
               <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
+            {/* Admin Portal - Always visible */}
             <Link 
-              href="/auth"
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-              data-testid="nav-sign-in"
+              href="/admin" 
+              className="text-purple-600 hover:text-purple-700 transition-colors duration-200 font-medium flex items-center"
+              data-testid="nav-admin-portal"
             >
-              Sign In
+              <Shield className="h-4 w-4 mr-1" />
+              Admin Portal
             </Link>
+            {!isAuthenticated && (
+              <Link 
+                href="/auth"
+                className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                data-testid="nav-sign-in"
+              >
+                Sign In
+              </Link>
+            )}
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
@@ -205,7 +246,12 @@ export default function EnhancedHeader({
                       Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="text-red-600"
+                      data-testid="button-logout"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>

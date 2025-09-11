@@ -1,7 +1,18 @@
 // PWA utilities for service worker registration and management
 
-export async function registerServiceWorker() {
+export async function unregisterServiceWorker() {
   if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const registration of registrations) {
+      await registration.unregister();
+    }
+    console.log('All service workers unregistered for development');
+  }
+}
+
+export async function registerServiceWorker() {
+  // Only register service worker in production
+  if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'

@@ -69,7 +69,7 @@ export default function EnhancedHome() {
         onBookingClick={handleBookingClick}
         onServiceSelect={handleServiceSelect}
         isAuthenticated={isAuthenticated}
-        user={user}
+        user={user || undefined}
         notificationCount={notificationCount}
         messageCount={messageCount}
       />
