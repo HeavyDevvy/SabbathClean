@@ -37,19 +37,46 @@ export default function BookingConfirmation() {
     // Set up the PDF
     const pageWidth = pdf.internal.pageSize.getWidth();
     const margin = 20;
-    let currentY = 30;
+    let currentY = 20;
     
-    // Header - Berry Events branding
-    pdf.setFontSize(24);
-    pdf.setTextColor(124, 58, 237); // Purple color matching logo
-    pdf.text('BERRY EVENTS', pageWidth / 2, currentY, { align: 'center' });
+    // Add Berry Events logo
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+      
+      // Add logo to PDF (centered, 40x40 size)
+      const logoSize = 30;
+      pdf.addImage(dataURL, 'JPEG', (pageWidth - logoSize) / 2, currentY, logoSize, logoSize);
+      
+      currentY += logoSize + 15;
+      
+      // Header - Berry Events branding
+      pdf.setFontSize(20);
+      pdf.setTextColor(124, 58, 237); // Purple color matching logo
+      pdf.text('BERRY EVENTS', pageWidth / 2, currentY, { align: 'center' });
+      
+      currentY += 12;
+      pdf.setFontSize(16);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text('Booking Receipt', pageWidth / 2, currentY, { align: 'center' });
+      
+      currentY += 20;
+      
+      // Continue with the rest of the PDF generation
+      generatePDFContent(pdf, pageWidth, margin, currentY);
+    };
     
-    currentY += 15;
-    pdf.setFontSize(16);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text('Booking Receipt', pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 20;
+    img.src = berryLogoPath;
+  };
+  
+  // Separate function for PDF content generation
+  const generatePDFContent = (pdf: jsPDF, pageWidth: number, margin: number, startY: number) => {
+    let currentY = startY;
     
     // Booking Reference
     pdf.setFontSize(14);
@@ -124,7 +151,7 @@ export default function BookingConfirmation() {
     
     toast({
       title: "PDF Receipt Downloaded!",
-      description: "Your booking receipt has been saved as a PDF.",
+      description: "Your booking receipt has been saved as a PDF with logo.",
     });
   };
 
