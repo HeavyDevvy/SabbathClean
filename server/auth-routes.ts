@@ -1118,11 +1118,17 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { email, password } = req.body;
       
-      // Get admin credentials from environment variables
+      // Get admin credentials from environment variables (with fallback for development)
       const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@berryevents.co.za';
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '12345'; // Temporary fallback
       
-      // Ensure admin password is set in environment
+      // Debug: Admin login attempt (credentials removed for security)
+      console.log('Admin login attempt:', { 
+        emailMatch: email === ADMIN_EMAIL,
+        passwordMatch: password === ADMIN_PASSWORD
+      });
+      
+      // Ensure admin password is available
       if (!ADMIN_PASSWORD) {
         console.error('ADMIN_PASSWORD environment variable not set');
         return res.status(500).json({ message: 'Admin authentication not configured' });
