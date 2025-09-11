@@ -343,7 +343,7 @@ export class DatabaseStorage implements IStorage {
       const inactiveUsersResult = await db.select({ count: sql<number>`count(*)` })
         .from(users)
         .where(sql`id NOT IN (
-          SELECT DISTINCT user_id FROM bookings 
+          SELECT DISTINCT customer_id FROM bookings 
           WHERE created_at >= NOW() - INTERVAL '90 days'
         )`);
       

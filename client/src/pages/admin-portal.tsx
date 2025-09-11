@@ -90,6 +90,13 @@ export default function AdminPortal() {
     email: "",
     password: ""
   });
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserForm, setEditUserForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    isVerified: false
+  });
 
   // Real-time data refresh using React Query
   useEffect(() => {
@@ -195,6 +202,31 @@ export default function AdminPortal() {
     adminLoginMutation.mutate(loginData);
   };
 
+  // User update mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: { userId: string; updates: Partial<User> }) => {
+      const response = await fetch(`/api/admin/users/${userData.userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify(userData.updates)
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "User Updated", description: "User information has been updated successfully." });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setEditingUser(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update user. Please try again.", variant: "destructive" });
+    }
+  });
+
+  // Provider approval mutation  
   const handleProviderApproval = useMutation({
     mutationFn: async ({ providerId, action }: { providerId: string; action: 'approve' | 'decline' }) => {
       const response = await fetch(`/api/admin/providers/${providerId}/${action}`, {
@@ -749,6 +781,22 @@ export default function AdminPortal() {
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingUser(user);
+                            setEditUserForm({
+                              firstName: user.firstName,
+                              lastName: user.lastName,
+                              email: user.email,
+                              isVerified: user.isVerified
+                            });
+                          }}
+                          data-testid={`edit-user-${user.id}`}
+                        >
+                          Edit
+                        </Button>
                         {user.isVerified ? (
                           <CheckCircle className="h-5 w-5 text-green-600" />
                         ) : (
@@ -886,6 +934,80 @@ export default function AdminPortal() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User Edit Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Edit User: {editingUser.firstName} {editingUser.lastName}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="edit-firstName">First Name</Label>
+                <Input
+                  id="edit-firstName"
+                  value={editUserForm.firstName}
+                  onChange={(e) => setEditUserForm({...editUserForm, firstName: e.target.value})}
+                  data-testid="input-edit-firstName"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-lastName">Last Name</Label>
+                <Input
+                  id="edit-lastName"
+                  value={editUserForm.lastName}
+                  onChange={(e) => setEditUserForm({...editUserForm, lastName: e.target.value})}
+                  data-testid="input-edit-lastName"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editUserForm.email}
+                  onChange={(e) => setEditUserForm({...editUserForm, email: e.target.value})}
+                  data-testid="input-edit-email"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-verified"
+                  checked={editUserForm.isVerified}
+                  onChange={(e) => setEditUserForm({...editUserForm, isVerified: e.target.checked})}
+                  data-testid="checkbox-edit-verified"
+                />
+                <Label htmlFor="edit-verified">Verified User</Label>
+              </div>
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  onClick={() => {
+                    updateUserMutation.mutate({
+                      userId: editingUser.id,
+                      updates: editUserForm
+                    });
+                  }}
+                  disabled={updateUserMutation.isPending}
+                  className="flex-1"
+                  data-testid="button-save-user"
+                >
+                  {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditingUser(null)}
+                  className="flex-1"
+                  data-testid="button-cancel-edit"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

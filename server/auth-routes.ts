@@ -1286,4 +1286,32 @@ export function registerAuthRoutes(app: Express) {
       res.status(500).json({ message: 'Failed to decline provider' });
     }
   });
+
+  // User update endpoint
+  app.patch('/api/admin/users/:userId', authenticateAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const updates = req.body;
+      
+      // Get current user to verify it exists
+      const currentUser = await storage.getUserById(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update user with provided fields
+      await storage.updateUser(userId, {
+        firstName: updates.firstName,
+        lastName: updates.lastName,
+        email: updates.email,
+        isVerified: updates.isVerified,
+        updatedAt: new Date()
+      });
+
+      res.json({ message: 'User updated successfully' });
+    } catch (error) {
+      console.error('User update error:', error);
+      res.status(500).json({ message: 'Failed to update user' });
+    }
+  });
 }
