@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Share2, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
+import berryLogoPath from "@assets/PHOTO-2025-07-11-15-55-28_1757585084424.jpg";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
@@ -50,8 +50,9 @@ export default function BookingConfirmation() {
       </head>
       <body>
         <div class="header">
-          <h1>Berry Events</h1>
-          <h2>Booking Receipt</h2>
+          <img src="data:image/jpeg;base64,${btoa('Berry Events Logo')}" alt="Berry Events" style="width: 120px; height: auto; margin: 0 auto 15px auto; display: block; border-radius: 8px;">
+          <h1 style="color: #7c3aed; margin: 0;">Berry Events</h1>
+          <h2 style="margin: 5px 0 15px 0;">Booking Receipt</h2>
           <div class="booking-id">Reference: ${bookingDetails.bookingId}</div>
         </div>
         
@@ -153,6 +154,15 @@ Best regards`;
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
+          {/* Berry Events Logo */}
+          <div className="mx-auto mb-4">
+            <img 
+              src={berryLogoPath} 
+              alt="Berry Events Logo" 
+              className="h-20 w-auto mx-auto rounded-lg"
+              data-testid="berry-logo"
+            />
+          </div>
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
             <CheckCircle className="h-10 w-10 text-green-600" />
           </div>
