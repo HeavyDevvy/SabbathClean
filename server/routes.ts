@@ -1070,6 +1070,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register support routes
   registerSupportRoutes(app);
 
+  // Wallet API Routes
+  app.get("/api/wallet/balance", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const balance = await storage.getWalletBalance(userId);
+      const wallet = await storage.getOrCreateWallet(userId);
+      
+      res.json({ 
+        balance, 
+        currency: wallet.currency,
+        autoReload: {
+          enabled: wallet.autoReloadEnabled,
+          threshold: parseFloat(wallet.autoReloadThreshold || "0"),
+          amount: parseFloat(wallet.autoReloadAmount || "0")
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/wallet/add-funds", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { amount, paymentIntentId, description } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const transaction = await storage.addWalletFunds(
+        userId, 
+        parseFloat(amount), 
+        paymentIntentId, 
+        description || "Added funds to wallet"
+      );
+      
+      const newBalance = await storage.getWalletBalance(userId);
+      
+      res.json({ 
+        transaction, 
+        newBalance,
+        message: "Funds added successfully"
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/wallet/payment", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { amount, bookingId, serviceId, description } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const transaction = await storage.processWalletPayment(
+        userId,
+        parseFloat(amount),
+        bookingId,
+        serviceId,
+        description || "Payment for service"
+      );
+      
+      const newBalance = await storage.getWalletBalance(userId);
+      
+      res.json({ 
+        transaction, 
+        newBalance,
+        message: "Payment processed successfully"
+      });
+    } catch (error: any) {
+      if (error.message === 'Insufficient wallet balance') {
+        return res.status(400).json({ message: "Insufficient wallet balance" });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/wallet/transactions", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      
+      const transactions = await storage.getWalletTransactions(userId, limit, offset);
+      
+      res.json({ transactions });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/wallet/auto-reload", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { enabled, threshold, amount, paymentMethodId } = req.body;
+      
+      if (enabled && (!threshold || !amount || threshold < 0 || amount < 0)) {
+        return res.status(400).json({ message: "Invalid auto-reload settings" });
+      }
+
+      await storage.updateAutoReloadSettings(userId, {
+        enabled: Boolean(enabled),
+        threshold: parseFloat(threshold || "0"),
+        amount: parseFloat(amount || "0"),
+        paymentMethodId
+      });
+      
+      res.json({ message: "Auto-reload settings updated successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Stripe Payment Intent creation for wallet funding
+  app.post("/api/wallet/create-payment-intent", authenticateToken, async (req, res) => {
+    try {
+      const { amount } = req.body;
+      
+      if (!amount || amount < 0.50) { // Minimum $0.50
+        return res.status(400).json({ message: "Minimum amount is $0.50" });
+      }
+
+      // Import Stripe here since it's optional
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2023-10-16'
+      });
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(parseFloat(amount) * 100), // Convert to cents
+        currency: 'usd',
+        metadata: {
+          purpose: 'wallet_funding',
+          userId: req.user?.id
+        }
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error('Stripe error:', error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time tracking updates

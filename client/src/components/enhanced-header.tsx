@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield } from "lucide-react";
+import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
@@ -241,6 +241,10 @@ export default function EnhancedHeader({
                       <Calendar className="mr-2 h-4 w-4" />
                       My Bookings
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLocation("/wallet")} data-testid="nav-wallet">
+                      <Wallet className="mr-2 h-4 w-4" />
+                      My Wallet
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setLocation("/settings")}>
                       <Settings className="mr-2 h-4 w-4" />
                       Settings
@@ -359,6 +363,15 @@ export default function EnhancedHeader({
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Profile
+                  </Link>
+                  <Link 
+                    href="/wallet" 
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium flex items-center"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    data-testid="mobile-nav-wallet"
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    My Wallet
                   </Link>
                   {user?.isProvider && (
                     <Link 

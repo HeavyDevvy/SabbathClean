@@ -39,6 +39,7 @@ import Quote from "@/pages/quote";
 import AdminPortal from "@/pages/admin-portal";
 import VerifyEmail from "@/pages/verify-email";
 import ResetPassword from "@/pages/reset-password";
+import Wallet from "@/pages/wallet";
 
 function Router() {
   return (
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/provider-training" component={ProviderTraining} />
       <Route path="/provider-dashboard" component={ProviderDashboard} />
       <Route path="/profile" component={Profile} />
+      <Route path="/wallet" component={Wallet} />
       <Route path="/notifications" component={NotificationSettings} />
       <Route path="/mobile-app" component={MobileApp} />
       <Route path="/tracking" component={TrackingPage} />

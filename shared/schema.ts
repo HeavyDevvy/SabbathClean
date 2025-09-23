@@ -700,3 +700,60 @@ export type InsertJobQueue = z.infer<typeof insertJobQueueSchema>;
 
 export type PaymentMethod = typeof paymentMethods.$inferSelect;
 export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
+
+// Wallet System Tables
+export const wallets = pgTable("wallets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  currency: text("currency").default("USD").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  // Auto-reload settings
+  autoReloadEnabled: boolean("auto_reload_enabled").default(false),
+  autoReloadThreshold: decimal("auto_reload_threshold", { precision: 10, scale: 2 }).default("10.00"),
+  autoReloadAmount: decimal("auto_reload_amount", { precision: 10, scale: 2 }).default("50.00"),
+  autoReloadPaymentMethodId: varchar("auto_reload_payment_method_id"),
+  // Stripe customer info
+  stripeCustomerId: text("stripe_customer_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  walletId: varchar("wallet_id").references(() => wallets.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: text("type").notNull(), // 'deposit', 'withdraw', 'payment', 'refund', 'auto_reload'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  balanceBefore: decimal("balance_before", { precision: 10, scale: 2 }).notNull(),
+  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  status: text("status").default("completed").notNull(), // 'pending', 'completed', 'failed', 'cancelled'
+  // Payment processing info
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeChargeId: text("stripe_charge_id"),
+  // Related entities
+  bookingId: varchar("booking_id").references(() => bookings.id),
+  serviceId: varchar("service_id").references(() => services.id),
+  metadata: jsonb("metadata"), // Additional transaction data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema exports for wallet tables
+export const insertWalletSchema = createInsertSchema(wallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;

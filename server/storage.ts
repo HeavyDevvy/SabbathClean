@@ -40,7 +40,13 @@ import {
   certifications,
   providerCertifications,
   skillAssessments,
-  providerAssessmentResults
+  providerAssessmentResults,
+  wallets,
+  walletTransactions,
+  type Wallet,
+  type InsertWallet,
+  type WalletTransaction,
+  type InsertWalletTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -68,6 +74,15 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   getAllProviders(): Promise<ServiceProvider[]>;
   updateProviderVerificationStatus(providerId: string, status: string): Promise<void>;
+
+  // Wallet methods
+  getOrCreateWallet(userId: string): Promise<Wallet>;
+  getWalletBalance(userId: string): Promise<number>;
+  addWalletFunds(userId: string, amount: number, stripePaymentIntentId?: string, description?: string): Promise<WalletTransaction>;
+  withdrawWalletFunds(userId: string, amount: number, description?: string): Promise<WalletTransaction>;
+  processWalletPayment(userId: string, amount: number, bookingId?: string, serviceId?: string, description?: string): Promise<WalletTransaction>;
+  getWalletTransactions(userId: string, limit?: number, offset?: number): Promise<WalletTransaction[]>;
+  updateAutoReloadSettings(userId: string, settings: { enabled: boolean; threshold: number; amount: number; paymentMethodId?: string }): Promise<void>;
   
   // Service Provider operations
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
@@ -431,6 +446,157 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(serviceProviders.id, providerId));
+  }
+
+  // Wallet methods implementation
+  async getOrCreateWallet(userId: string): Promise<Wallet> {
+    // First try to get existing wallet
+    const [existingWallet] = await db.select().from(wallets).where(eq(wallets.userId, userId));
+    
+    if (existingWallet) {
+      return existingWallet;
+    }
+
+    // Create new wallet if none exists
+    const [newWallet] = await db.insert(wallets)
+      .values({
+        userId,
+        balance: "0.00",
+        currency: "USD",
+        isActive: true
+      })
+      .returning();
+    
+    return newWallet;
+  }
+
+  async getWalletBalance(userId: string): Promise<number> {
+    const wallet = await this.getOrCreateWallet(userId);
+    return parseFloat(wallet.balance);
+  }
+
+  async addWalletFunds(userId: string, amount: number, stripePaymentIntentId?: string, description?: string): Promise<WalletTransaction> {
+    const wallet = await this.getOrCreateWallet(userId);
+    const currentBalance = parseFloat(wallet.balance);
+    const newBalance = currentBalance + amount;
+
+    // Update wallet balance
+    await db.update(wallets)
+      .set({ 
+        balance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(wallets.id, wallet.id));
+
+    // Record transaction
+    const [transaction] = await db.insert(walletTransactions)
+      .values({
+        walletId: wallet.id,
+        userId,
+        type: 'deposit',
+        amount: amount.toFixed(2),
+        balanceBefore: currentBalance.toFixed(2),
+        balanceAfter: newBalance.toFixed(2),
+        description: description || `Added funds to wallet`,
+        status: 'completed',
+        stripePaymentIntentId
+      })
+      .returning();
+
+    return transaction;
+  }
+
+  async withdrawWalletFunds(userId: string, amount: number, description?: string): Promise<WalletTransaction> {
+    const wallet = await this.getOrCreateWallet(userId);
+    const currentBalance = parseFloat(wallet.balance);
+    
+    if (currentBalance < amount) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    const newBalance = currentBalance - amount;
+
+    // Update wallet balance
+    await db.update(wallets)
+      .set({ 
+        balance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(wallets.id, wallet.id));
+
+    // Record transaction
+    const [transaction] = await db.insert(walletTransactions)
+      .values({
+        walletId: wallet.id,
+        userId,
+        type: 'withdraw',
+        amount: amount.toFixed(2),
+        balanceBefore: currentBalance.toFixed(2),
+        balanceAfter: newBalance.toFixed(2),
+        description: description || `Withdrawn funds from wallet`,
+        status: 'completed'
+      })
+      .returning();
+
+    return transaction;
+  }
+
+  async processWalletPayment(userId: string, amount: number, bookingId?: string, serviceId?: string, description?: string): Promise<WalletTransaction> {
+    const wallet = await this.getOrCreateWallet(userId);
+    const currentBalance = parseFloat(wallet.balance);
+    
+    if (currentBalance < amount) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    const newBalance = currentBalance - amount;
+
+    // Update wallet balance
+    await db.update(wallets)
+      .set({ 
+        balance: newBalance.toFixed(2),
+        updatedAt: new Date()
+      })
+      .where(eq(wallets.id, wallet.id));
+
+    // Record transaction
+    const [transaction] = await db.insert(walletTransactions)
+      .values({
+        walletId: wallet.id,
+        userId,
+        type: 'payment',
+        amount: amount.toFixed(2),
+        balanceBefore: currentBalance.toFixed(2),
+        balanceAfter: newBalance.toFixed(2),
+        description: description || `Payment for service`,
+        status: 'completed',
+        bookingId,
+        serviceId
+      })
+      .returning();
+
+    return transaction;
+  }
+
+  async getWalletTransactions(userId: string, limit: number = 50, offset: number = 0): Promise<WalletTransaction[]> {
+    return await db.select()
+      .from(walletTransactions)
+      .where(eq(walletTransactions.userId, userId))
+      .orderBy(desc(walletTransactions.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async updateAutoReloadSettings(userId: string, settings: { enabled: boolean; threshold: number; amount: number; paymentMethodId?: string }): Promise<void> {
+    await db.update(wallets)
+      .set({
+        autoReloadEnabled: settings.enabled,
+        autoReloadThreshold: settings.threshold.toFixed(2),
+        autoReloadAmount: settings.amount.toFixed(2),
+        autoReloadPaymentMethodId: settings.paymentMethodId,
+        updatedAt: new Date()
+      })
+      .where(eq(wallets.userId, userId));
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
