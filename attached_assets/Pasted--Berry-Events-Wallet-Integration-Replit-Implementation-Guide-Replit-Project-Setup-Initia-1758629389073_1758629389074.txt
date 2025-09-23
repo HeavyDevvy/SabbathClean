@@ -1,0 +1,516 @@
+# Berry Events Wallet Integration - Replit Implementation Guide
+
+## Replit Project Setup
+
+### Initial Configuration
+Create a new Replit project with the following structure:
+```
+berry-wallet/
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   └── styles/
+├── backend/
+│   ├── routes/
+│   ├── models/
+│   ├── middleware/
+│   └── utils/
+├── database/
+└── tests/
+```
+
+### Required Dependencies
+Add to `package.json`:
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "stripe": "^12.0.0",
+    "plaid": "^11.0.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "cors": "^2.8.5",
+    "helmet": "^6.1.5"
+  }
+}
+```
+
+## Core Implementation Tasks
+
+### 1. Wallet Backend API (Express.js)
+
+#### Environment Variables (.env)
+```bash
+# Payment Processing
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+PLAID_CLIENT_ID=your_plaid_client_id
+PLAID_SECRET=your_plaid_secret
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/berry-wallet
+JWT_SECRET=your_jwt_secret_here
+
+# Security
+ENCRYPTION_KEY=32-char-encryption-key
+API_RATE_LIMIT=100
+
+# Webhooks
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+#### Database Models (MongoDB/Mongoose)
+Create `models/Wallet.js`:
+```javascript
+const mongoose = require('mongoose');
+
+const walletSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  balance: { type: Number, default: 0, min: 0 },
+  currency: { type: String, default: 'USD' },
+  autoReload: {
+    enabled: { type: Boolean, default: false },
+    threshold: { type: Number, default: 10 },
+    amount: { type: Number, default: 50 },
+    paymentMethodId: String
+  },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+```
+
+#### API Routes Structure
+Create `routes/wallet.js`:
+```javascript
+const express = require('express');
+const router = express.Router();
+
+// GET /api/wallet - Get wallet balance and info
+router.get('/', authenticateToken, getWallet);
+
+// POST /api/wallet/add-funds - Add money to wallet
+router.post('/add-funds', authenticateToken, addFunds);
+
+// POST /api/wallet/withdraw - Withdraw from wallet
+router.post('/withdraw', authenticateToken, withdrawFunds);
+
+// GET /api/wallet/transactions - Get transaction history
+router.get('/transactions', authenticateToken, getTransactions);
+
+// POST /api/wallet/auto-reload - Configure auto-reload
+router.post('/auto-reload', authenticateToken, configureAutoReload);
+```
+
+### 2. Payment Processing Integration
+
+#### Stripe Setup (backend/utils/stripe.js)
+```javascript
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+class PaymentProcessor {
+  async createPaymentIntent(amount, currency = 'usd') {
+    return await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency,
+      metadata: { platform: 'berry-events' }
+    });
+  }
+
+  async processWalletTopup(userId, amount, paymentMethodId) {
+    // Implementation for wallet funding
+  }
+
+  async handleWebhook(payload, signature) {
+    // Stripe webhook handler for payment confirmations
+  }
+}
+```
+
+#### Bank Account Integration (Plaid)
+```javascript
+const { PlaidApi, Configuration, PlaidEnvironments } = require('plaid');
+
+const plaidClient = new PlaidApi(new Configuration({
+  basePath: PlaidEnvironments.sandbox, // Use production for live
+  baseOptions: {
+    headers: {
+      'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
+      'PLAID-SECRET': process.env.PLAID_SECRET,
+    },
+  },
+}));
+```
+
+### 3. Frontend Wallet Components (React)
+
+#### Wallet Dashboard Component
+Create `components/WalletDashboard.jsx`:
+```jsx
+import React, { useState, useEffect } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
+const WalletDashboard = () => {
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWalletData();
+  }, []);
+
+  const fetchWalletData = async () => {
+    // Fetch wallet balance and recent transactions
+  };
+
+  return (
+    <div className="wallet-dashboard">
+      <div className="balance-card">
+        <h2>Wallet Balance</h2>
+        <div className="balance-amount">${balance.toFixed(2)}</div>
+      </div>
+      
+      <div className="quick-actions">
+        <button onClick={handleAddFunds}>Add Funds</button>
+        <button onClick={handleWithdraw}>Withdraw</button>
+        <button onClick={handleAutoReload}>Auto-Reload Settings</button>
+      </div>
+
+      <TransactionHistory transactions={transactions} />
+    </div>
+  );
+};
+```
+
+#### Add Funds Modal
+Create `components/AddFundsModal.jsx`:
+```jsx
+import React, { useState } from 'react';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+const AddFundsModal = ({ isOpen, onClose, onSuccess }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [amount, setAmount] = useState(25);
+  const [processing, setProcessing] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    if (!stripe || !elements) return;
+    
+    setProcessing(true);
+    
+    // Process payment and add to wallet
+    try {
+      const result = await processPayment(amount);
+      if (result.success) {
+        onSuccess(amount);
+        onClose();
+      }
+    } catch (error) {
+      console.error('Payment failed:', error);
+    }
+    
+    setProcessing(false);
+  };
+
+  return (
+    <div className={`modal ${isOpen ? 'open' : ''}`}>
+      <div className="modal-content">
+        <h3>Add Funds to Wallet</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="amount-selector">
+            {[25, 50, 100, 200].map(preset => (
+              <button 
+                key={preset}
+                type="button"
+                className={amount === preset ? 'selected' : ''}
+                onClick={() => setAmount(preset)}
+              >
+                ${preset}
+              </button>
+            ))}
+          </div>
+          
+          <input 
+            type="number" 
+            value={amount} 
+            onChange={(e) => setAmount(Number(e.target.value))}
+            min="5"
+            max="1000"
+          />
+          
+          <CardElement />
+          
+          <button type="submit" disabled={processing}>
+            {processing ? 'Processing...' : `Add $${amount}`}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+```
+
+### 4. Security Implementation
+
+#### JWT Authentication Middleware
+Create `middleware/auth.js`:
+```javascript
+const jwt = require('jsonwebtoken');
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+};
+```
+
+#### Data Encryption Utils
+Create `utils/encryption.js`:
+```javascript
+const crypto = require('crypto');
+
+class EncryptionService {
+  constructor() {
+    this.algorithm = 'aes-256-gcm';
+    this.secretKey = process.env.ENCRYPTION_KEY;
+  }
+
+  encrypt(text) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipher(this.algorithm, this.secretKey);
+    cipher.setAAD(Buffer.from('berry-wallet', 'utf8'));
+    
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const tag = cipher.getAuthTag();
+    
+    return {
+      encrypted,
+      iv: iv.toString('hex'),
+      tag: tag.toString('hex')
+    };
+  }
+
+  decrypt(encryptedData) {
+    // Decryption implementation
+  }
+}
+```
+
+### 5. Auto-Reload System
+
+#### Background Job Processing
+Create `utils/autoReload.js`:
+```javascript
+const cron = require('node-cron');
+
+class AutoReloadService {
+  constructor() {
+    // Check for auto-reload every 5 minutes
+    cron.schedule('*/5 * * * *', () => {
+      this.processAutoReloads();
+    });
+  }
+
+  async processAutoReloads() {
+    const walletsNeedingReload = await Wallet.find({
+      'autoReload.enabled': true,
+      balance: { $lt: '$autoReload.threshold' }
+    }).populate('userId');
+
+    for (const wallet of walletsNeedingReload) {
+      await this.executeAutoReload(wallet);
+    }
+  }
+
+  async executeAutoReload(wallet) {
+    try {
+      const paymentResult = await this.processPayment(
+        wallet.autoReload.paymentMethodId,
+        wallet.autoReload.amount
+      );
+
+      if (paymentResult.success) {
+        wallet.balance += wallet.autoReload.amount;
+        await wallet.save();
+
+        // Log transaction
+        await this.logTransaction({
+          userId: wallet.userId,
+          type: 'auto_reload',
+          amount: wallet.autoReload.amount,
+          status: 'completed'
+        });
+
+        // Send notification
+        await this.sendNotification(wallet.userId, 'Auto-reload successful');
+      }
+    } catch (error) {
+      console.error('Auto-reload failed:', error);
+      await this.handleAutoReloadFailure(wallet, error);
+    }
+  }
+}
+```
+
+### 6. Event Integration
+
+#### Ticket Purchase with Wallet
+Create `utils/eventPurchase.js`:
+```javascript
+class EventPurchaseService {
+  async purchaseTicketWithWallet(userId, eventId, ticketQuantity) {
+    const wallet = await Wallet.findOne({ userId });
+    const event = await Event.findById(eventId);
+    
+    const totalCost = event.ticketPrice * ticketQuantity;
+    
+    if (wallet.balance < totalCost) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    // Start transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Deduct from wallet
+      wallet.balance -= totalCost;
+      await wallet.save({ session });
+
+      // Create ticket purchase
+      const purchase = new TicketPurchase({
+        userId,
+        eventId,
+        quantity: ticketQuantity,
+        totalAmount: totalCost,
+        paymentMethod: 'wallet',
+        status: 'confirmed'
+      });
+      await purchase.save({ session });
+
+      // Log transaction
+      await this.logTransaction({
+        userId,
+        type: 'ticket_purchase',
+        amount: totalCost,
+        eventId,
+        status: 'completed'
+      }, { session });
+
+      await session.commitTransaction();
+      return { success: true, purchase };
+      
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+}
+```
+
+### 7. Testing Setup
+
+#### Test Configuration
+Create `tests/wallet.test.js`:
+```javascript
+const request = require('supertest');
+const app = require('../app');
+const mongoose = require('mongoose');
+
+describe('Wallet API', () => {
+  beforeEach(async () => {
+    // Setup test database
+  });
+
+  afterEach(async () => {
+    // Cleanup
+  });
+
+  test('should create wallet for new user', async () => {
+    const response = await request(app)
+      .post('/api/wallet/create')
+      .set('Authorization', `Bearer ${testToken}`)
+      .expect(201);
+
+    expect(response.body.balance).toBe(0);
+  });
+
+  test('should add funds to wallet', async () => {
+    const response = await request(app)
+      .post('/api/wallet/add-funds')
+      .set('Authorization', `Bearer ${testToken}`)
+      .send({
+        amount: 50,
+        paymentMethodId: 'pm_test_card'
+      })
+      .expect(200);
+
+    expect(response.body.newBalance).toBe(50);
+  });
+});
+```
+
+## Replit Deployment Checklist
+
+### Environment Setup
+1. Configure Replit Secrets for all environment variables
+2. Enable PostgreSQL/MongoDB database add-on
+3. Set up SSL certificates for production
+4. Configure domain and custom DNS
+
+### Security Configuration
+- Enable Replit's built-in authentication
+- Set up rate limiting middleware
+- Configure CORS policies
+- Implement request logging
+- Set up monitoring and alerts
+
+### Performance Optimization
+- Enable Replit's CDN for static assets
+- Implement database connection pooling
+- Add Redis for session management
+- Set up background job processing
+- Configure auto-scaling policies
+
+## Development Workflow
+
+1. **Setup Phase**: Clone template, install dependencies
+2. **Backend Development**: Implement API routes and database models
+3. **Frontend Development**: Build React components
+4. **Integration Testing**: Connect frontend to backend
+5. **Payment Testing**: Use Stripe test mode
+6. **Security Review**: Audit authentication and encryption
+7. **Performance Testing**: Load test critical endpoints
+8. **Deployment**: Deploy to Replit production environment
+
+## Monitoring & Analytics
+
+Implement tracking for:
+- Wallet creation rates
+- Average balance per user
+- Transaction success rates
+- Auto-reload effectiveness
+- Payment method preferences
+- User retention after wallet adoption
+
+This implementation guide provides a complete roadmap for building the Berry Events wallet system on Replit, with all the convenience features of Uber's wallet while being tailored for event ticketing and payments.
