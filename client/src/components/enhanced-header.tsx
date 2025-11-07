@@ -114,20 +114,20 @@ export default function EnhancedHeader({
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search services, providers, or help..."
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 data-testid="search-input"
               />
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-7">
+          <nav className="hidden md:flex items-center space-x-6">
             <Link 
               href="/" 
               className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
