@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
-import logoImage from "@assets/Untitled design (2)_1762495887852.png";
+import logo from "@assets/Untitled design (2)_1762495887852.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
@@ -100,12 +100,7 @@ export default function EnhancedHeader({
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <img 
-                src={logoImage} 
-                alt="Berry Events Logo" 
-                className="h-8"
-                style={{ width: 'auto' }}
-              />
+              <img src={logo} alt="Berry Events logo" style={{ height: "42px", width: "auto" }} />
               <div className="hidden sm:block">
                 <span className="text-xl font-bold text-gray-900">Berry Events</span>
                 <p className="text-xs text-gray-500 -mt-1">All your home services</p>
