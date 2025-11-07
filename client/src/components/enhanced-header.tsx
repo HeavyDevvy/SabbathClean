@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
+import logoImage from "@assets/Untitled design (1)_1762495302156.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
@@ -99,9 +100,12 @@ export default function EnhancedHeader({
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">B</span>
-              </div>
+              <img 
+                src={logoImage} 
+                alt="Berry Events Logo" 
+                className="h-8"
+                style={{ width: 'auto' }}
+              />
               <div className="hidden sm:block">
                 <span className="text-xl font-bold text-gray-900">Berry Events</span>
                 <p className="text-xs text-gray-500 -mt-1">All your home services</p>
@@ -110,20 +114,20 @@ export default function EnhancedHeader({
           </Link>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+          <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search services, providers, or help..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                 data-testid="search-input"
               />
             </div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-7">
             <Link 
               href="/" 
               className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
