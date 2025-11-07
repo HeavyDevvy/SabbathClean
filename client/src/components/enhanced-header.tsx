@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
-import logoImage from "@assets/Untitled design (1)_1762495302156.png";
+import logoImage from "@assets/Untitled design (2)_1762495887852.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
