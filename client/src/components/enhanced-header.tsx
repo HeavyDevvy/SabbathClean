@@ -100,7 +100,7 @@ export default function EnhancedHeader({
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <img src={logo} alt="Berry Events logo" style={{ height: "42px", width: "auto" }} />
+              <img src={logo} alt="Berry Events logo" style={{ height: "63px", width: "auto" }} />
               <div className="hidden sm:block">
                 <span className="text-xl font-bold text-gray-900">Berry Events</span>
                 <p className="text-xs text-gray-500 -mt-1">All your home services</p>
