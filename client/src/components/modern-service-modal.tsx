@@ -547,12 +547,19 @@ export default function ModernServiceModal({
   // Map service IDs to their correct configurations
   const serviceIdMapping: Record<string, string> = {
     "cleaning": "cleaning",
-    "garden-care": "garden-care", 
+    "house-cleaning": "cleaning", // Map house-cleaning to cleaning config
+    "garden-care": "garden-care",
+    "garden-maintenance": "garden-maintenance", 
     "plumbing": "plumbing",
+    "plumbing-services": "plumbing",
     "electrical": "electrical",
+    "electrical-services": "electrical",
     "chef-catering": "chef-catering",
     "waitering": "event-staff", // waitering maps to event-staff config
+    "event-staff": "event-staff",
+    "event-staffing": "event-staff",
     "handyman": "handyman",
+    "handyman-services": "handyman",
     "beauty-wellness": "beauty-wellness",
     "moving": "moving",
     "au-pair": "au-pair"
@@ -716,7 +723,7 @@ export default function ModernServiceModal({
 
 
   const handleNext = () => {
-    if (step < currentConfig.steps) setStep(step + 1);
+    if (currentConfig && step < currentConfig.steps) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -1723,6 +1730,25 @@ export default function ModernServiceModal({
       </Card>
     </div>
   );
+
+  // Guard against undefined config
+  if (!currentConfig) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Service Not Available</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <p className="text-gray-600">
+              This service configuration is not available. Please select a different service.
+            </p>
+            <Button className="mt-4" onClick={onClose}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
