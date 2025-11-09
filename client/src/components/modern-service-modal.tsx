@@ -772,6 +772,9 @@ export default function ModernServiceModal({
 
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
+  
+  // Track if we need to show service selection (Step 0)
+  const needsServiceSelection = !serviceId || !currentConfig;
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -1142,24 +1145,86 @@ export default function ModernServiceModal({
     });
   };
 
-  // Guard against undefined config
-  if (!currentConfig) {
+  // Render service selection step (Step 0) when no service is selected
+  const renderServiceSelection = () => {
+    const availableServices = [
+      { id: "cleaning", config: serviceConfigs["cleaning"], description: "Professional house cleaning services" },
+      { id: "garden-care", config: serviceConfigs["garden-care"], description: "Complete garden maintenance" },
+      { id: "plumbing", config: serviceConfigs["plumbing"], description: "Expert plumbing repairs and installation" },
+      { id: "handyman", config: serviceConfigs["handyman"], description: "General handyman services" },
+      { id: "chef-catering", config: serviceConfigs["chef-catering"], description: "Professional catering and chef services" },
+      { id: "event-staff", config: serviceConfigs["event-staff"], description: "Waitering and event staffing" }
+    ];
+
     return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Service Not Available</DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-6">
-            <p className="text-gray-600">
-              This service configuration is not available. Please select a different service.
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <Sparkles className="h-12 w-12 text-primary mx-auto mb-3" />
+          <h3 className="text-lg font-semibold">Choose a Service</h3>
+          <p className="text-gray-600 text-sm">Select the service you'd like to book</p>
+          {bookedServices.length > 0 && (
+            <p className="text-sm text-green-600 mt-2">
+              {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''} already selected
             </p>
-            <Button className="mt-4" onClick={onClose}>Close</Button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {availableServices.map((service) => {
+            const isBooked = bookedServices.includes(service.id);
+            const Icon = service.config.icon;
+            
+            return (
+              <Card
+                key={service.id}
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  isBooked ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={() => {
+                  if (!isBooked && bookedServices.length < 3) {
+                    onServiceSelect?.(service.id);
+                    setStep(1);
+                  } else if (bookedServices.length >= 3) {
+                    toast({
+                      variant: "destructive",
+                      title: "Maximum services reached",
+                      description: "You can only book up to 3 services at once."
+                    });
+                  }
+                }}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                      isBooked ? 'bg-gray-200' : 'bg-primary/10'
+                    }`}>
+                      <Icon className={`h-6 w-6 ${isBooked ? 'text-gray-400' : 'text-primary'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{service.config.title}</h4>
+                      <p className="text-sm text-gray-600">{service.description}</p>
+                      {isBooked && (
+                        <Badge variant="secondary" className="mt-2 bg-gray-100">Already Selected</Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {bookedServices.length >= 3 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-yellow-800">
+              Maximum of 3 services reached. Complete your booking or remove a service to add another.
+            </p>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
     );
-  }
+  };
+
 
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -2430,12 +2495,25 @@ export default function ModernServiceModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <currentConfig.icon className="h-6 w-6" />
-              <span>{currentConfig.title}</span>
-            </DialogTitle>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {needsServiceSelection ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Book Your Service</DialogTitle>
+                <DialogDescription>Select a service to get started</DialogDescription>
+              </DialogHeader>
+              {renderServiceSelection()}
+              <div className="flex justify-end pt-6 border-t">
+                <Button variant="outline" onClick={onClose}>Cancel</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center space-x-2">
+                  <currentConfig.icon className="h-6 w-6" />
+                  <span>{currentConfig.title}</span>
+                </DialogTitle>
             <DialogDescription>
               Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
             </DialogDescription>
@@ -2506,6 +2584,8 @@ export default function ModernServiceModal({
               </Button>
             )}
           </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
       
