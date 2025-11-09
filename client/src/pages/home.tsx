@@ -12,9 +12,15 @@ export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
   const [isProviderOnboardingOpen, setIsProviderOnboardingOpen] = useState(false);
+  const [bookedServices, setBookedServices] = useState<string[]>([]);
 
   const openBooking = (service?: string) => {
     if (service && service !== 'all-services') {
+      // Check if service is already booked
+      if (bookedServices.includes(service)) {
+        alert(`You've already booked ${service.replace('-', ' ')} in this session. Please choose a different service.`);
+        return;
+      }
       setSelectedService(service);
     } else {
       // No service pre-selected - let user choose
@@ -47,6 +53,16 @@ export default function Home() {
           console.log("Booking completed:", bookingData);
           setIsBookingOpen(false);
           setSelectedService(""); // Clear selected service to prevent card interference
+        }}
+        bookedServices={bookedServices}
+        onAddAnotherService={(currentServiceId: string) => {
+          // Add current service to booked list
+          if (currentServiceId && !bookedServices.includes(currentServiceId)) {
+            setBookedServices(prev => [...prev, currentServiceId]);
+          }
+          // Close modal to return to home page
+          setIsBookingOpen(false);
+          setSelectedService("");
         }}
       />
       

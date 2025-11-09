@@ -39,6 +39,8 @@ interface ModernServiceModalProps {
   onServiceSelect?: (serviceId: string) => void;
   onBookingComplete: (bookingData: any) => void;
   editBookingData?: any; // For editing existing bookings
+  bookedServices: string[]; // Track services already booked in this session (required)
+  onAddAnotherService: (serviceId: string) => void; // Callback when adding another service (required)
 }
 
 export default function ModernServiceModal({
@@ -47,7 +49,9 @@ export default function ModernServiceModal({
   serviceId,
   onServiceSelect,
   onBookingComplete,
-  editBookingData
+  editBookingData,
+  bookedServices,
+  onAddAnotherService
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -57,7 +61,6 @@ export default function ModernServiceModal({
   const [estimatedHours, setEstimatedHours] = useState<number>(0);
   const [suggestedAddOnsFromComment, setSuggestedAddOnsFromComment] = useState<AddOn[]>([]);
   const [providerDetailsModal, setProviderDetailsModal] = useState<any>(null);
-  const [bookedServices, setBookedServices] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     // Core fields
@@ -577,12 +580,6 @@ export default function ModernServiceModal({
 
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
-  
-  // If no service selected, start at step 0 (service selection)
-  const showServiceSelection = !serviceId || serviceId === '' || serviceId === 'all-services';
-  
-  // Debug logging
-  console.log('ModernServiceModal - serviceId:', serviceId, 'showServiceSelection:', showServiceSelection);
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -855,72 +852,6 @@ export default function ModernServiceModal({
       bankAccount: "",
       bankBranch: ""
     });
-  };
-
-  const renderServiceSelection = () => {
-    const availableServices = [
-      { id: 'house-cleaning', name: 'House Cleaning', icon: Sparkles, bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
-      { id: 'plumbing', name: 'Plumbing Services', icon: Droplets, bgColor: 'bg-cyan-100', iconColor: 'text-cyan-600' },
-      { id: 'electrical', name: 'Electrical Services', icon: Zap, bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
-      { id: 'garden-maintenance', name: 'Garden Maintenance', icon: TreePine, bgColor: 'bg-green-100', iconColor: 'text-green-600' },
-      { id: 'chef-catering', name: 'Chef & Catering', icon: ChefHat, bgColor: 'bg-orange-100', iconColor: 'text-orange-600' },
-      { id: 'event-staff', name: 'Event Staffing', icon: Users, bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
-      { id: 'handyman', name: 'Handyman Services', icon: Wrench, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' },
-    ];
-
-    return (
-      <div className="space-y-6">
-        <div className="text-center mb-6">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Service</h3>
-          <p className="text-gray-600">Choose the service you'd like to book</p>
-          {bookedServices.length > 0 && (
-            <p className="text-sm text-green-600 mt-2">
-              ✓ {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''} already booked
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {availableServices.map((service) => {
-            const Icon = service.icon;
-            const isBooked = bookedServices.includes(service.id);
-            return (
-              <Card 
-                key={service.id}
-                className={`${isBooked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:scale-105'} transition-all border-2 ${isBooked ? 'border-gray-300' : 'hover:border-primary'}`}
-                onClick={() => {
-                  if (!isBooked && onServiceSelect) {
-                    onServiceSelect(service.id);
-                  } else if (isBooked) {
-                    toast({
-                      title: "Service Already Booked",
-                      description: `You've already added ${service.name} to your booking.`,
-                      variant: "destructive"
-                    });
-                  }
-                }}
-                data-testid={`select-service-${service.id}`}
-              >
-                <CardContent className="p-6 text-center relative">
-                  {isBooked && (
-                    <div className="absolute top-2 right-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    </div>
-                  )}
-                  <div className={`h-16 w-16 mx-auto mb-4 rounded-full ${service.bgColor} flex items-center justify-center`}>
-                    <Icon className={`h-8 w-8 ${service.iconColor}`} />
-                  </div>
-                  <h4 className="font-semibold text-gray-900">{service.name}</h4>
-                  {isBooked && (
-                    <p className="text-xs text-gray-600 mt-2">Already booked</p>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-    );
   };
 
   const renderStep1 = () => (
@@ -1786,32 +1717,22 @@ export default function ModernServiceModal({
         ))}
       </div>
 
-      {/* Add Another Service Button */}
-      <Button
-        variant="outline"
-        className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
-        onClick={() => {
-          // Add current service to booked list
-          if (serviceId && !bookedServices.includes(serviceId)) {
-            setBookedServices(prev => [...prev, serviceId]);
-          }
-          
-          // Reset form data for next service
-          resetFormData();
-          setAddOnsComment("");
-          setEstimatedHours(0);
-          setSuggestedAddOnsFromComment([]);
-          
-          // Go back to service selection
-          if (onServiceSelect) {
-            onServiceSelect('');
-          }
-          setStep(1);
-        }}
-      >
-        <span className="text-lg mr-2">+</span>
-        Add Another Service
-      </Button>
+      {/* Add Another Service Button - Only show when provider is selected */}
+      {formData.selectedProvider && onAddAnotherService && (
+        <Button
+          variant="outline"
+          className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
+          onClick={() => {
+            // Call the callback to handle adding service in parent
+            if (onAddAnotherService && serviceId) {
+              onAddAnotherService(serviceId);
+            }
+          }}
+        >
+          <span className="text-lg mr-2">+</span>
+          Add Another Service
+        </Button>
+      )}
       {bookedServices.length > 0 && (
         <div className="text-sm text-gray-600 text-center">
           Already booked: {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''}
@@ -1986,24 +1907,6 @@ export default function ModernServiceModal({
       </Card>
     </div>
   );
-
-  // Show service selection if no service is selected
-  if (showServiceSelection) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Book a Service</DialogTitle>
-            <DialogDescription>
-              Select the service you need to get started
-            </DialogDescription>
-          </DialogHeader>
-          
-          {renderServiceSelection()}
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   // Guard against undefined config
   if (!currentConfig) {
