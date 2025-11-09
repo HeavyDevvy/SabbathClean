@@ -34,6 +34,8 @@ import { useToast } from "@/hooks/use-toast";
 import BookingConfirmationModal from "./booking-confirmation-modal";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
+import { southAfricanBanks, validateAccountNumber } from "../../../config/banks";
+import { aggregatePayments } from "@/lib/paymentAggregator";
 
 interface ModernServiceModalProps {
   isOpen: boolean;
@@ -43,7 +45,8 @@ interface ModernServiceModalProps {
   onBookingComplete: (bookingData: any) => void;
   editBookingData?: any; // For editing existing bookings
   bookedServices?: string[]; // Track services already booked in this session
-  onAddAnotherService?: (serviceId: string) => void; // Callback when adding another service
+  pendingDrafts?: any[]; // Store service drafts before payment (multi-service)
+  onAddAnotherService?: (draftData: any) => void; // Callback when adding another service with full draft data
 }
 
 export default function ModernServiceModal({
@@ -54,6 +57,7 @@ export default function ModernServiceModal({
   onBookingComplete,
   editBookingData,
   bookedServices = [],
+  pendingDrafts = [],
   onAddAnotherService
 }: ModernServiceModalProps) {
   const { toast } = useToast();
@@ -2090,19 +2094,29 @@ export default function ModernServiceModal({
       </div>
 
       {/* Add Another Service Button - Only show when provider is selected */}
-      {formData.selectedProvider && onAddAnotherService && (
+      {formData.selectedProvider && onAddAnotherService && bookedServices.length < 2 && (
         <Button
           variant="outline"
           className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
           onClick={() => {
-            // Call the callback to handle adding service in parent
-            if (onAddAnotherService && serviceId) {
-              onAddAnotherService(serviceId);
+            // Create draft data with all current service details
+            const draftData = {
+              serviceId,
+              serviceName: currentConfig.title,
+              ...formData,
+              pricing,
+              estimatedHours,
+              timestamp: new Date().toISOString()
+            };
+            
+            // Store draft before moving to next service
+            if (onAddAnotherService) {
+              onAddAnotherService(draftData);
             }
           }}
         >
           <span className="text-lg mr-2">+</span>
-          Add Another Service
+          Add Another Service (Max 3)
         </Button>
       )}
       {bookedServices.length > 0 && (
@@ -2113,17 +2127,94 @@ export default function ModernServiceModal({
     </div>
   );
 
-  const renderStep5 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Method</h3>
-        <p className="text-gray-600">Choose your preferred payment method to complete the booking</p>
-      </div>
+  const renderStep5 = () => {
+    // Create current draft from form data
+    const currentDraft = useMemo(() => ({
+      serviceId,
+      serviceName: currentConfig.title,
+      ...formData,
+      pricing,
+      estimatedHours,
+      timestamp: new Date().toISOString()
+    }), [serviceId, formData, pricing, estimatedHours]);
 
-      {/* Payment Method Selection */}
-      <div className="space-y-4">
-        <Label className="text-base font-medium">Select Payment Method</Label>
-        <div className="grid grid-cols-2 gap-4">
+    // Aggregate all services (pending + current)
+    const paymentSnapshot = useMemo(() => 
+      aggregatePayments(pendingDrafts, currentDraft), 
+      [pendingDrafts, currentDraft]
+    );
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Summary</h3>
+          <p className="text-gray-600">Review your services and complete payment</p>
+        </div>
+
+        {/* Multi-Service Summary */}
+        {paymentSnapshot.services.length > 1 && (
+          <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center justify-between">
+                <span>Booking {paymentSnapshot.services.length} Services</span>
+                <Badge className="bg-green-600">{paymentSnapshot.services.length}x Services</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {paymentSnapshot.lineItems.map((item, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-gray-200">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-sm">{item.serviceName}</h4>
+                    <span className="font-bold text-primary">R{item.total}</span>
+                  </div>
+                  <div className="text-xs text-gray-600 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Base Price:</span>
+                      <span>R{item.basePrice}</span>
+                    </div>
+                    {item.addOns > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Add-ons:</span>
+                        <span>+R{item.addOns}</span>
+                      </div>
+                    )}
+                    {item.discounts > 0 && (
+                      <div className="flex justify-between text-red-600">
+                        <span>Discounts:</span>
+                        <span>-R{item.discounts}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Separator />
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal:</span>
+                  <span>R{paymentSnapshot.subtotal}</span>
+                </div>
+                {paymentSnapshot.totalDiscounts > 0 && (
+                  <div className="flex justify-between text-sm text-red-600">
+                    <span>Total Discounts:</span>
+                    <span>-R{paymentSnapshot.totalDiscounts}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-lg text-primary">
+                  <span>Grand Total:</span>
+                  <span>R{paymentSnapshot.grandTotal}</span>
+                </div>
+                <p className="text-xs text-gray-500 italic">
+                  Includes R{paymentSnapshot.commission} platform fee (15%)
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment Method Selection */}
+        <div className="space-y-4">
+          <Label className="text-base font-medium">Select Payment Method</Label>
+          <div className="grid grid-cols-2 gap-4">
           <Card 
             className={`cursor-pointer border-2 transition-all ${
               formData.paymentMethod === "card" ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
@@ -2488,7 +2579,8 @@ export default function ModernServiceModal({
         </CardContent>
       </Card>
     </div>
-  );
+    );
+  };
 
   // Guard against undefined config - moved to correct location below
   

@@ -13,7 +13,8 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState<string>("");
   const [isProviderOnboardingOpen, setIsProviderOnboardingOpen] = useState(false);
   const [bookedServices, setBookedServices] = useState<string[]>([]);
-  const [confirmedDrafts, setConfirmedDrafts] = useState<any[]>([]); // Store complete booking data for multi-service
+  const [pendingDrafts, setPendingDrafts] = useState<any[]>([]); // Store service drafts before payment
+  const [confirmedDrafts, setConfirmedDrafts] = useState<any[]>([]); // Store confirmed bookings after payment
 
   const openBooking = (service?: string) => {
     if (service && service !== 'all-services') {
@@ -51,26 +52,33 @@ export default function Home() {
         serviceId={selectedService}
         onServiceSelect={(serviceId) => setSelectedService(serviceId)}
         onBookingComplete={(bookingData) => {
-          console.log("Booking completed:", bookingData);
+          console.log("Payment completed for all services:", bookingData);
           
-          // Add to confirmed drafts for multi-service aggregation
-          setConfirmedDrafts(prev => [...prev, bookingData]);
+          // Promote all pending drafts + final booking to confirmed
+          const allBookings = [...pendingDrafts, bookingData];
+          setConfirmedDrafts(allBookings);
           
-          // Track service ID to prevent duplicates
-          if (bookingData.serviceId && !bookedServices.includes(bookingData.serviceId)) {
-            setBookedServices(prev => [...prev, bookingData.serviceId]);
-          }
+          // Clear session state after successful payment
+          setPendingDrafts([]);
+          setBookedServices([]);
           
           setIsBookingOpen(false);
-          setSelectedService(""); // Clear selected service to prevent card interference
+          setSelectedService("");
         }}
         bookedServices={bookedServices}
-        onAddAnotherService={(currentServiceId: string) => {
-          // Add current service to booked list
-          if (currentServiceId && !bookedServices.includes(currentServiceId)) {
-            setBookedServices(prev => [...prev, currentServiceId]);
+        pendingDrafts={pendingDrafts}
+        onAddAnotherService={(draftData: any) => {
+          console.log("Adding service to pending drafts:", draftData);
+          
+          // Store complete draft data before payment
+          setPendingDrafts(prev => [...prev, draftData]);
+          
+          // Track service ID to prevent duplicates
+          if (draftData.serviceId && !bookedServices.includes(draftData.serviceId)) {
+            setBookedServices(prev => [...prev, draftData.serviceId]);
           }
-          // Close modal to return to home page
+          
+          // Close modal to return to home page for next service
           setIsBookingOpen(false);
           setSelectedService("");
         }}
