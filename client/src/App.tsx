@@ -40,12 +40,14 @@ import AdminPortal from "@/pages/admin-portal";
 import VerifyEmail from "@/pages/verify-email";
 import ResetPassword from "@/pages/reset-password";
 import Wallet from "@/pages/wallet";
+import ChatPage from "@/pages/chat";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={EnhancedHome} />
       <Route path="/minimalist" component={MinimalistHome} />
+      <Route path="/chat" component={ChatPage} />
       <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/booking" component={Booking} />
