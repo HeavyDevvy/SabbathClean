@@ -56,6 +56,8 @@ export default function ModernServiceModal({
   const [addOnsComment, setAddOnsComment] = useState("");
   const [estimatedHours, setEstimatedHours] = useState<number>(0);
   const [suggestedAddOnsFromComment, setSuggestedAddOnsFromComment] = useState<AddOn[]>([]);
+  const [providerDetailsModal, setProviderDetailsModal] = useState<any>(null);
+  const [bookedServices, setBookedServices] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     // Core fields
@@ -871,27 +873,47 @@ export default function ModernServiceModal({
         <div className="text-center mb-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Service</h3>
           <p className="text-gray-600">Choose the service you'd like to book</p>
+          {bookedServices.length > 0 && (
+            <p className="text-sm text-green-600 mt-2">
+              ✓ {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''} already booked
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           {availableServices.map((service) => {
             const Icon = service.icon;
+            const isBooked = bookedServices.includes(service.id);
             return (
               <Card 
                 key={service.id}
-                className="cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 hover:border-primary"
+                className={`${isBooked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:scale-105'} transition-all border-2 ${isBooked ? 'border-gray-300' : 'hover:border-primary'}`}
                 onClick={() => {
-                  if (onServiceSelect) {
+                  if (!isBooked && onServiceSelect) {
                     onServiceSelect(service.id);
+                  } else if (isBooked) {
+                    toast({
+                      title: "Service Already Booked",
+                      description: `You've already added ${service.name} to your booking.`,
+                      variant: "destructive"
+                    });
                   }
                 }}
                 data-testid={`select-service-${service.id}`}
               >
-                <CardContent className="p-6 text-center">
+                <CardContent className="p-6 text-center relative">
+                  {isBooked && (
+                    <div className="absolute top-2 right-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    </div>
+                  )}
                   <div className={`h-16 w-16 mx-auto mb-4 rounded-full ${service.bgColor} flex items-center justify-center`}>
                     <Icon className={`h-8 w-8 ${service.iconColor}`} />
                   </div>
                   <h4 className="font-semibold text-gray-900">{service.name}</h4>
+                  {isBooked && (
+                    <p className="text-xs text-gray-600 mt-2">Already booked</p>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -1707,10 +1729,9 @@ export default function ModernServiceModal({
         {providers.map((provider) => (
           <Card 
             key={provider.id}
-            className={`cursor-pointer transition-all ${
+            className={`transition-all ${
               formData.selectedProvider?.id === provider.id ? 'ring-2 ring-primary' : ''
             }`}
-            onClick={() => setFormData(prev => ({ ...prev, selectedProvider: provider }))}
           >
             <CardContent className="p-4">
               <div className="flex items-center space-x-4">
@@ -1719,7 +1740,12 @@ export default function ModernServiceModal({
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-1">
-                    <h4 className="font-semibold">{provider.name}</h4>
+                    <h4 
+                      className="font-semibold text-primary underline cursor-pointer hover:text-primary/80"
+                      onClick={() => setProviderDetailsModal(provider)}
+                    >
+                      {provider.name}
+                    </h4>
                     {provider.verified && (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     )}
@@ -1738,13 +1764,21 @@ export default function ModernServiceModal({
                       {provider.responseTime}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {provider.specializations.slice(0, 2).map(spec => (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {provider.specializations.slice(0, 2).map((spec: string) => (
                       <Badge key={spec} variant="secondary" className="text-xs">
                         {spec}
                       </Badge>
                     ))}
                   </div>
+                  <Button
+                    size="sm"
+                    variant={formData.selectedProvider?.id === provider.id ? "default" : "outline"}
+                    onClick={() => setFormData(prev => ({ ...prev, selectedProvider: provider }))}
+                    className="w-full"
+                  >
+                    {formData.selectedProvider?.id === provider.id ? "Selected" : "Select Provider"}
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -1752,53 +1786,37 @@ export default function ModernServiceModal({
         ))}
       </div>
 
-      <Card className="bg-gray-50">
-        <CardHeader>
-          <CardTitle className="text-lg">Booking Summary</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex justify-between">
-            <span>Base Service ({serviceId.replace('-', ' ')})</span>
-            <span>R{pricing.basePrice}</span>
-          </div>
-          {pricing.addOnsPrice > 0 && (
-            <div className="flex justify-between">
-              <span>Selected Add-ons</span>
-              <span>+R{pricing.addOnsPrice}</span>
-            </div>
-          )}
-          {pricing.recurringDiscount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Recurring Service Discount ({formData.recurringSchedule})</span>
-              <span>-R{pricing.recurringDiscount}</span>
-            </div>
-          )}
-          {pricing.timeDiscount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Early Bird Discount (6 AM)</span>
-              <span>-R{pricing.timeDiscount}</span>
-            </div>
-          )}
-          {pricing.materialsDiscount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Materials Discount (15%)</span>
-              <span>-R{pricing.materialsDiscount}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Provider within 20km radius</span>
-            <span>✓ Verified</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between font-semibold text-lg">
-            <span>Total Amount</span>
-            <span className="text-primary">R{pricing.totalPrice}</span>
-          </div>
-          <p className="text-xs text-gray-500 text-center">
-            Final amount includes all services, materials, and applicable discounts
-          </p>
-        </CardContent>
-      </Card>
+      {/* Add Another Service Button */}
+      <Button
+        variant="outline"
+        className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
+        onClick={() => {
+          // Add current service to booked list
+          if (serviceId && !bookedServices.includes(serviceId)) {
+            setBookedServices(prev => [...prev, serviceId]);
+          }
+          
+          // Reset form data for next service
+          resetFormData();
+          setAddOnsComment("");
+          setEstimatedHours(0);
+          setSuggestedAddOnsFromComment([]);
+          
+          // Go back to service selection
+          if (onServiceSelect) {
+            onServiceSelect('');
+          }
+          setStep(1);
+        }}
+      >
+        <span className="text-lg mr-2">+</span>
+        Add Another Service
+      </Button>
+      {bookedServices.length > 0 && (
+        <div className="text-sm text-gray-600 text-center">
+          Already booked: {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''}
+        </div>
+      )}
     </div>
   );
 
@@ -2087,6 +2105,92 @@ export default function ModernServiceModal({
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Provider Details Modal */}
+      {providerDetailsModal && (
+        <Dialog open={!!providerDetailsModal} onOpenChange={() => setProviderDetailsModal(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Provider Details</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="h-10 w-10 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{providerDetailsModal.name}</h3>
+                  {providerDetailsModal.verified && (
+                    <div className="flex items-center text-green-600 text-sm">
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Verified Provider
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Rating</p>
+                  <div className="flex items-center">
+                    <Star className="h-5 w-5 text-yellow-400 mr-1" />
+                    <span className="font-semibold">{providerDetailsModal.rating}</span>
+                    <span className="text-sm text-gray-600 ml-1">({providerDetailsModal.reviews} reviews)</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Distance</p>
+                  <div className="flex items-center">
+                    <MapPin className="h-5 w-5 text-primary mr-1" />
+                    <span className="font-semibold">{providerDetailsModal.distance}km away</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Response Time</p>
+                  <div className="flex items-center">
+                    <Clock className="h-5 w-5 text-primary mr-1" />
+                    <span className="font-semibold">{providerDetailsModal.responseTime}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Specializations</p>
+                <div className="flex flex-wrap gap-2">
+                  {providerDetailsModal.specializations.map((spec: string) => (
+                    <Badge key={spec} variant="secondary">
+                      {spec}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-600 mb-2">About</p>
+                <p className="text-sm">
+                  Professional service provider with {providerDetailsModal.reviews}+ successful bookings. 
+                  Specializes in {providerDetailsModal.specializations.join(', ')}. 
+                  Highly rated and verified by Berry Events.
+                </p>
+              </div>
+
+              <Button 
+                className="w-full"
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, selectedProvider: providerDetailsModal }));
+                  setProviderDetailsModal(null);
+                }}
+              >
+                Select This Provider
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
       
       {/* Booking Confirmation Modal */}
       <BookingConfirmationModal
