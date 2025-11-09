@@ -1,0 +1,263 @@
+REPLIT PRODUCTION UPDATE - MULTI-SERVICE BOOKING FEATURE
+CRITICAL INSTRUCTIONS:
+
+Make ONLY the changes specified below
+Do NOT modify any other functionality, routes, components, styles, or copy
+Ensure zero regressions and zero console errors
+All existing features must continue working exactly as before
+
+
+SCOPE: ADD MULTI-SERVICE BOOKING (UP TO 3 SERVICES PER SESSION)
+REQUIREMENT OVERVIEW
+Allow users to book multiple services (max 3) in a single booking session. Each service has its own provider selection and costs are aggregated across all services.
+
+DETAILED IMPLEMENTATION REQUIREMENTS
+1. STATE MANAGEMENT (Core Foundation)
+Create/Update booking state to track multiple services:
+javascript// Booking state structure should include:
+{
+  selectedServices: [
+    {
+      serviceId: "house_cleaning",
+      serviceName: "House Cleaning",
+      providerId: "provider_123",
+      providerName: "John's Cleaning Co.",
+      providerCost: 500,
+      addons: [
+        { id: "deep_cleaning", label: "Deep cleaning", price: 650 }
+      ],
+      totalCost: 1150
+    }
+    // ... up to 3 services
+  ],
+  currentServiceIndex: 0, // Which service we're currently configuring
+  grandTotal: 0 // Sum of all service costs
+}
+State must persist through all booking steps:
+
+Service Selection → Provider Selection → Schedule & Preferences → Add-ons → Payment Summary
+
+
+2. "CHOOSE VERIFIED PROVIDER" STEP MODIFICATIONS
+Add "Add Another Service" button:
+Button Placement:
+
+Position at the bottom of the page, below the provider selection grid
+Style consistently with existing buttons (use same classes/styles as "Continue" or "Next" buttons)
+Button text: "➕ Add Another Service"
+
+Button Logic:
+javascript// Pseudocode for button handler
+onClick = () => {
+  // Check if max services reached
+  if (selectedServices.length >= 3) {
+    showNotification("Maximum 3 services per booking");
+    return;
+  }
+  
+  // Save current service configuration
+  saveCurrentServiceToState();
+  
+  // Navigate back to service selection (step 1)
+  navigateToServiceSelection();
+}
+Button Visibility:
+
+Show button only AFTER user has selected a provider for current service
+Disable button if 3 services already selected (show tooltip: "Maximum 3 services reached")
+
+
+3. SERVICE SELECTION STEP (STEP 1) MODIFICATIONS
+Hide Previously Selected Services:
+When user returns to service selection after clicking "Add Another Service":
+
+Filter out services that are already in selectedServices array
+Visually hide/remove those service cards from the selection grid
+OR gray them out with "Already Selected" overlay (cannot be clicked)
+
+Implementation approach:
+javascript// Filter available services
+const availableServices = allServices.filter(service => 
+  !selectedServices.some(selected => selected.serviceId === service.id)
+);
+
+// Render only availableServices
+```
+
+**Navigation logic:**
+- After selecting a new service, proceed to provider selection for that NEW service
+- Keep track of which service is currently being configured (use `currentServiceIndex`)
+
+---
+
+### 4. COST AGGREGATION THROUGHOUT FLOW
+
+**Each step must accumulate costs:**
+
+**Provider Selection:**
+- When provider is selected, store: `providerCost` for current service
+
+**Add-ons Selection:**
+- When add-ons are selected, store: `addons` array with prices for current service
+- Calculate `totalCost = providerCost + sum(addon prices)` for current service
+
+**Schedule & Preferences:**
+- No cost changes, just maintain state
+
+**Pass costs forward:**
+- Each "Continue/Next" button should update the current service object in `selectedServices` array
+- Recalculate `grandTotal` = sum of all `totalCost` values in `selectedServices`
+
+---
+
+### 5. PAYMENT SUMMARY PAGE - DETAILED BREAKDOWN
+
+**Display requirements:**
+
+**For each service in `selectedServices`, show:**
+```
+Service 1: House Cleaning
+  Provider: John's Cleaning Co. ................. R500
+  Add-on: Deep cleaning ......................... R650
+  Add-on: Window cleaning ....................... R350
+  ________________________________________________
+  Subtotal: ..................................... R1,500
+
+Service 2: Plumbing Services
+  Provider: Fix-It Plumbing .................... R800
+  Add-on: Geyser maintenance ................... R650
+  ________________________________________________
+  Subtotal: ..................................... R1,450
+
+═══════════════════════════════════════════════════
+GRAND TOTAL: .................................... R2,950
+```
+
+**Layout structure:**
+- Use card/section for each service
+- Service name as header
+- Provider line with name and cost
+- Each add-on on separate line with cost
+- Subtotal line (bold/emphasized)
+- Divider between services
+- Grand total at bottom (larger font, bold, highlighted background)
+
+**Styling guidelines:**
+- Match existing payment summary styles
+- Use dot leaders (...) or right-aligned prices for clarity
+- Clear visual hierarchy (service > provider > add-ons)
+
+---
+
+### 6. VALIDATION & ERROR HANDLING
+
+**Implement these checks:**
+
+1. **Max 3 services validation:**
+   - Before showing "Add Another Service" button
+   - Before navigating back to service selection
+   - Show clear message if limit reached
+
+2. **Duplicate prevention:**
+   - Service selection step must check `selectedServices` array
+   - Cannot select a service that's already in the array
+
+3. **State persistence:**
+   - When user goes back to add another service, previous service data must be preserved
+   - Ensure state doesn't reset between steps
+
+4. **Navigation guards:**
+   - User cannot proceed without selecting provider for current service
+   - All required fields must be filled before allowing "Continue"
+
+---
+
+### 7. USER EXPERIENCE ENHANCEMENTS
+
+**Add visual indicators:**
+
+1. **Progress indicator showing services:**
+```
+   [✓ House Cleaning] [✓ Plumbing] [➤ Garden Care]
+
+Show at top of booking flow
+Checkmark for completed services
+Arrow for current service being configured
+
+
+Service counter:
+
+"Service 1 of 3" or "Booking 2 services" near top of page
+Updates as services are added
+
+
+Confirmation messages:
+
+After adding service: "House Cleaning added! Add another service or continue to checkout."
+When limit reached: "Maximum 3 services selected"
+
+
+
+
+TESTING CHECKLIST (MUST ALL PASS)
+Before submitting, verify:
+
+ Can select first service and provider normally
+ "Add Another Service" button appears after selecting provider
+ Button is disabled/hidden when 3 services selected
+ Clicking button returns to service selection (step 1)
+ Previously selected services are hidden/disabled on service selection
+ Can select second service (different from first)
+ Second service has its own provider selection
+ Costs from first service are preserved
+ Can add third service successfully
+ Cannot add fourth service (max 3 enforced)
+ Payment Summary shows all services with breakdown
+ Each service shows provider cost + add-ons separately
+ Subtotals per service are correct
+ Grand total = sum of all subtotals (verified with calculator)
+ Can complete booking with multiple services
+ No console errors throughout entire flow
+ Existing single-service booking still works (don't click "Add Another")
+ Navigation back/forward buttons work correctly
+ State persists when using browser back button
+
+
+FILES LIKELY TO MODIFY
+Based on typical booking flow structure:
+
+Booking state/context file (e.g., BookingContext.js, bookingSlice.js, or similar)
+Provider selection component/page
+Service selection component/page
+Payment summary component/page
+Booking flow router/stepper component
+
+Note: Use your existing file structure. Don't rename or restructure files.
+
+REQUIRED OUTPUT AFTER COMPLETION
+Please provide:
+
+List of files modified (full paths)
+Brief description of changes per file (2-3 sentences each)
+Any new functions/methods added (with names)
+Confirmation that all items in testing checklist pass
+Screenshots or description of:
+
+"Add Another Service" button location
+Payment Summary with multi-service breakdown
+Service selection with hidden duplicates
+
+
+
+
+SUCCESS CRITERIA
+✅ User can book 1, 2, or 3 services in single session
+✅ Cannot book duplicate services
+✅ Cannot exceed 3 services
+✅ All costs correctly aggregated
+✅ Payment Summary shows clear breakdown by service
+✅ No existing functionality broken
+✅ No console errors or warnings
+✅ All existing booking flows work as before
+
+REMINDER: Change ONLY what's specified above. Do not refactor, optimize, or modify any other parts of the application.RetryClaude can make mistakes. Please double-check responses.
