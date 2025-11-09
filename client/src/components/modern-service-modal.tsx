@@ -31,6 +31,7 @@ import {
   Lock as LockIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/useDebounce";
 import BookingConfirmationModal from "./booking-confirmation-modal";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
@@ -68,6 +69,9 @@ export default function ModernServiceModal({
   const [estimatedHours, setEstimatedHours] = useState<number>(0);
   const [suggestedAddOnsFromComment, setSuggestedAddOnsFromComment] = useState<AddOn[]>([]);
   const [providerDetailsModal, setProviderDetailsModal] = useState<any>(null);
+  
+  // ADDED: Debounce add-ons comment to prevent excessive keyword matching on every keystroke
+  const debouncedComment = useDebounce(addOnsComment, 400);
   
   // Payment validation state
   const [paymentTouched, setPaymentTouched] = useState({
@@ -820,6 +824,10 @@ export default function ModernServiceModal({
       setShowConfirmation(false);
       setConfirmedBookingData(null);
       
+      // ADDED: Reset add-ons comment and suggestions to avoid stale recommendations
+      setAddOnsComment("");
+      setSuggestedAddOnsFromComment([]);
+      
       // Reset form data to empty state for new service
       setFormData({
         propertyType: "",
@@ -895,14 +903,18 @@ export default function ModernServiceModal({
   }, [formData.urgency]);
 
   // Auto-suggest add-ons based on comment keywords
+  // ADDED: Debounced keyword auto-suggest for add-ons with minimum 3-character check
   useEffect(() => {
-    if (addOnsComment && mappedServiceId) {
-      const suggestions = suggestAddOns(mappedServiceId, addOnsComment);
+    const trimmedComment = debouncedComment.trim();
+    
+    // Require minimum 3 characters to avoid spurious matches on very short inputs
+    if (trimmedComment.length >= 3 && mappedServiceId) {
+      const suggestions = suggestAddOns(mappedServiceId, debouncedComment);
       setSuggestedAddOnsFromComment(suggestions);
     } else {
       setSuggestedAddOnsFromComment([]);
     }
-  }, [addOnsComment, mappedServiceId]);
+  }, [debouncedComment, mappedServiceId]);
 
   // Auto-calculate estimated hours
   useEffect(() => {
