@@ -2152,6 +2152,46 @@ export default function ModernServiceModal({
             </p>
           </div>
         </div>
+
+        {/* Add Another Service Button - Show on Step 3 (Add-ons) */}
+        {onAddAnotherService && bookedServices.length < 2 && (
+          <div className="space-y-3 mt-6">
+            <Button
+              variant="outline"
+              className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
+              onClick={() => {
+                // Save current draft data without provider selection
+                const draftData = {
+                  serviceId: mappedServiceId,
+                  serviceName: currentConfig?.name || serviceId,
+                  ...formData,
+                  pricing,
+                  totalCost: pricing.totalPrice,
+                  commission: Math.round(pricing.totalPrice * 0.15),
+                  timestamp: new Date().toISOString(),
+                  selectedProvider: null, // No provider selected yet
+                  addOnsComment,
+                  estimatedHours
+                };
+                
+                // Close modal and trigger add another service
+                onAddAnotherService(draftData);
+              }}
+              data-testid="button-add-another-service"
+            >
+              <span className="text-lg mr-2">+</span>
+              Add Another Service (Max 3)
+            </Button>
+            {bookedServices.length > 0 && (
+              <div className="text-sm text-gray-600 text-center">
+                Already booked: {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''}
+              </div>
+            )}
+            <p className="text-xs text-gray-500 text-center">
+              You can add up to 3 services before completing your booking
+            </p>
+          </div>
+        )}
       </div>
     );
   };
@@ -2233,34 +2273,8 @@ export default function ModernServiceModal({
         ))}
       </div>
 
-      {/* Add Another Service Button - Only show when provider is selected */}
-      {formData.selectedProvider && onAddAnotherService && bookedServices.length < 2 && (
-        <Button
-          variant="outline"
-          className="w-full border-2 border-dashed border-primary text-primary hover:bg-primary/5"
-          onClick={() => {
-            // Create draft data with all current service details
-            const draftData = {
-              serviceId,
-              serviceName: currentConfig.title,
-              ...formData,
-              pricing,
-              estimatedHours,
-              timestamp: new Date().toISOString()
-            };
-            
-            // Store draft before moving to next service
-            if (onAddAnotherService) {
-              onAddAnotherService(draftData);
-            }
-          }}
-        >
-          <span className="text-lg mr-2">+</span>
-          Add Another Service (Max 3)
-        </Button>
-      )}
       {bookedServices.length > 0 && (
-        <div className="text-sm text-gray-600 text-center">
+        <div className="text-sm text-gray-600 text-center mt-4">
           Already booked: {bookedServices.length} service{bookedServices.length > 1 ? 's' : ''}
         </div>
       )}
