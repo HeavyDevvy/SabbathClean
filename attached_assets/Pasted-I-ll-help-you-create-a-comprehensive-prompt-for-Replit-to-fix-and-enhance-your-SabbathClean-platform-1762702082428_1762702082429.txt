@@ -1,0 +1,97 @@
+I'll help you create a comprehensive prompt for Replit to fix and enhance your SabbathClean platform. Let me first fetch the website to understand its current structure.Based on your requirements, I'll create a comprehensive prompt for Replit Agent. Here's the prompt:
+
+---
+
+## 🔧 SabbathClean Platform Bug Fixes & Enhancements
+
+**CRITICAL: Maintain all existing functionality. Do not break anything while implementing these changes.**
+
+### **Priority 1: Main Page - Service Selection Fix**
+
+**Issue:** On the main page where the "Book Service Now" button is located, services are displaying but not functioning when selected.
+
+**Required Fix:**
+- Make all service options clickable and fully functional
+- When a service is selected, it should navigate the user to the actual service process menu for that specific service
+- Ensure smooth navigation flow from main page → service selection → service process
+- Test all service links to confirm they route correctly
+
+---
+
+### **Priority 2: Service-Specific Smart Suggestions**
+
+**Issue:** In the "Add-ons & Extras - Customize your service with additional options" page, the Comments/Additional Details section shows example descriptions with smart suggestions, but the examples are generic and not contextual to the selected service.
+
+**Required Fix:**
+- Implement **dynamic, service-specific example descriptions** for the Comments/Additional Details field
+- Examples should be contextually relevant to the service type:
+  - **House Cleaning:** "Please focus on the kitchen and bathrooms. Use eco-friendly products."
+  - **Laundry Service:** "Separate whites from colors. Use fabric softener on towels only."
+  - **Ironing Service:** "Extra starch on shirts. Delicate setting for silk items."
+  - **Carpet Cleaning:** "High-traffic areas near entrance need extra attention. Pet-friendly products preferred."
+  - (Add appropriate examples for all other services)
+- Ensure smart suggestions adapt based on the currently selected service
+
+---
+
+### **Priority 3: Multi-Service Booking & Unified Payment**
+
+**Issue:** Customers can only book one service at a time. Need ability to add multiple services before checkout.
+
+**Required Implementation:**
+
+#### A. **"Choose Your Provider" Page Enhancement:**
+- After a customer selects a provider for their first service, display an option: **"Add Another Service"** button
+- Allow customers to add **up to 3 services maximum** before proceeding to payment
+- Each added service should go through its own:
+  - Service customization (add-ons, extras)
+  - Comments/details
+  - Provider selection
+  
+#### B. **Service Management Features:**
+- Display a summary/cart showing all selected services
+- Allow users to review, edit, or remove services before payment
+- Show a running total that updates as services are added/removed
+
+#### C. **Unified Payment Page:**
+- Create a **single consolidated payment page** that accounts for all selected services (up to 3)
+- Display:
+  - Itemized list of all services with individual prices
+  - Service details for each (date, time, provider, add-ons)
+  - Subtotal for each service
+  - **Grand Total** for all services combined
+- Process payment once for all services
+- Generate a single confirmation with all booking details
+
+---
+
+### **Testing Requirements:**
+
+Before marking as complete, verify:
+
+✅ All services on main page are clickable and route correctly  
+✅ Smart suggestions change dynamically based on service type  
+✅ Multi-service flow works smoothly (add up to 3 services)  
+✅ Payment page correctly calculates total for multiple services  
+✅ All existing functionality remains intact  
+✅ No broken links or navigation issues  
+✅ Responsive design maintained across all pages  
+✅ Database properly stores multi-service bookings  
+
+---
+
+### **Implementation Notes:**
+
+- Use modular code to avoid duplication
+- Ensure backend handles multi-service transactions atomically
+- Maintain consistent UI/UX across all service flows
+- Add proper error handling for edge cases
+- Preserve all current styling and branding
+
+---
+
+**Please implement these changes incrementally, testing after each major change to ensure nothing breaks. Provide status updates for each priority section.**
+
+---
+
+This prompt gives Replit Agent clear, structured instructions with specific requirements for each fix while emphasizing the importance of maintaining existing functionality. The prompt is detailed enough to guide the AI through the changes systematically.

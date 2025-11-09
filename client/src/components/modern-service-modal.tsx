@@ -812,6 +812,32 @@ export default function ModernServiceModal({
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
   
+  // Service-specific placeholder suggestions for Comments field
+  const servicePlaceholders: Record<string, string> = {
+    "cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
+    "house-cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
+    "garden-care": "Example: Trim overgrown hedges along the fence. Mow the lawn and edge the driveway. Remove weeds from flower beds.",
+    "garden-maintenance": "Example: Trim overgrown hedges along the fence. Mow the lawn and edge the driveway. Remove weeds from flower beds.",
+    "plumbing": "Example: Leaking faucet in the kitchen sink. Low water pressure in upstairs bathroom. Fix running toilet.",
+    "plumbing-services": "Example: Leaking faucet in the kitchen sink. Low water pressure in upstairs bathroom. Fix running toilet.",
+    "electrical": "Example: Install dimmer switch in living room. Replace faulty outlet in bedroom. Check circuit breaker for kitchen.",
+    "electrical-services": "Example: Install dimmer switch in living room. Replace faulty outlet in bedroom. Check circuit breaker for kitchen.",
+    "chef-catering": "Example: Prepare traditional South African braai for 20 guests. Include vegetarian options. Serve at 6 PM.",
+    "waitering": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
+    "event-staff": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
+    "event-staffing": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
+    "handyman": "Example: Fix squeaky door hinges. Patch holes in drywall. Install new curtain rods in bedrooms.",
+    "handyman-services": "Example: Fix squeaky door hinges. Patch holes in drywall. Install new curtain rods in bedrooms.",
+    "moving": "Example: Moving from 2-bedroom apartment to 3-bedroom house. Need help with furniture and boxes. No fragile items.",
+    "beauty-wellness": "Example: Haircut and styling for wedding. Prefer natural makeup look. Available on Saturday afternoon.",
+    "au-pair": "Example: Need help with 2 children aged 5 and 7. Pickup from school at 3 PM. Homework assistance needed."
+  };
+
+  // Get service-specific placeholder or use default
+  const getCommentPlaceholder = () => {
+    return servicePlaceholders[mappedServiceId] || servicePlaceholders[serviceId] || "Describe any specific requirements or special instructions for your service provider.";
+  };
+  
   // Track if we need to show service selection (Step 0)
   const needsServiceSelection = !serviceId || !currentConfig;
 
@@ -1985,7 +2011,7 @@ export default function ModernServiceModal({
             <Label htmlFor="addons-comment">Comments / Additional Details</Label>
             <Textarea
               id="addons-comment"
-              placeholder="Describe any specific issues or requirements (e.g., 'leaking faucet in kitchen', 'overgrown hedges')"
+              placeholder={getCommentPlaceholder()}
               value={addOnsComment}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAddOnsComment(e.target.value)}
               className="min-h-[80px]"
