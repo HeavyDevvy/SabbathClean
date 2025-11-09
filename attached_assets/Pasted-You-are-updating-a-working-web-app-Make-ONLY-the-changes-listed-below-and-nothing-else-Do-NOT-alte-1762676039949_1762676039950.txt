@@ -1,0 +1,127 @@
+You are updating a working web app. Make ONLY the changes listed below and nothing else.
+Do NOT alter any copy/wording, routes, API contracts, global styles, state structure, or unrelated components.
+Preserve all existing behaviors outside the specified areas.
+
+====================
+OBJECTIVE
+====================
+1) Fix “Book services now” so it allows service selection (not defaulting to House Cleaning).
+2) Implement “Add another service” flow exactly as described below.
+3) Complete the remaining Payment step updates (per earlier spec).
+4) Apply missing updates on the Booking Confirmation page (per earlier spec).
+5) Verify that ALL previously requested changes are present and working as intended.
+6) Produce a concise change report and pass the acceptance checklist at the end.
+
+====================
+AUDIT FIRST (REQUIRED)
+====================
+Before making changes:
+- Detect the stack and locate the following (file path → component/function → line range):
+  - Home page “Book services now” selection UI + step navigation handler(s).
+  - Provider selection step and any “Add another service” logic or placeholders.
+  - Booking flow: Payment step (summary, add-ons dropdown, totals, validation).
+  - Booking Confirmation page component/template.
+- Output a structured list of the targets you will modify. Then proceed to implement fixes.
+
+====================
+FIXES TO IMPLEMENT
+====================
+
+[1] HOME PAGE — SERVICE SELECTION
+- Bug: “Book services now” only allows House Cleaning and ignores other choices.
+- Fix:
+  - Ensure the selection component correctly binds the chosen service ID/category to booking state.
+  - Remove any hard-coded default forcing House Cleaning after “Next”.
+  - If the blank screen after Add-ins was due to a null route/state, fix the handler while preserving route names and state shapes.
+- Do NOT change labels, design system, or unrelated logic.
+
+[2] ADD ANOTHER SERVICE — MULTI-SERVICE BOOKING (max 3)
+- At the end of “Choose your verified provider” step, ensure a control labeled EXACTLY “Add another service” appears.
+- Behavior when clicked:
+  - Return user to the first booking step to select a new service.
+  - Prevent selecting the same service again within the same booking session (hide or disable already-selected services).
+  - Maintain a list of up to 3 distinct services (hard cap = 3).
+  - Each added service must go through the same booking flow (including add-ons, schedule, provider).
+  - Aggregate services so that Payment step shows each service with its own line items/add-ons, plus a single grand total.
+- IMPORTANT:
+  - Do not break existing single-service behavior.
+  - Use existing state/store if present; if not, add a small scoped booking-session aggregator without changing global app patterns.
+
+[3] PAYMENT STEP — COMPLETE REMAINING CHANGES
+- Ensure the following are implemented and working:
+  - Clear breakdown of add-ons (with prices) per service.
+  - A dropdown above the total to add more add-ons; changes must update breakdown + total immediately.
+  - Multi-service display: split by service with individual subtotals and one grand total.
+  - Validation:
+    - Bank select dropdown with SA banks:
+      ["ABSA","FNB","Standard Bank","Nedbank","Capitec","Investec","African Bank","TymeBank","Discovery Bank","Bidvest Bank","Sasfin"]
+    - Account number: numeric only; typical SA lengths 8–13 (configurable, warn on mismatch).
+    - CVV: 3–4 digits.
+    - Expiry: MM/YY format with inline validation.
+  - Receipt download: ensure only ONE file per click; include all services and add-ons.
+  - “Add to Calendar”: generate valid .ics for the full booking (all services, provider(s), address, scheduled date/time, add-ons in notes) and:
+    - Email to the user’s registered email using the existing mailer, OR
+    - If none exists, add a minimal server routine consistent with current stack. Also provide a fallback “Download .ics” link on success/fail.
+- Do not add heavy dependencies; keep any new code minimal and scoped.
+
+[4] BOOKING CONFIRMATION PAGE — APPLY MISSING UPDATES
+- Ensure the confirmation page:
+  - Uses the same global logo used on Booking Confirmed across the entire app.
+  - Shows all services booked (single or multi-service) with add-ons and totals matching the Payment step.
+  - Provides “Share booking” and “Add to Calendar” (the same .ics behavior as above).
+- Maintain existing styling patterns; do not change unrelated content.
+
+[5] PREVIOUSLY SPECIFIED CHANGES — VERIFY & COMPLETE
+Confirm (and implement if missing) the previously requested items:
+- Demo modal (“Watch how it works”): single Play control only; one close X; remove misleading clickable elements.
+- Emergency/Urgent/Same Day behavior:
+  - Preferred date defaults to TODAY and is read-only.
+  - Emergency time preference locked to “As soon as possible”.
+- Add-ons & extras:
+  - Comments field present.
+  - Add-ons as dropdown with pricing per industry.
+  - Keyword-based auto-suggest from comments (config-driven).
+  - Hours auto-populated from industry standards (config-driven) with disclaimer:
+    “The time spent on site is subject to change once the service provider assesses the scope of work on-site.”
+- Provider step:
+  - Remove booking summary from this page.
+  - Provider names clickable → modal shows photo, rating, distance, ETA, bio.
+- Services page “Book Now” flow matches Home booking flow (parity).
+- Services page respects logged-in state (no sign-in/join prompts if already authenticated).
+- Logo consistency: same logo everywhere; sized correctly per context.
+- Receipt: single download; reflects all add-ons/services.
+
+====================
+CONFIG & DATA (SCOPED)
+====================
+- Keep any new configuration in a dedicated `/config` folder:
+  - addons.json (per service/industry with {id, label, price})
+  - keywords.json (keyword → addonId mapping; many-to-many allowed)
+  - hours.json (industry standard hours per service/add-on)
+  - banks.json (bank list + optional account pattern hints)
+- Seed with reasonable placeholders and TODO comments; do NOT fetch external data.
+
+====================
+STRICT NON-GOALS
+====================
+- Do NOT change wording, font stacks, colors, or layout outside the components modified here.
+- Do NOT alter routes, API contracts, DB schema, auth flows, or global providers.
+- Do NOT introduce large new dependencies. Keep everything minimal and local to the flow.
+
+====================
+OUTPUT AFTER CHANGES
+====================
+Provide:
+1) A list of all edited files with a one-line summary for each.
+2) For critical fixes (service selection bug, add-another-service flow, payment summary, booking confirmation), show concise diffs or before/after snippets.
+3) Note any small helper/config files you added under /config.
+
+====================
+ACCEPTANCE CHECKLIST (MUST PASS)
+====================
+[ ] Home “Book services now”: user can select any available service; Next proceeds through the flow (no blank screen).
+[ ] “Add another service”: returns to first step; prevents duplicate service selection; allows up to 3 distinct services; aggregates through to Payment.
+[ ] Payment: shows per-service breakdown + add-ons; can add add-ons at Payment and totals update; bank select + validation works; one receipt per click; .ics email + fallback download works.
+[ ] Booking Confirmation: shows all services + add-ons + totals; same logo as booking confirmation used globally; “Add to Calendar” present.
+[ ] Prior items verified: demo modal (single play + one close X); emergency/urgent/same day rules; comments + add-ons dropdown + pricing + keyword autosuggest; hours auto-fill + disclaimer; provider modal; services page parity and login state.
+[ ] No regressions; no console errors.
