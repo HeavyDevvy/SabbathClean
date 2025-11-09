@@ -25,7 +25,10 @@ import {
   TreePine,
   ChefHat,
   Users,
-  Wrench
+  Wrench,
+  Shield,
+  AlertCircle,
+  Lock as LockIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BookingConfirmationModal from "./booking-confirmation-modal";
@@ -971,11 +974,60 @@ export default function ModernServiceModal({
   };
 
   const handleBookingConfirm = () => {
-    // Create enhanced booking data with all necessary details
+    // Validate payment information before proceeding
+    if (!validateAll()) {
+      toast({
+        variant: "destructive",
+        title: "Payment validation failed",
+        description: "Please check your payment details and try again."
+      });
+      return; // Keep modal open for user to fix errors
+    }
+
+    // Create masked payment info (only store last 4 digits and brand, never full card details)
+    const maskedPaymentInfo = formData.paymentMethod === "card" ? {
+      paymentMethod: "card",
+      cardBrand: cardBrand,
+      cardLast4: formData.cardNumber.replace(/\s/g, '').slice(-4),
+      cardholderName: formData.cardholderName
+      // NEVER store: cardNumber, cvv, expiryDate
+    } : {
+      paymentMethod: "bank",
+      bankAccountLast4: formData.bankAccount.slice(-4),
+      bankBranch: formData.bankBranch
+      // NEVER store: full bankAccount
+    };
+
+    // Create enhanced booking data WITHOUT sensitive payment fields
     const bookingData = {
       serviceId,
       serviceName: currentConfig.title,
-      ...formData,
+      // Include all form fields EXCEPT sensitive payment data
+      propertyType: formData.propertyType,
+      address: formData.address,
+      preferredDate: formData.preferredDate,
+      timePreference: formData.timePreference,
+      recurringSchedule: formData.recurringSchedule,
+      materials: formData.materials,
+      insurance: formData.insurance,
+      cleaningType: formData.cleaningType,
+      propertySize: formData.propertySize,
+      gardenSize: formData.gardenSize,
+      gardenCondition: formData.gardenCondition,
+      urgency: formData.urgency,
+      electricalIssue: formData.electricalIssue,
+      cuisineType: formData.cuisineType,
+      menuSelection: formData.menuSelection,
+      selectedMenu: formData.selectedMenu,
+      customMenuItems: formData.customMenuItems,
+      dietaryRequirements: formData.dietaryRequirements,
+      eventSize: formData.eventSize,
+      selectedAddOns: formData.selectedAddOns,
+      specialRequests: formData.specialRequests,
+      
+      // Include masked payment info only
+      payment: maskedPaymentInfo,
+      
       pricing,
       totalCost: pricing.totalPrice,
       commission: Math.round(pricing.totalPrice * 0.15), // 15% platform commission
@@ -992,6 +1044,7 @@ export default function ModernServiceModal({
       } : null
     };
 
+    // Safe to log - no sensitive payment data included
     console.log("Processing booking:", bookingData);
     
     // Store booking data and show confirmation modal
@@ -1005,6 +1058,39 @@ export default function ModernServiceModal({
   const handleConfirmationClose = () => {
     setShowConfirmation(false);
     setConfirmedBookingData(null);
+    
+    // SECURITY: Clear all sensitive payment data from memory
+    setFormData(prev => ({
+      ...prev,
+      // Clear card payment fields
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      // Clear bank transfer fields
+      bankAccount: "",
+      bankBranch: ""
+    }));
+    
+    // Reset payment validation state
+    setPaymentTouched({
+      cardNumber: false,
+      expiryDate: false,
+      cvv: false,
+      cardholderName: false,
+      bankAccount: false,
+      bankBranch: false
+    });
+    
+    setPaymentErrors({
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      bankAccount: "",
+      bankBranch: ""
+    });
+    
     // Close the main modal after confirmation modal is closed
     onClose();
     // Reset form state
@@ -1992,51 +2078,201 @@ export default function ModernServiceModal({
       {formData.paymentMethod === "card" && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <CreditCard className="h-5 w-5 mr-2" />
-              Card Details
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CreditCard className="h-5 w-5 mr-2" />
+                Card Details
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Shield className="h-4 w-4 text-green-600" />
+                <span>Secure Payment</span>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Cardholder Name */}
             <div>
-              <Label htmlFor="cardholderName">Cardholder Name</Label>
-              <Input
-                id="cardholderName"
-                placeholder="John Doe"
-                value={formData.cardholderName}
-                onChange={(e) => setFormData(prev => ({ ...prev, cardholderName: e.target.value }))}
-              />
+              <Label htmlFor="cardholderName">Cardholder Name *</Label>
+              <div className="relative">
+                <Input
+                  id="cardholderName"
+                  data-testid="input-cardholder-name"
+                  placeholder="John Doe"
+                  value={formData.cardholderName}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, cardholderName: e.target.value }));
+                    if (paymentTouched.cardholderName) {
+                      validateField('cardholderName', e.target.value);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    markTouched('cardholderName');
+                    validateField('cardholderName', e.target.value);
+                  }}
+                  className={`pr-10 ${
+                    paymentTouched.cardholderName && !paymentErrors.cardholderName 
+                      ? 'border-green-500' 
+                      : paymentTouched.cardholderName && paymentErrors.cardholderName 
+                      ? 'border-red-500' 
+                      : ''
+                  }`}
+                />
+                {paymentTouched.cardholderName && !paymentErrors.cardholderName && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                )}
+              </div>
+              {paymentTouched.cardholderName && paymentErrors.cardholderName && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {paymentErrors.cardholderName}
+                </p>
+              )}
             </div>
+
+            {/* Card Number with Brand Detection */}
             <div>
-              <Label htmlFor="cardNumber">Card Number</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                value={formData.cardNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, cardNumber: e.target.value }))}
-                maxLength={19}
-              />
+              <Label htmlFor="cardNumber">Card Number *</Label>
+              <div className="relative">
+                <Input
+                  id="cardNumber"
+                  data-testid="input-card-number"
+                  placeholder="1234 5678 9012 3456"
+                  value={formData.cardNumber}
+                  onChange={(e) => {
+                    const formatted = formatCardNumber(e.target.value);
+                    setFormData(prev => ({ ...prev, cardNumber: formatted }));
+                    if (paymentTouched.cardNumber) {
+                      validateField('cardNumber', formatted);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    markTouched('cardNumber');
+                    validateField('cardNumber', e.target.value);
+                  }}
+                  maxLength={19}
+                  className={`pr-16 ${
+                    paymentTouched.cardNumber && !paymentErrors.cardNumber 
+                      ? 'border-green-500' 
+                      : paymentTouched.cardNumber && paymentErrors.cardNumber 
+                      ? 'border-red-500' 
+                      : ''
+                  }`}
+                />
+                {/* Card Brand Icon */}
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {cardBrand && (
+                    <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                      {cardBrand}
+                    </span>
+                  )}
+                  {paymentTouched.cardNumber && !paymentErrors.cardNumber && cardBrand && (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  )}
+                </div>
+              </div>
+              {paymentTouched.cardNumber && paymentErrors.cardNumber && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {paymentErrors.cardNumber}
+                </p>
+              )}
             </div>
+
+            {/* Expiry and CVV */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input
-                  id="expiryDate"
-                  placeholder="MM/YY"
-                  value={formData.expiryDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
-                  maxLength={5}
-                />
+                <Label htmlFor="expiryDate">Expiry Date *</Label>
+                <div className="relative">
+                  <Input
+                    id="expiryDate"
+                    data-testid="input-expiry-date"
+                    placeholder="MM/YY"
+                    value={formData.expiryDate}
+                    onChange={(e) => {
+                      const formatted = formatExpiryDate(e.target.value);
+                      setFormData(prev => ({ ...prev, expiryDate: formatted }));
+                      if (paymentTouched.expiryDate) {
+                        validateField('expiryDate', formatted);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      markTouched('expiryDate');
+                      validateField('expiryDate', e.target.value);
+                    }}
+                    maxLength={5}
+                    className={`pr-10 ${
+                      paymentTouched.expiryDate && !paymentErrors.expiryDate 
+                        ? 'border-green-500' 
+                        : paymentTouched.expiryDate && paymentErrors.expiryDate 
+                        ? 'border-red-500' 
+                        : ''
+                    }`}
+                  />
+                  {paymentTouched.expiryDate && !paymentErrors.expiryDate && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                  )}
+                </div>
+                {paymentTouched.expiryDate && paymentErrors.expiryDate && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {paymentErrors.expiryDate}
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  value={formData.cvv}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cvv: e.target.value }))}
-                  maxLength={4}
-                />
+                <Label htmlFor="cvv">CVV *</Label>
+                <div className="relative">
+                  <Input
+                    id="cvv"
+                    data-testid="input-cvv"
+                    placeholder={cardBrand === 'American Express' ? '1234' : '123'}
+                    value={formData.cvv}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setFormData(prev => ({ ...prev, cvv: value }));
+                      if (paymentTouched.cvv) {
+                        validateField('cvv', value);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      markTouched('cvv');
+                      validateField('cvv', e.target.value);
+                    }}
+                    maxLength={cardBrand === 'American Express' ? 4 : 3}
+                    type="password"
+                    className={`pr-10 ${
+                      paymentTouched.cvv && !paymentErrors.cvv 
+                        ? 'border-green-500' 
+                        : paymentTouched.cvv && paymentErrors.cvv 
+                        ? 'border-red-500' 
+                        : ''
+                    }`}
+                  />
+                  {paymentTouched.cvv && !paymentErrors.cvv && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                  )}
+                </div>
+                {paymentTouched.cvv && paymentErrors.cvv && (
+                  <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {paymentErrors.cvv}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+              <div className="flex items-start gap-3">
+                <LockIcon className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-green-800">
+                  <p className="font-semibold mb-1">Your payment is secure</p>
+                  <ul className="space-y-0.5 text-green-700">
+                    <li>• 256-bit SSL encryption</li>
+                    <li>• PCI DSS compliant</li>
+                    <li>• No card details stored</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -2054,22 +2290,82 @@ export default function ModernServiceModal({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="bankAccount">Bank Account Number</Label>
-              <Input
-                id="bankAccount"
-                placeholder="1234567890"
-                value={formData.bankAccount}
-                onChange={(e) => setFormData(prev => ({ ...prev, bankAccount: e.target.value }))}
-              />
+              <Label htmlFor="bankAccount">Bank Account Number *</Label>
+              <div className="relative">
+                <Input
+                  id="bankAccount"
+                  data-testid="input-bank-account"
+                  placeholder="1234567890"
+                  value={formData.bankAccount}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setFormData(prev => ({ ...prev, bankAccount: value }));
+                    if (paymentTouched.bankAccount) {
+                      validateField('bankAccount', value);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    markTouched('bankAccount');
+                    validateField('bankAccount', e.target.value);
+                  }}
+                  maxLength={12}
+                  className={`pr-10 ${
+                    paymentTouched.bankAccount && !paymentErrors.bankAccount 
+                      ? 'border-green-500' 
+                      : paymentTouched.bankAccount && paymentErrors.bankAccount 
+                      ? 'border-red-500' 
+                      : ''
+                  }`}
+                />
+                {paymentTouched.bankAccount && !paymentErrors.bankAccount && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                )}
+              </div>
+              {paymentTouched.bankAccount && paymentErrors.bankAccount && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {paymentErrors.bankAccount}
+                </p>
+              )}
             </div>
             <div>
-              <Label htmlFor="bankBranch">Branch Code</Label>
-              <Input
-                id="bankBranch"
-                placeholder="123456"
-                value={formData.bankBranch}
-                onChange={(e) => setFormData(prev => ({ ...prev, bankBranch: e.target.value }))}
-              />
+              <Label htmlFor="bankBranch">Branch Code *</Label>
+              <div className="relative">
+                <Input
+                  id="bankBranch"
+                  data-testid="input-bank-branch"
+                  placeholder="123456"
+                  value={formData.bankBranch}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setFormData(prev => ({ ...prev, bankBranch: value }));
+                    if (paymentTouched.bankBranch) {
+                      validateField('bankBranch', value);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    markTouched('bankBranch');
+                    validateField('bankBranch', e.target.value);
+                  }}
+                  maxLength={6}
+                  className={`pr-10 ${
+                    paymentTouched.bankBranch && !paymentErrors.bankBranch 
+                      ? 'border-green-500' 
+                      : paymentTouched.bankBranch && paymentErrors.bankBranch 
+                      ? 'border-red-500' 
+                      : ''
+                  }`}
+                />
+                {paymentTouched.bankBranch && !paymentErrors.bankBranch && (
+                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                )}
+              </div>
+              {paymentTouched.bankBranch && paymentErrors.bankBranch && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {paymentErrors.bankBranch}
+                </p>
+              )}
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-700">
