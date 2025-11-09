@@ -1047,10 +1047,11 @@ export default function ModernServiceModal({
       if (childrenAge) basePrice *= childrenAge.multiplier;
     }
 
-    // Add-ons pricing
-    const addOnsPrice = config.addOns
-      ?.filter((addon: any) => formData.selectedAddOns.includes(addon.id))
-      ?.reduce((sum: number, addon: any) => sum + addon.price, 0) || 0;
+    // Add-ons pricing - FIXED: Use serviceAddOns from config/addons.ts instead of hardcoded config.addOns
+    const availableAddOns = serviceAddOns[mappedServiceId] || [];
+    const addOnsPrice = availableAddOns
+      .filter((addon: AddOn) => formData.selectedAddOns.includes(addon.id))
+      .reduce((sum: number, addon: AddOn) => sum + addon.price, 0) || 0;
 
     // Enhanced discount calculations
     let materialsDiscount = 0;
