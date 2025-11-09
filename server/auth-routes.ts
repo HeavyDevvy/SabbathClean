@@ -1314,4 +1314,120 @@ export function registerAuthRoutes(app: Express) {
       res.status(500).json({ message: 'Failed to update user' });
     }
   });
+
+  // Change password endpoint (requires current password)
+  app.post('/api/user/change-password', authenticateToken, async (req: any, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Current password and new password are required' });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters long' });
+      }
+
+      // Get current user
+      const user = await storage.getUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Verify current password
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password || '');
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await storage.updateUser(req.user.id, {
+        password: hashedPassword,
+        updatedAt: new Date()
+      });
+
+      res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).json({ message: 'Failed to change password' });
+    }
+  });
+
+  // Get user security settings
+  app.get('/api/user/security-settings', authenticateToken, async (req: any, res) => {
+    try {
+      const user = await storage.getUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const preferences = user.preferences as any || {};
+      res.json({
+        is2FAEnabled: preferences.is2FAEnabled || false,
+        isBiometricsEnabled: preferences.isBiometricsEnabled || false
+      });
+    } catch (error) {
+      console.error('Get security settings error:', error);
+      res.status(500).json({ message: 'Failed to fetch security settings' });
+    }
+  });
+
+  // Toggle 2FA
+  app.post('/api/user/toggle-2fa', authenticateToken, async (req: any, res) => {
+    try {
+      const { enabled } = req.body;
+
+      const user = await storage.getUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const preferences = user.preferences as any || {};
+      preferences.is2FAEnabled = enabled;
+
+      await storage.updateUser(req.user.id, {
+        preferences,
+        updatedAt: new Date()
+      });
+
+      res.json({ 
+        message: enabled ? 'Two-factor authentication enabled' : 'Two-factor authentication disabled',
+        is2FAEnabled: enabled
+      });
+    } catch (error) {
+      console.error('Toggle 2FA error:', error);
+      res.status(500).json({ message: 'Failed to toggle 2FA' });
+    }
+  });
+
+  // Toggle Biometrics
+  app.post('/api/user/toggle-biometrics', authenticateToken, async (req: any, res) => {
+    try {
+      const { enabled } = req.body;
+
+      const user = await storage.getUserById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const preferences = user.preferences as any || {};
+      preferences.isBiometricsEnabled = enabled;
+
+      await storage.updateUser(req.user.id, {
+        preferences,
+        updatedAt: new Date()
+      });
+
+      res.json({ 
+        message: enabled ? 'Biometric authentication enabled' : 'Biometric authentication disabled',
+        isBiometricsEnabled: enabled
+      });
+    } catch (error) {
+      console.error('Toggle biometrics error:', error);
+      res.status(500).json({ message: 'Failed to toggle biometrics' });
+    }
+  });
 }

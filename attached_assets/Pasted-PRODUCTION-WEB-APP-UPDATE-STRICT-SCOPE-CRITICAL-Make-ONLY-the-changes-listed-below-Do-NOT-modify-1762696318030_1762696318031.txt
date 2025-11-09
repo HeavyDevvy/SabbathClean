@@ -1,0 +1,237 @@
+PRODUCTION WEB APP UPDATE - STRICT SCOPE
+CRITICAL: Make ONLY the changes listed below. Do NOT modify any other logic, routes, APIs, copy, layouts, styles, or components. Zero regressions, zero console errors.
+
+A) FIX SERVICE SELECTION FLOW
+Issue: When user selects a service on "Choose a Service" page, the wrong booking popup opens (defaults to House Cleaning or nothing happens).
+Fix Required:
+
+Ensure the selected service immediately opens the CORRECT booking popup/flow for that specific service
+Fix the selection handler - do NOT change route names or state structure
+Test all 8 services to confirm each opens its own booking flow
+
+
+B) MULTI-SERVICE BOOKING (UP TO 3 SERVICES)
+On "Choose Verified Provider" step, add:
+
+"Add Another Service" button at bottom of page
+Clicking returns user to service selection (step 1)
+Previously selected services must be hidden/disabled (prevent duplicates)
+Maximum 3 services per booking session
+Aggregate costs from all selected services + their providers
+Payment Summary must show:
+
+Line-by-line breakdown by service
+Each service's provider cost + add-ons
+Grand total (sum of all services)
+
+
+
+State Management:
+
+Track array of selected services in booking flow
+Pass accumulated costs through each step
+Validate max 3 services before allowing "Add Another"
+
+
+C) SCHEDULE & PREFERENCES - STABILITY CHECK ONLY
+DO NOT change any text, labels, or existing fields.
+Only fix if broken:
+
+Ensure step renders correctly for all 8 services (no blank screens)
+Fix any navigation/state issues that prevent progression
+Keep changes isolated to this step only
+
+
+D) NEW ADD-ONS WITH PRICING + KEYWORD AUTO-SUGGEST
+1. Create /config/addons.json with this structure:
+json[
+  {
+    "serviceId": "house_cleaning",
+    "serviceName": "House Cleaning",
+    "addons": [
+      {
+        "id": "deep_cleaning",
+        "label": "Deep cleaning (ovens, fridges, cupboards)",
+        "priceZAR": 650,
+        "keywords": ["deep clean", "oven", "fridge", "cupboard", "kitchen deep"]
+      }
+      // ... more addons
+    ]
+  }
+  // ... more services
+]
+2. Add these exact add-ons with prices:
+House Cleaning:
+
+Deep cleaning (ovens, fridges, cupboards): R650
+Window cleaning: R350
+Carpet and upholstery cleaning: R750
+Laundry service (wash, dry, fold, iron): R300
+Organizing and decluttering: R450
+Post-construction cleaning: R1,200
+Pet hair removal treatment: R250
+Disinfection and sanitizing: R400
+
+Plumbing Services:
+
+Drain camera inspection: R750
+Water pressure testing: R300
+Leak detection service: R600
+Geyser maintenance/flush: R650
+Pipe insulation: R350
+Water filtration system installation: R1,200
+Greywater system setup: R1,500
+Certificate of Compliance: R850
+
+Electrical Services:
+
+Certificate of Compliance (COC): R900
+Electrical inspection and testing: R700
+Surge protection installation: R650
+Generator installation/connection: R1,500
+Solar panel installation: R2,800
+Prepaid meter installation: R1,200
+DB board upgrade: R2,000
+Energy audit: R900
+
+Garden Care:
+
+Tree felling/pruning: R1,200
+Hedge trimming: R400
+Lawn fertilization and treatment: R450
+Garden waste removal: R350
+Irrigation system installation/repair: R1,200
+Seasonal flower planting: R350
+Mulching: R300
+Pest and disease control: R500
+
+Chef and Catering:
+
+Special dietary accommodations (vegan, halaal, kosher, gluten-free): R300
+Tableware and cutlery rental: R600
+Beverage service: R500
+Dessert/cake service: R450
+Menu tasting session: R700
+Leftovers packaging: R200
+Kitchen cleanup: R350
+
+Waitering Services:
+
+Bartender service: R600
+Glassware and tableware rental: R450
+Table setting and decoration: R400
+Champagne/wine service specialist: R350
+Post-event cleanup: R450
+
+Moving Services:
+
+Packing service (full/partial): R1,000
+Unpacking service: R800
+Packing materials supply: R450
+Furniture disassembly/reassembly: R900
+Appliance disconnection/reconnection: R600
+Heavy item specialists (pianos, safes): R1,800
+Storage solutions: R700
+Insurance coverage upgrade: R400
+Furniture hoisting/crane service: R2,200
+
+Au Pair Services:
+
+Overnight care: R800
+School drop-off and pick-up: R300
+Homework assistance/tutoring: R350
+Meal preparation for children: R250
+Light housekeeping: R250
+Newborn care specialist: R900
+Special needs care: R900
+Additional children surcharge: R200
+Swimming supervision (certified): R300
+First aid certified: R250
+
+3. Keyword Auto-Suggest Implementation:
+Add debounced keyword detection on comment/notes field:
+
+Scan user input for keywords (case-insensitive)
+Auto-preselect matching add-ons
+User can manually check/uncheck any suggestions
+Show notification: "We noticed you mentioned [keyword] - we've suggested relevant add-ons"
+
+Keyword arrays per service:
+
+House Cleaning: deep clean, post construction, windows, carpet, upholstery, laundry, declutter, sanitize, pet hair
+Plumbing: leak, geyser, low pressure, camera, filtration, greywater, coc, compliance
+Electrical: coc, compliance, inspection, surge, generator, solar, prepaid, db board, energy audit
+Garden: tree, hedge, lawn, fertilize, waste, irrigation, flowers, mulch, pest
+Chef/Catering: halaal, kosher, vegan, gluten, tableware, beverage, dessert, tasting, leftovers, cleanup
+Waitering: bartender, glassware, table setting, champagne, wine, post-event
+Moving: packing, unpacking, materials, disassembly, reassembly, appliance, piano, safe, storage, insurance, crane
+Au Pair: overnight, school run, homework, newborn, special needs, first aid, swimming, meals, light housekeeping
+
+Integration:
+
+Extend existing add-ons UI (checkboxes/dropdown)
+DO NOT remove or rename existing add-ons
+Add prices to each add-on in UI
+Include add-on costs in payment calculations
+
+
+E) LOGO REPLACEMENT
+I will upload a new logo file.
+Replace everywhere:
+
+Header/navigation
+Footer
+Login/signup pages
+Any splash screens
+
+Sizing guidelines:
+
+Header: 40-64px height (match existing layout)
+Maintain aspect ratio
+No layout shifts or text displacement
+
+After upload, tell me:
+
+Where to place the file
+What the import path is
+Which components were updated
+
+
+IMPLEMENTATION RULES
+✅ DO:
+
+Keep all route names, state shapes, component names unchanged
+Add comments: // ADDED: Multi-service booking feature where changes made
+Create /config/addons.json for new add-on data
+Test each service flow end-to-end
+
+❌ DON'T:
+
+Change existing add-ons (only append new ones)
+Modify unrelated components or styling
+Add new npm dependencies unless absolutely necessary (list if you do)
+Change any copy/text except where specified
+
+
+REQUIRED OUTPUT
+After completing changes, provide:
+
+Files Modified (with paths)
+Summary per file (what changed and why)
+New files created (e.g., /config/addons.json)
+Logo upload instructions (path and import location)
+Testing notes (any edge cases to check)
+
+
+FINAL QA CHECKLIST (MUST ALL PASS ✓)
+
+ Any service selected opens its correct booking flow (not House Cleaning default)
+ "Add Another Service" button appears on provider step
+ Cannot select same service twice; max 3 services enforced
+ Payment Summary shows split breakdown by service with correct totals
+ All new add-ons visible with exact prices listed above
+ Keyword auto-suggest works; user can edit selections
+ Schedule & Preferences renders for all 8 services (no errors)
+ New logo displays correctly everywhere (no broken images/layout)
+ Zero console errors in browser
+ Zero unintended changes to other features

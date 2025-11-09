@@ -4,18 +4,30 @@ import { authenticateToken } from "./auth-routes";
 import { z } from "zod";
 
 // Validation schemas
+const currentYear = new Date().getFullYear();
+
 const addPaymentMethodSchema = z.object({
   type: z.enum(['card', 'bank_transfer']),
   cardHolderName: z.string().optional(),
   cardLast4: z.string().length(4).optional(),
   cardBrand: z.string().optional(),
-  expiryMonth: z.string().optional(),
-  expiryYear: z.string().optional(),
+  expiryMonth: z.coerce.number().int().min(1).max(12).optional(),
+  expiryYear: z.coerce.number().int().min(currentYear).optional(),
   bankName: z.string().optional(),
   accountHolderName: z.string().optional(),
   nickname: z.string().optional(),
   isDefault: z.boolean().default(false)
-});
+}).refine(
+  (data) => {
+    if (data.type === 'card') {
+      return data.cardHolderName && data.cardLast4 && data.expiryMonth && data.expiryYear;
+    }
+    return true;
+  },
+  {
+    message: 'Card holder name, card last 4 digits, expiry month, and expiry year are required for card payments'
+  }
+);
 
 export function registerPaymentRoutes(app: Express) {
   // Get user's payment methods

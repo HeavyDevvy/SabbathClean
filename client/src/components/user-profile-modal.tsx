@@ -79,7 +79,21 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
     providerUpdates: true
   });
 
-  const { toast } = useToast();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [isBiometricsEnabled, setIsBiometricsEnabled] = useState(false);
+
+  const { toast} = useToast();
   const queryClient = useQueryClient();
 
   // Fetch payment methods
@@ -89,6 +103,24 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
   });
 
   const paymentMethodsArray = Array.isArray(paymentMethods) ? paymentMethods : [];
+
+  // Fetch security settings
+  const { data: securitySettings, isLoading: securityLoading } = useQuery<{
+    is2FAEnabled: boolean;
+    isBiometricsEnabled: boolean;
+  }>({
+    queryKey: ['/api/user/security-settings'],
+    enabled: isOpen && activeTab === 'security',
+    retry: false
+  });
+
+  // Update local state when security settings are loaded
+  useEffect(() => {
+    if (securitySettings) {
+      setIs2FAEnabled(securitySettings.is2FAEnabled || false);
+      setIsBiometricsEnabled(securitySettings.isBiometricsEnabled || false);
+    }
+  }, [securitySettings]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -164,6 +196,76 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
     }
   });
 
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      return await apiRequest('POST', '/api/user/change-password', data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Changed",
+        description: "Your password has been successfully updated.",
+      });
+      setShowChangePassword(false);
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Password Change Failed",
+        description: error.message || "Failed to change password.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Toggle 2FA mutation
+  const toggle2FAMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      return await apiRequest('POST', '/api/user/toggle-2fa', { enabled });
+    },
+    onSuccess: (data: any) => {
+      setIs2FAEnabled(data.is2FAEnabled);
+      toast({
+        title: data.is2FAEnabled ? "2FA Enabled" : "2FA Disabled",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/security-settings'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update 2FA settings.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Toggle biometrics mutation
+  const toggleBiometricsMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      return await apiRequest('POST', '/api/user/toggle-biometrics', { enabled });
+    },
+    onSuccess: (data: any) => {
+      setIsBiometricsEnabled(data.isBiometricsEnabled);
+      toast({
+        title: data.isBiometricsEnabled ? "Biometrics Enabled" : "Biometrics Disabled",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/security-settings'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update biometric settings.",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Auto-detect card brand
   const detectCardBrand = (number: string) => {
     const cleanNumber = number.replace(/\s/g, '');
@@ -218,6 +320,60 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
     removePaymentMethodMutation.mutate(id);
   };
 
+  const handleChangePassword = () => {
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all password fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New password and confirm password do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast({
+        title: "Weak Password",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    changePasswordMutation.mutate({
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword
+    });
+  };
+
+  const handleToggle2FA = () => {
+    toggle2FAMutation.mutate(!is2FAEnabled);
+  };
+
+  const handleToggleBiometrics = async () => {
+    if (!isBiometricsEnabled) {
+      if ('credentials' in navigator && 'create' in navigator.credentials) {
+        toggleBiometricsMutation.mutate(true);
+      } else {
+        toast({
+          title: "Not Supported",
+          description: "Biometric authentication is not supported on this device.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toggleBiometricsMutation.mutate(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
@@ -226,14 +382,9 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
         data-testid="user-profile-modal"
       >
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">
-              Account Settings
-            </DialogTitle>
-            <Button variant="ghost" size="sm" onClick={onClose} data-testid="close-profile-modal">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-2xl font-bold">
+            Account Settings
+          </DialogTitle>
           <div id="profile-modal-description" className="sr-only">
             Manage your account settings, payment methods, and preferences
           </div>
@@ -548,7 +699,45 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
           <TabsContent value="notifications" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setNotifications({
+                          emailNotifications: true,
+                          smsNotifications: true,
+                          pushNotifications: true,
+                          marketingEmails: true,
+                          bookingReminders: true,
+                          providerUpdates: true
+                        });
+                      }}
+                      data-testid="select-all-notifications"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setNotifications({
+                          emailNotifications: false,
+                          smsNotifications: false,
+                          pushNotifications: false,
+                          marketingEmails: false,
+                          bookingReminders: false,
+                          providerUpdates: false
+                        });
+                      }}
+                      data-testid="deselect-all-notifications"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {Object.entries(notifications).map(([key, value]) => (
@@ -577,29 +766,170 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                 <CardTitle>Password & Security</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="outline" data-testid="change-password-button">
-                  <Lock className="h-4 w-4 mr-2" />
-                  Change Password
-                </Button>
+                {!showChangePassword ? (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowChangePassword(true)}
+                    data-testid="change-password-button"
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    Change Password
+                  </Button>
+                ) : (
+                  <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+                    <h4 className="font-medium">Change Password</h4>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="currentPassword"
+                          type={showCurrentPassword ? "text" : "password"}
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                          data-testid="input-current-password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        >
+                          {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showNewPassword ? "text" : "password"}
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                          data-testid="input-new-password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                          data-testid="input-confirm-password"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-3">
+                      <Button 
+                        onClick={handleChangePassword} 
+                        disabled={changePasswordMutation.isPending}
+                        data-testid="save-password-button"
+                      >
+                        {changePasswordMutation.isPending ? 'Saving...' : 'Save Password'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setShowChangePassword(false);
+                          setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                        }}
+                        disabled={changePasswordMutation.isPending}
+                        data-testid="cancel-password-button"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Two-Factor Authentication</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Add an extra layer of security to your account
-                  </p>
-                  <Button variant="outline" data-testid="enable-2fa-button">
-                    Enable Two-Factor Authentication
-                  </Button>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-medium mb-1">Two-Factor Authentication</h4>
+                      <p className="text-sm text-gray-600">
+                        Add an extra layer of security to your account
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">
+                        {toggle2FAMutation.isPending ? 'Updating...' : (is2FAEnabled ? 'Enabled' : 'Disabled')}
+                      </span>
+                      <input
+                        id="toggle2FA"
+                        type="checkbox"
+                        checked={is2FAEnabled}
+                        onChange={handleToggle2FA}
+                        disabled={toggle2FAMutation.isPending}
+                        className="rounded border-gray-300"
+                        data-testid="toggle-2fa"
+                      />
+                    </div>
+                  </div>
+                  {is2FAEnabled && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p className="text-sm text-green-800">
+                        Two-factor authentication is active. You'll need to enter a code from your authenticator app when logging in.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Active Sessions</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Manage your active login sessions
-                  </p>
-                  <Button variant="outline" data-testid="manage-sessions-button">
-                    View Active Sessions
-                  </Button>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-medium mb-1">Biometric Authentication</h4>
+                      <p className="text-sm text-gray-600">
+                        Use fingerprint or face recognition for secure access
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">
+                        {toggleBiometricsMutation.isPending ? 'Updating...' : (isBiometricsEnabled ? 'Enabled' : 'Disabled')}
+                      </span>
+                      <input
+                        id="toggleBiometrics"
+                        type="checkbox"
+                        checked={isBiometricsEnabled}
+                        onChange={handleToggleBiometrics}
+                        disabled={toggleBiometricsMutation.isPending}
+                        className="rounded border-gray-300"
+                        data-testid="toggle-biometrics"
+                      />
+                    </div>
+                  </div>
+                  {isBiometricsEnabled && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-800">
+                        Biometric authentication is enabled for this device. You can use fingerprint or face recognition to log in.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
