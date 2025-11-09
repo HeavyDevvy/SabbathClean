@@ -568,10 +568,13 @@ export default function ModernServiceModal({
   };
 
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
-  const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"]) : null;
+  const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
   
   // If no service selected, start at step 0 (service selection)
-  const showServiceSelection = !serviceId || serviceId === 'all-services';
+  const showServiceSelection = !serviceId || serviceId === '' || serviceId === 'all-services';
+  
+  // Debug logging
+  console.log('ModernServiceModal - serviceId:', serviceId, 'showServiceSelection:', showServiceSelection);
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -826,13 +829,13 @@ export default function ModernServiceModal({
 
   const renderServiceSelection = () => {
     const availableServices = [
-      { id: 'house-cleaning', name: 'House Cleaning', icon: Sparkles, color: 'blue' },
-      { id: 'plumbing', name: 'Plumbing Services', icon: Droplets, color: 'cyan' },
-      { id: 'electrical', name: 'Electrical Services', icon: Zap, color: 'yellow' },
-      { id: 'garden-maintenance', name: 'Garden Maintenance', icon: TreePine, color: 'green' },
-      { id: 'chef-catering', name: 'Chef & Catering', icon: ChefHat, color: 'orange' },
-      { id: 'event-staff', name: 'Event Staffing', icon: Users, color: 'purple' },
-      { id: 'handyman', name: 'Handyman Services', icon: Wrench, color: 'gray' },
+      { id: 'house-cleaning', name: 'House Cleaning', icon: Sparkles, bgColor: 'bg-blue-100', iconColor: 'text-blue-600' },
+      { id: 'plumbing', name: 'Plumbing Services', icon: Droplets, bgColor: 'bg-cyan-100', iconColor: 'text-cyan-600' },
+      { id: 'electrical', name: 'Electrical Services', icon: Zap, bgColor: 'bg-yellow-100', iconColor: 'text-yellow-600' },
+      { id: 'garden-maintenance', name: 'Garden Maintenance', icon: TreePine, bgColor: 'bg-green-100', iconColor: 'text-green-600' },
+      { id: 'chef-catering', name: 'Chef & Catering', icon: ChefHat, bgColor: 'bg-orange-100', iconColor: 'text-orange-600' },
+      { id: 'event-staff', name: 'Event Staffing', icon: Users, bgColor: 'bg-purple-100', iconColor: 'text-purple-600' },
+      { id: 'handyman', name: 'Handyman Services', icon: Wrench, bgColor: 'bg-gray-100', iconColor: 'text-gray-600' },
     ];
 
     return (
@@ -854,10 +857,11 @@ export default function ModernServiceModal({
                     onServiceSelect(service.id);
                   }
                 }}
+                data-testid={`select-service-${service.id}`}
               >
                 <CardContent className="p-6 text-center">
-                  <div className={`h-16 w-16 mx-auto mb-4 rounded-full bg-${service.color}-100 flex items-center justify-center`}>
-                    <Icon className={`h-8 w-8 text-${service.color}-600`} />
+                  <div className={`h-16 w-16 mx-auto mb-4 rounded-full ${service.bgColor} flex items-center justify-center`}>
+                    <Icon className={`h-8 w-8 ${service.iconColor}`} />
                   </div>
                   <h4 className="font-semibold text-gray-900">{service.name}</h4>
                 </CardContent>
