@@ -811,6 +811,72 @@ export default function ModernServiceModal({
   // Track if we need to show service selection (Step 0)
   const needsServiceSelection = !serviceId || !currentConfig;
 
+  // ADDED: Multi-service booking feature - Reset modal state when serviceId changes
+  // FIX: Fixes bug where selecting a service opens wrong booking flow
+  useEffect(() => {
+    if (serviceId && !editBookingData) {
+      // Reset to step 1 when a new service is selected (not editing)
+      setStep(1);
+      setShowConfirmation(false);
+      setConfirmedBookingData(null);
+      
+      // Reset form data to empty state for new service
+      setFormData({
+        propertyType: "",
+        address: "",
+        preferredDate: "",
+        timePreference: "",
+        recurringSchedule: "one-time",
+        materials: "supply",
+        insurance: false,
+        cleaningType: "",
+        propertySize: "",
+        gardenSize: "",
+        gardenCondition: "",
+        urgency: "standard",
+        electricalIssue: "",
+        cuisineType: "",
+        menuSelection: "popular",
+        selectedMenu: "",
+        customMenuItems: [] as string[],
+        dietaryRequirements: [] as string[],
+        eventSize: "",
+        selectedAddOns: [] as string[],
+        selectedProvider: null as any,
+        specialRequests: "",
+        paymentMethod: "card",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        selectedBank: "",
+        bankAccount: "",
+        bankBranch: ""
+      });
+      
+      // Reset payment validation state
+      setPaymentTouched({
+        cardNumber: false,
+        expiryDate: false,
+        cvv: false,
+        cardholderName: false,
+        selectedBank: false,
+        bankAccount: false,
+        bankBranch: false
+      });
+      
+      setPaymentErrors({
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        selectedBank: "",
+        bankAccount: "",
+        bankBranch: ""
+      });
+    }
+  }, [serviceId, editBookingData]);
+
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
   useEffect(() => {

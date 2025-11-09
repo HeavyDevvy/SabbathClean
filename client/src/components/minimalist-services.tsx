@@ -20,8 +20,10 @@ import {
   Clock
 } from "lucide-react";
 
+// ADDED: Multi-service booking feature
 interface MinimalistServicesProps {
   onServiceSelect: (serviceId: string) => void;
+  bookedServices?: string[]; // Array of already-selected service IDs to hide
 }
 
 // Simplified service structure focusing on core offerings
@@ -85,11 +87,14 @@ const services = [
   }
 ];
 
-export default function MinimalistServices({ onServiceSelect }: MinimalistServicesProps) {
+export default function MinimalistServices({ onServiceSelect, bookedServices = [] }: MinimalistServicesProps) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [clickedCard, setClickedCard] = useState<string | null>(null);
+  
+  // ADDED: Multi-service booking feature - Filter out already-booked services
+  const availableServices = services.filter(service => !bookedServices.includes(service.id));
 
   const handleServiceClick = (serviceId: string) => {
     setClickedCard(serviceId);
@@ -124,7 +129,7 @@ export default function MinimalistServices({ onServiceSelect }: MinimalistServic
         {/* Services Grid - Animated Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           <AnimatePresence>
-            {services.map((service, index) => (
+            {availableServices.map((service, index) => (
               <motion.div
                 key={service.id}
                 initial={{ opacity: 0, y: 50 }}
