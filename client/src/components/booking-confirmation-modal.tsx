@@ -34,6 +34,12 @@ export default function BookingConfirmationModal({
 }: BookingConfirmationModalProps) {
   const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
+  
+  // Persist booking reference so it doesn't change on re-renders
+  // Must be called before any conditional returns to follow Rules of Hooks
+  const bookingRef = useMemo(() => {
+    return `BE${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
+  }, []);
 
   if (!bookingData) return null;
 
@@ -45,11 +51,6 @@ export default function BookingConfirmationModal({
       day: 'numeric'
     });
   };
-
-  // Persist booking reference so it doesn't change on re-renders
-  const bookingRef = useMemo(() => {
-    return `BE${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
-  }, []);
 
   const handleDownloadReceipt = () => {
     try {
