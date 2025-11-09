@@ -4,7 +4,7 @@ import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Share2
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
-import berryLogoPath from "@assets/PHOTO-2025-07-11-15-55-28_1757585084424.jpg";
+import berryLogoPath from "@assets/berry-events-new-logo.jpg";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
