@@ -813,7 +813,20 @@ export default function ModernServiceModal({
   }, [mappedServiceId, formData.propertySize, formData.gardenSize, formData.selectedAddOns]);
 
   useEffect(() => {
-    const config = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
+    // FIX: Don't default to cleaning - wait for valid service selection
+    if (!mappedServiceId || !serviceConfigs[mappedServiceId]) {
+      setPricing({
+        basePrice: 0,
+        addOnsPrice: 0,
+        materialsDiscount: 0,
+        recurringDiscount: 0,
+        timeDiscount: 0,
+        totalPrice: 0
+      });
+      return;
+    }
+    
+    const config = serviceConfigs[mappedServiceId];
     let basePrice = config.basePrice;
     
     // Property type multiplier
