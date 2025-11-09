@@ -1,0 +1,180 @@
+I'll create a comprehensive prompt for Replit to fix the sign-up and payment method issues on your SabbathClean platform.
+
+---
+
+## 🔧 SabbathClean - Sign-Up Flow & Payment Method Fixes
+
+**CRITICAL: Maintain all existing functionality. Do not break anything while implementing these changes.**
+
+---
+
+### **Priority 1: Fix Social Media Sign-Up/Registration**
+
+**Issue:** The registration/sign-up process breaks when customers select social media authentication options (Google, Facebook, etc.)
+
+**Required Fix:**
+
+#### A. **Diagnose & Fix Social Auth Integration:**
+- Identify why social sign-up is breaking (check console errors, API responses, OAuth flows)
+- Common issues to check:
+  - OAuth credentials/tokens expired or misconfigured
+  - Redirect URIs not properly set
+  - Missing environment variables for social auth providers
+  - Callback URL handling errors
+  - Session management issues after social login
+
+#### B. **Streamline Social Sign-Up Process:**
+- Ensure seamless authentication flow for:
+  - **Google Sign-In**
+  - **Facebook Login**
+  - **Apple Sign-In** (if applicable)
+  - Any other social auth providers
+- After successful social authentication:
+  - Automatically create user account in database
+  - Capture essential profile information (name, email, profile picture)
+  - Redirect user to appropriate dashboard/home page
+  - Maintain logged-in session
+
+#### C. **Fallback & Error Handling:**
+- If social sign-up fails, show clear error message
+- Provide option to retry or use email/password registration
+- Log errors for debugging without exposing sensitive info to users
+- Test edge cases:
+  - User cancels social auth popup
+  - Email already registered with different method
+  - Network failures during auth process
+
+---
+
+### **Priority 2: Fix Payment Method Addition**
+
+**Issue:** In Profile/Account Settings → Payment Tab, users encounter errors when trying to add payment methods. Card details are not being saved.
+
+**Required Fix:**
+
+#### A. **Diagnose Payment Integration Issues:**
+- Check which payment gateway is being used (Stripe, PayPal, Square, etc.)
+- Common issues to investigate:
+  - API keys missing or incorrect (test vs. production keys)
+  - Payment gateway SDK not properly initialized
+  - CORS errors blocking payment API calls
+  - SSL/HTTPS requirements not met
+  - Webhook endpoints not configured
+  - Card tokenization failing
+
+#### B. **Fix Card Details Saving Functionality:**
+- Ensure secure card tokenization process works correctly
+- Implement proper flow:
+  1. User enters card details in secure form
+  2. Card data is tokenized (never store raw card numbers)
+  3. Token is securely saved to user's profile
+  4. Display masked card info (e.g., "**** **** **** 1234")
+  5. Allow multiple payment methods to be saved
+  6. Enable setting a default payment method
+
+#### C. **Payment Tab UI Improvements:**
+- Show clear success message when card is saved
+- Display saved payment methods with:
+  - Card brand logo (Visa, Mastercard, etc.)
+  - Last 4 digits
+  - Expiration date
+  - Default payment indicator
+- Add options to:
+  - **Edit** payment method
+  - **Delete** payment method
+  - **Set as default** for future bookings
+- Show loading states during save operations
+
+#### D. **Security & Validation:**
+- Implement client-side validation:
+  - Valid card number format
+  - Valid expiry date (not expired)
+  - Valid CVV format
+  - Required billing information
+- Server-side validation for all payment data
+- Ensure PCI compliance (no raw card data stored)
+- Use HTTPS for all payment-related pages
+
+---
+
+### **Testing Requirements:**
+
+Before marking as complete, verify:
+
+#### Sign-Up Tests:
+✅ Email/password registration works smoothly  
+✅ Google sign-in completes successfully  
+✅ Facebook login completes successfully  
+✅ Social auth creates proper user accounts  
+✅ Users are redirected correctly after sign-up  
+✅ Session persists after social login  
+✅ Duplicate email handling works properly  
+
+#### Payment Method Tests:
+✅ Payment tab loads without errors  
+✅ Can successfully add new card  
+✅ Card details are saved to user profile  
+✅ Saved cards display correctly (masked)  
+✅ Can set default payment method  
+✅ Can delete saved payment methods  
+✅ Test with multiple card brands (Visa, Mastercard, Amex)  
+✅ Error messages are clear and helpful  
+✅ Payment methods work during checkout  
+
+---
+
+### **Implementation Steps:**
+
+**Phase 1 - Social Sign-Up Fix:**
+1. Check all OAuth configuration and credentials
+2. Test each social provider individually
+3. Fix callback/redirect URLs
+4. Implement proper error handling
+5. Test complete sign-up flow end-to-end
+
+**Phase 2 - Payment Method Fix:**
+1. Verify payment gateway API keys and configuration
+2. Check payment SDK initialization
+3. Fix card tokenization process
+4. Implement secure card saving
+5. Add UI for managing saved cards
+6. Test with test cards from payment provider
+
+---
+
+### **Environment Variables to Check:**
+
+```
+# Social Auth
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=
+OAUTH_REDIRECT_URI=
+
+# Payment Gateway (example for Stripe)
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
+
+---
+
+### **Debugging Tips:**
+
+- Check browser console for JavaScript errors
+- Review server logs for API failures
+- Test in incognito/private mode to avoid cached issues
+- Use payment provider's test mode and test cards
+- Verify database schema includes necessary fields for:
+  - Social auth provider IDs
+  - Payment method tokens
+  - User payment preferences
+
+---
+
+**Please implement these fixes methodically, testing each component before moving to the next. Provide detailed status updates and error logs if issues persist.**
+
+---
+
+This prompt provides Replit Agent with clear, actionable steps to diagnose and fix both the social sign-up and payment method issues, while maintaining security best practices and comprehensive testing requirements.
