@@ -208,7 +208,7 @@ export default function ModernServiceModal({
 
   const validateBankAccount = (account: string): string => {
     if (!account) return "Bank account is required";
-    if (!/^\d{10,12}$/.test(account)) return "Invalid account number format";
+    if (!/^\d{8,12}$/.test(account)) return "Account number must be 8-12 digits";
     return "";
   };
 
