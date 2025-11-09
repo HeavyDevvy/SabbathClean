@@ -148,29 +148,20 @@ export default function AnimatedServiceCard({
           </div>
         </div>
 
-        {/* Enhanced Interactive Buttons */}
-        <div className="mt-auto space-y-2">
+        {/* Single Booking Button */}
+        <div className="mt-auto">
           <Button 
             onClick={(e) => {
               e.stopPropagation();
               onModalOpen(service.id);
             }}
-            className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-xs py-3 px-2 rounded-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1 shadow-lg hover:shadow-xl group relative overflow-hidden"
+            className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl group relative overflow-hidden"
             data-testid={`book-${service.id}`}
           >
             <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-            <span className="relative z-10">Book Now - Advanced Booking</span>
+            <span className="relative z-10">Quick Quote or Book Now</span>
             <ArrowRight className="h-4 w-4 ml-2 relative z-10 group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
           </Button>
-          <button
-            className="w-full bg-white hover:bg-gray-50 text-primary font-medium py-2 px-4 rounded-lg transition-all duration-300 border border-primary/20 hover:border-primary/40 text-sm hover:scale-105 transform"
-            onClick={(e) => {
-              e.stopPropagation();
-              onServiceSelect(service.id);
-            }}
-          >
-            Quick Quote & Details
-          </button>
         </div>
       </CardContent>
     </Card>
