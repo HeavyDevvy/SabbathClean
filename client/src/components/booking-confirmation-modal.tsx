@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ import {
   MessageCircle
 } from "lucide-react";
 import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
+import { generateBookingReceipt } from "@/lib/pdfGenerator";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingConfirmationModalProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ export default function BookingConfirmationModal({
   bookingData
 }: BookingConfirmationModalProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const { toast } = useToast();
 
   if (!bookingData) return null;
 
@@ -43,11 +46,27 @@ export default function BookingConfirmationModal({
     });
   };
 
-  const generateBookingReference = () => {
+  // Persist booking reference so it doesn't change on re-renders
+  const bookingRef = useMemo(() => {
     return `BE${Date.now().toString().slice(-6)}${Math.random().toString(36).substr(2, 3).toUpperCase()}`;
-  };
+  }, []);
 
-  const bookingRef = generateBookingReference();
+  const handleDownloadReceipt = () => {
+    try {
+      generateBookingReceipt(bookingData, bookingRef);
+      toast({
+        title: "Receipt downloaded",
+        description: "Your booking receipt has been downloaded successfully."
+      });
+    } catch (error) {
+      console.error("Error generating receipt:", error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "Unable to generate receipt. Please try again."
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -261,7 +280,8 @@ export default function BookingConfirmationModal({
           <Button 
             variant="outline" 
             className="flex-1"
-            onClick={() => window.print()}
+            onClick={handleDownloadReceipt}
+            data-testid="button-download-receipt"
           >
             <Download className="h-4 w-4 mr-2" />
             Download Receipt

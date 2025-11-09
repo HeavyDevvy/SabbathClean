@@ -49,7 +49,8 @@ Previous comprehensive features are still available at `/enhanced` route for com
 - **Recommendation Engine**: AI-powered service matching based on user preferences, location, ratings, and history, with contextual suggestions and real-time scoring.
 - **Dynamic Pricing**: Market-comparable pricing with service-specific surcharges, customizations, and competitive positioning against industry benchmarks.
 - **Mobile App Companion**: Complete Progressive Web App implementation with push notifications, offline functionality, service worker caching, PWA manifest, installable mobile experience, and native app features including background sync and notification management.
-- **Payment Validation (Step 6 - Nov 2025)**: Comprehensive client-side payment validation with Luhn algorithm card number verification, auto-formatting for card numbers (spaces every 4 digits) and expiry dates (MM/YY), card brand detection (Visa, Mastercard, Amex, Discover), CVV validation (3-4 digits based on card type), bank account validation, real-time error feedback with touched state tracking, and security best practices (no PAN/CVV logging, Stripe integration for actual processing).
+- **Payment Validation (Steps 6-7 - Nov 2025)**: Comprehensive client-side payment validation with Luhn algorithm card number verification, auto-formatting for card numbers (spaces every 4 digits) and expiry dates (MM/YY), card brand detection (Visa, Mastercard, Amex, Discover), CVV validation (3-4 digits based on card type), bank account validation (8-12 digits), real-time error feedback with touched state tracking, and security best practices (no PAN/CVV logging, masked storage with only last 4 digits + brand, state cleanup after booking completion, validation guard before booking confirmation).
+- **PDF Receipt Generation (Step 8 - Nov 2025)**: Professional PDF receipt generation using jsPDF with comprehensive booking confirmation. Features include: Berry Events branded design with purple/green color scheme, persistent booking reference (useMemo), organized sections (Service Details, Provider Details, Payment Summary), pricing breakdown with discounts and add-ons, masked payment info display (last 4 digits only), Berry Events Bank protection notice, platform commission disclosure (15%), professional footer with contact info, automatic download on confirmation, error handling with toast notifications, and fallback handling for missing data.
 
 # External Dependencies
 
@@ -76,3 +77,6 @@ Previous comprehensive features are still available at `/enhanced` route for com
 ## Form & Validation
 - **React Hook Form**: For performant form handling.
 - **Zod**: Used for runtime type validation and schema parsing.
+
+## PDF Generation
+- **jsPDF**: Used for generating professional PDF receipts with Berry Events branding.
