@@ -75,6 +75,7 @@ export default function ModernServiceModal({
     expiryDate: false,
     cvv: false,
     cardholderName: false,
+    selectedBank: false,
     bankAccount: false,
     bankBranch: false
   });
@@ -84,6 +85,7 @@ export default function ModernServiceModal({
     expiryDate: "",
     cvv: "",
     cardholderName: "",
+    selectedBank: "",
     bankAccount: "",
     bankBranch: ""
   });
@@ -125,6 +127,7 @@ export default function ModernServiceModal({
     expiryDate: "",
     cvv: "",
     cardholderName: "",
+    selectedBank: "",
     bankAccount: "",
     bankBranch: ""
   });
@@ -210,9 +213,23 @@ export default function ModernServiceModal({
     return "";
   };
 
+  const validateSelectedBank = (bankCode: string): string => {
+    if (!bankCode) return "Please select your bank";
+    return "";
+  };
+
   const validateBankAccount = (account: string): string => {
     if (!account) return "Bank account is required";
-    if (!/^\d{8,12}$/.test(account)) return "Account number must be 8-12 digits";
+    if (formData.selectedBank) {
+      const isValid = validateAccountNumber(formData.selectedBank, account);
+      if (!isValid) {
+        const bank = southAfricanBanks.find(b => b.code === formData.selectedBank);
+        const lengths = bank?.accountNumberLength.join(' or ') || '8-12';
+        return `Account must be ${lengths} digits for this bank`;
+      }
+    } else if (!/^\d{8,12}$/.test(account)) {
+      return "Account number must be 8-12 digits";
+    }
     return "";
   };
 
@@ -237,6 +254,9 @@ export default function ModernServiceModal({
       case "cardholderName":
         error = validateCardholderName(value);
         break;
+      case "selectedBank":
+        error = validateSelectedBank(value);
+        break;
       case "bankAccount":
         error = validateBankAccount(value);
         break;
@@ -260,6 +280,7 @@ export default function ModernServiceModal({
         expiryDate: expiryError,
         cvv: cvvError,
         cardholderName: nameError,
+        selectedBank: "",
         bankAccount: "",
         bankBranch: ""
       });
@@ -269,28 +290,38 @@ export default function ModernServiceModal({
         expiryDate: true,
         cvv: true,
         cardholderName: true,
+        selectedBank: false,
         bankAccount: false,
         bankBranch: false
       });
       
       return !cardNumberError && !expiryError && !cvvError && !nameError;
     } else if (formData.paymentMethod === "bank") {
+      const bankError = validateSelectedBank(formData.selectedBank);
       const accountError = validateBankAccount(formData.bankAccount);
       const branchError = validateBankBranch(formData.bankBranch);
       
       setPaymentErrors({
-        ...paymentErrors,
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        selectedBank: bankError,
         bankAccount: accountError,
         bankBranch: branchError
       });
       
       setPaymentTouched({
-        ...paymentTouched,
+        cardNumber: false,
+        expiryDate: false,
+        cvv: false,
+        cardholderName: false,
+        selectedBank: true,
         bankAccount: true,
         bankBranch: true
       });
       
-      return !accountError && !branchError;
+      return !bankError && !accountError && !branchError;
     }
     return false;
   };
@@ -1088,6 +1119,7 @@ export default function ModernServiceModal({
       cvv: "",
       cardholderName: "",
       // Clear bank transfer fields
+      selectedBank: "",
       bankAccount: "",
       bankBranch: ""
     }));
@@ -1098,6 +1130,7 @@ export default function ModernServiceModal({
       expiryDate: false,
       cvv: false,
       cardholderName: false,
+      selectedBank: false,
       bankAccount: false,
       bankBranch: false
     });
@@ -1107,6 +1140,7 @@ export default function ModernServiceModal({
       expiryDate: "",
       cvv: "",
       cardholderName: "",
+      selectedBank: "",
       bankAccount: "",
       bankBranch: ""
     });
@@ -1144,6 +1178,7 @@ export default function ModernServiceModal({
       expiryDate: "",
       cvv: "",
       cardholderName: "",
+      selectedBank: "",
       bankAccount: "",
       bankBranch: ""
     });
@@ -2128,21 +2163,18 @@ export default function ModernServiceModal({
   );
 
   const renderStep5 = () => {
-    // Create current draft from form data
-    const currentDraft = useMemo(() => ({
+    // Create current draft from form data (plain variables, not hooks)
+    const currentDraft = {
       serviceId,
       serviceName: currentConfig.title,
       ...formData,
       pricing,
       estimatedHours,
       timestamp: new Date().toISOString()
-    }), [serviceId, formData, pricing, estimatedHours]);
+    };
 
     // Aggregate all services (pending + current)
-    const paymentSnapshot = useMemo(() => 
-      aggregatePayments(pendingDrafts, currentDraft), 
-      [pendingDrafts, currentDraft]
-    );
+    const paymentSnapshot = aggregatePayments(pendingDrafts, currentDraft);
 
     return (
       <div className="space-y-6">
@@ -2458,6 +2490,60 @@ export default function ModernServiceModal({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Bank Selector */}
+            <div>
+              <Label htmlFor="selectedBank">Select Your Bank *</Label>
+              <Select
+                value={formData.selectedBank}
+                onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, selectedBank: value }));
+                  if (paymentTouched.selectedBank) {
+                    validateField('selectedBank', value);
+                  }
+                  if (formData.bankAccount) {
+                    validateField('bankAccount', formData.bankAccount);
+                  }
+                }}
+              >
+                <SelectTrigger 
+                  id="selectedBank"
+                  data-testid="select-bank"
+                  className={`${
+                    paymentTouched.selectedBank && !paymentErrors.selectedBank 
+                      ? 'border-green-500' 
+                      : paymentTouched.selectedBank && paymentErrors.selectedBank 
+                      ? 'border-red-500' 
+                      : ''
+                  }`}
+                  onBlur={() => {
+                    markTouched('selectedBank');
+                    validateField('selectedBank', formData.selectedBank);
+                  }}
+                >
+                  <SelectValue placeholder="Choose your bank..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {southAfricanBanks.map((bank) => (
+                    <SelectItem key={bank.code} value={bank.code}>
+                      {bank.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {paymentTouched.selectedBank && paymentErrors.selectedBank && (
+                <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {paymentErrors.selectedBank}
+                </p>
+              )}
+              {paymentTouched.selectedBank && !paymentErrors.selectedBank && formData.selectedBank && (
+                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  Bank selected
+                </p>
+              )}
+            </div>
+
             <div>
               <Label htmlFor="bankAccount">Bank Account Number *</Label>
               <div className="relative">
