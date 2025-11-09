@@ -18,7 +18,7 @@ import {
   MessageCircle,
   CalendarPlus
 } from "lucide-react";
-import berryLogoPath from "@assets/PHOTO-2025-08-13-13-21-07_1756439170299.jpg";
+import berryLogoPath from "@assets/Untitled design (2)_1762495887852.png";
 import { generateBookingReceipt } from "@/lib/pdfGenerator";
 import { downloadCalendarInvite } from "@/lib/calendarGenerator";
 import { useToast } from "@/hooks/use-toast";

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, Calendar, Star } from "lucide-react";
-import berryLogo from "@assets/PHOTO-2025-08-13-13-21-07_1756396475295.jpg";
+import berryLogo from "@assets/Untitled design (2)_1762495887852.png";
 
 interface MinimalistHeroProps {
   onGetStarted: () => void;
