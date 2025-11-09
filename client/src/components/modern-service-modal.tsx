@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BookingConfirmationModal from "./booking-confirmation-modal";
+import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
+import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
 
 interface ModernServiceModalProps {
   isOpen: boolean;
@@ -50,6 +53,9 @@ export default function ModernServiceModal({
   const [step, setStep] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedBookingData, setConfirmedBookingData] = useState<any>(null);
+  const [addOnsComment, setAddOnsComment] = useState("");
+  const [estimatedHours, setEstimatedHours] = useState<number>(0);
+  const [suggestedAddOnsFromComment, setSuggestedAddOnsFromComment] = useState<AddOn[]>([]);
   
   const [formData, setFormData] = useState({
     // Core fields
@@ -592,6 +598,28 @@ export default function ModernServiceModal({
       }));
     }
   }, [formData.urgency]);
+
+  // Auto-suggest add-ons based on comment keywords
+  useEffect(() => {
+    if (addOnsComment && mappedServiceId) {
+      const suggestions = suggestAddOns(mappedServiceId, addOnsComment);
+      setSuggestedAddOnsFromComment(suggestions);
+    } else {
+      setSuggestedAddOnsFromComment([]);
+    }
+  }, [addOnsComment, mappedServiceId]);
+
+  // Auto-calculate estimated hours
+  useEffect(() => {
+    if (mappedServiceId) {
+      const hours = calculateEstimatedHours(
+        mappedServiceId,
+        formData.propertySize || formData.gardenSize,
+        formData.selectedAddOns
+      );
+      setEstimatedHours(hours);
+    }
+  }, [mappedServiceId, formData.propertySize, formData.gardenSize, formData.selectedAddOns]);
 
   useEffect(() => {
     const config = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
@@ -1495,46 +1523,169 @@ export default function ModernServiceModal({
     </div>
   );
 
-  const renderStep3 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-6">
-        <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-          <span className="text-primary text-xl">+</span>
-        </div>
-        <h3 className="text-lg font-semibold">Add-ons & Extras</h3>
-        <p className="text-gray-600 text-sm">Customize your service with additional options</p>
-      </div>
-
-      <div className="space-y-4">
-        <Label>Suggested Add-ons</Label>
-        {currentConfig.addOns?.map((addon: any) => (
-          <div key={addon.id} className="flex items-center justify-between p-3 border rounded-lg">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id={addon.id}
-                checked={formData.selectedAddOns.includes(addon.id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setFormData(prev => ({
-                      ...prev,
-                      selectedAddOns: [...prev.selectedAddOns, addon.id]
-                    }));
-                  } else {
-                    setFormData(prev => ({
-                      ...prev,
-                      selectedAddOns: prev.selectedAddOns.filter((id: string) => id !== addon.id)
-                    }));
-                  }
-                }}
-              />
-              <Label htmlFor={addon.id} className="font-medium">{addon.name}</Label>
-            </div>
-            <span className="font-semibold">+R{addon.price}</span>
+  const renderStep3 = () => {
+    const availableAddOns = serviceAddOns[mappedServiceId] || [];
+    
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span className="text-primary text-xl">+</span>
           </div>
-        ))}
+          <h3 className="text-lg font-semibold">Add-ons & Extras</h3>
+          <p className="text-gray-600 text-sm">Customize your service with additional options</p>
+        </div>
+
+        <div className="space-y-4">
+          {/* Comments Field */}
+          <div>
+            <Label htmlFor="addons-comment">Comments / Additional Details</Label>
+            <Textarea
+              id="addons-comment"
+              placeholder="Describe any specific issues or requirements (e.g., 'leaking faucet in kitchen', 'overgrown hedges')"
+              value={addOnsComment}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setAddOnsComment(e.target.value)}
+              className="min-h-[80px]"
+              data-testid="textarea-addons-comment"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Tip: Mention specific issues to get smart add-on suggestions
+            </p>
+          </div>
+
+          {/* Keyword-based Suggestions */}
+          {suggestedAddOnsFromComment.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start space-x-2 mb-3">
+                <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-blue-900 text-sm">Smart Suggestions</h4>
+                  <p className="text-xs text-blue-700">Based on your comments, we suggest:</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {suggestedAddOnsFromComment.map((addon) => (
+                  <div 
+                    key={addon.id} 
+                    className="flex items-center justify-between p-2 bg-white rounded border border-blue-200"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`suggested-${addon.id}`}
+                        checked={formData.selectedAddOns.includes(addon.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData(prev => ({
+                              ...prev,
+                              selectedAddOns: [...prev.selectedAddOns, addon.id]
+                            }));
+                          } else {
+                            setFormData(prev => ({
+                              ...prev,
+                              selectedAddOns: prev.selectedAddOns.filter((id: string) => id !== addon.id)
+                            }));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`suggested-${addon.id}`} className="text-sm font-medium cursor-pointer">
+                        {addon.name}
+                      </Label>
+                    </div>
+                    <span className="text-sm font-semibold text-blue-700">+R{addon.price}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Add-ons Dropdown */}
+          <div>
+            <Label htmlFor="select-addon">Add More Services (Optional)</Label>
+            <Select
+              value=""
+              onValueChange={(value) => {
+                if (value && !formData.selectedAddOns.includes(value)) {
+                  setFormData(prev => ({
+                    ...prev,
+                    selectedAddOns: [...prev.selectedAddOns, value]
+                  }));
+                }
+              }}
+            >
+              <SelectTrigger id="select-addon">
+                <SelectValue placeholder="Select additional services" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAddOns.map((addon) => (
+                  <SelectItem 
+                    key={addon.id} 
+                    value={addon.id}
+                    disabled={formData.selectedAddOns.includes(addon.id)}
+                  >
+                    {addon.name} - R{addon.price}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Selected Add-ons Display */}
+          {formData.selectedAddOns.length > 0 && (
+            <div>
+              <Label>Selected Add-ons</Label>
+              <div className="space-y-2 mt-2">
+                {formData.selectedAddOns.map((addonId: string) => {
+                  const addon = availableAddOns.find((a: AddOn) => a.id === addonId);
+                  if (!addon) return null;
+                  return (
+                    <div key={addonId} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="font-medium">{addon.name}</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <span className="font-semibold text-primary">+R{addon.price}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              selectedAddOns: prev.selectedAddOns.filter((id: string) => id !== addonId)
+                            }));
+                          }}
+                          className="h-8 w-8 p-0"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Estimated Hours */}
+          <div>
+            <Label htmlFor="estimated-hours">Estimated Hours</Label>
+            <Input
+              id="estimated-hours"
+              type="text"
+              value={`${estimatedHours} hours`}
+              readOnly
+              className="bg-gray-50"
+              data-testid="input-estimated-hours"
+            />
+            <p className="text-xs text-orange-600 mt-1 flex items-start">
+              <span className="mr-1">⚠️</span>
+              <span>The time spent on site is subject to change once the service provider assesses the scope on-site.</span>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderStep4 = () => (
     <div className="space-y-6">
