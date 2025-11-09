@@ -39,8 +39,8 @@ interface ModernServiceModalProps {
   onServiceSelect?: (serviceId: string) => void;
   onBookingComplete: (bookingData: any) => void;
   editBookingData?: any; // For editing existing bookings
-  bookedServices: string[]; // Track services already booked in this session (required)
-  onAddAnotherService: (serviceId: string) => void; // Callback when adding another service (required)
+  bookedServices?: string[]; // Track services already booked in this session
+  onAddAnotherService?: (serviceId: string) => void; // Callback when adding another service
 }
 
 export default function ModernServiceModal({
@@ -50,7 +50,7 @@ export default function ModernServiceModal({
   onServiceSelect,
   onBookingComplete,
   editBookingData,
-  bookedServices,
+  bookedServices = [],
   onAddAnotherService
 }: ModernServiceModalProps) {
   const { toast } = useToast();
