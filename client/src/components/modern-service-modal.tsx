@@ -569,6 +569,22 @@ export default function ModernServiceModal({
   const currentConfig = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
 
   // Calculate pricing whenever form data changes
+  // Auto-set date and time for Emergency/Urgent/Same Day services
+  useEffect(() => {
+    const isEmergency = formData.urgency === "emergency";
+    const isUrgent = formData.urgency === "urgent";
+    const isSameDay = formData.urgency === "same-day";
+    
+    if (isEmergency || isUrgent || isSameDay) {
+      const today = new Date().toISOString().split('T')[0];
+      setFormData(prev => ({
+        ...prev,
+        preferredDate: today,
+        timePreference: isEmergency ? "ASAP" : prev.timePreference
+      }));
+    }
+  }, [formData.urgency]);
+
   useEffect(() => {
     const config = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
     let basePrice = config.basePrice;
@@ -1311,18 +1327,30 @@ export default function ModernServiceModal({
             onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
             min={new Date().toISOString().split('T')[0]}
             className="w-full"
+            readOnly={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
+            disabled={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
           />
+          {(formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day") && (
+            <p className="text-xs text-orange-600 mt-1">
+              Date locked to today for {formData.urgency === "emergency" ? "emergency" : formData.urgency === "urgent" ? "urgent" : "same-day"} services
+            </p>
+          )}
         </div>
 
         <div>
           <Label>Modern Time Preference Selection *</Label>
-          <Select value={formData.timePreference} onValueChange={(value) =>
-            setFormData(prev => ({ ...prev, timePreference: value }))
-          }>
+          <Select 
+            value={formData.timePreference} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, timePreference: value }))}
+            disabled={formData.urgency === "emergency"}
+          >
             <SelectTrigger className="h-12">
               <SelectValue placeholder="Choose your preferred time slot" />
             </SelectTrigger>
             <SelectContent>
+              {formData.urgency === "emergency" && (
+                <SelectItem value="ASAP">As Soon As Possible</SelectItem>
+              )}
               <SelectItem value="08:00">08:00 - Morning</SelectItem>
               <SelectItem value="10:00">10:00 - Late Morning</SelectItem>
               <SelectItem value="12:00">12:00 - Noon</SelectItem>
@@ -1330,6 +1358,11 @@ export default function ModernServiceModal({
               <SelectItem value="16:00">16:00 - Late Afternoon</SelectItem>
             </SelectContent>
           </Select>
+          {formData.urgency === "emergency" && (
+            <p className="text-xs text-red-600 mt-1">
+              Time locked to "As Soon As Possible" for emergency services
+            </p>
+          )}
         </div>
 
         <div>
