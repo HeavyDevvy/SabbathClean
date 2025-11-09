@@ -1,0 +1,102 @@
+You will update the booking flow in small, controlled steps. You must not skip steps. You must not change anything outside the changes listed. Do not remove or rename any components, pages, hooks, routes, or API calls.
+
+Before making any code changes:
+1) Identify and list the file paths and component names for:
+   - Home page booking button / service selection
+   - Home page “Watch how it works” modal
+   - Booking flow: Schedule & Preferences step
+   - Booking flow: Add-ons & Extras step
+   - Booking flow: Choose Provider step
+   - Booking flow: Payment & Summary step
+   - Booking flow: Booking confirmation page (logo source)
+   - Services page "Book Now" button entry point
+   - Global header logo reference
+
+STOP after listing the files and wait for confirmation.
+
+After listing, perform these changes in the exact order below, pausing after each step to show the diff and confirm:
+
+-----------------
+STEP 1: Home Page Fixes
+-----------------
+A) Fix “Book services now” so users can actually select a service, and ensure clicking “Next” after Add-ins does NOT go to a blank screen.
+B) In the “Watch how it works” modal, remove clickable stage elements. Replace with a single “Play Demo” button. Remove duplicate close X. Show diff and stop.
+
+-----------------
+STEP 2: Booking Specialist Buttons
+-----------------
+Replace the two buttons (“Book Now - advanced booking” and “Quick Quote & details”) with ONE button labeled exactly:
+Quick Quote or Book Now
+Wire it to the same combined flow. Show diff and stop.
+
+-----------------
+STEP 3: Emergency / Urgent / Same Day Behavior
+-----------------
+When service type is Emergency, Urgent or Same Day:
+- Preferred Date defaults to today and becomes read-only.
+- For Emergency specifically, disable time selection and auto-set to “As soon as possible”.
+Apply across all services. Show diff and stop.
+
+-----------------
+STEP 4: Add-ons & extras enhancements
+-----------------
+On the Add-ons & Extras step:
+- Add a free-text “Comments” field.
+- Convert add-ons to a dropdown of common issues per industry, each with visible pricing.
+- Implement simple keyword → add-on auto-suggest from a config file (create config/addons.json and config/keywords.json).
+- Add an Hours field that auto-populates from config/hours.json.
+- Place this disclaimer below Hours:
+“The time spent on site is subject to change once the service provider assesses the scope on-site.”
+Show diff and stop.
+
+-----------------
+STEP 5: Choose Provider Step
+-----------------
+- Remove booking summary from this page.
+- Make provider names clickable → open modal showing: photo, rating, distance, ETA, bio.
+- Add “Add another service” button that returns to service selection and prevents choosing the same service twice.
+Show diff and stop.
+
+-----------------
+STEP 6: Payment Step Enhancements
+-----------------
+- Show breakdown of all add-ons with pricing.
+- Allow user to add additional add-ons from a dropdown above the total.
+- Update total live.
+- Add “Select Bank” dropdown containing:
+["ABSA","FNB","Standard Bank","Nedbank","Capitec","Investec","African Bank","TymeBank","Discovery Bank","Bidvest Bank","Sasfin"]
+- Validate account number length (8–13 digits), CVV (3–4 digits), expiry (MM/YY).
+- Fix receipt download so it downloads only one copy.
+- Add “Add to Calendar” button that sends the user a .ics calendar invite via their existing registered email, with fallback download link.
+Show diff and stop.
+
+-----------------
+STEP 7: Logo Consistency
+-----------------
+Replace all logos in the app with the same logo used on the Booking Confirmed page. Keep sizing proportional and do not distort. Show diff and stop.
+
+-----------------
+STEP 8: Services Page Login State
+-----------------
+If user is logged in, do NOT show “Sign In” or “Join as Provider” on the Services page. Show diff and stop.
+
+-----------------
+FINAL STEP: Confirm No Regressions
+-----------------
+Run the full booking flow and confirm the following checklist is true before finalizing:
+[ ] Book services now → selection works → no blank screen
+[ ] Demo modal works → one play button → one close button
+[ ] Only one button: Quick Quote or Book Now
+[ ] Emergency/Urgent/Same Day → date locked to today → Emergency → time locked to ASAP
+[ ] Add-ons → comment, dropdown with pricing, keyword auto-suggest, hours auto-fill + disclaimer
+[ ] Provider step → summary removed → provider modal works → add another service works, no duplicates
+[ ] Payment summary updates dynamically and validates payment info
+[ ] Receipt downloads one copy only
+[ ] Calendar invite works and sends correct .ics
+[ ] Same logo everywhere
+[ ] Services page respects login state
+[ ] No additional UI, routing, state, or logic changes occurred
+
+STOP and wait for confirmation before applying final save.
+
+Do not make any changes outside these.
