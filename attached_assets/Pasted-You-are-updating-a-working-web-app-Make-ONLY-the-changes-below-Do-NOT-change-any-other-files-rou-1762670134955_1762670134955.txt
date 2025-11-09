@@ -1,0 +1,172 @@
+You are updating a working web app. Make ONLY the changes below. 
+Do NOT change any other files, routes, API calls, state management, business logic, copy/wording, colors, fonts, layouts, or behaviors unless explicitly requested. 
+Preserve all existing functionality and styling everywhere else.
+
+====================
+SCOPE OF CHANGES
+====================
+
+[HOME PAGE]
+
+1) "Book services now"
+- Fix so users can select their required service(s) as intended.
+- After the “Add-ins & extras” page, clicking “Next” must NOT go to a blank screen; proceed to the next step in the flow.
+
+2) "Watch how it works" (demo modal)
+- Remove stage-by-stage clickability (no pseudo-clickable steps).
+- Provide a single “Play Demo” control that plays the demo.
+- Remove confusion where fields look clickable but do nothing.
+- Fix “double close X” — there should be only ONE clear close icon.
+
+[BOOKING A SPECIALIST]
+
+3) Replace two buttons with one
+- Remove “Book Now - advanced booking” and “Quick Quote & details”.
+- Add ONE button instead: **“Quick Quote or Book Now”**.
+- Clicking this launches the SAME popup/flow as before (merged).
+
+[GENERAL CHANGES ACROSS BOOKING FLOW]
+
+4) When service type is Emergency / Urgent / Same Day
+- On the “Schedule & preferences” step:
+  - The Preferred Date must default to TODAY and become read-only (user cannot change it).
+  - This must apply across ALL services when Emergency/Urgent/Same Day is selected.
+- For “Emergency” specifically:
+  - Disable modern time preferences UI; auto-set to “As soon as possible” (read-only).
+
+5) “Add-ons & extras” step enhancements
+- Add a **free-text Comment field** (brief problem description).
+- Convert Add-ons input into a **dropdown** that lists common issues/service add-ons per industry, each with **displayed pricing**.
+- Implement **auto-suggest/auto-populate** of add-ons based on **keywords** found in the comment field. 
+  - Create a keyword → add-on mapping per service/industry in a single config file (e.g., `config/addons.ts` or `.json`).
+  - Users must still be able to manually pick additional add-ons.
+- Add an **Hours** field that **auto-populates** based on an “industry standard hours per add-on/service” table.
+  - Store these standards in a config file (e.g., `config/estimates.ts` or `.json`) and use them to prefill hours.
+  - Put this disclaimer directly under Hours:
+    “The time spent on site is subject to change once the service provider assesses the scope of work on-site.”
+  - If you cannot fetch external data, seed the config with reasonable placeholders and a TODO comment to update.
+
+6) “Choose your verified provider” step
+- **Remove** the booking summary from this page.
+- Provider names become **clickable**; clicking opens a **modal** with:
+  - Provider photo
+  - Rating
+  - Distance from job address
+  - Estimated arrival time
+  - Bio (from the provider profile)
+- Make this selection feel personal; do not alter underlying data models beyond reading existing provider info.
+
+7) “Add another service” option (bottom of provider step)
+- Add a control: **“Add another service”**.
+- Clicking it returns the user to step 1 to choose an additional service.
+- Prevent selecting the exact same service again in the same booking session (e.g., if House Cleaning was chosen, hide it for the second pick).
+- Ensure the multi-service selection aggregates correctly through to payment.
+
+[PAYMENT METHOD STEP]
+
+8) Final booking summary
+- Show a **clear breakdown** of all selected add-ons with **prices**.
+- Add a dropdown above the total to **add more add-ons** at the last moment.
+  - If the user adds more, update the summary breakdown and the total immediately.
+- If the user added additional services earlier, show a **split breakdown** by service while summing to a single total.
+
+9) Payment field validation
+- Validate formats strictly:
+  - Bank account number: numeric only; validate typical SA lengths (8–13 digits; use the selected bank to tune if there’s a per-bank rule in config).
+  - CVV: 3 or 4 digits.
+  - Expiry: MM/YY format.
+- Add a **Select Bank** dropdown populated with major South African banks (no external calls; hardcode list in config):
+  ["ABSA", "FNB", "Standard Bank", "Nedbank", "Capitec", "Investec", "African Bank", "TymeBank", "Discovery Bank", "Bidvest Bank", "Sasfin"].
+- Use the selected bank to determine any stricter allowed account number patterns via config, but do not block payment if pattern is unknown; show friendly inline validation errors.
+
+10) “Download report/receipt”
+- Fix bug where multiple copies are downloaded.
+- Ensure only **one** receipt is downloaded per click.
+- Keep the report layout/fields the same but include **all add-ons** and multi-service line items in the receipt.
+
+11) Calendar invite
+- On the last step, next to “Share booking”, add: **“Add to Calendar”**.
+- Clicking it should:
+  - Generate a valid **.ics** invite containing: service title(s), provider, address, scheduled date/time, and notes for add-ons.
+  - Send the invite via email to the **user’s registered email** (use existing email/send routine if present).
+  - If no mailer exists, add a minimal server route using existing stack conventions and env vars (e.g., NODEMAILER) without breaking anything else.
+  - Also provide a fallback **download .ics** link if email fails.
+- Confirm this works end-to-end.
+
+[LOGO CONSISTENCY]
+
+12) Use the **same logo** shown on the Booking Confirmed page **everywhere** the logo appears in the app.
+- Replace any mismatched header/footer/brand logos with this one.
+- Size appropriately per context without distorting aspect ratio.
+
+[PARITY BETWEEN ENTRY POINTS]
+
+13) Ensure the **Services page “Book Now”** flow mirrors the updated Home page booking experience exactly (same validations, add-ons, hours, emergency handling, provider modal, summary, payment, calendar invite, etc.).
+
+[CUSTOM SOLUTIONS]
+
+14) Need a custom service solution
+- On clicking **“Contact Us for Custom Solution”**, open a **popup** with a large description textarea where users can provide a detailed brief.
+- Submit should use the existing contact/request channel; if none, add a minimal endpoint consistent with current backend patterns. Do not affect other areas.
+
+[AUTH ON SERVICES PAGE]
+
+15) Services page login state
+- If the user is already authenticated, **do not** show “Sign in” or “Join as Provider” prompts on the Services page.
+- Keep them logged in and proceed as normal.
+
+====================
+STRICT NON-GOALS
+====================
+- Do NOT change copy/wording anywhere except where a new button text was specified (“Quick Quote or Book Now”).
+- Do NOT alter routes, API contracts, DB schemas, or global styles.
+- Do NOT introduce new dependencies unless absolutely necessary for .ics email; if added, keep it minimal and scoped.
+- Do NOT break or change existing flows outside the screens specified.
+
+====================
+TECHNICAL IMPLEMENTATION NOTES
+====================
+- Centralize new configurable data in `/config` (e.g., addons, keyword map, hours estimates, banks & formats).
+- Make all new UI additions accessible (labels, focus, aria).
+- Keep all new styles scoped to the relevant components to avoid regressions.
+- For keyword → add-on auto-suggest: trigger on debounce of comment field; show suggested item(s) pre-selected but allow user edits.
+- For duplicate-service prevention in multi-service flow: compare service IDs; hide already-selected ones for the “Add another service” step only.
+
+====================
+ACCEPTANCE CRITERIA
+====================
+- Home “Book services now” allows selection and proceeds past Add-ins to the next step with no blank screen.
+- Demo modal has one close icon and one Play control (no dead clickable steps).
+- Booking Specialist shows one button: “Quick Quote or Book Now”, launching the merged flow.
+- Emergency/Urgent/Same Day set today’s date (read-only) and emergency locks time to “As soon as possible”.
+- Add-ons dropdown + pricing + comment auto-suggest + hours auto-fill (with disclaimer) all working.
+- Provider step has clickable names → modal with photo, rating, distance, ETA, bio. Summary removed from this step.
+- “Add another service” loops back to start, cannot reselect identical service, aggregates to payment correctly.
+- Final summary shows add-ons breakdown, allows adding more add-ons and updates totals live. Multi-service is split but totals summed.
+- Payment validation enforces formats; SA banks dropdown present.
+- Receipt downloads only once and includes add-ons/multi-service lines.
+- “Add to Calendar” emails a valid .ics to the registered email (with fallback .ics download).
+- The same logo from booking confirmation is used globally and sized correctly.
+- Services page honors logged-in state (no sign-in/join prompts).
+- Services page “Book Now” matches Home booking flow behavior.
+- No other parts of the app are changed.
+
+====================
+FINAL QA CHECKLIST (run and confirm)
+====================
+[ ] Book services now: select service → Add-ins → Next → continues (no blank screen)
+[ ] Demo modal: one Play button; one close X; nothing misleading is clickable
+[ ] One combined button: “Quick Quote or Book Now” works end-to-end
+[ ] Emergency/Urgent/Same Day: date locked to today; Emergency time = ASAP
+[ ] Add-ons: comment present; dropdown with prices; keyword auto-suggest; hours auto-fill + disclaimer
+[ ] Provider step: summary removed; provider modal shows photo/rating/distance/ETA/bio
+[ ] Add another service: cannot pick duplicate; all services appear in final summary
+[ ] Payment summary: add-ons breakdown; can add more add-ons; totals update
+[ ] Payment validation: account number, CVV, expiry; SA banks dropdown present
+[ ] Receipt: single download per click; includes all add-ons/services
+[ ] Calendar: valid .ics emailed; fallback download works
+[ ] Logo: same as booking confirmation used everywhere; sized well
+[ ] Services page: remains logged in; no sign-in/join prompts for authenticated users
+[ ] No regressions elsewhere; no console errors
+
+When done, list all edited files and briefly summarize the change in each.

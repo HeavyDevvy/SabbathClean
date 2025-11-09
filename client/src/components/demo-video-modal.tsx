@@ -123,25 +123,25 @@ export default function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps)
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-lg">
             <h3 className="text-2xl font-bold mb-6 text-center">Choose Your Service</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Card className="cursor-pointer hover:shadow-lg transition-all transform hover:scale-105">
+              <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-4xl mb-2">✨</div>
                   <h4 className="font-bold">House Cleaning</h4>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:shadow-lg transition-all">
+              <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-4xl mb-2">🌿</div>
                   <h4 className="font-bold">Garden Care</h4>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:shadow-lg transition-all">
+              <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-4xl mb-2">👨‍🍳</div>
                   <h4 className="font-bold">Chef & Catering</h4>
                 </CardContent>
               </Card>
-              <Card className="cursor-pointer hover:shadow-lg transition-all">
+              <Card>
                 <CardContent className="p-4 text-center">
                   <div className="text-4xl mb-2">🔧</div>
                   <h4 className="font-bold">Plumbing</h4>
@@ -165,13 +165,13 @@ export default function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps)
               <div>
                 <label className="block font-medium mb-2">Cleaning Type</label>
                 <div className="grid grid-cols-3 gap-2">
-                  <Badge className="bg-blue-100 text-blue-800 p-2 cursor-pointer hover:bg-blue-200">
+                  <Badge className="bg-blue-100 text-blue-800 p-2">
                     Basic Clean
                   </Badge>
-                  <Badge className="bg-primary text-white p-2 cursor-pointer">
+                  <Badge className="bg-primary text-white p-2">
                     Deep Clean ✓
                   </Badge>
-                  <Badge className="bg-gray-100 text-gray-800 p-2 cursor-pointer hover:bg-gray-200">
+                  <Badge className="bg-gray-100 text-gray-800 p-2">
                     Move In/Out
                   </Badge>
                 </div>
@@ -306,14 +306,9 @@ export default function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps)
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span className="flex items-center space-x-2">
-              <Play className="h-6 w-6 text-primary" />
-              <span>Berry Events Booking Experience Demo</span>
-            </span>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+          <DialogTitle className="flex items-center space-x-2">
+            <Play className="h-6 w-6 text-primary" />
+            <span>Berry Events Booking Experience Demo</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -347,66 +342,50 @@ export default function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps)
             {renderScene()}
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-center space-x-4 py-4 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRestart}
-              className="flex items-center space-x-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              <span>Restart</span>
-            </Button>
-
-            <Button
-              onClick={handlePlayPause}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6"
-            >
-              {isPlaying ? (
-                <>
-                  <Pause className="h-4 w-4 mr-2" />
-                  Pause Demo
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-2" />
-                  {progress > 0 ? 'Resume Demo' : 'Start Demo'}
-                </>
-              )}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMuted(!isMuted)}
-              className="flex items-center space-x-2"
-            >
-              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-            </Button>
+          {/* Single Play Demo Control */}
+          <div className="flex items-center justify-center py-4 border-t">
+            {!isPlaying && progress === 0 && (
+              <Button
+                onClick={() => setIsPlaying(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
+              >
+                <Play className="h-5 w-5 mr-2" />
+                Play Demo
+              </Button>
+            )}
+            {(isPlaying || progress > 0) && (
+              <div className="text-sm text-gray-600">
+                {isPlaying ? 'Demo playing...' : 'Demo completed'}
+                {progress >= 100 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRestart}
+                    className="ml-4"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Watch Again
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Step Navigation */}
+          {/* Step Indicators - Visual Only */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
             {demoSteps.map((step, index) => (
-              <button
+              <div
                 key={index}
-                onClick={() => {
-                  setCurrentStep(index);
-                  setIsPlaying(false);
-                  const stepProgress = demoSteps.slice(0, index).reduce((sum, s) => sum + s.duration, 0);
-                  setProgress((stepProgress / totalDuration) * 100);
-                }}
-                className={`p-2 text-xs rounded-lg border transition-all ${
+                className={`p-2 text-xs rounded-lg border ${
                   index === currentStep 
                     ? 'bg-primary text-white border-primary' 
                     : index < currentStep 
                       ? 'bg-green-100 text-green-800 border-green-200'
-                      : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200'
+                      : 'bg-gray-100 text-gray-600 border-gray-200'
                 }`}
               >
                 {step.title}
-              </button>
+              </div>
             ))}
           </div>
         </div>
