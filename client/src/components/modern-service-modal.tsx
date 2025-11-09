@@ -62,6 +62,82 @@ export default function ModernServiceModal({
   const [suggestedAddOnsFromComment, setSuggestedAddOnsFromComment] = useState<AddOn[]>([]);
   const [providerDetailsModal, setProviderDetailsModal] = useState<any>(null);
   
+  // Payment validation state
+  const [paymentErrors, setPaymentErrors] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
+    bankAccount: "",
+    bankBranch: ""
+  });
+  const [cardBrand, setCardBrand] = useState<string>("");
+  
+  // Payment validation helper functions
+  const formatCardNumber = (value: string): string => {
+    return value
+      .replace(/\D/g, '')
+      .replace(/(.{4})/g, '$1 ')
+      .trim()
+      .slice(0, 19); // Max 16 digits + 3 spaces
+  };
+
+  const formatExpiryDate = (value: string): string => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 4);
+    if (numericValue.length >= 2) {
+      return `${numericValue.slice(0, 2)}/${numericValue.slice(2)}`;
+    }
+    return numericValue;
+  };
+
+  const detectCardBrand = (cardNumber: string): string => {
+    const cleaned = cardNumber.replace(/\s/g, '');
+    if (/^4/.test(cleaned)) return 'Visa';
+    if (/^5[1-5]/.test(cleaned) || /^2[2-7]/.test(cleaned)) return 'Mastercard';
+    if (/^3[47]/.test(cleaned)) return 'American Express';
+    if (/^6(?:011|5)/.test(cleaned)) return 'Discover';
+    return '';
+  };
+
+  const validateCardNumber = (cardNumber: string): boolean => {
+    const cleaned = cardNumber.replace(/\s/g, '');
+    if (!/^\d{13,19}$/.test(cleaned)) return false;
+    
+    // Luhn Algorithm
+    let sum = 0;
+    let shouldDouble = false;
+    for (let i = cleaned.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleaned.charAt(i));
+      if (shouldDouble) {
+        if ((digit *= 2) > 9) digit -= 9;
+      }
+      sum += digit;
+      shouldDouble = !shouldDouble;
+    }
+    return sum % 10 === 0;
+  };
+
+  const validateExpiryDate = (expiry: string): boolean => {
+    const [month, year] = expiry.split('/');
+    if (!month || !year || month.length !== 2 || year.length !== 2) return false;
+    const monthNum = parseInt(month);
+    const yearNum = parseInt('20' + year);
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    
+    if (monthNum < 1 || monthNum > 12) return false;
+    if (yearNum < currentYear) return false;
+    if (yearNum === currentYear && monthNum < currentMonth) return false;
+    return true;
+  };
+
+  const validateCVV = (cvv: string, cardType: string): boolean => {
+    if (cardType === 'American Express') {
+      return /^\d{4}$/.test(cvv);
+    }
+    return /^\d{3}$/.test(cvv);
+  };
+  
   const [formData, setFormData] = useState({
     // Core fields
     propertyType: editBookingData?.propertyType || "",
