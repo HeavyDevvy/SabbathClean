@@ -9,8 +9,6 @@ import { registerCustomerReviewRoutes } from "./customer-review-routes";
 import { registerSupportRoutes } from "./support-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
-import { db } from "./db";
-import { eq, and } from "drizzle-orm";
 import { 
   insertUserSchema, 
   insertServiceProviderSchema, 
@@ -22,9 +20,7 @@ import {
   insertCertificationSchema,
   insertProviderCertificationSchema,
   insertSkillAssessmentSchema,
-  insertProviderAssessmentResultSchema,
-  conversations,
-  messages
+  insertProviderAssessmentResultSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1245,246 +1241,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat API Routes
-  app.get("/api/conversations", authenticateToken, async (req, res) => {
-    try {
-      const userId = req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const userConversations = await db.query.conversations.findMany({
-        where: (conversations, { or, eq }) =>
-          or(
-            eq(conversations.customerId, userId),
-            eq(conversations.providerId, userId)
-          ),
-        with: {
-          customer: {
-            columns: { id: true, firstName: true, lastName: true, profileImage: true }
-          },
-          provider: {
-            columns: { id: true, firstName: true, lastName: true, profileImage: true }
-          },
-          booking: {
-            columns: { id: true, bookingNumber: true, serviceType: true }
-          }
-        },
-        orderBy: (conversations, { desc }) => [desc(conversations.lastMessageAt)]
-      });
-
-      res.json(userConversations);
-    } catch (error: any) {
-      console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.get("/api/conversations/:conversationId/messages", authenticateToken, async (req, res) => {
-    try {
-      const { conversationId } = req.params;
-      const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const conversation = await db.query.conversations.findFirst({
-        where: (conversations, { eq }) => eq(conversations.id, conversationId)
-      });
-
-      if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
-      }
-
-      if (conversation.customerId !== userId && conversation.providerId !== userId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-      
-      const conversationMessages = await db.query.messages.findMany({
-        where: (messages, { eq }) => eq(messages.conversationId, conversationId),
-        with: {
-          sender: {
-            columns: { id: true, firstName: true, lastName: true, profileImage: true }
-          }
-        },
-        orderBy: (messages, { asc }) => [asc(messages.createdAt)]
-      });
-
-      res.json(conversationMessages);
-    } catch (error: any) {
-      console.error("Error fetching messages:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/conversations/:conversationId/messages", authenticateToken, async (req, res) => {
-    try {
-      const { conversationId } = req.params;
-      const { senderType, content, messageType } = req.body;
-      const senderId = req.user?.id;
-
-      if (!senderId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      if (!senderType || !content) {
-        return res.status(400).json({ message: "senderType and content are required" });
-      }
-
-      const conversation = await db.query.conversations.findFirst({
-        where: (conversations, { eq }) => eq(conversations.id, conversationId)
-      });
-
-      if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
-      }
-
-      if (conversation.customerId !== senderId && conversation.providerId !== senderId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
-      const [newMessage] = await db.insert(messages).values({
-        conversationId,
-        senderId,
-        senderType,
-        content,
-        messageType: messageType || 'text'
-      }).returning();
-
-      const updateData: any = {
-        lastMessageAt: new Date(),
-        lastMessage: content
-      };
-
-      if (senderType === 'customer') {
-        updateData.unreadCountProvider = (conversation.unreadCountProvider || 0) + 1;
-      } else {
-        updateData.unreadCountCustomer = (conversation.unreadCountCustomer || 0) + 1;
-      }
-
-      await db.update(conversations)
-        .set(updateData)
-        .where(eq(conversations.id, conversationId));
-
-      const messageWithSender = await db.query.messages.findFirst({
-        where: (messages, { eq }) => eq(messages.id, newMessage.id),
-        with: {
-          sender: {
-            columns: { id: true, firstName: true, lastName: true, profileImage: true }
-          }
-        }
-      });
-
-      const recipientId = senderType === 'customer' ? conversation.providerId : conversation.customerId;
-      if (app.locals.broadcastChatMessage) {
-        app.locals.broadcastChatMessage(recipientId, {
-          conversationId,
-          message: messageWithSender
-        });
-      }
-
-      res.json(messageWithSender);
-    } catch (error: any) {
-      console.error("Error sending message:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/conversations", authenticateToken, async (req, res) => {
-    try {
-      const { providerId, bookingId, subject } = req.body;
-      const customerId = req.user?.id;
-
-      if (!customerId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      if (!providerId) {
-        return res.status(400).json({ message: "providerId is required" });
-      }
-
-      const existingConversation = await db.query.conversations.findFirst({
-        where: (conversations, { and, eq }) =>
-          and(
-            eq(conversations.customerId, customerId),
-            eq(conversations.providerId, providerId),
-            bookingId ? eq(conversations.bookingId, bookingId) : undefined
-          )
-      });
-
-      if (existingConversation) {
-        return res.json(existingConversation);
-      }
-
-      const [newConversation] = await db.insert(conversations).values({
-        customerId,
-        providerId,
-        bookingId,
-        subject: subject || 'New Conversation'
-      }).returning();
-
-      res.json(newConversation);
-    } catch (error: any) {
-      console.error("Error creating conversation:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.patch("/api/conversations/:conversationId/mark-read", authenticateToken, async (req, res) => {
-    try {
-      const { conversationId } = req.params;
-      const { userType } = req.body;
-      const userId = req.user?.id;
-
-      if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      if (!userType || !['customer', 'provider'].includes(userType)) {
-        return res.status(400).json({ message: "Valid userType (customer/provider) is required" });
-      }
-
-      const conversation = await db.query.conversations.findFirst({
-        where: (conversations, { eq }) => eq(conversations.id, conversationId)
-      });
-
-      if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
-      }
-
-      if (conversation.customerId !== userId && conversation.providerId !== userId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
-      const updateField = userType === 'customer' ? 'unreadCountCustomer' : 'unreadCountProvider';
-      
-      await db.update(conversations)
-        .set({ [updateField]: 0 })
-        .where(eq(conversations.id, conversationId));
-
-      await db.update(messages)
-        .set({ isRead: true, readAt: new Date() })
-        .where(and(
-          eq(messages.conversationId, conversationId),
-          eq(messages.isRead, false)
-        ));
-
-      res.json({ success: true });
-    } catch (error: any) {
-      console.error("Error marking messages as read:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
   const httpServer = createServer(app);
 
-  // WebSocket server for real-time tracking and chat updates
+  // WebSocket server for real-time tracking updates
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  // Store active WebSocket connections for tracking and chat
+  // Store active WebSocket connections for tracking
   const trackingConnections = new Map<string, Set<WebSocket>>();
-  const chatConnections = new Map<string, Set<WebSocket>>(); // userId -> Set<WebSocket>
 
   wss.on('connection', (ws: WebSocket, req) => {
     console.log('WebSocket connection established');
@@ -1501,26 +1264,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trackingConnections.get(data.bookingId)?.add(ws);
           console.log(`Client subscribed to tracking for booking: ${data.bookingId}`);
         }
-
-        if (data.type === 'subscribe_chat' && data.userId) {
-          // Subscribe to chat updates for a specific user
-          if (!chatConnections.has(data.userId)) {
-            chatConnections.set(data.userId, new Set());
-          }
-          chatConnections.get(data.userId)?.add(ws);
-          console.log(`Client subscribed to chat for user: ${data.userId}`);
-        }
-
-        if (data.type === 'unsubscribe_chat' && data.userId) {
-          const connections = chatConnections.get(data.userId);
-          if (connections) {
-            connections.delete(ws);
-            if (connections.size === 0) {
-              chatConnections.delete(data.userId);
-            }
-          }
-          console.log(`Client unsubscribed from chat for user: ${data.userId}`);
-        }
       } catch (error) {
         console.error('WebSocket message parsing error:', error);
       }
@@ -1529,10 +1272,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on('close', () => {
       // Remove this connection from all tracking subscriptions
       trackingConnections.forEach((connections) => {
-        connections.delete(ws);
-      });
-      // Remove this connection from all chat subscriptions
-      chatConnections.forEach((connections) => {
         connections.delete(ws);
       });
       console.log('WebSocket connection closed');
@@ -1556,26 +1295,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   };
-
-  // Function to broadcast new chat messages
-  const broadcastChatMessage = (userId: string, messageData: any) => {
-    const connections = chatConnections.get(userId);
-    if (connections) {
-      const message = JSON.stringify({
-        type: 'new_message',
-        data: messageData
-      });
-      
-      connections.forEach((ws) => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(message);
-        }
-      });
-    }
-  };
-
-  // Expose broadcast function via app.locals so routes can access it
-  app.locals.broadcastChatMessage = broadcastChatMessage;
 
   // Enhance location update endpoint to broadcast WebSocket updates
   const originalUpdateLocation = app._router.stack.find((layer: any) => 

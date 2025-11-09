@@ -9,7 +9,6 @@ import BerryStarsSection from "@/components/berry-stars-section";
 import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 import Footer from "@/components/footer";
-import BookingCart from "@/components/booking-cart";
 import { Button } from "@/components/ui/button";
 import { 
   Menu,
@@ -28,8 +27,6 @@ export default function MinimalistHome() {
   // ADDED: Multi-service booking feature - Track up to 3 service bookings
   const [bookingDrafts, setBookingDrafts] = useState<ServiceDraft[]>([]);
   const [currentDraft, setCurrentDraft] = useState<ServiceDraft | null>(null);
-  const [editingDraft, setEditingDraft] = useState<ServiceDraft | null>(null);
-  const [editingDraftIndex, setEditingDraftIndex] = useState<number | null>(null);
   
   // Mock user data - replace with actual auth
   const [user] = useState({
@@ -98,53 +95,6 @@ export default function MinimalistHome() {
   // ADDED: Multi-service booking feature - Extract booked service IDs
   const bookedServices = bookingDrafts.map(draft => draft.serviceId);
 
-  // ADDED: Cart management handlers
-  const handleRemoveService = (index: number) => {
-    setBookingDrafts(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleEditService = (draft: ServiceDraft, index: number) => {
-    // Store the draft and its index for editing
-    setEditingDraft(draft);
-    setEditingDraftIndex(index);
-    // Open modal with the service
-    setSelectedService(draft.serviceId);
-    setIsBookingModalOpen(true);
-  };
-
-  const handleAddServiceFromCart = () => {
-    // Clear selected service to show service selection
-    setSelectedService("");
-    setEditingDraft(null);
-    setEditingDraftIndex(null);
-    setIsBookingModalOpen(true);
-  };
-
-  const handleProceedToCheckout = () => {
-    // Process final booking with all drafts
-    if (bookingDrafts.length > 0) {
-      // Aggregate all services
-      const aggregated = aggregatePayments(bookingDrafts);
-      
-      // Create a consolidated booking with all services
-      const consolidatedBooking = {
-        bookingId: `BE${Date.now().toString().slice(-6)}`,
-        timestamp: new Date().toISOString(),
-        status: 'confirmed',
-        multiService: true,
-        services: aggregated.lineItems,
-        aggregatedPayment: aggregated,
-        totalCost: aggregated.grandTotal,
-        commission: aggregated.commission
-      };
-      
-      setCompletedBookingData(consolidatedBooking);
-      setIsConfirmationOpen(true);
-      // Clear cart after checkout
-      setBookingDrafts([]);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white">
       {/* Clean Navigation Header */}
@@ -191,31 +141,12 @@ export default function MinimalistHome() {
         {/* Hero Section */}
         <MinimalistHero onGetStarted={handleBookingClick} />
 
-        {/* Services Section with Cart */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Services Grid - Takes 2 columns on large screens */}
-            <div className="lg:col-span-2">
-              <div data-section="services" id="services">
-                <MinimalistServices 
-                  onServiceSelect={handleServiceSelect} 
-                  bookedServices={bookedServices}
-                />
-              </div>
-            </div>
-
-            {/* Booking Cart - Takes 1 column on large screens, sticky */}
-            <div className="lg:col-span-1">
-              <BookingCart
-                bookingDrafts={bookingDrafts}
-                onRemoveService={handleRemoveService}
-                onEditService={handleEditService}
-                onAddService={handleAddServiceFromCart}
-                onProceedToCheckout={handleProceedToCheckout}
-                maxServices={3}
-              />
-            </div>
-          </div>
+        {/* Services Section */}
+        <div data-section="services" id="services">
+          <MinimalistServices 
+            onServiceSelect={handleServiceSelect} 
+            bookedServices={bookedServices}
+          />
         </div>
 
         {/* How It Works Section */}
@@ -238,11 +169,9 @@ export default function MinimalistHome() {
           onClose={() => {
             setIsBookingModalOpen(false);
             setSelectedService("");
-            setEditingDraft(null);
-            setEditingDraftIndex(null);
           }}
           serviceId={selectedService || "house-cleaning"}
-          editBookingData={editingDraft || completedBookingData}
+          editBookingData={completedBookingData}
           bookedServices={bookedServices}
           pendingDrafts={bookingDrafts}
           onAddAnotherService={handleAddAnotherService}
@@ -260,43 +189,30 @@ export default function MinimalistHome() {
               selectedAddOns: bookingData.selectedAddOns
             };
             
-            // Handle edit vs new service
-            if (editingDraft && editingDraftIndex !== null) {
-              // Update existing draft
-              setBookingDrafts(prev => {
-                const updated = [...prev];
-                updated[editingDraftIndex] = serviceDraft;
-                return updated;
-              });
-              setEditingDraft(null);
-              setEditingDraftIndex(null);
-              setIsBookingModalOpen(false);
-            } else {
-              // Combine with any pending drafts
-              const allDrafts = [...bookingDrafts, serviceDraft];
-              
-              // Finalize booking with aggregated data
-              const isMultiService = allDrafts.length > 1;
-              const aggregated = isMultiService ? aggregatePayments(allDrafts) : null;
-              
-              const enhancedBookingData = {
-                ...bookingData,
-                bookingId: `BE${Date.now().toString().slice(-6)}`,
-                timestamp: new Date().toISOString(),
-                status: 'confirmed',
-                ...(isMultiService && {
-                  multiService: true,
-                  services: aggregated!.lineItems,
-                  aggregatedPayment: aggregated
-                })
-              };
-              
-              setCompletedBookingData(enhancedBookingData);
-              setIsBookingModalOpen(false);
-              setIsConfirmationOpen(true);
-              // Reset drafts after confirmation
-              setBookingDrafts([]);
-            }
+            // Combine with any pending drafts
+            const allDrafts = [...bookingDrafts, serviceDraft];
+            
+            // Finalize booking with aggregated data
+            const isMultiService = allDrafts.length > 1;
+            const aggregated = isMultiService ? aggregatePayments(allDrafts) : null;
+            
+            const enhancedBookingData = {
+              ...bookingData,
+              bookingId: `BE${Date.now().toString().slice(-6)}`,
+              timestamp: new Date().toISOString(),
+              status: 'confirmed',
+              ...(isMultiService && {
+                multiService: true,
+                services: aggregated!.lineItems,
+                aggregatedPayment: aggregated
+              })
+            };
+            
+            setCompletedBookingData(enhancedBookingData);
+            setIsBookingModalOpen(false);
+            setIsConfirmationOpen(true);
+            // Reset drafts after confirmation
+            setBookingDrafts([]);
           }}
         />
       )}

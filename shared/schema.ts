@@ -230,9 +230,6 @@ export const conversations = pgTable("conversations", {
   subject: text("subject"),
   status: text("status").default("active"), // active, closed, archived
   lastMessageAt: timestamp("last_message_at"),
-  lastMessage: text("last_message"),
-  unreadCountCustomer: integer("unread_count_customer").default(0),
-  unreadCountProvider: integer("unread_count_provider").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -241,7 +238,6 @@ export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
   senderId: varchar("sender_id").references(() => users.id).notNull(),
-  senderType: text("sender_type").notNull(), // 'customer' or 'provider'
   content: text("content").notNull(),
   messageType: text("message_type").default("text"), // text, image, document, system
   attachments: jsonb("attachments"), // file URLs and metadata

@@ -1,6 +1,6 @@
 # Overview
 
-Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform connecting customers with verified service providers for various home services, including cleaning, plumbing, electrical work, chef/catering, waitering, and garden care. The platform aims to be a leading premium service provider in South Africa, emphasizing quality, security, and specialized services like African cuisine catering. It offers a dynamic pricing model, an advanced booking system with geolocation, provider matching, reviews, and secure payment processing via Stripe, with all payments flowing through "Berry Events Bank" to ensure trust and security. The platform also includes an AI-powered recommendation engine, an interactive onboarding tutorial, a comprehensive Progressive Web App (PWA) with mobile companion features including push notifications, offline functionality, and native app-like experience, and an in-app chat system for direct customer-provider communication.
+Berry Events - All your Home Services In One is a comprehensive domestic services marketplace platform connecting customers with verified service providers for various home services, including cleaning, plumbing, electrical work, chef/catering, waitering, and garden care. The platform aims to be a leading premium service provider in South Africa, emphasizing quality, security, and specialized services like African cuisine catering. It offers a dynamic pricing model, an advanced booking system with geolocation, provider matching, reviews, and secure payment processing via Stripe, with all payments flowing through "Berry Events Bank" to ensure trust and security. The platform also includes an AI-powered recommendation engine, an interactive onboarding tutorial, and a comprehensive Progressive Web App (PWA) with mobile companion features including push notifications, offline functionality, and native app-like experience.
 
 # User Preferences
 
@@ -28,10 +28,9 @@ The system includes basic user management and is designed to support comprehensi
 
 **Major Design Overhaul (Dec 2024):** Completely redesigned to mirror SweepSouth's minimalistic approach with clean, spacious layouts and simplified user flows. Removed redundant features and focused on core functionality. 
 
-The platform now features (main homepage at `/`):
+The platform now features:
 - Minimalistic hero section with focused quick-booking flow
 - Streamlined services grid (6 core services vs previous 8+ categories)  
-- Multi-service booking cart (max 3 services) with edit/remove functionality, visible on right sidebar
 - Clean navigation with reduced menu items
 - Spacious card layouts with ample white space
 - Simplified trust indicators and testimonials
@@ -52,7 +51,6 @@ Previous comprehensive features are still available at `/enhanced` route for com
 - **Mobile App Companion**: Complete Progressive Web App implementation with push notifications, offline functionality, service worker caching, PWA manifest, installable mobile experience, and native app features including background sync and notification management.
 - **Payment Validation (Steps 6-7 - Nov 2025)**: Comprehensive client-side payment validation with Luhn algorithm card number verification, auto-formatting for card numbers (spaces every 4 digits) and expiry dates (MM/YY), card brand detection (Visa, Mastercard, Amex, Discover), CVV validation (3-4 digits based on card type), bank account validation (8-12 digits), real-time error feedback with touched state tracking, and security best practices (no PAN/CVV logging, masked storage with only last 4 digits + brand, state cleanup after booking completion, validation guard before booking confirmation).
 - **PDF Receipt Generation (Step 8 - Nov 2025)**: Professional PDF receipt generation using jsPDF with comprehensive booking confirmation. Features include: Berry Events branded design with purple/green color scheme, persistent booking reference (useMemo), organized sections (Service Details, Provider Details, Payment Summary), pricing breakdown with discounts and add-ons, masked payment info display (last 4 digits only), Berry Events Bank protection notice, platform commission disclosure (15%), professional footer with contact info, automatic download on confirmation, error handling with toast notifications, and fallback handling for missing data.
-- **In-App Chat System (Nov 2025)**: Real-time messaging between customers and service providers using WebSocket technology. Features include: authenticated chat endpoints with participant verification, conversations linked to bookings, real-time message delivery via WebSocket, unread message counters, message history, typing indicators UI, and secure chat interface accessible at `/chat` route. All chat operations require authentication and verify participant membership server-side.
 
 # External Dependencies
 
