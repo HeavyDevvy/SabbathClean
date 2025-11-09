@@ -33,6 +33,7 @@ interface ModernServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   serviceId: string;
+  onServiceSelect?: (serviceId: string) => void;
   onBookingComplete: (bookingData: any) => void;
   editBookingData?: any; // For editing existing bookings
 }
@@ -41,6 +42,7 @@ export default function ModernServiceModal({
   isOpen,
   onClose,
   serviceId,
+  onServiceSelect,
   onBookingComplete,
   editBookingData
 }: ModernServiceModalProps) {
@@ -565,8 +567,11 @@ export default function ModernServiceModal({
     "au-pair": "au-pair"
   };
 
-  const mappedServiceId = serviceIdMapping[serviceId] || serviceId;
-  const currentConfig = serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"];
+  const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
+  const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || serviceConfigs["cleaning"]) : null;
+  
+  // If no service selected, start at step 0 (service selection)
+  const showServiceSelection = !serviceId || serviceId === 'all-services';
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -817,6 +822,51 @@ export default function ModernServiceModal({
       bankAccount: "",
       bankBranch: ""
     });
+  };
+
+  const renderServiceSelection = () => {
+    const availableServices = [
+      { id: 'house-cleaning', name: 'House Cleaning', icon: Sparkles, color: 'blue' },
+      { id: 'plumbing', name: 'Plumbing Services', icon: Droplets, color: 'cyan' },
+      { id: 'electrical', name: 'Electrical Services', icon: Zap, color: 'yellow' },
+      { id: 'garden-maintenance', name: 'Garden Maintenance', icon: TreePine, color: 'green' },
+      { id: 'chef-catering', name: 'Chef & Catering', icon: ChefHat, color: 'orange' },
+      { id: 'event-staff', name: 'Event Staffing', icon: Users, color: 'purple' },
+      { id: 'handyman', name: 'Handyman Services', icon: Wrench, color: 'gray' },
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Select a Service</h3>
+          <p className="text-gray-600">Choose the service you'd like to book</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {availableServices.map((service) => {
+            const Icon = service.icon;
+            return (
+              <Card 
+                key={service.id}
+                className="cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 hover:border-primary"
+                onClick={() => {
+                  if (onServiceSelect) {
+                    onServiceSelect(service.id);
+                  }
+                }}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className={`h-16 w-16 mx-auto mb-4 rounded-full bg-${service.color}-100 flex items-center justify-center`}>
+                    <Icon className={`h-8 w-8 text-${service.color}-600`} />
+                  </div>
+                  <h4 className="font-semibold text-gray-900">{service.name}</h4>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
   const renderStep1 = () => (
@@ -1763,6 +1813,24 @@ export default function ModernServiceModal({
       </Card>
     </div>
   );
+
+  // Show service selection if no service is selected
+  if (showServiceSelection) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Book a Service</DialogTitle>
+            <DialogDescription>
+              Select the service you need to get started
+            </DialogDescription>
+          </DialogHeader>
+          
+          {renderServiceSelection()}
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   // Guard against undefined config
   if (!currentConfig) {

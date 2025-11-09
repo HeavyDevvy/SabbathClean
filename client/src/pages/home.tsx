@@ -16,12 +16,11 @@ export default function Home() {
   const openBooking = (service?: string) => {
     if (service && service !== 'all-services') {
       setSelectedService(service);
-      setIsBookingOpen(true);
     } else {
-      // Default to house cleaning for general bookings
-      setSelectedService('house-cleaning');
-      setIsBookingOpen(true);
+      // No service pre-selected - let user choose
+      setSelectedService('');
     }
+    setIsBookingOpen(true);
   };
 
   return (
@@ -42,7 +41,8 @@ export default function Home() {
           setIsBookingOpen(false);
           setSelectedService("");
         }}
-        serviceId={selectedService || "house-cleaning"}
+        serviceId={selectedService}
+        onServiceSelect={(serviceId) => setSelectedService(serviceId)}
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setIsBookingOpen(false);
