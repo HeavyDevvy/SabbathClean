@@ -1,0 +1,428 @@
+[
+  {
+    "serviceId": "house-cleaning",
+    "serviceName": "House Cleaning",
+    "addons": [
+      {
+        "id": "deep_cleaning",
+        "label": "Deep cleaning (ovens, fridges, cupboards)",
+        "priceZAR": 650,
+        "keywords": ["deep clean", "oven", "fridge", "cupboard", "kitchen deep", "deep", "cupboards", "ovens", "fridges"]
+      },
+      {
+        "id": "window_cleaning",
+        "label": "Window cleaning",
+        "priceZAR": 350,
+        "keywords": ["window", "windows", "glass"]
+      },
+      {
+        "id": "carpet_upholstery",
+        "label": "Carpet and upholstery cleaning",
+        "priceZAR": 750,
+        "keywords": ["carpet", "upholstery", "rug", "furniture", "sofa", "couch"]
+      },
+      {
+        "id": "laundry_service",
+        "label": "Laundry service (wash, dry, fold, iron)",
+        "priceZAR": 300,
+        "keywords": ["laundry", "wash", "dry", "fold", "iron", "clothes", "washing"]
+      },
+      {
+        "id": "organizing_declutter",
+        "label": "Organizing and decluttering",
+        "priceZAR": 450,
+        "keywords": ["organize", "organiz", "declutter", "tidy", "arrange", "organizing"]
+      },
+      {
+        "id": "post_construction",
+        "label": "Post-construction cleaning",
+        "priceZAR": 1200,
+        "keywords": ["post construction", "construction", "renovation", "building", "debris", "dust"]
+      },
+      {
+        "id": "pet_hair_removal",
+        "label": "Pet hair removal treatment",
+        "priceZAR": 250,
+        "keywords": ["pet hair", "pet", "dog", "cat", "animal", "fur"]
+      },
+      {
+        "id": "disinfection_sanitize",
+        "label": "Disinfection and sanitizing",
+        "priceZAR": 400,
+        "keywords": ["disinfect", "sanitize", "sterilize", "germ", "bacteria", "sanitizing", "sanitise"]
+      }
+    ]
+  },
+  {
+    "serviceId": "plumbing",
+    "serviceName": "Plumbing Services",
+    "addons": [
+      {
+        "id": "drain_camera",
+        "label": "Drain camera inspection",
+        "priceZAR": 750,
+        "keywords": ["camera", "inspection", "drain camera", "camera inspection", "inspect"]
+      },
+      {
+        "id": "pressure_testing",
+        "label": "Water pressure testing",
+        "priceZAR": 300,
+        "keywords": ["pressure", "low pressure", "water pressure", "pressure test"]
+      },
+      {
+        "id": "leak_detection",
+        "label": "Leak detection service",
+        "priceZAR": 600,
+        "keywords": ["leak", "leaking", "drip", "water leak", "pipe leak"]
+      },
+      {
+        "id": "geyser_maintenance",
+        "label": "Geyser maintenance/flush",
+        "priceZAR": 650,
+        "keywords": ["geyser", "water heater", "hot water", "flush", "maintenance"]
+      },
+      {
+        "id": "pipe_insulation",
+        "label": "Pipe insulation",
+        "priceZAR": 350,
+        "keywords": ["insulation", "insulate", "pipe insulation", "winter", "freeze"]
+      },
+      {
+        "id": "water_filtration",
+        "label": "Water filtration system installation",
+        "priceZAR": 1200,
+        "keywords": ["filtration", "filter", "water filter", "purification", "clean water"]
+      },
+      {
+        "id": "greywater_system",
+        "label": "Greywater system setup",
+        "priceZAR": 1500,
+        "keywords": ["greywater", "grey water", "recycling", "water recycling"]
+      },
+      {
+        "id": "coc_plumbing",
+        "label": "Certificate of Compliance",
+        "priceZAR": 850,
+        "keywords": ["coc", "certificate", "compliance", "certification"]
+      }
+    ]
+  },
+  {
+    "serviceId": "electrical",
+    "serviceName": "Electrical Services",
+    "addons": [
+      {
+        "id": "coc_electrical",
+        "label": "Certificate of Compliance (COC)",
+        "priceZAR": 900,
+        "keywords": ["coc", "certificate", "compliance", "certification", "electrical certificate"]
+      },
+      {
+        "id": "electrical_inspection",
+        "label": "Electrical inspection and testing",
+        "priceZAR": 700,
+        "keywords": ["inspection", "test", "testing", "check", "safety check"]
+      },
+      {
+        "id": "surge_protection",
+        "label": "Surge protection installation",
+        "priceZAR": 650,
+        "keywords": ["surge", "protection", "surge protector", "lightning"]
+      },
+      {
+        "id": "generator_install",
+        "label": "Generator installation/connection",
+        "priceZAR": 1500,
+        "keywords": ["generator", "backup power", "power backup", "loadshedding"]
+      },
+      {
+        "id": "solar_panel",
+        "label": "Solar panel installation",
+        "priceZAR": 2800,
+        "keywords": ["solar", "solar panel", "renewable", "green energy", "photovoltaic"]
+      },
+      {
+        "id": "prepaid_meter",
+        "label": "Prepaid meter installation",
+        "priceZAR": 1200,
+        "keywords": ["prepaid", "meter", "prepaid meter", "electricity meter"]
+      },
+      {
+        "id": "db_board_upgrade",
+        "label": "DB board upgrade",
+        "priceZAR": 2000,
+        "keywords": ["db board", "distribution board", "circuit breaker", "upgrade"]
+      },
+      {
+        "id": "energy_audit",
+        "label": "Energy audit",
+        "priceZAR": 900,
+        "keywords": ["energy audit", "audit", "energy", "efficiency", "consumption"]
+      }
+    ]
+  },
+  {
+    "serviceId": "garden-care",
+    "serviceName": "Garden Care",
+    "addons": [
+      {
+        "id": "tree_felling",
+        "label": "Tree felling/pruning",
+        "priceZAR": 1200,
+        "keywords": ["tree", "felling", "prune", "pruning", "tree removal", "cut tree"]
+      },
+      {
+        "id": "hedge_trimming",
+        "label": "Hedge trimming",
+        "priceZAR": 400,
+        "keywords": ["hedge", "trim", "trimming", "hedges", "shrub"]
+      },
+      {
+        "id": "lawn_fertilization",
+        "label": "Lawn fertilization and treatment",
+        "priceZAR": 450,
+        "keywords": ["fertilize", "fertilization", "lawn treatment", "feed", "nutrients"]
+      },
+      {
+        "id": "waste_removal",
+        "label": "Garden waste removal",
+        "priceZAR": 350,
+        "keywords": ["waste", "removal", "garden waste", "rubbish", "debris", "cleanup"]
+      },
+      {
+        "id": "irrigation_system",
+        "label": "Irrigation system installation/repair",
+        "priceZAR": 1200,
+        "keywords": ["irrigation", "sprinkler", "watering", "water system"]
+      },
+      {
+        "id": "flower_planting",
+        "label": "Seasonal flower planting",
+        "priceZAR": 350,
+        "keywords": ["flowers", "planting", "plants", "seasonal", "bedding"]
+      },
+      {
+        "id": "mulching",
+        "label": "Mulching",
+        "priceZAR": 300,
+        "keywords": ["mulch", "mulching", "bark", "compost"]
+      },
+      {
+        "id": "pest_disease_control",
+        "label": "Pest and disease control",
+        "priceZAR": 500,
+        "keywords": ["pest", "disease", "insects", "bug", "treatment", "control"]
+      }
+    ]
+  },
+  {
+    "serviceId": "chef-catering",
+    "serviceName": "Chef & Catering",
+    "addons": [
+      {
+        "id": "dietary_accommodations",
+        "label": "Special dietary accommodations (vegan, halaal, kosher, gluten-free)",
+        "priceZAR": 300,
+        "keywords": ["vegan", "halaal", "halal", "kosher", "gluten", "gluten-free", "dietary", "allergy", "vegetarian"]
+      },
+      {
+        "id": "tableware_rental",
+        "label": "Tableware and cutlery rental",
+        "priceZAR": 600,
+        "keywords": ["tableware", "cutlery", "plates", "dishes", "rental", "crockery"]
+      },
+      {
+        "id": "beverage_service",
+        "label": "Beverage service",
+        "priceZAR": 500,
+        "keywords": ["beverage", "drinks", "bar", "soft drinks", "juice"]
+      },
+      {
+        "id": "dessert_cake",
+        "label": "Dessert/cake service",
+        "priceZAR": 450,
+        "keywords": ["dessert", "cake", "sweet", "pastry", "pudding"]
+      },
+      {
+        "id": "menu_tasting",
+        "label": "Menu tasting session",
+        "priceZAR": 700,
+        "keywords": ["tasting", "sample", "preview", "trial"]
+      },
+      {
+        "id": "leftovers_packaging",
+        "label": "Leftovers packaging",
+        "priceZAR": 200,
+        "keywords": ["leftovers", "packaging", "takeaway", "doggy bag"]
+      },
+      {
+        "id": "kitchen_cleanup",
+        "label": "Kitchen cleanup",
+        "priceZAR": 350,
+        "keywords": ["cleanup", "clean up", "kitchen", "washing", "dishes"]
+      }
+    ]
+  },
+  {
+    "serviceId": "waitering",
+    "serviceName": "Waitering Services",
+    "addons": [
+      {
+        "id": "bartender_service",
+        "label": "Bartender service",
+        "priceZAR": 600,
+        "keywords": ["bartender", "bar", "drinks", "cocktails", "mixologist"]
+      },
+      {
+        "id": "glassware_rental",
+        "label": "Glassware and tableware rental",
+        "priceZAR": 450,
+        "keywords": ["glassware", "glasses", "tableware", "rental", "champagne flutes"]
+      },
+      {
+        "id": "table_setting",
+        "label": "Table setting and decoration",
+        "priceZAR": 400,
+        "keywords": ["table setting", "decoration", "decor", "centerpiece", "setup"]
+      },
+      {
+        "id": "wine_specialist",
+        "label": "Champagne/wine service specialist",
+        "priceZAR": 350,
+        "keywords": ["champagne", "wine", "specialist", "sommelier", "wine service"]
+      },
+      {
+        "id": "post_event_cleanup",
+        "label": "Post-event cleanup",
+        "priceZAR": 450,
+        "keywords": ["post-event", "cleanup", "clean up", "after party", "cleaning"]
+      }
+    ]
+  },
+  {
+    "serviceId": "home-moving",
+    "serviceName": "Home Moving",
+    "addons": [
+      {
+        "id": "packing_service",
+        "label": "Packing service (full/partial)",
+        "priceZAR": 1000,
+        "keywords": ["packing", "pack", "boxes", "wrapping"]
+      },
+      {
+        "id": "unpacking_service",
+        "label": "Unpacking service",
+        "priceZAR": 800,
+        "keywords": ["unpacking", "unpack", "setup", "arrange"]
+      },
+      {
+        "id": "packing_materials",
+        "label": "Packing materials supply",
+        "priceZAR": 450,
+        "keywords": ["materials", "boxes", "bubble wrap", "tape", "supplies"]
+      },
+      {
+        "id": "furniture_assembly",
+        "label": "Furniture disassembly/reassembly",
+        "priceZAR": 900,
+        "keywords": ["disassembly", "reassembly", "assembly", "furniture", "assemble", "disassemble"]
+      },
+      {
+        "id": "appliance_connection",
+        "label": "Appliance disconnection/reconnection",
+        "priceZAR": 600,
+        "keywords": ["appliance", "disconnect", "reconnect", "washing machine", "fridge"]
+      },
+      {
+        "id": "heavy_items",
+        "label": "Heavy item specialists (pianos, safes)",
+        "priceZAR": 1800,
+        "keywords": ["piano", "safe", "heavy", "specialist", "large items"]
+      },
+      {
+        "id": "storage_solutions",
+        "label": "Storage solutions",
+        "priceZAR": 700,
+        "keywords": ["storage", "warehouse", "temporary storage"]
+      },
+      {
+        "id": "insurance_upgrade",
+        "label": "Insurance coverage upgrade",
+        "priceZAR": 400,
+        "keywords": ["insurance", "coverage", "protection", "insure"]
+      },
+      {
+        "id": "furniture_hoisting",
+        "label": "Furniture hoisting/crane service",
+        "priceZAR": 2200,
+        "keywords": ["hoisting", "crane", "lift", "balcony", "window"]
+      }
+    ]
+  },
+  {
+    "serviceId": "au-pair",
+    "serviceName": "Au Pair Services",
+    "addons": [
+      {
+        "id": "overnight_care",
+        "label": "Overnight care",
+        "priceZAR": 800,
+        "keywords": ["overnight", "night", "sleep over", "24 hour", "full day"]
+      },
+      {
+        "id": "school_transport",
+        "label": "School drop-off and pick-up",
+        "priceZAR": 300,
+        "keywords": ["school run", "school", "drop-off", "pick-up", "transport"]
+      },
+      {
+        "id": "homework_help",
+        "label": "Homework assistance/tutoring",
+        "priceZAR": 350,
+        "keywords": ["homework", "tutor", "tutoring", "help", "education", "learning"]
+      },
+      {
+        "id": "meal_prep_kids",
+        "label": "Meal preparation for children",
+        "priceZAR": 250,
+        "keywords": ["meal", "food", "cooking", "prepare", "lunch"]
+      },
+      {
+        "id": "light_housekeeping",
+        "label": "Light housekeeping",
+        "priceZAR": 250,
+        "keywords": ["housekeeping", "cleaning", "light housekeeping", "tidy"]
+      },
+      {
+        "id": "newborn_specialist",
+        "label": "Newborn care specialist",
+        "priceZAR": 900,
+        "keywords": ["newborn", "baby", "infant", "specialist"]
+      },
+      {
+        "id": "special_needs",
+        "label": "Special needs care",
+        "priceZAR": 900,
+        "keywords": ["special needs", "disability", "therapy", "special care"]
+      },
+      {
+        "id": "additional_children",
+        "label": "Additional children surcharge",
+        "priceZAR": 200,
+        "keywords": ["additional", "extra", "more children", "siblings"]
+      },
+      {
+        "id": "swimming_supervision",
+        "label": "Swimming supervision (certified)",
+        "priceZAR": 300,
+        "keywords": ["swimming", "pool", "water", "lifeguard"]
+      },
+      {
+        "id": "first_aid_certified",
+        "label": "First aid certified",
+        "priceZAR": 250,
+        "keywords": ["first aid", "medical", "certified", "emergency"]
+      }
+    ]
+  }
+]
