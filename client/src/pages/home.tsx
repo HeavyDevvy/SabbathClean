@@ -13,6 +13,7 @@ export default function Home() {
   const [selectedService, setSelectedService] = useState<string>("");
   const [isProviderOnboardingOpen, setIsProviderOnboardingOpen] = useState(false);
   const [bookedServices, setBookedServices] = useState<string[]>([]);
+  const [confirmedDrafts, setConfirmedDrafts] = useState<any[]>([]); // Store complete booking data for multi-service
 
   const openBooking = (service?: string) => {
     if (service && service !== 'all-services') {
@@ -51,6 +52,15 @@ export default function Home() {
         onServiceSelect={(serviceId) => setSelectedService(serviceId)}
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
+          
+          // Add to confirmed drafts for multi-service aggregation
+          setConfirmedDrafts(prev => [...prev, bookingData]);
+          
+          // Track service ID to prevent duplicates
+          if (bookingData.serviceId && !bookedServices.includes(bookingData.serviceId)) {
+            setBookedServices(prev => [...prev, bookingData.serviceId]);
+          }
+          
           setIsBookingOpen(false);
           setSelectedService(""); // Clear selected service to prevent card interference
         }}
