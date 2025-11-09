@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
-import logo from "@assets/Untitled design (2)_1762495887852.png";
+import logo from "@assets/berry-events-logo.jpg";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;

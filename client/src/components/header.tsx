@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
-import berryLogo from "@assets/Untitled design (2)_1762495887852.png";
+import berryLogo from "@assets/berry-events-logo.jpg";
 
 interface HeaderProps {
   onBookingClick?: () => void;
@@ -60,7 +60,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center">
             <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
+              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
             </div>
             <span className="ml-3 text-xl font-bold text-gray-900">Berry Events</span>
             <span className="ml-2 text-sm text-gray-600">- All your Home Services In One</span>
