@@ -45,8 +45,8 @@ import ChatPage from "@/pages/chat";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={EnhancedHome} />
-      <Route path="/minimalist" component={MinimalistHome} />
+      <Route path="/" component={MinimalistHome} />
+      <Route path="/enhanced" component={EnhancedHome} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
