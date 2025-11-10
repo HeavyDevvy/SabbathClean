@@ -1,5 +1,6 @@
 // ADDED: Multi-service booking feature
 import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 import MinimalistHero from "@/components/minimalist-hero";
 import MinimalistServices from "@/components/minimalist-services";
 import ModernServiceModal from "@/components/modern-service-modal";
@@ -18,6 +19,7 @@ import {
 import { aggregatePayments, type ServiceDraft } from "@/lib/paymentAggregator";
 
 export default function MinimalistHome() {
+  const { addToCart, itemCount } = useCart();
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [isDemoVideoOpen, setIsDemoVideoOpen] = useState(false);
@@ -132,6 +134,9 @@ export default function MinimalistHome() {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100">
             <div className="px-4 py-3 space-y-3">
+              <div className="flex justify-center pb-2">
+                <CartDrawer />
+              </div>
               <Button variant="outline" className="w-full">Sign In</Button>
               <Button className="w-full bg-blue-600">Get Started</Button>
             </div>
@@ -177,44 +182,33 @@ export default function MinimalistHome() {
           bookedServices={bookedServices}
           pendingDrafts={bookingDrafts}
           onAddAnotherService={handleAddAnotherService}
-          onBookingComplete={(bookingData) => {
+          onBookingComplete={async (bookingData) => {
             console.log("Booking completed:", bookingData);
             
-            // ADDED: Multi-service booking feature - Create final ServiceDraft
-            const serviceDraft: ServiceDraft = {
-              serviceId: bookingData.serviceId,
-              serviceName: bookingData.serviceName,
-              pricing: bookingData.pricing,
-              selectedProvider: bookingData.selectedProvider,
-              preferredDate: bookingData.preferredDate,
-              timePreference: bookingData.timePreference,
-              selectedAddOns: bookingData.selectedAddOns
-            };
-            
-            // Combine with any pending drafts
-            const allDrafts = [...bookingDrafts, serviceDraft];
-            
-            // Finalize booking with aggregated data
-            const isMultiService = allDrafts.length > 1;
-            const aggregated = isMultiService ? aggregatePayments(allDrafts) : null;
-            
-            const enhancedBookingData = {
-              ...bookingData,
-              bookingId: `BE${Date.now().toString().slice(-6)}`,
-              timestamp: new Date().toISOString(),
-              status: 'confirmed',
-              ...(isMultiService && {
-                multiService: true,
-                services: aggregated!.lineItems,
-                aggregatedPayment: aggregated
-              })
-            };
-            
-            setCompletedBookingData(enhancedBookingData);
-            setIsBookingModalOpen(false);
-            setIsConfirmationOpen(true);
-            // Reset drafts after confirmation
-            setBookingDrafts([]);
+            // Add service to cart (new shopping cart system)
+            try {
+              await addToCart({
+                serviceId: bookingData.serviceId,
+                serviceName: bookingData.serviceName,
+                serviceType: bookingData.serviceType || 'general',
+                scheduledDate: bookingData.preferredDate,
+                scheduledTime: bookingData.timePreference,
+                duration: bookingData.duration || null,
+                basePrice: bookingData.pricing?.basePrice || "0",
+                addOnsPrice: bookingData.pricing?.addOns || "0",
+                subtotal: bookingData.pricing?.total || "0",
+                serviceDetails: JSON.stringify(bookingData.serviceDetails || {}),
+                selectedAddOns: bookingData.selectedAddOns || [],
+                comments: bookingData.comments || null,
+                providerId: bookingData.selectedProvider?.id || null,
+              });
+              
+              // Close modal after successful cart add
+              setIsBookingModalOpen(false);
+              setSelectedService("");
+            } catch (error) {
+              console.error("Failed to add to cart:", error);
+            }
           }}
         />
       )}
