@@ -4,6 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { config } from "dotenv";
+import cookieParser from "cookie-parser";
 
 // Load environment variables from .env file
 config();
@@ -13,6 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); // Enable cookie parsing for cart sessions
 
 // Serve PWA files with proper headers
 app.get('/sw.js', (req, res) => {
