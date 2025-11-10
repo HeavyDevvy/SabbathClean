@@ -1226,9 +1226,21 @@ export default function ModernServiceModal({
       return;
     }
 
+    // Map frontend service IDs to database service IDs
+    const serviceIdMapping: Record<string, string> = {
+      'cleaning': 'house-cleaning',
+      'garden-care': 'gardening',
+      'chef-catering': 'chef-catering',
+      'plumbing': 'plumbing',
+      'electrical': 'electrical',
+      'waitering': 'event-staff'
+    };
+    
+    const dbServiceId = serviceIdMapping[serviceId] || serviceId;
+    
     // Map booking data to CartItem format
     const cartItem = {
-      serviceId,
+      serviceId: dbServiceId, // Use database-compatible service ID
       serviceName: currentConfig.title,
       providerId: formData.selectedProvider?.id?.toString() || "1",
       providerName: formData.selectedProvider?.name || "Berry Events Provider",

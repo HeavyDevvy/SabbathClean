@@ -772,7 +772,7 @@ export const carts = pgTable("carts", {
 export const cartItems = pgTable("cart_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   cartId: varchar("cart_id").references(() => carts.id, { onDelete: "cascade" }).notNull(),
-  serviceId: varchar("service_id").references(() => services.id).notNull(),
+  serviceId: varchar("service_id"), // Make nullable - we use serviceType/serviceName for flexibility
   providerId: varchar("provider_id").references(() => serviceProviders.id),
   serviceType: text("service_type").notNull(),
   serviceName: text("service_name").notNull(),
