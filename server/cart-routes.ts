@@ -45,7 +45,11 @@ export function registerCartRoutes(app: Express) {
         return res.status(404).json({ message: "Cart not found" });
       }
       
-      res.json(cartData);
+      // Flatten cart and items for frontend compatibility
+      res.json({
+        ...cartData.cart,
+        items: cartData.items
+      });
     } catch (error: any) {
       console.error("Error fetching cart:", error);
       res.status(500).json({ message: error.message });
@@ -74,12 +78,15 @@ export function registerCartRoutes(app: Express) {
       // Add item to cart (deduplication handled in storage layer)
       const cartItem = await storage.addItemToCart(cart.id, itemData);
       
-      // Return updated cart
+      // Return updated cart with flattened structure
       const cartData = await storage.getCartWithItems(cart.id);
       
       res.status(201).json({ 
         item: cartItem,
-        cart: cartData
+        cart: {
+          ...cartData.cart,
+          items: cartData.items
+        }
       });
     } catch (error: any) {
       console.error("Error adding item to cart:", error);

@@ -48,11 +48,11 @@ function CartItemCard({ item }: { item: CartItem }) {
               <Clock className="w-3 h-3 ml-3 mr-1.5 flex-shrink-0" />
               <span data-testid={`cart-item-time-${item.id}`}>{item.scheduledTime}</span>
             </div>
-            {serviceDetails.location && (
+            {serviceDetails.address && (
               <div className="flex items-start text-xs text-gray-600">
                 <MapPin className="w-3 h-3 mr-1.5 flex-shrink-0 mt-0.5" />
                 <span className="line-clamp-1" data-testid={`cart-item-location-${item.id}`}>
-                  {serviceDetails.location}
+                  {serviceDetails.address}
                 </span>
               </div>
             )}
