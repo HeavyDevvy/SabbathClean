@@ -757,3 +757,121 @@ export type Wallet = typeof wallets.$inferSelect;
 export type InsertWallet = z.infer<typeof insertWalletSchema>;
 export type WalletTransaction = typeof walletTransactions.$inferSelect;
 export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+
+// Shopping Cart System Tables
+export const carts = pgTable("carts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id), // null for guest users
+  sessionToken: text("session_token"), // For guest cart tracking
+  status: text("status").default("active").notNull(), // active, checked_out, abandoned, expired
+  expiresAt: timestamp("expires_at"), // Auto-expire stale carts after 7 days
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const cartItems = pgTable("cart_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cartId: varchar("cart_id").references(() => carts.id, { onDelete: "cascade" }).notNull(),
+  serviceId: varchar("service_id").references(() => services.id).notNull(),
+  providerId: varchar("provider_id").references(() => serviceProviders.id),
+  serviceType: text("service_type").notNull(),
+  serviceName: text("service_name").notNull(),
+  // Booking details
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  scheduledTime: text("scheduled_time").notNull(),
+  duration: integer("duration"), // Estimated hours
+  // Pricing
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  addOnsPrice: decimal("add_ons_price", { precision: 10, scale: 2 }).default("0"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  // Service configuration stored as JSON
+  serviceDetails: jsonb("service_details"), // property type, size, urgency, etc.
+  selectedAddOns: jsonb("selected_addons").default('[]'), // Array of add-on IDs
+  comments: text("comments"),
+  // Metadata
+  addedAt: timestamp("added_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const orders = pgTable("orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  cartId: varchar("cart_id").references(() => carts.id),
+  orderNumber: text("order_number").notNull().unique(), // BE-2025-001234
+  // Payment details
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0"),
+  serviceFee: decimal("service_fee", { precision: 10, scale: 2 }).default("0"),
+  platformFee: decimal("platform_fee", { precision: 10, scale: 2 }).default("0"),
+  // Payment processing
+  paymentStatus: text("payment_status").default("pending").notNull(), // pending, processing, paid, failed, refunded
+  paymentMethod: text("payment_method"), // card, bank, wallet
+  paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID
+  stripeChargeId: text("stripe_charge_id"),
+  // Order status
+  status: text("status").default("pending").notNull(), // pending, confirmed, processing, completed, cancelled
+  confirmationSentAt: timestamp("confirmation_sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: varchar("order_id").references(() => orders.id, { onDelete: "cascade" }).notNull(),
+  bookingId: varchar("booking_id").references(() => bookings.id), // Links to actual booking after creation
+  serviceId: varchar("service_id").references(() => services.id).notNull(),
+  providerId: varchar("provider_id").references(() => serviceProviders.id),
+  // Service details snapshot (preserved even if service changes)
+  serviceName: text("service_name").notNull(),
+  serviceType: text("service_type").notNull(),
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  scheduledTime: text("scheduled_time").notNull(),
+  duration: integer("duration"),
+  // Pricing snapshot
+  basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+  addOnsPrice: decimal("add_ons_price", { precision: 10, scale: 2 }).default("0"),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  // Configuration
+  serviceDetails: jsonb("service_details"),
+  selectedAddOns: jsonb("selected_addons").default('[]'),
+  comments: text("comments"),
+  // Status tracking
+  status: text("status").default("pending").notNull(), // pending, confirmed, completed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema exports for cart system
+export const insertCartSchema = createInsertSchema(carts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCartItemSchema = createInsertSchema(cartItems).omit({
+  id: true,
+  addedAt: true,
+  updatedAt: true,
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Cart = typeof carts.$inferSelect;
+export type InsertCart = z.infer<typeof insertCartSchema>;
+export type CartItem = typeof cartItems.$inferSelect;
+export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
