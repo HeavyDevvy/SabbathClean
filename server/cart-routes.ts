@@ -81,6 +81,10 @@ export function registerCartRoutes(app: Express) {
       // Return updated cart with flattened structure
       const cartData = await storage.getCartWithItems(cart.id);
       
+      if (!cartData) {
+        return res.status(500).json({ message: "Failed to retrieve cart data" });
+      }
+      
       res.status(201).json({ 
         item: cartItem,
         cart: {

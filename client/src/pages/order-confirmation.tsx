@@ -84,7 +84,7 @@ export default function OrderConfirmation() {
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(60, 60, 60);
-        doc.text(`Date: ${item.scheduledDate} at ${item.scheduledTime}`, 25, yPos);
+        doc.text(`Date: ${new Date(item.scheduledDate).toLocaleDateString()} at ${item.scheduledTime}`, 25, yPos);
         yPos += 5;
         
         if (item.duration) {
@@ -304,7 +304,7 @@ export default function OrderConfirmation() {
                       <div className="mt-2 space-y-1 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 mr-2" />
-                          <span>{item.scheduledDate}</span>
+                          <span>{new Date(item.scheduledDate).toLocaleDateString()}</span>
                           <Clock className="w-4 h-4 ml-4 mr-2" />
                           <span>{item.scheduledTime}</span>
                         </div>
@@ -339,7 +339,7 @@ export default function OrderConfirmation() {
                     
                     {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
                       <div className="ml-4 space-y-1">
-                        {item.selectedAddOns.map((addon: string, addonIdx: number) => (
+                        {(item.selectedAddOns as string[]).map((addon, addonIdx) => (
                           <div key={addonIdx} className="flex items-center text-xs text-gray-600">
                             <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
                             {addon}

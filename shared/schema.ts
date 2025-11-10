@@ -827,7 +827,7 @@ export const orderItems = pgTable("order_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").references(() => orders.id, { onDelete: "cascade" }).notNull(),
   bookingId: varchar("booking_id").references(() => bookings.id), // Links to actual booking after creation
-  serviceId: varchar("service_id").references(() => services.id).notNull(),
+  serviceId: varchar("service_id").references(() => services.id), // Nullable to match cart items flexibility
   providerId: varchar("provider_id").references(() => serviceProviders.id),
   // Service details snapshot (preserved even if service changes)
   serviceName: text("service_name").notNull(),
@@ -872,6 +872,7 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
   id: true,
+  orderId: true, // Added by storage layer during order creation
   createdAt: true,
   updatedAt: true,
 });
