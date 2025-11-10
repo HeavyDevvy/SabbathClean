@@ -60,6 +60,16 @@ export default function CartCheckout() {
   const platformFee = subtotal * 0.15;
   const total = subtotal + platformFee;
   
+  // Helper function to detect card brand
+  const detectCardBrand = (number: string): string => {
+    const cleanNumber = number.replace(/\s/g, '');
+    if (/^4/.test(cleanNumber)) return 'Visa';
+    if (/^5[1-5]/.test(cleanNumber)) return 'Mastercard';
+    if (/^3[47]/.test(cleanNumber)) return 'American Express';
+    if (/^6(?:011|5)/.test(cleanNumber)) return 'Discover';
+    return 'Unknown';
+  };
+
   const handleCheckout = async () => {
     if (paymentMethod === "card") {
       if (!cardNumber || !cardExpiry || !cardCVV || !cardName) {
@@ -84,24 +94,43 @@ export default function CartCheckout() {
     setIsProcessing(true);
     
     try {
+      // SECURITY: Create masked payment info - NEVER send full card number or CVV
       const paymentData = {
         paymentMethod,
         ...(paymentMethod === "card" ? {
-          cardLast4: cardNumber.slice(-4),
-          cardBrand: "Visa",
+          cardLast4: cardNumber.replace(/\s/g, '').slice(-4), // Only last 4 digits
+          cardBrand: detectCardBrand(cardNumber),
+          cardholderName: cardName
+          // NEVER include: cardNumber, cardExpiry, cardCVV
         } : {
           bankName,
-          accountLast4: accountNumber.slice(-4),
+          accountLast4: accountNumber.slice(-4), // Only last 4 digits
+          accountHolder
+          // NEVER include: full accountNumber
         })
       };
       
       const order = await checkout(paymentData);
       
       if (order) {
+        // Clear sensitive payment data from state
+        setCardNumber("");
+        setCardExpiry("");
+        setCardCVV("");
+        setCardName("");
+        setAccountNumber("");
+        setBankName("");
+        setAccountHolder("");
+        
         navigate(`/order-confirmation/${order.id}`);
       }
     } catch (error) {
       console.error("Checkout error:", error);
+      toast({
+        title: "Checkout failed",
+        description: "Please try again or contact support",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -129,21 +158,25 @@ export default function CartCheckout() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {cart.items.map((item: CartItem, idx: number) => {
                   const serviceDetails = item.serviceDetails ? 
                     (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                     : {};
                   
+                  const basePrice = parseFloat(item.basePrice as string) || 0;
+                  const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
+                  const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+                  
                   return (
                     <div
                       key={item.id}
-                      className="border-b border-gray-200 pb-4 last:border-0"
+                      className="border border-gray-200 rounded-lg p-4 bg-white"
                       data-testid={`checkout-item-${idx}`}
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900" data-testid={`checkout-item-name-${idx}`}>
+                          <h3 className="font-semibold text-gray-900 text-lg" data-testid={`checkout-item-name-${idx}`}>
                             {item.serviceName}
                           </h3>
                           <div className="mt-2 space-y-1 text-sm text-gray-600">
@@ -153,27 +186,46 @@ export default function CartCheckout() {
                               <Clock className="w-4 h-4 ml-4 mr-2" />
                               <span data-testid={`checkout-item-time-${idx}`}>{item.scheduledTime}</span>
                             </div>
-                            {serviceDetails.location && (
+                            {serviceDetails.address && (
                               <div className="flex items-start">
                                 <MapPin className="w-4 h-4 mr-2 mt-0.5" />
-                                <span className="line-clamp-1">{serviceDetails.location}</span>
+                                <span className="line-clamp-1">{serviceDetails.address}</span>
                               </div>
                             )}
                           </div>
-                          {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {item.selectedAddOns.map((addon: string, addonIdx: number) => (
-                                <Badge key={addonIdx} variant="secondary" className="text-xs">
-                                  {addon}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
                         </div>
-                        <div className="ml-4 text-right">
-                          <p className="font-semibold text-purple-600" data-testid={`checkout-item-price-${idx}`}>
-                            R{parseFloat(item.subtotal as string).toFixed(2)}
-                          </p>
+                      </div>
+                      
+                      {/* Price Breakdown */}
+                      <div className="mt-3 pt-3 border-t border-gray-100 space-y-2 text-sm">
+                        <div className="flex justify-between text-gray-700">
+                          <span>Base Service Price</span>
+                          <span>R{basePrice.toFixed(2)}</span>
+                        </div>
+                        
+                        {addOnsPrice > 0 && (
+                          <div className="flex justify-between text-gray-700">
+                            <span>Add-ons</span>
+                            <span>R{addOnsPrice.toFixed(2)}</span>
+                          </div>
+                        )}
+                        
+                        {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+                          <div className="ml-4 space-y-1">
+                            {item.selectedAddOns.map((addon: string, addonIdx: number) => (
+                              <div key={addonIdx} className="flex items-center text-xs text-gray-600">
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                                {addon}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        <Separator className="my-2" />
+                        
+                        <div className="flex justify-between font-semibold text-purple-600">
+                          <span>Service Subtotal</span>
+                          <span data-testid={`checkout-item-subtotal-${idx}`}>R{itemSubtotal.toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
