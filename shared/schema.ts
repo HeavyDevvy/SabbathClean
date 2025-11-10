@@ -853,6 +853,8 @@ export const insertCartItemSchema = createInsertSchema(cartItems).omit({
   id: true,
   addedAt: true,
   updatedAt: true,
+}).extend({
+  scheduledDate: z.coerce.date(), // Accept ISO date strings and coerce to Date
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({

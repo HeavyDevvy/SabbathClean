@@ -57,12 +57,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     mutationFn: async (item: Partial<CartItem>) => {
       console.log("➕ Adding item to cart via API (raw):", item);
       
-      // Transform data to match backend schema
+      // Transform data to match backend schema - keep dates as ISO strings
       const transformedItem = {
         ...item,
         cartId: cart?.id, // Add the current cart ID
         serviceType: item.serviceId, // Map serviceId to serviceType
-        scheduledDate: new Date(item.scheduledDate!), // Convert string to Date
+        scheduledDate: item.scheduledDate, // Keep as ISO string - backend will coerce to Date
         duration: parseInt(item.duration?.toString().replace(/[^\d]/g, '') || '2'), // Extract number from "2-4 hours"
       };
       
