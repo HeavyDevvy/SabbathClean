@@ -60,7 +60,8 @@ export default function OrderConfirmation() {
       doc.setTextColor(100, 100, 100);
       doc.text(`Booking Reference: ${bookingReference}`, 20, yPos);
       yPos += 6;
-      doc.text(`Order Date: ${new Date(order.createdAt || new Date()).toLocaleDateString()}`, 20, yPos);
+      const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+      doc.text(`Order Date: ${orderDate}`, 20, yPos);
       yPos += 15;
       
       doc.setFontSize(14);
