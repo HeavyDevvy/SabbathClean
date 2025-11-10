@@ -28,10 +28,13 @@ import {
   Wrench,
   Shield,
   AlertCircle,
-  Lock as LockIcon
+  Lock as LockIcon,
+  ShoppingCart,
+  Plus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useCart } from "@/contexts/CartContext";
 import BookingConfirmationModal from "./booking-confirmation-modal";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
@@ -62,6 +65,7 @@ export default function ModernServiceModal({
   onAddAnotherService
 }: ModernServiceModalProps) {
   const { toast } = useToast();
+  const { addToCart, itemCount } = useCart();
   const [step, setStep] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedBookingData, setConfirmedBookingData] = useState<any>(null);
@@ -1209,6 +1213,111 @@ export default function ModernServiceModal({
     
     // Call the original completion handler for data persistence
     onBookingComplete(bookingData);
+  };
+
+  const handleAddToCartAndContinue = async () => {
+    // Check cart limit (max 3 services)
+    if (itemCount >= 3) {
+      toast({
+        variant: "destructive",
+        title: "Cart limit reached",
+        description: "You can add up to 3 services per booking. Please proceed to checkout."
+      });
+      return;
+    }
+
+    // Create booking data WITHOUT payment info (payment happens at checkout)
+    const bookingData = {
+      serviceId,
+      serviceName: currentConfig.title,
+      propertyType: formData.propertyType,
+      address: formData.address,
+      preferredDate: formData.preferredDate,
+      timePreference: formData.timePreference,
+      recurringSchedule: formData.recurringSchedule,
+      materials: formData.materials,
+      insurance: formData.insurance,
+      cleaningType: formData.cleaningType,
+      propertySize: formData.propertySize,
+      gardenSize: formData.gardenSize,
+      gardenCondition: formData.gardenCondition,
+      urgency: formData.urgency,
+      electricalIssue: formData.electricalIssue,
+      cuisineType: formData.cuisineType,
+      menuSelection: formData.menuSelection,
+      selectedMenu: formData.selectedMenu,
+      customMenuItems: formData.customMenuItems,
+      dietaryRequirements: formData.dietaryRequirements,
+      eventSize: formData.eventSize,
+      selectedAddOns: formData.selectedAddOns,
+      specialRequests: formData.specialRequests,
+      pricing,
+      totalCost: pricing.totalPrice,
+      commission: Math.round(pricing.totalPrice * 0.15),
+      timestamp: new Date().toISOString(),
+      selectedProvider: formData.selectedProvider
+    };
+
+    console.log("Adding to cart:", bookingData);
+    
+    try {
+      // Call onBookingComplete which adds to cart in minimalist-home.tsx
+      await onBookingComplete(bookingData);
+      
+      // Reset modal to step 1 for selecting another service
+      setStep(1);
+      
+      // Clear form data for next service
+      setFormData({
+        propertyType: "",
+        address: "",
+        preferredDate: "",
+        timePreference: "",
+        recurringSchedule: "one-time",
+        materials: "supply",
+        insurance: false,
+        cleaningType: "",
+        propertySize: "",
+        gardenSize: "",
+        gardenCondition: "",
+        urgency: "standard",
+        electricalIssue: "",
+        cuisineType: "",
+        menuSelection: "popular",
+        selectedMenu: "",
+        customMenuItems: [],
+        dietaryRequirements: [],
+        eventSize: "",
+        selectedAddOns: [],
+        specialRequests: "",
+        selectedProvider: null,
+        paymentMethod: "card",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        selectedBank: "",
+        bankAccount: "",
+        bankBranch: ""
+      });
+      
+      // Reset other state
+      setAddOnsComment("");
+      setEstimatedHours(0);
+      
+      toast({
+        title: "Service added to cart!",
+        description: `You can add ${3 - (itemCount + 1)} more service${3 - (itemCount + 1) === 1 ? '' : 's'}. Select another service or go to cart to checkout.`
+      });
+      
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to add to cart",
+        description: "Please try again."
+      });
+    }
   };
 
   const handleConfirmationClose = () => {
@@ -2847,39 +2956,55 @@ export default function ModernServiceModal({
               Back
             </Button>
 
-            {step < currentConfig.steps ? (
-              <Button 
-                onClick={handleNext}
-                disabled={
-                  (step === 1 && (!formData.propertyType || !formData.address || 
-                    (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
-                    (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
-                    (serviceId === "plumbing" && !formData.urgency) ||
-                    (serviceId === "electrical" && !formData.electricalIssue) ||
-                    (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
-                  )) ||
-                  (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
-                  (step === 4 && !formData.selectedProvider) ||
-                  (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
-                  (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
-                }
-              >
-                Next
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleBookingConfirm}
-                className="bg-gradient-to-r from-primary to-purple-600"
-                disabled={
-                  formData.paymentMethod === "card" 
-                    ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
-                    : (!formData.bankAccount || !formData.bankBranch)
-                }
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Complete Booking - R{pricing.totalPrice}
-              </Button>
-            )}
+            <div className="flex gap-3">
+              {/* Add to Cart button - Show at step 4 (provider selection) */}
+              {step === 4 && formData.selectedProvider && itemCount < 3 && (
+                <Button 
+                  variant="outline"
+                  onClick={handleAddToCartAndContinue}
+                  disabled={!formData.selectedProvider}
+                  className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                  data-testid="button-add-to-cart-continue"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Add to Cart & Select Another
+                </Button>
+              )}
+
+              {step < currentConfig.steps ? (
+                <Button 
+                  onClick={handleNext}
+                  disabled={
+                    (step === 1 && (!formData.propertyType || !formData.address || 
+                      (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
+                      (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
+                      (serviceId === "plumbing" && !formData.urgency) ||
+                      (serviceId === "electrical" && !formData.electricalIssue) ||
+                      (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
+                    )) ||
+                    (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
+                    (step === 4 && !formData.selectedProvider) ||
+                    (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
+                    (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
+                  }
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleBookingConfirm}
+                  className="bg-gradient-to-r from-primary to-purple-600"
+                  disabled={
+                    formData.paymentMethod === "card" 
+                      ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
+                      : (!formData.bankAccount || !formData.bankBranch)
+                  }
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Complete Booking - R{pricing.totalPrice}
+                </Button>
+              )}
+            </div>
           </div>
             </>
           )}
