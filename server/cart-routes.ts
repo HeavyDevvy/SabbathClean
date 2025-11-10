@@ -229,9 +229,16 @@ export function registerCartRoutes(app: Express) {
       // Get complete order with items
       const completeOrder = await storage.getOrderWithItems(order.id);
       
+      if (!completeOrder) {
+        return res.status(500).json({ message: "Failed to retrieve order" });
+      }
+      
       res.status(201).json({
         message: "Order created successfully",
-        order: completeOrder
+        order: {
+          ...completeOrder.order,
+          items: completeOrder.items
+        }
       });
       
     } catch (error: any) {
