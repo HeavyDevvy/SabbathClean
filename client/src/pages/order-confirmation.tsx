@@ -44,19 +44,19 @@ export default function OrderConfirmation() {
       
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Berry Events', 20, 20);
       
       doc.setTextColor(0, 0, 0);
       yPos = 50;
       
       doc.setFontSize(18);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Booking Confirmation', 20, yPos);
       yPos += 10;
       
       doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(100, 100, 100);
       doc.text(`Booking Reference: ${bookingReference}`, 20, yPos);
       yPos += 6;
@@ -65,24 +65,24 @@ export default function OrderConfirmation() {
       yPos += 15;
       
       doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(0, 0, 0);
       doc.text('Service Details', 20, yPos);
       yPos += 8;
       
       order.items.forEach((item, index) => {
-        if (yPos > pageHeight - 40) {
+        if (yPos > pageHeight - 60) {
           doc.addPage();
           yPos = 20;
         }
         
         doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.text(`${index + 1}. ${item.serviceName}`, 20, yPos);
         yPos += 6;
         
         doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setTextColor(60, 60, 60);
         doc.text(`Date: ${item.scheduledDate} at ${item.scheduledTime}`, 25, yPos);
         yPos += 5;
@@ -96,16 +96,58 @@ export default function OrderConfirmation() {
           (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
           : {};
         
-        if (serviceDetails.location) {
-          const locationText = `Location: ${serviceDetails.location}`;
+        if (serviceDetails.address) {
+          const locationText = `Location: ${serviceDetails.address}`;
           const splitLocation = doc.splitTextToSize(locationText, pageWidth - 50);
           doc.text(splitLocation, 25, yPos);
           yPos += splitLocation.length * 5;
         }
         
+        yPos += 3;
+        doc.setDrawColor(220, 220, 220);
+        doc.line(25, yPos, pageWidth - 20, yPos);
+        yPos += 5;
+        
+        // Price Breakdown
+        const basePrice = parseFloat(item.basePrice as string) || 0;
+        const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
+        const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+        
         doc.setTextColor(0, 0, 0);
-        doc.text(`Price: R${parseFloat(item.subtotal as string).toFixed(2)}`, 25, yPos);
+        doc.text('Base Service Price:', 25, yPos);
+        doc.text(`R${basePrice.toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
+        yPos += 5;
+        
+        if (addOnsPrice > 0) {
+          doc.text('Add-ons:', 25, yPos);
+          doc.text(`R${addOnsPrice.toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
+          yPos += 5;
+          
+          // List add-ons
+          if (item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(80, 80, 80);
+            item.selectedAddOns.forEach((addon: string) => {
+              doc.text(`\u2022 ${addon}`, 30, yPos);
+              yPos += 4;
+            });
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+          }
+        }
+        
+        doc.setDrawColor(220, 220, 220);
+        doc.line(25, yPos, pageWidth - 20, yPos);
+        yPos += 5;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(123, 44, 191);
+        doc.text('Service Subtotal:', 25, yPos);
+        doc.text(`R${itemSubtotal.toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
         yPos += 10;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
       });
       
       if (yPos > pageHeight - 60) {
@@ -115,12 +157,12 @@ export default function OrderConfirmation() {
       
       yPos += 5;
       doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Payment Summary', 20, yPos);
       yPos += 8;
       
       doc.setFontSize(10);
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.text('Subtotal:', 20, yPos);
       doc.text(`R${parseFloat(order.subtotal as string).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
       yPos += 6;
@@ -133,13 +175,13 @@ export default function OrderConfirmation() {
       doc.line(20, yPos, pageWidth - 20, yPos);
       yPos += 6;
       
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Total Amount:', 20, yPos);
       doc.text(`R${parseFloat(order.totalAmount as string).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
       yPos += 12;
       
       doc.setFontSize(9);
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       const paymentInfo = order.paymentMethod === 'card' 
         ? `Card ending in ****${(order as any).cardLast4 || 'XXXX'}`
         : `Bank account ending in ****${(order as any).accountLast4 || 'XXXX'}`;
@@ -153,12 +195,12 @@ export default function OrderConfirmation() {
       yPos += 7;
       
       doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(123, 44, 191);
       doc.text('Berry Events Bank Protection', 25, yPos);
       yPos += 5;
       
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setTextColor(60, 60, 60);
       const protectionText = 'Your payment is held securely until all services are completed. Full refund guaranteed if services are not delivered as promised.';
       const splitText = doc.splitTextToSize(protectionText, pageWidth - 50);
@@ -244,15 +286,19 @@ export default function OrderConfirmation() {
                 (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                 : {};
               
+              const basePrice = parseFloat(item.basePrice as string) || 0;
+              const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
+              const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+              
               return (
                 <div
                   key={item.id}
-                  className="border-b border-gray-200 pb-4 last:border-0"
+                  className="border border-gray-200 rounded-lg p-4 bg-white"
                   data-testid={`confirmed-service-${idx}`}
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900" data-testid={`confirmed-service-name-${idx}`}>
+                      <h3 className="font-semibold text-gray-900 text-lg" data-testid={`confirmed-service-name-${idx}`}>
                         {item.serviceName}
                       </h3>
                       <div className="mt-2 space-y-1 text-sm text-gray-600">
@@ -262,32 +308,51 @@ export default function OrderConfirmation() {
                           <Clock className="w-4 h-4 ml-4 mr-2" />
                           <span>{item.scheduledTime}</span>
                         </div>
-                        {serviceDetails.location && (
+                        {serviceDetails.address && (
                           <div className="flex items-start">
                             <MapPin className="w-4 h-4 mr-2 mt-0.5" />
-                            <span className="line-clamp-2">{serviceDetails.location}</span>
+                            <span className="line-clamp-2">{serviceDetails.address}</span>
                           </div>
                         )}
                       </div>
-                      {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {item.selectedAddOns.map((addon: string, addonIdx: number) => (
-                            <Badge key={addonIdx} variant="secondary" className="text-xs">
-                              {addon}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                       <div className="mt-2">
                         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                           {item.status || 'Confirmed'}
                         </Badge>
                       </div>
                     </div>
-                    <div className="ml-4 text-right">
-                      <p className="font-semibold text-purple-600">
-                        R{parseFloat(item.subtotal as string).toFixed(2)}
-                      </p>
+                  </div>
+                  
+                  {/* Price Breakdown */}
+                  <div className="mt-3 pt-3 border-t border-gray-100 space-y-2 text-sm">
+                    <div className="flex justify-between text-gray-700">
+                      <span>Base Service Price</span>
+                      <span>R{basePrice.toFixed(2)}</span>
+                    </div>
+                    
+                    {addOnsPrice > 0 && (
+                      <div className="flex justify-between text-gray-700">
+                        <span>Add-ons</span>
+                        <span>R{addOnsPrice.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+                      <div className="ml-4 space-y-1">
+                        {item.selectedAddOns.map((addon: string, addonIdx: number) => (
+                          <div key={addonIdx} className="flex items-center text-xs text-gray-600">
+                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
+                            {addon}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <Separator className="my-2" />
+                    
+                    <div className="flex justify-between font-semibold text-purple-600">
+                      <span>Service Subtotal</span>
+                      <span>R{itemSubtotal.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
