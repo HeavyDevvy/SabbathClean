@@ -1500,49 +1500,75 @@ export default function ModernServiceModal({
       <div className="text-center mb-6">
         <currentConfig.icon className="h-12 w-12 text-primary mx-auto mb-3" />
         <h3 className="text-lg font-semibold">Service Details</h3>
-        <p className="text-gray-600 text-sm">Tell us about your property and needs</p>
+        <p className="text-gray-600 text-sm">
+          {serviceId === "plumbing" ? "Select your service urgency" : "Tell us about your property and needs"}
+        </p>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <Label htmlFor="property-type">Property Type *</Label>
-          <Select value={formData.propertyType} onValueChange={(value) => 
-            setFormData(prev => ({ ...prev, propertyType: value }))
-          }>
-            <SelectTrigger data-testid="select-property-type">
-              <SelectValue placeholder="Select property type" />
-            </SelectTrigger>
-            <SelectContent>
-              {currentConfig.propertyTypes?.map((type: any) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="address">Service Address *</Label>
-          <div className="space-y-3">
-            <Input
-              id="address"
-              placeholder="Enter your service address"
-              value={formData.address}
-              onChange={(e) => handleAddressChange(e.target.value)}
-              className="w-full"
-              data-testid="input-address"
-            />
-            {formData.address && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-xs text-green-700 flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Address confirmed - Provider matching within 20km radius
-                </p>
-              </div>
-            )}
+        {serviceId === "plumbing" && (
+          <div>
+            <Label htmlFor="plumbing-urgency">Service Type / Urgency *</Label>
+            <Select value={formData.urgency} onValueChange={(value) =>
+              setFormData(prev => ({ ...prev, urgency: value }))
+            }>
+              <SelectTrigger data-testid="select-plumbing-urgency">
+                <SelectValue placeholder="Select service urgency" />
+              </SelectTrigger>
+              <SelectContent>
+                {currentConfig.urgencyLevels?.map((level: any) => (
+                  <SelectItem key={level.value} value={level.value}>
+                    {level.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
+        )}
+
+        {serviceId !== "plumbing" && (
+          <>
+            <div>
+              <Label htmlFor="property-type">Property Type *</Label>
+              <Select value={formData.propertyType} onValueChange={(value) => 
+                setFormData(prev => ({ ...prev, propertyType: value }))
+              }>
+                <SelectTrigger data-testid="select-property-type">
+                  <SelectValue placeholder="Select property type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.propertyTypes?.map((type: any) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="address">Service Address *</Label>
+              <div className="space-y-3">
+                <Input
+                  id="address"
+                  placeholder="Enter your service address"
+                  value={formData.address}
+                  onChange={(e) => handleAddressChange(e.target.value)}
+                  className="w-full"
+                  data-testid="input-address"
+                />
+                {formData.address && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <p className="text-xs text-green-700 flex items-center">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Address confirmed - Provider matching within 20km radius
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
 
         {serviceId === "cleaning" && (
           <>
@@ -1624,25 +1650,6 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "plumbing" && (
-          <div>
-            <Label>Service Type *</Label>
-            <Select value={formData.urgency} onValueChange={(value) =>
-              setFormData(prev => ({ ...prev, urgency: value }))
-            }>
-              <SelectTrigger>
-                <SelectValue placeholder="Select service urgency" />
-              </SelectTrigger>
-              <SelectContent>
-                {currentConfig.urgencyLevels?.map((level: any) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         {serviceId === "electrical" && (
           <div>
@@ -1990,11 +1997,59 @@ export default function ModernServiceModal({
     <div className="space-y-6">
       <div className="text-center mb-6">
         <CalendarIcon className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="text-lg font-semibold">Schedule & Preferences</h3>
-        <p className="text-gray-600 text-sm">Choose your preferred date and time</p>
+        <h3 className="text-lg font-semibold">
+          {serviceId === "plumbing" ? "Property Details & Schedule" : "Schedule & Preferences"}
+        </h3>
+        <p className="text-gray-600 text-sm">
+          {serviceId === "plumbing" ? "Tell us about your property and choose your preferred time" : "Choose your preferred date and time"}
+        </p>
       </div>
 
       <div className="space-y-4">
+        {serviceId === "plumbing" && (
+          <div className="space-y-4 pb-6 mb-6 border-b">
+            <div>
+              <Label htmlFor="property-type">Property Type *</Label>
+              <Select
+                value={formData.propertyType}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, propertyType: value }))
+                }
+              >
+                <SelectTrigger data-testid="select-property-type">
+                  <SelectValue placeholder="Select property type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.propertyTypes?.map((type: any) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="address">Service Address *</Label>
+              <Input
+                id="address"
+                data-testid="input-address"
+                value={formData.address}
+                onChange={(e) => handleAddressChange(e.target.value)}
+                placeholder="Enter your service address"
+                className="w-full"
+              />
+              {formData.address && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
+                  <p className="text-xs text-green-700 flex items-center">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Address confirmed - Provider matching within 20km radius
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         <div>
           <Label>Preferred Date *</Label>
           <Input
@@ -2991,14 +3046,16 @@ export default function ModernServiceModal({
                 <Button 
                   onClick={handleNext}
                   disabled={
-                    (step === 1 && (!formData.propertyType || !formData.address || 
+                    (step === 1 && serviceId === "plumbing" && !formData.urgency) ||
+                    (step === 1 && serviceId !== "plumbing" && (
+                      !formData.propertyType || !formData.address || 
                       (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
                       (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
-                      (serviceId === "plumbing" && !formData.urgency) ||
                       (serviceId === "electrical" && !formData.electricalIssue) ||
                       (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
                     )) ||
-                    (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
+                    (step === 2 && serviceId === "plumbing" && (!formData.propertyType || !formData.address || !formData.preferredDate || !formData.timePreference)) ||
+                    (step === 2 && serviceId !== "plumbing" && (!formData.preferredDate || !formData.timePreference)) ||
                     (step === 4 && !formData.selectedProvider) ||
                     (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
                     (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
