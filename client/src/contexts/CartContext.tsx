@@ -31,18 +31,38 @@ export function CartProvider({ children }: { children: ReactNode }) {
     queryKey: ['/api/cart'],
     retry: 1,
     staleTime: 30000, // 30 seconds
+    onSuccess: (data) => {
+      console.log("🛒 Cart data fetched successfully:", data);
+      console.log("🛒 Cart items count:", data?.items?.length || 0);
+      console.log("🛒 Cart items:", data?.items);
+    },
+    onError: (error) => {
+      console.error("❌ Error fetching cart:", error);
+    },
   });
 
   // Calculate item count
   const itemCount = cart?.items?.length || 0;
+  
+  // Debug: Log cart state changes
+  useEffect(() => {
+    console.log("🔄 Cart state updated:");
+    console.log("  - Items count:", itemCount);
+    console.log("  - Cart object:", cart);
+    console.log("  - Is loading:", isLoading);
+  }, [cart, itemCount, isLoading]);
 
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (item: Partial<CartItem>) => {
+      console.log("➕ Adding item to cart via API:", item);
       const response = await apiRequest('POST', '/api/cart/items', item);
-      return response.json();
+      const data = await response.json();
+      console.log("✅ Item added successfully, API response:", data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("✅ Add to cart mutation successful");
       queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       toast({
         title: "Added to cart",
@@ -50,6 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: any) => {
+      console.error("❌ Add to cart mutation failed:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to add service to cart",
