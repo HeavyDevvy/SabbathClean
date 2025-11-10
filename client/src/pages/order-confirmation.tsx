@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Download, Calendar, Clock, MapPin, Home, Shield, FileText } from "lucide-react";
 import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
+import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
 
 interface OrderWithItems extends Order {
@@ -109,9 +110,9 @@ export default function OrderConfirmation() {
         yPos += 5;
         
         // Price Breakdown
-        const basePrice = parseFloat(item.basePrice as string) || 0;
-        const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
-        const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+        const basePrice = parseDecimal(item.basePrice);
+        const addOnsPrice = parseDecimal(item.addOnsPrice);
+        const itemSubtotal = parseDecimal(item.subtotal);
         
         doc.setTextColor(0, 0, 0);
         doc.text('Base Service Price:', 25, yPos);
@@ -164,11 +165,11 @@ export default function OrderConfirmation() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text('Subtotal:', 20, yPos);
-      doc.text(`R${parseFloat(order.subtotal as string).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
+      doc.text(`R${parseDecimal(order.subtotal).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
       yPos += 6;
       
       doc.text('Platform Fee (15%):', 20, yPos);
-      doc.text(`R${parseFloat(order.platformFee as string).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
+      doc.text(`R${parseDecimal(order.platformFee).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
       yPos += 6;
       
       doc.setDrawColor(200, 200, 200);
@@ -177,7 +178,7 @@ export default function OrderConfirmation() {
       
       doc.setFont('helvetica', 'bold');
       doc.text('Total Amount:', 20, yPos);
-      doc.text(`R${parseFloat(order.totalAmount as string).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
+      doc.text(`R${parseDecimal(order.totalAmount).toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
       yPos += 12;
       
       doc.setFontSize(9);
@@ -286,9 +287,9 @@ export default function OrderConfirmation() {
                 (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                 : {};
               
-              const basePrice = parseFloat(item.basePrice as string) || 0;
-              const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
-              const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+              const basePrice = parseDecimal(item.basePrice);
+              const addOnsPrice = parseDecimal(item.addOnsPrice);
+              const itemSubtotal = parseDecimal(item.subtotal);
               
               return (
                 <div
@@ -367,20 +368,20 @@ export default function OrderConfirmation() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
               <span className="font-medium" data-testid="payment-subtotal">
-                R{parseFloat(order.subtotal as string).toFixed(2)}
+                {formatCurrency(order.subtotal)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Platform Fee (15%)</span>
               <span className="font-medium" data-testid="payment-platform-fee">
-                R{parseFloat(order.platformFee as string).toFixed(2)}
+                {formatCurrency(order.platformFee)}
               </span>
             </div>
             <Separator />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total Paid</span>
               <span className="text-purple-600" data-testid="payment-total">
-                R{parseFloat(order.totalAmount as string).toFixed(2)}
+                {formatCurrency(order.totalAmount)}
               </span>
             </div>
             <div className="mt-4 text-sm text-gray-600">
