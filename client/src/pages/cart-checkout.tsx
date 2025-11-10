@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { CartItem } from "@shared/schema";
 
 export default function CartCheckout() {
@@ -56,7 +57,7 @@ export default function CartCheckout() {
     );
   }
   
-  const subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal as string), 0);
+  const subtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0);
   const platformFee = subtotal * 0.15;
   const total = subtotal + platformFee;
   
@@ -164,9 +165,9 @@ export default function CartCheckout() {
                     (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                     : {};
                   
-                  const basePrice = parseFloat(item.basePrice as string) || 0;
-                  const addOnsPrice = parseFloat(item.addOnsPrice as string) || 0;
-                  const itemSubtotal = parseFloat(item.subtotal as string) || 0;
+                  const basePrice = parseDecimal(item.basePrice);
+                  const addOnsPrice = parseDecimal(item.addOnsPrice);
+                  const itemSubtotal = parseDecimal(item.subtotal);
                   
                   return (
                     <div
@@ -182,7 +183,11 @@ export default function CartCheckout() {
                           <div className="mt-2 space-y-1 text-sm text-gray-600">
                             <div className="flex items-center">
                               <Calendar className="w-4 h-4 mr-2" />
-                              <span data-testid={`checkout-item-date-${idx}`}>{item.scheduledDate}</span>
+                              <span data-testid={`checkout-item-date-${idx}`}>
+                                {item.scheduledDate instanceof Date 
+                                  ? item.scheduledDate.toLocaleDateString() 
+                                  : new Date(item.scheduledDate).toLocaleDateString()}
+                              </span>
                               <Clock className="w-4 h-4 ml-4 mr-2" />
                               <span data-testid={`checkout-item-time-${idx}`}>{item.scheduledTime}</span>
                             </div>
@@ -200,19 +205,19 @@ export default function CartCheckout() {
                       <div className="mt-3 pt-3 border-t border-gray-100 space-y-2 text-sm">
                         <div className="flex justify-between text-gray-700">
                           <span>Base Service Price</span>
-                          <span>R{basePrice.toFixed(2)}</span>
+                          <span>{formatCurrency(basePrice)}</span>
                         </div>
                         
                         {addOnsPrice > 0 && (
                           <div className="flex justify-between text-gray-700">
                             <span>Add-ons</span>
-                            <span>R{addOnsPrice.toFixed(2)}</span>
+                            <span>{formatCurrency(addOnsPrice)}</span>
                           </div>
                         )}
                         
                         {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
                           <div className="ml-4 space-y-1">
-                            {item.selectedAddOns.map((addon: string, addonIdx: number) => (
+                            {(item.selectedAddOns as string[]).map((addon, addonIdx) => (
                               <div key={addonIdx} className="flex items-center text-xs text-gray-600">
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
                                 {addon}
@@ -225,7 +230,7 @@ export default function CartCheckout() {
                         
                         <div className="flex justify-between font-semibold text-purple-600">
                           <span>Service Subtotal</span>
-                          <span data-testid={`checkout-item-subtotal-${idx}`}>R{itemSubtotal.toFixed(2)}</span>
+                          <span data-testid={`checkout-item-subtotal-${idx}`}>{formatCurrency(itemSubtotal)}</span>
                         </div>
                       </div>
                     </div>
@@ -354,16 +359,16 @@ export default function CartCheckout() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal ({cart.items.length} services)</span>
-                  <span className="font-medium" data-testid="summary-subtotal">R{subtotal.toFixed(2)}</span>
+                  <span className="font-medium" data-testid="summary-subtotal">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Platform Fee (15%)</span>
-                  <span className="font-medium" data-testid="summary-platform-fee">R{platformFee.toFixed(2)}</span>
+                  <span className="font-medium" data-testid="summary-platform-fee">{formatCurrency(platformFee)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span className="text-purple-600" data-testid="summary-total">R{total.toFixed(2)}</span>
+                  <span className="text-purple-600" data-testid="summary-total">{formatCurrency(total)}</span>
                 </div>
               </div>
               

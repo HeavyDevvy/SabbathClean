@@ -26,20 +26,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
+  // Helper to normalize cart item prices from decimal strings to numbers
+  const normalizeCartData = (data: CartWithItems | null): CartWithItems | null => {
+    if (!data) return null;
+    
+    return {
+      ...data,
+      items: data.items?.map(item => ({
+        ...item,
+        basePrice: item.basePrice,
+        addOnsPrice: item.addOnsPrice,
+        subtotal: item.subtotal,
+      })) || []
+    };
+  };
+
   // Fetch cart from API
-  const { data: cart, isLoading } = useQuery<CartWithItems>({
+  const { data: rawCart, isLoading } = useQuery<CartWithItems>({
     queryKey: ['/api/cart'],
     retry: 1,
     staleTime: 30000, // 30 seconds
-    onSuccess: (data) => {
-      console.log("🛒 Cart data fetched successfully:", data);
-      console.log("🛒 Cart items count:", data?.items?.length || 0);
-      console.log("🛒 Cart items:", data?.items);
-    },
-    onError: (error) => {
-      console.error("❌ Error fetching cart:", error);
-    },
   });
+  
+  const cart = normalizeCartData(rawCart || null);
 
   // Calculate item count
   const itemCount = cart?.items?.length || 0;

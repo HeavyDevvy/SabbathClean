@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCart } from '@/contexts/CartContext';
 import { useLocation } from 'wouter';
+import { parseDecimal, formatCurrency } from '@/lib/currency';
 import type { CartItem } from '@shared/schema';
 
 function CartItemCard({ item }: { item: CartItem }) {
@@ -44,7 +45,11 @@ function CartItemCard({ item }: { item: CartItem }) {
           <div className="mt-1 space-y-1">
             <div className="flex items-center text-xs text-gray-600">
               <Calendar className="w-3 h-3 mr-1.5 flex-shrink-0" />
-              <span data-testid={`cart-item-date-${item.id}`}>{item.scheduledDate}</span>
+              <span data-testid={`cart-item-date-${item.id}`}>
+                {item.scheduledDate instanceof Date 
+                  ? item.scheduledDate.toLocaleDateString() 
+                  : new Date(item.scheduledDate).toLocaleDateString()}
+              </span>
               <Clock className="w-3 h-3 ml-3 mr-1.5 flex-shrink-0" />
               <span data-testid={`cart-item-time-${item.id}`}>{item.scheduledTime}</span>
             </div>
@@ -61,7 +66,7 @@ function CartItemCard({ item }: { item: CartItem }) {
         
         <div className="flex flex-col items-end gap-2">
           <p className="font-semibold text-purple-600 whitespace-nowrap" data-testid={`cart-item-price-${item.id}`}>
-            R{parseFloat(item.subtotal as string).toFixed(2)}
+            {formatCurrency(item.subtotal)}
           </p>
           <Button
             variant="ghost"
@@ -80,7 +85,7 @@ function CartItemCard({ item }: { item: CartItem }) {
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1.5">Add-ons:</p>
           <div className="flex flex-wrap gap-1.5">
-            {item.selectedAddOns.map((addon: string, idx: number) => (
+            {(item.selectedAddOns as string[]).map((addon, idx) => (
               <Badge
                 key={idx}
                 variant="secondary"
@@ -126,7 +131,7 @@ export function CartDrawer() {
   };
 
   const subtotal = cart?.items?.reduce(
-    (sum, item) => sum + parseFloat(item.subtotal as string), 
+    (sum, item) => sum + parseDecimal(item.subtotal), 
     0
   ) || 0;
 
@@ -211,16 +216,16 @@ export function CartDrawer() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span data-testid="cart-subtotal">R{subtotal.toFixed(2)}</span>
+                  <span data-testid="cart-subtotal">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Platform Fee (15%)</span>
-                  <span data-testid="cart-platform-fee">R{platformFee.toFixed(2)}</span>
+                  <span data-testid="cart-platform-fee">{formatCurrency(platformFee)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold text-base text-gray-900">
                   <span>Total</span>
-                  <span data-testid="cart-total">R{total.toFixed(2)}</span>
+                  <span data-testid="cart-total">{formatCurrency(total)}</span>
                 </div>
               </div>
 
