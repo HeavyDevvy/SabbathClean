@@ -10,6 +10,7 @@ import HowItWorksSection from "@/components/how-it-works-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
+import { CartDrawer } from "@/components/cart-drawer";
 import { 
   Menu,
   X
@@ -108,6 +109,7 @@ export default function MinimalistHome() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-4">
+              <CartDrawer />
               <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
                 Sign In
               </Button>

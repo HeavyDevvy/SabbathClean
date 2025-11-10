@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CartProvider } from "@/contexts/CartContext";
 import Home from "@/pages/home";
 import EnhancedHome from "@/pages/enhanced-home";
 import MinimalistHome from "@/pages/minimalist-home";
@@ -40,12 +41,16 @@ import AdminPortal from "@/pages/admin-portal";
 import VerifyEmail from "@/pages/verify-email";
 import ResetPassword from "@/pages/reset-password";
 import Wallet from "@/pages/wallet";
+import CartCheckout from "@/pages/cart-checkout";
+import OrderConfirmation from "@/pages/order-confirmation";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={EnhancedHome} />
       <Route path="/minimalist" component={MinimalistHome} />
+      <Route path="/cart-checkout" component={CartCheckout} />
+      <Route path="/order-confirmation/:orderId" component={OrderConfirmation} />
       <Route path="/old-home" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/booking" component={Booking} />
@@ -89,10 +94,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </CartProvider>
     </QueryClientProvider>
   );
 }
