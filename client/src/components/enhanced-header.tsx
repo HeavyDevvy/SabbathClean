@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
+import { CartDrawer } from "./cart-drawer";
 import logo from "@assets/berry-events-new-logo.jpg";
 
 interface EnhancedHeaderProps {
@@ -181,6 +182,9 @@ export default function EnhancedHeader({
               <Search className="h-5 w-5" />
             </Button>
 
+            {/* Shopping Cart - Always visible */}
+            <CartDrawer />
+
             {isAuthenticated ? (
               <>
 
@@ -328,6 +332,12 @@ export default function EnhancedHeader({
               >
                 Services
               </Link>
+              
+              {/* Shopping Cart - Mobile */}
+              <div className="px-4">
+                <CartDrawer />
+              </div>
+              
               <Link 
                 href="/auth" 
                 className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
