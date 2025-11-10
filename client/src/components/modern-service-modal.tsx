@@ -1242,8 +1242,8 @@ export default function ModernServiceModal({
     const cartItem = {
       serviceId: dbServiceId, // Use database-compatible service ID
       serviceName: currentConfig.title,
-      providerId: formData.selectedProvider?.id?.toString() || "1",
-      providerName: formData.selectedProvider?.name || "Berry Events Provider",
+      providerId: null, // Set to null - will be assigned after checkout
+      providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
       scheduledTime: formData.timePreference,
       duration: estimatedHours > 0 ? `${estimatedHours} hours` : "2-4 hours",
