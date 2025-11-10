@@ -1226,43 +1226,47 @@ export default function ModernServiceModal({
       return;
     }
 
-    // Create booking data WITHOUT payment info (payment happens at checkout)
-    const bookingData = {
+    // Map booking data to CartItem format
+    const cartItem = {
       serviceId,
       serviceName: currentConfig.title,
-      propertyType: formData.propertyType,
-      address: formData.address,
-      preferredDate: formData.preferredDate,
-      timePreference: formData.timePreference,
-      recurringSchedule: formData.recurringSchedule,
-      materials: formData.materials,
-      insurance: formData.insurance,
-      cleaningType: formData.cleaningType,
-      propertySize: formData.propertySize,
-      gardenSize: formData.gardenSize,
-      gardenCondition: formData.gardenCondition,
-      urgency: formData.urgency,
-      electricalIssue: formData.electricalIssue,
-      cuisineType: formData.cuisineType,
-      menuSelection: formData.menuSelection,
-      selectedMenu: formData.selectedMenu,
-      customMenuItems: formData.customMenuItems,
-      dietaryRequirements: formData.dietaryRequirements,
-      eventSize: formData.eventSize,
-      selectedAddOns: formData.selectedAddOns,
-      specialRequests: formData.specialRequests,
-      pricing,
-      totalCost: pricing.totalPrice,
-      commission: Math.round(pricing.totalPrice * 0.15),
-      timestamp: new Date().toISOString(),
-      selectedProvider: formData.selectedProvider
+      providerId: formData.selectedProvider?.id?.toString() || "1",
+      providerName: formData.selectedProvider?.name || "Berry Events Provider",
+      scheduledDate: formData.preferredDate,
+      scheduledTime: formData.timePreference,
+      duration: estimatedHours > 0 ? `${estimatedHours} hours` : "2-4 hours",
+      basePrice: pricing.basePrice.toString(),
+      addOnsPrice: pricing.addOnsPrice.toString(),
+      subtotal: pricing.totalPrice.toString(),
+      selectedAddOns: formData.selectedAddOns || [],
+      comments: formData.specialRequests || "",
+      serviceDetails: JSON.stringify({
+        propertyType: formData.propertyType,
+        address: formData.address,
+        recurringSchedule: formData.recurringSchedule,
+        materials: formData.materials,
+        insurance: formData.insurance,
+        cleaningType: formData.cleaningType,
+        propertySize: formData.propertySize,
+        gardenSize: formData.gardenSize,
+        gardenCondition: formData.gardenCondition,
+        urgency: formData.urgency,
+        electricalIssue: formData.electricalIssue,
+        cuisineType: formData.cuisineType,
+        menuSelection: formData.menuSelection,
+        selectedMenu: formData.selectedMenu,
+        customMenuItems: formData.customMenuItems,
+        dietaryRequirements: formData.dietaryRequirements,
+        eventSize: formData.eventSize,
+        provider: formData.selectedProvider
+      })
     };
 
-    console.log("Adding to cart:", bookingData);
+    console.log("➕ Adding to cart (mapped to CartItem):", cartItem);
     
     try {
-      // Call onBookingComplete which adds to cart in minimalist-home.tsx
-      await onBookingComplete(bookingData);
+      // Add to cart via CartContext
+      await addToCart(cartItem);
       
       // Reset modal to step 1 for selecting another service
       setStep(1);
