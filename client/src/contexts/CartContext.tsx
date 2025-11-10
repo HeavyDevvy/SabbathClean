@@ -55,8 +55,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (item: Partial<CartItem>) => {
-      console.log("➕ Adding item to cart via API:", item);
-      const response = await apiRequest('POST', '/api/cart/items', item);
+      console.log("➕ Adding item to cart via API (raw):", item);
+      
+      // Transform data to match backend schema
+      const transformedItem = {
+        ...item,
+        cartId: cart?.id, // Add the current cart ID
+        serviceType: item.serviceId, // Map serviceId to serviceType
+        scheduledDate: new Date(item.scheduledDate!), // Convert string to Date
+        duration: parseInt(item.duration?.toString().replace(/[^\d]/g, '') || '2'), // Extract number from "2-4 hours"
+      };
+      
+      console.log("➕ Transformed item for API:", transformedItem);
+      const response = await apiRequest('POST', '/api/cart/items', transformedItem);
       const data = await response.json();
       console.log("✅ Item added successfully, API response:", data);
       return data;

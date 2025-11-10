@@ -5,6 +5,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,7 @@ export default function EnhancedHeader({
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(user);
   const { toast } = useToast();
+  const { itemCount } = useCart();
 
   // Logout mutation
   const logoutMutation = useMutation({
@@ -182,8 +184,15 @@ export default function EnhancedHeader({
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Shopping Cart - Always visible */}
-            <CartDrawer />
+            {/* Shopping Cart - Always visible with notification badge */}
+            <div className="relative">
+              <CartDrawer />
+              {itemCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-purple-600 text-white text-xs p-0 flex items-center justify-center animate-pulse">
+                  {itemCount > 9 ? '9+' : itemCount}
+                </Badge>
+              )}
+            </div>
 
             {isAuthenticated ? (
               <>
