@@ -187,21 +187,37 @@ export default function MinimalistHome() {
             
             // Add service to cart (new shopping cart system)
             try {
-              await addToCart({
-                serviceId: bookingData.serviceId,
-                serviceName: bookingData.serviceName,
-                serviceType: bookingData.serviceType || 'general',
-                scheduledDate: bookingData.preferredDate,
-                scheduledTime: bookingData.timePreference,
+              const cartItem = {
+                serviceId: bookingData.serviceId || selectedService,
+                serviceName: bookingData.serviceName || "Service",
+                serviceType: bookingData.serviceType || selectedService || 'general',
+                scheduledDate: bookingData.preferredDate || new Date().toISOString().split('T')[0],
+                scheduledTime: bookingData.timePreference || "09:00",
                 duration: bookingData.duration || null,
-                basePrice: bookingData.pricing?.basePrice || "0",
-                addOnsPrice: bookingData.pricing?.addOns || "0",
-                subtotal: bookingData.pricing?.total || "0",
-                serviceDetails: JSON.stringify(bookingData.serviceDetails || {}),
+                basePrice: String(bookingData.pricing?.basePrice || bookingData.totalCost || 0),
+                addOnsPrice: String(bookingData.pricing?.addOnsPrice || 0),
+                subtotal: String(bookingData.pricing?.totalPrice || bookingData.totalCost || 0),
+                serviceDetails: JSON.stringify({
+                  propertyType: bookingData.propertyType,
+                  address: bookingData.address,
+                  cleaningType: bookingData.cleaningType,
+                  propertySize: bookingData.propertySize,
+                  materials: bookingData.materials,
+                  recurringSchedule: bookingData.recurringSchedule,
+                  gardenSize: bookingData.gardenSize,
+                  gardenCondition: bookingData.gardenCondition,
+                  urgency: bookingData.urgency,
+                  electricalIssue: bookingData.electricalIssue,
+                  cuisineType: bookingData.cuisineType,
+                  eventSize: bookingData.eventSize,
+                }),
                 selectedAddOns: bookingData.selectedAddOns || [],
-                comments: bookingData.comments || null,
-                providerId: bookingData.selectedProvider?.id || null,
-              });
+                comments: bookingData.specialRequests || null,
+                providerId: bookingData.selectedProvider?.id ? String(bookingData.selectedProvider.id) : null,
+              };
+              
+              console.log("Adding to cart:", cartItem);
+              await addToCart(cartItem);
               
               // Close modal after successful cart add
               setIsBookingModalOpen(false);
