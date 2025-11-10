@@ -795,7 +795,7 @@ export const cartItems = pgTable("cart_items", {
 
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id), // Nullable to support guest checkout
   cartId: varchar("cart_id").references(() => carts.id),
   orderNumber: text("order_number").notNull().unique(), // BE-2025-001234
   // Payment details
@@ -809,6 +809,13 @@ export const orders = pgTable("orders", {
   paymentMethod: text("payment_method"), // card, bank, wallet
   paymentIntentId: text("payment_intent_id"), // Stripe payment intent ID
   stripeChargeId: text("stripe_charge_id"),
+  // Payment metadata (masked data only - NEVER store full card/account numbers)
+  cardLast4: text("card_last4"), // Last 4 digits of card
+  cardBrand: text("card_brand"), // visa, mastercard, amex, discover
+  cardholderName: text("cardholder_name"),
+  accountLast4: text("account_last4"), // Last 4 digits of bank account
+  bankName: text("bank_name"),
+  accountHolder: text("account_holder"),
   // Order status
   status: text("status").default("pending").notNull(), // pending, confirmed, processing, completed, cancelled
   confirmationSentAt: timestamp("confirmation_sent_at"),

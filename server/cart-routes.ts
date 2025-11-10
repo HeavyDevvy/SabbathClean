@@ -152,13 +152,7 @@ export function registerCartRoutes(app: Express) {
     try {
       const { userId, sessionToken } = getCartIdentifier(req);
       
-      // Must be authenticated to checkout
-      if (!userId) {
-        return res.status(401).json({ 
-          message: "Please sign in to complete checkout" 
-        });
-      }
-      
+      // Get cart (works for both authenticated users and guests)
       const cart = await storage.getOrCreateCart(userId, sessionToken);
       const cartData = await storage.getCartWithItems(cart.id);
       
@@ -178,25 +172,34 @@ export function registerCartRoutes(app: Express) {
       const orderNumber = `BE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
       
       // Validate payment data from request body
-      const { paymentMethod, paymentIntentId } = req.body;
+      const { paymentMethod, cardLast4, cardBrand, cardholderName, accountLast4, bankName, accountHolder } = req.body;
       
       if (!paymentMethod) {
         return res.status(400).json({ message: "Payment method required" });
       }
       
-      // Create order with items
+      // Create order with items and payment metadata
       const orderData = {
-        userId,
+        userId: userId || null, // Support guest checkout
         cartId: cart.id,
         orderNumber,
         subtotal: subtotal.toString(),
         platformFee: platformFee.toString(),
         totalAmount: totalAmount.toString(),
         paymentMethod,
-        paymentIntentId: paymentIntentId || null,
-        paymentStatus: paymentIntentId ? "paid" : "pending",
-        status: "confirmed"
-      };
+        paymentStatus: "paid", // Mark as paid for frontend flow
+        status: "confirmed",
+        // Add payment metadata (masked data only)
+        ...(paymentMethod === "card" ? {
+          cardLast4,
+          cardBrand,
+          cardholderName
+        } : {
+          accountLast4,
+          bankName,
+          accountHolder
+        })
+      } as any;
       
       // Convert cart items to order items
       const orderItemsData = cartData.items.map(item => ({
