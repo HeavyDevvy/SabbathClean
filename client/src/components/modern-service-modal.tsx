@@ -450,16 +450,23 @@ export default function ModernServiceModal({
         { value: "townhouse", label: "Townhouse", multiplier: 1.05 },
         { value: "villa", label: "Villa", multiplier: 1.3 }
       ],
-      urgencyLevels: [
-        { value: "emergency", label: "Emergency (24/7)", multiplier: 2.0 },
-        { value: "urgent", label: "Urgent (Same Day)", multiplier: 1.5 },
-        { value: "standard", label: "Standard (Next Day)", multiplier: 1.0 },
-        { value: "scheduled", label: "Scheduled (Flexible)", multiplier: 0.9 }
+      plumbingIssues: [
+        { value: "leaking-pipe", label: "Leaking Pipe", price: 450, description: "Fix water leaks in pipes, joints, or connections" },
+        { value: "blocked-drain", label: "Blocked Drain/Toilet", price: 380, description: "Clear blockages in drains, sinks, or toilets" },
+        { value: "geyser-repair", label: "Geyser/Water Heater Repair", price: 650, description: "Repair or replace water heater/geyser" },
+        { value: "tap-faucet", label: "Tap/Faucet Repair", price: 280, description: "Fix dripping or broken taps and faucets" },
+        { value: "burst-pipe", label: "Burst Pipe (Emergency)", price: 850, description: "Emergency repair for burst water pipes" },
+        { value: "toilet-installation", label: "Toilet Installation/Repair", price: 420, description: "Install new toilet or fix existing issues" },
+        { value: "shower-repair", label: "Shower Repair", price: 380, description: "Fix shower heads, mixers, or drainage" },
+        { value: "sink-installation", label: "Sink Installation", price: 520, description: "Install new kitchen or bathroom sink" },
+        { value: "water-pressure", label: "Low Water Pressure", price: 350, description: "Diagnose and fix water pressure issues" },
+        { value: "sewer-line", label: "Sewer Line Issues", price: 750, description: "Repair or unblock main sewer lines" },
+        { value: "other", label: "Other Plumbing Issue", price: 450, description: "Custom plumbing problem not listed above" }
       ],
       addOns: [
-        { id: "pipe-repair", name: "Pipe Repair", price: 200 },
-        { id: "faucet-install", name: "Faucet Installation", price: 150 },
-        { id: "toilet-repair", name: "Toilet Repair", price: 180 },
+        { id: "pipe-repair", name: "Additional Pipe Repair", price: 200 },
+        { id: "faucet-install", name: "Extra Faucet Installation", price: 150 },
+        { id: "toilet-repair", name: "Additional Toilet Repair", price: 180 },
         { id: "water-heater", name: "Water Heater Service", price: 400 }
       ]
     },
@@ -998,7 +1005,13 @@ export default function ModernServiceModal({
       if (condition) basePrice *= condition.multiplier;
     }
 
-    if (mappedServiceId === "plumbing" || mappedServiceId === "handyman") {
+    if (mappedServiceId === "plumbing") {
+      // Use the specific plumbing issue price as base price
+      const plumbingIssue = config.plumbingIssues?.find((i: any) => i.value === formData.urgency);
+      if (plumbingIssue) basePrice = plumbingIssue.price;
+    }
+    
+    if (mappedServiceId === "handyman") {
       const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
       if (urgency) basePrice *= urgency.multiplier;
     }
@@ -1631,12 +1644,15 @@ export default function ModernServiceModal({
               setFormData(prev => ({ ...prev, urgency: value }))
             }>
               <SelectTrigger data-testid="select-plumbing-urgency">
-                <SelectValue placeholder="Select service type" />
+                <SelectValue placeholder="Select the plumbing issue" />
               </SelectTrigger>
-              <SelectContent>
-                {currentConfig.urgencyLevels?.map((level: any) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
+              <SelectContent className="max-h-72 overflow-y-auto">
+                {currentConfig.plumbingIssues?.map((issue: any) => (
+                  <SelectItem key={issue.value} value={issue.value}>
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">{issue.label} - R{issue.price}</span>
+                      <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
