@@ -816,14 +816,6 @@ export default function ModernServiceModal({
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
   
-  // Debug logging
-  console.log("🔧 ModernServiceModal Debug:", { 
-    originalServiceId: serviceId, 
-    mappedServiceId, 
-    hasConfig: !!currentConfig,
-    step 
-  });
-  
   // Service-specific placeholder suggestions for Comments field
   const servicePlaceholders: Record<string, string> = {
     "cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
