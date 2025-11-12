@@ -666,36 +666,6 @@ export default function ModernServiceModal({
         { id: "cleanup-service", name: "Post-Event Cleanup", price: 250 }
       ]
     },
-    "handyman": {
-      title: "Handyman Service",
-      icon: Wrench,
-      basePrice: 350,
-      steps: 5,
-      propertyTypes: [
-        { value: "apartment", label: "Apartment", multiplier: 1.0 },
-        { value: "house", label: "House", multiplier: 1.2 },
-        { value: "townhouse", label: "Townhouse", multiplier: 1.1 },
-        { value: "villa", label: "Villa", multiplier: 1.4 }
-      ],
-      serviceTypes: [
-        { value: "general-repairs", label: "General Repairs", multiplier: 1.0 },
-        { value: "furniture-assembly", label: "Furniture Assembly", multiplier: 0.8 },
-        { value: "wall-mounting", label: "Wall Mounting & Hanging", multiplier: 0.9 },
-        { value: "home-maintenance", label: "Home Maintenance", multiplier: 1.2 }
-      ],
-      urgencyLevels: [
-        { value: "emergency", label: "Emergency (Same Day)", multiplier: 2.0 },
-        { value: "urgent", label: "Urgent (Next Day)", multiplier: 1.5 },
-        { value: "standard", label: "Standard (2-3 Days)", multiplier: 1.0 },
-        { value: "scheduled", label: "Scheduled (Flexible)", multiplier: 0.9 }
-      ],
-      addOns: [
-        { id: "materials-supply", name: "Materials & Hardware Supply", price: 150 },
-        { id: "painting-touchup", name: "Painting Touch-up", price: 200 },
-        { id: "minor-plumbing", name: "Minor Plumbing Fixes", price: 180 },
-        { id: "electrical-minor", name: "Minor Electrical Work", price: 220 }
-      ]
-    },
     "beauty-wellness": {
       title: "Beauty & Wellness Service",
       icon: Scissors,
@@ -813,8 +783,6 @@ export default function ModernServiceModal({
     "waitering": "event-staff", // waitering maps to event-staff config
     "event-staff": "event-staff",
     "event-staffing": "event-staff",
-    "handyman": "handyman",
-    "handyman-services": "handyman",
     "beauty-wellness": "beauty-wellness",
     "moving": "moving",
     "au-pair": "au-pair"
@@ -837,8 +805,6 @@ export default function ModernServiceModal({
     "waitering": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
     "event-staff": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
     "event-staffing": "Example: Need 3 waiters for dinner party. Black-tie attire required. Event runs from 7 PM to 11 PM.",
-    "handyman": "Example: Fix squeaky door hinges. Patch holes in drywall. Install new curtain rods in bedrooms.",
-    "handyman-services": "Example: Fix squeaky door hinges. Patch holes in drywall. Install new curtain rods in bedrooms.",
     "moving": "Example: Moving from 2-bedroom apartment to 3-bedroom house. Need help with furniture and boxes. No fragile items.",
     "beauty-wellness": "Example: Haircut and styling for wedding. Prefer natural makeup look. Available on Saturday afternoon.",
     "au-pair": "Example: Need help with 2 children aged 5 and 7. Pickup from school at 3 PM. Homework assistance needed."
@@ -1010,11 +976,6 @@ export default function ModernServiceModal({
       const plumbingIssue = config.plumbingIssues?.find((i: any) => i.value === formData.urgency);
       if (plumbingIssue) basePrice = plumbingIssue.price;
     }
-    
-    if (mappedServiceId === "handyman") {
-      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
-      if (urgency) basePrice *= urgency.multiplier;
-    }
 
     if (mappedServiceId === "electrical") {
       // Use the specific electrical issue price as base price
@@ -1056,11 +1017,6 @@ export default function ModernServiceModal({
       
       const eventSize = config.eventSizes?.find((s: any) => s.value === formData.propertySize);
       if (eventSize) basePrice *= eventSize.multiplier;
-    }
-
-    if (mappedServiceId === "handyman") {
-      const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
-      if (serviceType) basePrice *= serviceType.multiplier;
     }
 
     if (mappedServiceId === "beauty-wellness") {
@@ -1433,9 +1389,11 @@ export default function ModernServiceModal({
       { id: "cleaning", config: serviceConfigs["cleaning"], description: "Professional house cleaning services" },
       { id: "garden-care", config: serviceConfigs["garden-care"], description: "Complete garden maintenance" },
       { id: "plumbing", config: serviceConfigs["plumbing"], description: "Expert plumbing repairs and installation" },
-      { id: "handyman", config: serviceConfigs["handyman"], description: "General handyman services" },
+      { id: "electrical", config: serviceConfigs["electrical"], description: "Certified electrical repairs and installations" },
       { id: "chef-catering", config: serviceConfigs["chef-catering"], description: "Professional catering and chef services" },
-      { id: "event-staff", config: serviceConfigs["event-staff"], description: "Waitering and event staffing" }
+      { id: "event-staff", config: serviceConfigs["event-staff"], description: "Waitering and event staffing" },
+      { id: "moving", config: serviceConfigs["moving"], description: "Professional moving and relocation services" },
+      { id: "au-pair", config: serviceConfigs["au-pair"], description: "Trusted childcare and au pair services" }
     ];
 
     return (

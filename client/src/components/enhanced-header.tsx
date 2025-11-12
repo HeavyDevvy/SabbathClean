@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet } from "lucide-react";
+import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
@@ -78,14 +78,14 @@ export default function EnhancedHeader({
   };
 
   const services = [
-    { id: "house-cleaning", name: "House Cleaning", icon: Sparkles },
+    { id: "cleaning", name: "House Cleaning", icon: Sparkles },
     { id: "plumbing", name: "Plumbing Services", icon: Droplets },
     { id: "electrical", name: "Electrical Services", icon: Zap },
-    { id: "garden-maintenance", name: "Garden Maintenance", icon: TreePine },
+    { id: "garden-care", name: "Garden Care", icon: TreePine },
     { id: "chef-catering", name: "Chef & Catering", icon: ChefHat },
     { id: "event-staff", name: "Event Staffing", icon: Users },
-    { id: "handyman", name: "Handyman Services", icon: Wrench },
-    { id: "beauty-wellness", name: "Beauty & Wellness", icon: Scissors }
+    { id: "moving", name: "Moving Services", icon: Truck },
+    { id: "au-pair", name: "Au Pair Services", icon: Baby }
   ];
 
   const handleServiceSelect = (serviceId: string) => {

@@ -20,6 +20,9 @@ import { FaGoogle, FaApple, FaTwitter, FaInstagram } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
+import type { RegisterData } from "@/lib/auth-client";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -206,7 +209,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthM
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!isLogin && formData.password !== formData.confirmPassword) {
@@ -219,22 +222,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthM
     }
 
     if (isLogin) {
-      loginMutation.mutate({
-        email: formData.email,
-        password: formData.password,
-        rememberMe: formData.rememberMe
-      });
+      await handleLogin(e);
     } else {
-      registerMutation.mutate({
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        province: formData.province
-      });
+      // Register functionality - redirect to signup page
+      onClose();
+      window.location.href = "/auth";
     }
   };
 
@@ -481,10 +473,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthM
             <Button
               type="submit"
               className="w-full h-12"
-              disabled={loginMutation.isPending || registerMutation.isPending}
+              disabled={isLoading}
               data-testid="submit-auth-form"
             >
-              {(loginMutation.isPending || registerMutation.isPending) ? (
+              {isLoading ? (
                 <div className="flex items-center">
                   <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
                   {isLogin ? 'Signing In...' : 'Creating Account...'}
