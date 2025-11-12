@@ -105,7 +105,7 @@ export default function ModernServiceModal({
     // Core fields
     propertyType: editBookingData?.propertyType || "",
     address: editBookingData?.address || "",
-    // gateCode: REMOVED per architect security review - needs encrypted storage before implementation
+    gateCode: editBookingData?.gateCode || "", // Phase 3.2: Secure with encryption
     preferredDate: editBookingData?.preferredDate || "",
     timePreference: editBookingData?.timePreference || "",
     recurringSchedule: editBookingData?.recurringSchedule || "one-time",
@@ -1613,9 +1613,26 @@ export default function ModernServiceModal({
           </div>
         </div>
 
-        {/* Gate Code Field - REMOVED per architect security review
-            TODO: Implement with encrypted storage, access logging, and auto-deletion after service completion
-            Requirement: Phase 3.2 - conditional field for apartment/townhouse/villa */}
+        {/* Conditional Gate Code Field (Phase 3.2 - Secure) */}
+        {(formData.propertyType === "apartment" || formData.propertyType === "townhouse" || formData.propertyType === "villa") && (
+          <div>
+            <Label htmlFor="gate-code">Gate/Access Code (Optional)</Label>
+            <Input
+              id="gate-code"
+              type="password"
+              placeholder="Enter gate or access code"
+              value={formData.gateCode}
+              onChange={(e) => setFormData(prev => ({ ...prev, gateCode: e.target.value }))}
+              className="w-full"
+              data-testid="input-gate-code"
+              autoComplete="off"
+            />
+            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+              <Lock className="h-3 w-3" />
+              Encrypted and only shared with your assigned provider
+            </p>
+          </div>
+        )}
 
         {serviceId === "cleaning" && (
           <>

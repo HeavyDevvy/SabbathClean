@@ -35,6 +35,8 @@ import {
   type InsertOrder,
   type OrderItem,
   type InsertOrderItem,
+  type BookingGateCode,
+  type InsertBookingGateCode,
   users,
   serviceProviders,
   services,
@@ -55,6 +57,7 @@ import {
   cartItems,
   orders,
   orderItems,
+  bookingGateCodes,
   type Wallet,
   type InsertWallet,
   type WalletTransaction,
@@ -162,6 +165,12 @@ export interface IStorage {
   removeCartItem(itemId: string): Promise<void>;
   clearCart(cartId: string): Promise<void>;
   getCartItemCount(cartId: string): Promise<number>;
+  
+  // Gate Code operations (Phase 3.2 - Secure)
+  createGateCode(bookingId: string, encryptedGateCode: string, iv: string, authTag: string): Promise<BookingGateCode>;
+  getGateCodeForProvider(bookingId: string, providerId: string): Promise<BookingGateCode | null>;
+  deleteGateCodeAfterCompletion(bookingId: string): Promise<void>;
+  logGateCodeAccess(gateCodeId: string, providerId: string): Promise<void>;
   
   // Order operations
   createOrder(order: InsertOrder, orderItems: InsertOrderItem[]): Promise<Order>;
@@ -1197,6 +1206,54 @@ export class DatabaseStorage implements IStorage {
       .where(eq(orders.id, orderId))
       .returning();
     return order;
+  }
+
+  // Gate Code Operations (Phase 3.2 - Secure)
+  async createGateCode(bookingId: string, encryptedGateCode: string, iv: string, authTag: string): Promise<BookingGateCode> {
+    const [gateCode] = await db.insert(bookingGateCodes).values({
+      bookingId,
+      encryptedGateCode,
+      iv,
+      authTag
+    }).returning();
+    
+    return gateCode;
+  }
+
+  async getGateCodeForProvider(bookingId: string, providerId: string): Promise<BookingGateCode | null> {
+    // Only return gate code if not deleted
+    const [gateCode] = await db.select().from(bookingGateCodes)
+      .where(and(
+        eq(bookingGateCodes.bookingId, bookingId),
+        sql`${bookingGateCodes.deletedAt} IS NULL`
+      ))
+      .limit(1);
+    
+    if (!gateCode) {
+      return null;
+    }
+    
+    // Log access
+    await this.logGateCodeAccess(gateCode.id, providerId);
+    
+    return gateCode;
+  }
+
+  async deleteGateCodeAfterCompletion(bookingId: string): Promise<void> {
+    // Soft delete - mark as deleted but keep for audit
+    await db.update(bookingGateCodes)
+      .set({ deletedAt: new Date() })
+      .where(eq(bookingGateCodes.bookingId, bookingId));
+  }
+
+  async logGateCodeAccess(gateCodeId: string, providerId: string): Promise<void> {
+    // Update access timestamp and log who accessed it
+    await db.update(bookingGateCodes)
+      .set({ 
+        accessedAt: new Date(),
+        accessedBy: providerId
+      })
+      .where(eq(bookingGateCodes.id, gateCodeId));
   }
 }
 

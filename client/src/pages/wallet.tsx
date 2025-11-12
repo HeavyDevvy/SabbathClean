@@ -118,7 +118,7 @@ function AddFundsForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4" data-testid="form-add-funds">
       <div>
-        <Label htmlFor="amount">Amount (USD)</Label>
+        <Label htmlFor="amount">Amount (ZAR)</Label>
         <Input
           id="amount"
           type="number"
@@ -140,7 +140,7 @@ function AddFundsForm({ onSuccess }: { onSuccess: () => void }) {
             disabled={isProcessing || !stripe || !elements}
             data-testid="button-add-funds"
           >
-            {isProcessing ? "Processing..." : `Add $${amount || "0"} to Wallet`}
+            {isProcessing ? "Processing..." : `Add R${amount || "0"} to Wallet`}
           </Button>
         </>
       )}
@@ -201,7 +201,7 @@ function AutoReloadSettings({ walletData }: { walletData: WalletData }) {
       {enabled && (
         <>
           <div>
-            <Label htmlFor="threshold">Low Balance Threshold (USD)</Label>
+            <Label htmlFor="threshold">Low Balance Threshold (ZAR)</Label>
             <Input
               id="threshold"
               type="number"
@@ -215,7 +215,7 @@ function AutoReloadSettings({ walletData }: { walletData: WalletData }) {
           </div>
 
           <div>
-            <Label htmlFor="reload-amount">Auto-Reload Amount (USD)</Label>
+            <Label htmlFor="reload-amount">Auto-Reload Amount (ZAR)</Label>
             <Input
               id="reload-amount"
               type="number"
@@ -297,9 +297,9 @@ export default function WalletPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold" data-testid="text-balance">
-                  ${walletData.balance.toFixed(2)}
+                  R{walletData.balance.toFixed(2)}
                 </p>
-                <p className="text-blue-100">{walletData.currency}</p>
+                <p className="text-blue-100">ZAR</p>
               </CardContent>
             </Card>
 

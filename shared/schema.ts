@@ -793,6 +793,19 @@ export const cartItems = pgTable("cart_items", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Secure Gate Code Storage (Phase 3.2)
+export const bookingGateCodes = pgTable("booking_gate_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bookingId: varchar("booking_id").notNull(), // Reference to booking/cart item
+  encryptedGateCode: text("encrypted_gate_code").notNull(), // AES-256-GCM encrypted
+  iv: text("iv").notNull(), // Initialization vector for decryption
+  authTag: text("auth_tag"), // Authentication tag for GCM mode
+  createdAt: timestamp("created_at").defaultNow(),
+  accessedAt: timestamp("accessed_at"), // Audit trail
+  accessedBy: varchar("accessed_by"), // Provider ID who accessed
+  deletedAt: timestamp("deleted_at"), // Soft delete after service completion
+});
+
 export const orders = pgTable("orders", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id), // Nullable to support guest checkout
@@ -885,3 +898,15 @@ export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
+
+// Gate Code Schema (Phase 3.2)
+export const insertBookingGateCodeSchema = createInsertSchema(bookingGateCodes).omit({
+  id: true,
+  createdAt: true,
+  accessedAt: true,
+  accessedBy: true,
+  deletedAt: true,
+});
+
+export type BookingGateCode = typeof bookingGateCodes.$inferSelect;
+export type InsertBookingGateCode = z.infer<typeof insertBookingGateCodeSchema>;
