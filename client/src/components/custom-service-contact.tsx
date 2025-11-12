@@ -24,13 +24,13 @@ Service details:
 
 Best regards`;
     
-    const mailtoUrl = `mailto:customercare@berryevents.co.za?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoUrl = `mailto:support@berryevents.co.za?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
     
     setIsOpen(false);
     toast({
       title: "Email App Opened!",
-      description: "Contact customercare@berryevents.co.za for custom solutions.",
+      description: "Contact support@berryevents.co.za for custom solutions.",
     });
   };
 
@@ -101,7 +101,7 @@ Thank you!`;
                 data-testid="button-email-custom-contact"
               >
                 <Mail className="h-4 w-4 mr-2" />
-                Email: customercare@berryevents.co.za
+                Email: support@berryevents.co.za
               </Button>
               
               <Button

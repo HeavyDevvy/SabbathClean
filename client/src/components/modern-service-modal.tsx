@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useCart } from "@/contexts/CartContext";
 import BookingConfirmationModal from "./booking-confirmation-modal";
+import CustomServiceContact from "./custom-service-contact";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
 import { southAfricanBanks, validateAccountNumber } from "../../../config/banks";
@@ -1452,6 +1453,14 @@ export default function ModernServiceModal({
               </Card>
             );
           })}
+        </div>
+
+        {/* Custom Service Solution Form */}
+        <div className="mt-6">
+          <div className="text-center mb-3">
+            <p className="text-sm text-gray-600">Don't see what you need?</p>
+          </div>
+          <CustomServiceContact />
         </div>
 
         {bookedServices.length >= 3 && (
