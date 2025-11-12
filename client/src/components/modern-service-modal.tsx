@@ -1259,7 +1259,7 @@ export default function ModernServiceModal({
       providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
       scheduledTime: formData.timePreference,
-      duration: estimatedHours > 0 ? `${estimatedHours} hours` : "2-4 hours",
+      duration: estimatedHours > 0 ? Math.round(estimatedHours) : 3,
       basePrice: pricing.basePrice.toString(),
       addOnsPrice: pricing.addOnsPrice.toString(),
       subtotal: pricing.totalPrice.toString(),
