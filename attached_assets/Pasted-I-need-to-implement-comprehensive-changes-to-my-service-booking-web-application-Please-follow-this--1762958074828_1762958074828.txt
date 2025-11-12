@@ -1,0 +1,221 @@
+I need to implement comprehensive changes to my service booking web application. Please follow this detailed phased approach, testing thoroughly after EACH feature implementation.
+
+**PHASE 1: AUTHENTICATION & SESSION PERSISTENCE**
+
+**Task 1.1: Fix User Session Management**
+- Implement proper session storage that persists across page navigation
+- When user logs in, store authentication token in localStorage/sessionStorage
+- On every page load, check for existing auth token and set user as logged in
+- Update navigation header to conditionally render:
+  - If user NOT logged in: Show "Sign In" button
+  - If user IS logged in: Show user profile dropdown with options (My Profile, My Bookings, Logout)
+- Test: Login → Navigate to multiple pages → Verify user remains logged in
+
+**Task 1.2: Authentication Flow for Bookings**
+- When user tries to access booking steps without being logged in:
+  - Show modal/popup with:
+    - Email input field
+    - Password input field  
+    - "Sign In" button
+    - "Don't have an account? Sign Up" button
+  - "Sign Up" button redirects to full signup page
+  - After successful signin/signup, redirect user back to booking process at the exact step they were on
+  - Preserve all booking data entered before authentication interrupt
+
+**PHASE 2: HOME PAGE ENHANCEMENTS**
+
+**Task 2.1: Book Now Service Flow**
+- Update "Book Now" button modal to show ONLY these services:
+  - House Cleaning
+  - Plumbing Service  
+  - Electrical Services
+  - Garden Care
+  - Chef & Catering
+  - Waitering Services
+  - Moving Services
+  - Au Pair Service
+- REMOVE "Handyman" service completely
+- Each service click should redirect to specific booking process:
+  - "Au Pair Service" → `/booking/au-pair/step-1`
+  - "House Cleaning" → `/booking/house-cleaning/step-1`
+  - etc. for each service
+- Test each service redirects to correct booking flow
+
+**Task 2.2: Demo Video Popup Enhancement**
+- Increase popup dimensions to minimum 800px width × 600px height
+- Ensure all content fits without vertical scrolling:
+  - Video player (visible without scrolling)
+  - "Play Demo" button (visible)
+  - Process flow description (fully visible)
+  - Close button (visible)
+- Make popup responsive but ensure no content is cut off on standard screen sizes
+
+**Task 2.3: Custom Service Solution Implementation**
+- Create modal/popup with form containing:
+  - Name Surname (text input, required)
+  - Email address (email input, required) 
+  - Contact Number (tel input, required)
+  - Description (textarea, maxlength=500, required)
+- Form validation: All fields mandatory
+- Submit button: "Send to Berry Team"
+- On submit:
+  - Send form data to backend API endpoint
+  - Show success popup: "Thank you for your request!"
+  - Redirect to homepage after 2 seconds
+  - Email sent to: support@berryevents.co.za
+
+**PHASE 3: BOOKING PROCESS REDESIGN**
+
+**Task 3.1: Service-Specific Booking Fields**
+- Review each service booking form and ensure fields are relevant:
+  - House Cleaning: square footage, cleaning type, pets, etc.
+  - Plumbing: issue type, emergency, location access, etc.
+  - Electrical: problem description, power outage, etc.
+  - Au Pair: children ages, hours needed, languages, etc.
+- Maintain consistency: Common fields (address, contact info) should be in same order across all services
+
+**Task 3.2: Conditional Scheduling Fields**
+- Property type selection should show/hide gate code field:
+  - If "Townhouse" or "Apartment" selected → Show "Gate Code" input field
+  - If "House" selected → Hide "Gate Code" field
+- Implement proper field toggle logic
+
+**Task 3.3: Add-Ons System**
+- Create service-specific add-ons with pricing:
+  - House Cleaning: Deep cleaning (+R200), Window cleaning (+R150), etc.
+  - Plumbing: Emergency fee (+R300), Weekend service (+R200), etc.
+  - Electrical: Additional outlets (+R150), Ceiling fan installation (+R400), etc.
+- Each add-on should have:
+  - Checkbox for selection
+  - Clear price display
+  - Real-time total price calculation
+- Test: Select add-ons → Verify price updates correctly
+
+**Task 3.4: Remove Payment Step & Cart Integration**
+- Remove payment information collection from booking process
+- Final booking step should show:
+  - "Add to Cart" button (adds service to cart, stays on page)
+  - "Go to Cart" button (redirects to cart page)
+- Cart should display:
+  - Service name, date, time, provider, add-ons, total price
+  - "Remove" option for each item
+  - "Proceed to Payment" button
+
+**PHASE 4: CART & USER PROFILE MANAGEMENT**
+
+**Task 4.1: Cart Persistence & Automation**
+- Implement cart storage that persists for 14 days
+- Cart data structure should include:
+  - Service details, selected add-ons, pricing, booking datetime
+  - Timestamp for expiration tracking
+- Automated reminder system:
+  - After 3 days: In-app notification "Complete your booking!"
+  - After 7 days: Email reminder "Your cart items are waiting"
+  - After 12 days: Final reminder "Bookings expire in 2 days"
+
+**Task 4.2: User Profile Restructure**
+- Rename "Profile and settings" to "Profile and preferences"
+- Add new "Settings" tab with:
+  - Light/Dark mode toggle
+  - Privacy settings (data sharing preferences, notification preferences)
+- Ensure all existing profile functionality remains unchanged
+
+**Task 4.3: My Bookings Enhancements**
+
+**Reschedule Functionality:**
+- "Reschedule" button opens calendar popup
+- Show service provider availability (gray out unavailable dates)
+- Limit selection to 2-week window from closest Monday
+- Update booking with new date/time
+
+**Cancellation Process:**
+- "Cancel" button opens cancellation popup with:
+  - Reason selection (dropdown: "Found alternative", "No longer needed", "Price", "Other")
+  - Cancellation policy in BOLD RED text:
+    "10% cancellation fee deducted from amount paid"
+    "50% fee if cancelled 4 days or sooner before booking"  
+    "NO REFUND if cancelled 24 hours before booking"
+  - Consent checkbox: "I understand and accept the cancellation terms"
+  - "Confirm Cancellation" button (disabled until checkbox checked)
+- On confirmation: Move booking to "Past Bookings" section
+
+**Past Bookings Features:**
+- "Re-book this service" button that:
+  - Pre-populates all booking fields from previous booking
+  - EXCEPT: Date and time fields remain empty for new selection
+  - ALL fields remain editable even though pre-populated
+- "Share Booking" button that:
+  - Generates unique shareable link
+  - Link redirects to booking form with all service details pre-populated
+  - EXCEPT: User details, address, service date/time remain empty
+
+**PHASE 5: WALLET & BERRY STARS FIXES**
+
+**Task 5.1: Currency Conversion & Wallet UI**
+- Find ALL currency displays throughout application and change $ to R
+- Update currency formatting: R 1,000.00 (South African Rand format)
+- Add "Close" button (X) in top-right corner of wallet popup
+- Ensure all wallet functions work: View balance, transaction history, etc.
+
+**Task 5.2: Berry Stars Booking Flow Correction**
+- When user selects provider from Berry Stars section:
+  - Redirect to booking process for that provider's service
+  - SKIP the "Choose your verified provider" step (Step 4)
+  - Automatically pre-select the chosen provider
+  - Show confirmation: "Booking with [Provider Name]"
+  - Continue with remaining booking steps normally
+
+**IMPLEMENTATION & TESTING PROTOCOL:**
+
+**For EACH feature:**
+1. Implement the code changes
+2. Test the functionality thoroughly
+3. Verify no errors in console
+4. Check UI renders correctly
+5. Confirm user flow works end-to-end
+6. Only then proceed to next feature
+
+**FINAL COMPREHENSIVE TESTING CHECKLIST:**
+
+**Authentication & Session:**
+✅ User remains logged in across all page navigation
+✅ Navigation shows user menu when logged in, signin when not
+✅ Authentication interrupt during booking preserves data
+
+**Homepage Features:**
+✅ Book Now shows correct 8 services (no Handyman)
+✅ Each service redirects to correct booking flow
+✅ Demo video popup displays completely without scrolling
+✅ Custom solution popup works and sends email
+
+**Booking Process:**
+✅ Each service has relevant booking fields
+✅ Gate code field shows only for townhouse/apartment
+✅ Add-ons display with correct pricing and update totals
+✅ No payment step - ends with cart options
+✅ Guest flow redirects to signin and returns to cart
+
+**Cart & Profile:**
+✅ Cart items persist for 14 days
+✅ Reminder system implemented
+✅ Profile renamed to "Profile and preferences"
+✅ Settings tab with theme and privacy options
+
+**My Bookings:**
+✅ Reschedule shows provider availability with 2-week limit
+✅ Cancellation shows policy and requires consent
+✅ Past bookings have re-book (pre-populated) and share features
+
+**Wallet & Berry Stars:**
+✅ All currency shows as Rands (ZAR)
+✅ Wallet has close button and functions work
+✅ Berry Stars booking skips provider selection step
+
+**Overall Application:**
+✅ No JavaScript errors in console
+✅ No blank pages or broken redirects
+✅ All existing features still work unchanged
+✅ UI is consistent and professional
+✅ Mobile responsive design maintained
+
+Please implement in this exact order, testing each feature thoroughly before moving to the next. Confirm successful implementation of each item before proceeding.

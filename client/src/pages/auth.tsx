@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
 import { User, Mail, Phone, Lock, UserPlus, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import EnhancedSocialLogin from "@/components/enhanced-social-login";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login, register, refreshUser } = useAuth();
   const [showSocialLogin, setShowSocialLogin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const [signUpData, setSignUpData] = useState({
     firstName: "",
@@ -30,58 +31,6 @@ export default function Auth() {
     password: ""
   });
 
-  // Registration mutation using unified auth client
-  const registerMutation = useMutation({
-    mutationFn: async (userData: typeof signUpData) => {
-      return await authClient.register({
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phone: userData.phone || undefined, // Make phone optional
-        password: userData.password
-      });
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Welcome to Berry Events!",
-        description: "Your account has been created successfully. You can now book services.",
-      });
-      
-      // Store authentication data if needed
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        if (data.refreshToken) {
-          localStorage.setItem('refreshToken', data.refreshToken);
-        }
-      }
-      
-      // Redirect to home after successful signup
-      setTimeout(() => {
-        setLocation("/");
-      }, 1000);
-    },
-    onError: (error: any) => {
-      console.error('Registration error:', error);
-      
-      // Handle specific error types for better user feedback
-      let errorMessage = error.message || "Failed to create account. Please try again.";
-      
-      if (error.message?.includes('Email already registered')) {
-        errorMessage = "This email is already registered. Please try signing in instead.";
-      } else if (error.message?.includes('Invalid input data')) {
-        errorMessage = "Please check your information and try again. Make sure all required fields are filled correctly.";
-      } else if (error.message?.includes('password')) {
-        errorMessage = "Password must be at least 6 characters long.";
-      }
-      
-      toast({
-        title: "Registration Failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    }
-  });
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -94,38 +43,65 @@ export default function Auth() {
       return;
     }
 
-    registerMutation.mutate(signUpData);
+    try {
+      setIsLoading(true);
+      await register({
+        firstName: signUpData.firstName,
+        lastName: signUpData.lastName,
+        email: signUpData.email,
+        phone: signUpData.phone || undefined,
+        password: signUpData.password
+      });
+      
+      toast({
+        title: "Welcome to Berry Events!",
+        description: "Your account has been created successfully.",
+      });
+      
+      // Redirect to home after successful signup
+      setTimeout(() => {
+        setLocation("/");
+      }, 1000);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      
+      let errorMessage = error.message || "Failed to create account. Please try again.";
+      
+      if (error.message?.includes('Email already registered')) {
+        errorMessage = "This email is already registered. Please try signing in instead.";
+      } else if (error.message?.includes('Invalid input data')) {
+        errorMessage = "Please check your information and try again.";
+      } else if (error.message?.includes('password')) {
+        errorMessage = "Password must be at least 6 characters long.";
+      }
+      
+      toast({
+        title: "Registration Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Login mutation using unified auth client
-  const loginMutation = useMutation({
-    mutationFn: async (loginData: typeof signInData) => {
-      return await authClient.login({
-        email: loginData.email,
-        password: loginData.password,
-        rememberMe: false
-      });
-    },
-    onSuccess: (data) => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setIsLoading(true);
+      await login(signInData.email, signInData.password);
+      
       toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
       
-      // Store authentication data
-      if (data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        if (data.refreshToken) {
-          localStorage.setItem('refreshToken', data.refreshToken);
-        }
-      }
-      
       // Redirect to home after successful signin
       setTimeout(() => {
         setLocation("/");
       }, 1000);
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       console.error('Login error:', error);
       
       let errorMessage = error.message || "Login failed. Please try again.";
@@ -141,12 +117,9 @@ export default function Auth() {
         description: errorMessage,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
-  });
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate(signInData);
   };
 
   const handleSocialLoginSuccess = (data: any) => {
@@ -155,13 +128,8 @@ export default function Auth() {
       description: "You have been signed in successfully.",
     });
     
-    // Store authentication data
-    if (data.accessToken) {
-      localStorage.setItem('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        localStorage.setItem('refreshToken', data.refreshToken);
-      }
-    }
+    // Refresh user state to update auth context
+    refreshUser();
     
     setShowSocialLogin(false);
     setTimeout(() => {
@@ -230,10 +198,10 @@ export default function Auth() {
                 <Button 
                   type="submit" 
                   className="w-full bg-blue-600 hover:bg-blue-700" 
-                  disabled={loginMutation.isPending}
+                  disabled={isLoading}
                   data-testid="button-signin"
                 >
-                  {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                  {isLoading ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
               
@@ -360,10 +328,10 @@ export default function Auth() {
                 <Button 
                   type="submit" 
                   className="w-full bg-blue-600 hover:bg-blue-700" 
-                  disabled={registerMutation.isPending}
+                  disabled={isLoading}
                   data-testid="button-signup"
                 >
-                  {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
               
