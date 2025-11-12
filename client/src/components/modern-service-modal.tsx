@@ -1650,14 +1650,14 @@ export default function ModernServiceModal({
           </div>
         )}
 
-        {serviceId === "waitering" && (
+        {serviceId === "event-staff" && (
           <>
             <div>
               <Label>Staff Type *</Label>
               <Select value={formData.cleaningType} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, cleaningType: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-staff-type">
                   <SelectValue placeholder="Select staff type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1675,7 +1675,7 @@ export default function ModernServiceModal({
               <Select value={formData.propertySize} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, propertySize: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-event-size">
                   <SelectValue placeholder="Select event size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1697,7 +1697,7 @@ export default function ModernServiceModal({
               <Select value={formData.cleaningType} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, cleaningType: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-moving-type">
                   <SelectValue placeholder="Select moving type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1718,7 +1718,7 @@ export default function ModernServiceModal({
               <Select value={formData.propertySize} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, propertySize: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-moving-distance">
                   <SelectValue placeholder="Select moving distance" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1740,7 +1740,7 @@ export default function ModernServiceModal({
               <Select value={formData.cleaningType} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, cleaningType: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-care-type">
                   <SelectValue placeholder="Select care type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1761,7 +1761,7 @@ export default function ModernServiceModal({
               <Select value={formData.propertySize} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, propertySize: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-children-count">
                   <SelectValue placeholder="Select number of children" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1779,7 +1779,7 @@ export default function ModernServiceModal({
               <Select value={formData.gardenSize} onValueChange={(value) =>
                 setFormData(prev => ({ ...prev, gardenSize: value }))
               }>
-                <SelectTrigger>
+                <SelectTrigger data-testid="select-children-ages">
                   <SelectValue placeholder="Select age range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2979,7 +2979,10 @@ export default function ModernServiceModal({
                       (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
                       (serviceId === "plumbing" && !formData.urgency) ||
                       (serviceId === "electrical" && !formData.electricalIssue) ||
-                      (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize))
+                      (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
+                      (serviceId === "event-staff" && (!formData.cleaningType || !formData.propertySize)) ||
+                      (serviceId === "moving" && (!formData.cleaningType || !formData.propertySize)) ||
+                      (serviceId === "au-pair" && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
                     )) ||
                     (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
                     (step === 4 && !formData.selectedProvider) ||
