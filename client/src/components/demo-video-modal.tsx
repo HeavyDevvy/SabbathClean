@@ -304,7 +304,7 @@ export default function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-[800px] min-h-[600px] max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Play className="h-6 w-6 text-primary" />
