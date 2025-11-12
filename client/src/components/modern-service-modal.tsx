@@ -1390,9 +1390,9 @@ export default function ModernServiceModal({
   };
 
   const handleGoToCart = () => {
-    // Close modal and navigate to cart
+    // Close modal and navigate to cart checkout
     onClose();
-    navigate("/cart");
+    navigate("/cart-checkout");
   };
 
   const handleConfirmationClose = () => {

@@ -42,7 +42,7 @@ Previous comprehensive features are still available at `/enhanced` route for com
 
 ## Feature Specifications
 
-- **Services**: Supports 8 comprehensive service categories with advanced, multi-step booking workflows (4-5 steps per service). Includes location-based booking and specific requirements for each service (e.g., property size for cleaning, emergency 24/7 for plumbing).
+- **Services**: Supports 8 comprehensive service categories (cleaning, garden-care, plumbing, electrical, chef-catering, event-staff, moving, au-pair) with streamlined 4-step booking workflow. Includes location-based booking and specific requirements for each service. **Cart-Based Booking (Nov 2025)**: Removed payment step from booking flow - users now add services to cart (max 3) and checkout together at /cart-checkout.
 - **Chef & Catering**: Specializes in African cuisine (South African, West African, East African, North African, Central African) with flavor-based preferences, dual menu options (pre-made and custom builders), and real-time pricing.
 - **Provider Onboarding**: A 4-step professional application process including mobile camera document capture for ID verification, business documents, banking details, and a 24-48 hour review timeline.
 - **Training & Certification**: A comprehensive system for providers including multi-level training modules, progress tracking, service-specific certifications with expiration dates, and skill assessments.

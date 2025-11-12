@@ -17,9 +17,9 @@ function getCartIdentifier(req: Request): { userId?: string; sessionToken?: stri
   let sessionToken = req.cookies?.cartSession;
   if (!sessionToken) {
     sessionToken = randomUUID();
-    // Set cookie for 7 days
+    // Set cookie for 14 days (Phase 4.1: Extended cart persistence)
     (req as any).res?.cookie('cartSession', sessionToken, {
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production'
     });

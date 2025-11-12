@@ -1004,7 +1004,7 @@ export class DatabaseStorage implements IStorage {
     // Create new cart if none exists or existing one expired
     if (!cart) {
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // Cart expires in 7 days
+      expiresAt.setDate(expiresAt.getDate() + 14); // Cart expires in 14 days (Phase 4.1)
 
       [cart] = await db.insert(carts).values({
         userId: userId || null,

@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock, Save, MapPin } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun } from "lucide-react";
 
 // South African Provinces and Cities Data
 const SOUTH_AFRICAN_PROVINCES = {
@@ -176,9 +176,10 @@ export default function Profile() {
         </div>
 
         <Tabs defaultValue="bookings" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-            <TabsTrigger value="profile">Profile Settings</TabsTrigger>
+            <TabsTrigger value="profile">Profile Preferences</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
 
@@ -388,6 +389,61 @@ export default function Profile() {
                     </div>
                   </form>
                 </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <SettingsIcon className="h-5 w-5 mr-2" />
+                  Application Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <h3 className="font-medium">Theme</h3>
+                    <p className="text-sm text-gray-500">Choose your preferred color scheme</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        toast({
+                          title: "Theme Changed",
+                          description: "Light theme will be applied in the next update",
+                        });
+                      }}
+                      data-testid="button-theme-light"
+                    >
+                      <Sun className="h-4 w-4" />
+                      Light
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        toast({
+                          title: "Theme Changed",
+                          description: "Dark theme will be applied in the next update",
+                        });
+                      }}
+                      data-testid="button-theme-dark"
+                    >
+                      <Moon className="h-4 w-4" />
+                      Dark
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="text-sm text-gray-500 italic">
+                  Additional settings coming soon...
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

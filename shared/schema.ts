@@ -764,7 +764,7 @@ export const carts = pgTable("carts", {
   userId: varchar("user_id").references(() => users.id), // null for guest users
   sessionToken: text("session_token"), // For guest cart tracking
   status: text("status").default("active").notNull(), // active, checked_out, abandoned, expired
-  expiresAt: timestamp("expires_at"), // Auto-expire stale carts after 7 days
+  expiresAt: timestamp("expires_at"), // Auto-expire stale carts after 14 days (Phase 4.1)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
