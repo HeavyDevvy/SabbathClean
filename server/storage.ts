@@ -782,6 +782,29 @@ export class DatabaseStorage implements IStorage {
     return booking;
   }
 
+  // Phase 4.3b: Cancel booking and process refund
+  async cancelBooking(id: string, reason?: string): Promise<Booking> {
+    // Get current booking to append cancellation reason to notes
+    const currentBooking = await this.getBooking(id);
+    const cancelNote = reason 
+      ? `Cancelled by customer. Reason: ${reason}` 
+      : 'Cancelled by customer.';
+    const updatedNotes = currentBooking?.notes 
+      ? `${currentBooking.notes}\n\n${cancelNote}` 
+      : cancelNote;
+
+    const [booking] = await db.update(bookings)
+      .set({ 
+        status: 'cancelled',
+        paymentStatus: 'refunded',
+        notes: updatedNotes,
+        updatedAt: new Date() 
+      })
+      .where(eq(bookings.id, id))
+      .returning();
+    return booking;
+  }
+
   async getReviewsByProvider(providerId: string): Promise<Review[]> {
     return await db.select().from(reviews)
       .where(eq(reviews.providerId, providerId))

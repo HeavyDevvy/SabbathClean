@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EnhancedHeader from "@/components/enhanced-header";
 import { RescheduleDialog } from "@/components/reschedule-dialog";
+import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import type { Booking } from "@shared/schema";
@@ -102,6 +103,7 @@ const getStatusIcon = (status: string) => {
 export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
+  const [cancelBooking, setCancelBooking] = useState<any>(null);
   const { user } = useAuth();
 
   // Fetch real bookings from database
@@ -204,6 +206,20 @@ export default function BookingsPage() {
               variant="outline" 
               size="sm"
               className="text-red-600 hover:text-red-700"
+              onClick={() => {
+                if (booking.status === "completed") {
+                  // TODO: View receipt functionality
+                } else {
+                  setCancelBooking({
+                    id: booking.id,
+                    service: booking.serviceType,
+                    date: scheduledDate,
+                    time: booking.scheduledTime,
+                    price: `R${parseFloat(booking.totalPrice).toFixed(2)}`
+                  });
+                }
+              }}
+              data-testid={`button-cancel-${booking.id}`}
             >
               {booking.status === "completed" ? "View Receipt" : "Cancel Booking"}
             </Button>
@@ -328,6 +344,15 @@ export default function BookingsPage() {
           isOpen={true}
           onClose={() => setRescheduleBooking(null)}
           booking={rescheduleBooking}
+        />
+      )}
+
+      {/* Cancel Booking Dialog - Phase 4.3b */}
+      {cancelBooking && (
+        <CancelBookingDialog
+          isOpen={true}
+          onClose={() => setCancelBooking(null)}
+          booking={cancelBooking}
         />
       )}
     </div>

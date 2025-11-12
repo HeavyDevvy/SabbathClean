@@ -475,6 +475,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phase 4.3b: Cancel booking
+  app.patch("/api/bookings/:id/cancel", async (req, res) => {
+    try {
+      const { reason } = req.body;
+      
+      const booking = await storage.cancelBooking(
+        req.params.id,
+        reason
+      );
+      
+      res.json(booking);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Review routes
   app.post("/api/reviews", async (req, res) => {
     try {
