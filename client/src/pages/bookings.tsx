@@ -8,7 +8,7 @@ import EnhancedHeader from "@/components/enhanced-header";
 import { RescheduleDialog } from "@/components/reschedule-dialog";
 import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
 import { ShareBookingDialog } from "@/components/share-booking-dialog";
-import { ModernServiceModal } from "@/components/modern-service-modal";
+import ModernServiceModal from "@/components/modern-service-modal";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
