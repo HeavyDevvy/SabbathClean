@@ -103,6 +103,7 @@ export default function ModernServiceModal({
     // Core fields
     propertyType: editBookingData?.propertyType || "",
     address: editBookingData?.address || "",
+    // gateCode: REMOVED per architect security review - needs encrypted storage before implementation
     preferredDate: editBookingData?.preferredDate || "",
     timePreference: editBookingData?.timePreference || "",
     recurringSchedule: editBookingData?.recurringSchedule || "one-time",
@@ -1523,6 +1524,10 @@ export default function ModernServiceModal({
             )}
           </div>
         </div>
+
+        {/* Gate Code Field - REMOVED per architect security review
+            TODO: Implement with encrypted storage, access logging, and auto-deletion after service completion
+            Requirement: Phase 3.2 - conditional field for apartment/townhouse/villa */}
 
         {serviceId === "cleaning" && (
           <>
