@@ -27,6 +27,12 @@ export function CancelBookingDialog({ isOpen, onClose, booking }: CancelBookingD
   const cancelMutation = useMutation({
     mutationFn: async ({ bookingId, cancelReason }: { bookingId: string; cancelReason?: string }) => {
       const res = await apiRequest('PATCH', `/api/bookings/${bookingId}/cancel`, { reason: cancelReason });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: 'Failed to cancel booking' }));
+        throw new Error(errorData.message || `Cancellation failed: ${res.status}`);
+      }
+      
       return await res.json();
     },
     onSuccess: () => {

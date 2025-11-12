@@ -7,7 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EnhancedHeader from "@/components/enhanced-header";
 import { RescheduleDialog } from "@/components/reschedule-dialog";
 import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
+import { ShareBookingDialog } from "@/components/share-booking-dialog";
+import { ModernServiceModal } from "@/components/modern-service-modal";
 import { useAuth } from "@/hooks/useAuth";
+import { queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import type { Booking } from "@shared/schema";
 import { 
@@ -21,7 +24,9 @@ import {
   CheckCircle2,
   AlertCircle,
   MoreVertical,
-  Loader2
+  Loader2,
+  Repeat,
+  Share2
 } from "lucide-react";
 
 // Mock booking data
@@ -104,6 +109,8 @@ export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
   const [cancelBooking, setCancelBooking] = useState<any>(null);
+  const [rebookData, setRebookData] = useState<any>(null);
+  const [shareBooking, setShareBooking] = useState<any>(null);
   const { user } = useAuth();
 
   // Fetch real bookings from database
@@ -195,11 +202,43 @@ export default function BookingsPage() {
                 </>
               )}
               {booking.status === "completed" && (
-                <Button variant="outline" size="sm">
-                  <Star className="h-4 w-4 mr-1" />
-                  Rate Service
-                </Button>
+                <>
+                  <Button variant="outline" size="sm">
+                    <Star className="h-4 w-4 mr-1" />
+                    Rate Service
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="text-purple-600 hover:text-purple-700"
+                    onClick={() => setRebookData({
+                      serviceId: booking.serviceType,
+                      bookingData: booking
+                    })}
+                    data-testid={`button-book-again-${booking.id}`}
+                  >
+                    <Repeat className="h-4 w-4 mr-1" />
+                    Book Again
+                  </Button>
+                </>
               )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShareBooking({
+                  id: booking.id,
+                  bookingNumber: booking.bookingNumber,
+                  service: booking.serviceType,
+                  date: scheduledDate,
+                  time: booking.scheduledTime,
+                  address: booking.address,
+                  price: `R${parseFloat(booking.totalPrice).toFixed(2)}`
+                })}
+                data-testid={`button-share-${booking.id}`}
+              >
+                <Share2 className="h-4 w-4 mr-1" />
+                Share
+              </Button>
             </div>
             
             <Button 
@@ -353,6 +392,37 @@ export default function BookingsPage() {
           isOpen={true}
           onClose={() => setCancelBooking(null)}
           booking={cancelBooking}
+        />
+      )}
+
+      {/* Re-book Modal - Phase 4.3c */}
+      {rebookData && (
+        <ModernServiceModal
+          isOpen={true}
+          onClose={() => setRebookData(null)}
+          serviceId={rebookData.serviceId}
+          onBookingComplete={(bookingData) => {
+            queryClient.invalidateQueries({ queryKey: ['/api/bookings/customer'] });
+            setRebookData(null);
+          }}
+          editBookingData={{
+            propertyType: rebookData.bookingData.propertyType,
+            address: rebookData.bookingData.address,
+            gateCode: rebookData.bookingData.gateCode,
+            preferredDate: rebookData.bookingData.scheduledDate,
+            timePreference: rebookData.bookingData.scheduledTime,
+            recurringSchedule: rebookData.bookingData.recurringSchedule || "one-time",
+            specialRequests: rebookData.bookingData.specialInstructions,
+          }}
+        />
+      )}
+
+      {/* Share Booking Dialog - Phase 4.3d */}
+      {shareBooking && (
+        <ShareBookingDialog
+          isOpen={true}
+          onClose={() => setShareBooking(null)}
+          booking={shareBooking}
         />
       )}
     </div>
