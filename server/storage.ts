@@ -769,6 +769,19 @@ export class DatabaseStorage implements IStorage {
     return booking;
   }
 
+  // Phase 4.3a: Update booking schedule (reschedule)
+  async updateBookingSchedule(id: string, scheduledDate: Date, scheduledTime: string): Promise<Booking> {
+    const [booking] = await db.update(bookings)
+      .set({ 
+        scheduledDate, 
+        scheduledTime, 
+        updatedAt: new Date() 
+      })
+      .where(eq(bookings.id, id))
+      .returning();
+    return booking;
+  }
+
   async getReviewsByProvider(providerId: string): Promise<Review[]> {
     return await db.select().from(reviews)
       .where(eq(reviews.providerId, providerId))

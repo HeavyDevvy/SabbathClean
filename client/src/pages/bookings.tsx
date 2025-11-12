@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EnhancedHeader from "@/components/enhanced-header";
+import { RescheduleDialog } from "@/components/reschedule-dialog";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import type { Booking } from "@shared/schema";
 import { 
   Calendar,
   Clock,
@@ -14,7 +19,8 @@ import {
   CreditCard,
   CheckCircle2,
   AlertCircle,
-  MoreVertical
+  MoreVertical,
+  Loader2
 } from "lucide-react";
 
 // Mock booking data
@@ -95,99 +101,117 @@ const getStatusIcon = (status: string) => {
 
 export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
+  const { user } = useAuth();
 
-  const upcomingBookings = mockBookings.filter(b => 
+  // Fetch real bookings from database
+  const { data: bookings = [], isLoading } = useQuery<Booking[]>({
+    queryKey: ['/api/bookings/customer', user?.id],
+    enabled: !!user?.id,
+  });
+
+  const upcomingBookings = bookings.filter((b: any) => 
     b.status === "confirmed" || b.status === "pending"
   );
   
-  const pastBookings = mockBookings.filter(b => 
+  const pastBookings = bookings.filter((b: any) => 
     b.status === "completed" || b.status === "cancelled"
   );
 
-  const renderBookingCard = (booking: any) => (
-    <Card key={booking.id} className="mb-4 hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-bold text-gray-900">{booking.service}</h3>
-              <Badge className={`${getStatusColor(booking.status)} capitalize`}>
-                {getStatusIcon(booking.status)}
-                <span className="ml-1">{booking.status}</span>
-              </Badge>
-            </div>
-            <p className="text-gray-600 mb-1">with {booking.provider}</p>
-            <div className="flex items-center text-yellow-500 mb-2">
-              <Star className="h-4 w-4 fill-current mr-1" />
-              <span className="text-sm font-medium">{booking.rating}</span>
-            </div>
-          </div>
-          <Button variant="ghost" size="sm">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="space-y-2">
-            <div className="flex items-center text-gray-600">
-              <Calendar className="h-4 w-4 mr-2" />
-              <span className="text-sm">{booking.date} at {booking.time}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <Clock className="h-4 w-4 mr-2" />
-              <span className="text-sm">{booking.duration}</span>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <MapPin className="h-4 w-4 mr-2" />
-              <span className="text-sm">{booking.location}</span>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center text-gray-600">
-              <CreditCard className="h-4 w-4 mr-2" />
-              <span className="text-sm font-semibold text-green-600">R{booking.price}</span>
-            </div>
-            {booking.notes && (
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Notes:</span> {booking.notes}
+  const renderBookingCard = (booking: any) => {
+    const scheduledDate = format(new Date(booking.scheduledDate), "yyyy-MM-dd");
+    
+    return (
+      <Card key={booking.id} className="mb-4 hover:shadow-md transition-shadow">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-2">
+                <h3 className="text-lg font-bold text-gray-900">{booking.serviceType}</h3>
+                <Badge className={`${getStatusColor(booking.status)} capitalize`}>
+                  {getStatusIcon(booking.status)}
+                  <span className="ml-1">{booking.status}</span>
+                </Badge>
               </div>
-            )}
+              <p className="text-gray-600 mb-1">Booking #{booking.bookingNumber}</p>
+            </div>
+            <Button variant="ghost" size="sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
           </div>
-        </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex space-x-2">
-            {booking.status === "confirmed" && (
-              <>
-                <Button variant="outline" size="sm">
-                  <Phone className="h-4 w-4 mr-1" />
-                  Contact
-                </Button>
-                <Button variant="outline" size="sm">
-                  Reschedule
-                </Button>
-              </>
-            )}
-            {booking.status === "completed" && (
-              <Button variant="outline" size="sm">
-                <Star className="h-4 w-4 mr-1" />
-                Rate Service
-              </Button>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="space-y-2">
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span className="text-sm">{format(new Date(booking.scheduledDate), "MMMM d, yyyy")} at {booking.scheduledTime}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Clock className="h-4 w-4 mr-2" />
+                <span className="text-sm">{booking.duration} hour{booking.duration > 1 ? 's' : ''}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <MapPin className="h-4 w-4 mr-2" />
+                <span className="text-sm">{booking.address}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center text-gray-600">
+                <CreditCard className="h-4 w-4 mr-2" />
+                <span className="text-sm font-semibold text-green-600">R{parseFloat(booking.totalPrice).toFixed(2)}</span>
+              </div>
+              {booking.specialInstructions && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Notes:</span> {booking.specialInstructions}
+                </div>
+              )}
+            </div>
           </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-red-600 hover:text-red-700"
-          >
-            {booking.status === "completed" ? "View Receipt" : "Cancel Booking"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex space-x-2">
+              {booking.status === "confirmed" && (
+                <>
+                  <Button variant="outline" size="sm">
+                    <Phone className="h-4 w-4 mr-1" />
+                    Contact
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setRescheduleBooking({
+                      id: booking.id,
+                      service: booking.serviceType,
+                      date: scheduledDate,
+                      time: booking.scheduledTime
+                    })}
+                    data-testid={`button-reschedule-${booking.id}`}
+                  >
+                    Reschedule
+                  </Button>
+                </>
+              )}
+              {booking.status === "completed" && (
+                <Button variant="outline" size="sm">
+                  <Star className="h-4 w-4 mr-1" />
+                  Rate Service
+                </Button>
+              )}
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-red-600 hover:text-red-700"
+            >
+              {booking.status === "completed" ? "View Receipt" : "Cancel Booking"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -201,92 +225,111 @@ export default function BookingsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-1">
-                {upcomingBookings.length}
-              </div>
-              <div className="text-sm text-gray-600">Upcoming</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">
-                {pastBookings.filter(b => b.status === "completed").length}
-              </div>
-              <div className="text-sm text-gray-600">Completed</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600 mb-1">
-                R{mockBookings.reduce((sum, b) => sum + b.price, 0)}
-              </div>
-              <div className="text-sm text-gray-600">Total Spent</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600 mb-1">
-                {(mockBookings.reduce((sum, b) => sum + b.rating, 0) / mockBookings.length).toFixed(1)}
-              </div>
-              <div className="text-sm text-gray-600">Avg Rating</div>
-            </CardContent>
-          </Card>
-        </div>
+        {!isLoading && bookings.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  {upcomingBookings.length}
+                </div>
+                <div className="text-sm text-gray-600">Upcoming</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                  {pastBookings.filter((b: any) => b.status === "completed").length}
+                </div>
+                <div className="text-sm text-gray-600">Completed</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 mb-1">
+                  R{bookings.reduce((sum: number, b: any) => sum + parseFloat(b.totalPrice || 0), 0).toFixed(2)}
+                </div>
+                <div className="text-sm text-gray-600">Total Spent</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-600 mb-1">
+                  {bookings.filter((b: any) => b.customerRating).length > 0 
+                    ? (bookings.reduce((sum: number, b: any) => sum + (b.customerRating || 0), 0) / bookings.filter((b: any) => b.customerRating).length).toFixed(1)
+                    : "N/A"}
+                </div>
+                <div className="text-sm text-gray-600">Avg Rating</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Bookings Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upcoming">Upcoming Bookings</TabsTrigger>
-            <TabsTrigger value="past">Past Bookings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="upcoming" className="mt-6">
-            {upcomingBookings.length > 0 ? (
-              <div>
-                {upcomingBookings.map(renderBookingCard)}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No upcoming bookings
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Ready to book your next service? Browse our available services.
-                  </p>
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white">
-                    Browse Services
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="past" className="mt-6">
-            {pastBookings.length > 0 ? (
-              <div>
-                {pastBookings.map(renderBookingCard)}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <CheckCircle2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No past bookings
-                  </h3>
-                  <p className="text-gray-600">
-                    Your completed bookings will appear here.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upcoming">Upcoming Bookings</TabsTrigger>
+              <TabsTrigger value="past">Past Bookings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upcoming" className="mt-6">
+              {upcomingBookings.length > 0 ? (
+                <div>
+                  {upcomingBookings.map(renderBookingCard)}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No upcoming bookings
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Ready to book your next service? Browse our available services.
+                    </p>
+                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white">
+                      Browse Services
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="past" className="mt-6">
+              {pastBookings.length > 0 ? (
+                <div>
+                  {pastBookings.map(renderBookingCard)}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <CheckCircle2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No past bookings
+                    </h3>
+                    <p className="text-gray-600">
+                      Your completed bookings will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
+
+      {/* Reschedule Dialog */}
+      {rescheduleBooking && (
+        <RescheduleDialog
+          isOpen={true}
+          onClose={() => setRescheduleBooking(null)}
+          booking={rescheduleBooking}
+        />
+      )}
     </div>
   );
 }

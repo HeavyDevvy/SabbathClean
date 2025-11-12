@@ -454,6 +454,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Phase 4.3a: Reschedule booking
+  app.patch("/api/bookings/:id/reschedule", async (req, res) => {
+    try {
+      const { scheduledDate, scheduledTime } = req.body;
+      
+      if (!scheduledDate || !scheduledTime) {
+        return res.status(400).json({ message: "Date and time are required" });
+      }
+
+      const booking = await storage.updateBookingSchedule(
+        req.params.id,
+        new Date(scheduledDate),
+        scheduledTime
+      );
+      
+      res.json(booking);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Review routes
   app.post("/api/reviews", async (req, res) => {
     try {
