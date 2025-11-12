@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +68,7 @@ export default function ModernServiceModal({
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const { addToCart, itemCount } = useCart();
+  const [, navigate] = useLocation();
   const [step, setStep] = useState(1);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedBookingData, setConfirmedBookingData] = useState<any>(null);
@@ -387,7 +389,7 @@ export default function ModernServiceModal({
       title: "House Cleaning Service",
       icon: Sparkles,
       basePrice: 280,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.2 },
@@ -415,7 +417,7 @@ export default function ModernServiceModal({
       title: "Garden Care Service",
       icon: Scissors,
       basePrice: 320,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
         { value: "house", label: "House Garden", multiplier: 1.0 },
@@ -445,7 +447,7 @@ export default function ModernServiceModal({
       title: "Plumbing Service",
       icon: Droplets,
       basePrice: 380,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.1 },
@@ -476,7 +478,7 @@ export default function ModernServiceModal({
       title: "Electrical Service",
       icon: Zap,
       basePrice: 450,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.2 },
@@ -517,7 +519,7 @@ export default function ModernServiceModal({
       title: "Garden Maintenance Service",
       icon: TreePine,
       basePrice: 320,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
         { value: "house", label: "House Garden", multiplier: 1.0 },
@@ -547,7 +549,7 @@ export default function ModernServiceModal({
       title: "Chef & Catering Service",
       icon: ChefHat,
       basePrice: 850,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment/Small Kitchen", multiplier: 1.0 },
         { value: "house", label: "House Kitchen", multiplier: 1.1 },
@@ -642,7 +644,7 @@ export default function ModernServiceModal({
       title: "Event Staffing Service",
       icon: Users,
       basePrice: 180,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment/Small Space", multiplier: 0.8 },
         { value: "house", label: "House Event", multiplier: 1.0 },
@@ -672,7 +674,7 @@ export default function ModernServiceModal({
       title: "Beauty & Wellness Service",
       icon: Scissors,
       basePrice: 280,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment Visit", multiplier: 1.0 },
         { value: "house", label: "House Visit", multiplier: 1.1 },
@@ -702,7 +704,7 @@ export default function ModernServiceModal({
       title: "Moving Services",
       icon: Wrench,
       basePrice: 600,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment/1-2 Bedrooms", multiplier: 1.0 },
         { value: "house", label: "House/3-4 Bedrooms", multiplier: 1.4 },
@@ -734,7 +736,7 @@ export default function ModernServiceModal({
       title: "Au Pair Services",
       icon: Users,
       basePrice: 65,
-      steps: 5,
+      steps: 4,
       propertyTypes: [
         { value: "apartment", label: "Apartment", multiplier: 1.0 },
         { value: "house", label: "House", multiplier: 1.1 },
@@ -1305,6 +1307,92 @@ export default function ModernServiceModal({
         description: "Please try again."
       });
     }
+  };
+
+  const handleAddToCart = async () => {
+    // Check cart limit (max 3 services)
+    if (itemCount >= 3) {
+      toast({
+        variant: "destructive",
+        title: "Cart limit reached",
+        description: "You can add up to 3 services per booking. Please proceed to checkout."
+      });
+      return;
+    }
+
+    // Map frontend service IDs to database service IDs
+    const serviceIdMapping: Record<string, string> = {
+      'cleaning': 'house-cleaning',
+      'garden-care': 'gardening',
+      'chef-catering': 'chef-catering',
+      'plumbing': 'plumbing',
+      'electrical': 'electrical',
+      'waitering': 'event-staff'
+    };
+    
+    const dbServiceId = serviceIdMapping[serviceId] || serviceId;
+    
+    // Map booking data to CartItem format
+    const cartItem = {
+      serviceId: dbServiceId,
+      serviceName: currentConfig.title,
+      providerId: null,
+      providerName: formData.selectedProvider?.name || "To be assigned",
+      scheduledDate: formData.preferredDate,
+      scheduledTime: formData.timePreference,
+      duration: estimatedHours > 0 ? Math.round(estimatedHours) : 3,
+      basePrice: pricing.basePrice.toString(),
+      addOnsPrice: pricing.addOnsPrice.toString(),
+      subtotal: pricing.totalPrice.toString(),
+      selectedAddOns: formData.selectedAddOns || [],
+      comments: formData.specialRequests || "",
+      serviceDetails: JSON.stringify({
+        propertyType: formData.propertyType,
+        address: formData.address,
+        recurringSchedule: formData.recurringSchedule,
+        materials: formData.materials,
+        insurance: formData.insurance,
+        cleaningType: formData.cleaningType,
+        propertySize: formData.propertySize,
+        gardenSize: formData.gardenSize,
+        gardenCondition: formData.gardenCondition,
+        urgency: formData.urgency,
+        electricalIssue: formData.electricalIssue,
+        cuisineType: formData.cuisineType,
+        menuSelection: formData.menuSelection,
+        selectedMenu: formData.selectedMenu,
+        customMenuItems: formData.customMenuItems,
+        dietaryRequirements: formData.dietaryRequirements,
+        eventSize: formData.eventSize,
+        provider: formData.selectedProvider
+      })
+    };
+
+    try {
+      await addToCart(cartItem);
+      
+      toast({
+        title: "Service added to cart!",
+        description: `${currentConfig.title} added successfully. Go to cart to checkout.`
+      });
+      
+      // Close modal
+      onClose();
+      
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to add to cart",
+        description: "Please try again."
+      });
+    }
+  };
+
+  const handleGoToCart = () => {
+    // Close modal and navigate to cart
+    onClose();
+    navigate("/cart");
   };
 
   const handleConfirmationClose = () => {
@@ -2947,7 +3035,6 @@ export default function ModernServiceModal({
             {step === 2 && renderStep2()}
             {step === 3 && renderStep3()}
             {step === 4 && renderStep4()}
-            {step === 5 && renderStep5()}
           </div>
 
           {/* Navigation */}
@@ -2990,26 +3077,32 @@ export default function ModernServiceModal({
                       (serviceId === "au-pair" && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
                     )) ||
                     (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
-                    (step === 4 && !formData.selectedProvider) ||
-                    (step === 5 && formData.paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) ||
-                    (step === 5 && formData.paymentMethod === "bank" && (!formData.bankAccount || !formData.bankBranch))
+                    (step === 4 && !formData.selectedProvider)
                   }
                 >
                   Next
                 </Button>
               ) : (
-                <Button 
-                  onClick={handleBookingConfirm}
-                  className="bg-gradient-to-r from-primary to-purple-600"
-                  disabled={
-                    formData.paymentMethod === "card" 
-                      ? (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)
-                      : (!formData.bankAccount || !formData.bankBranch)
-                  }
-                >
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  Complete Booking - R{pricing.totalPrice}
-                </Button>
+                <>
+                  <Button 
+                    onClick={handleAddToCart}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600"
+                    disabled={!formData.selectedProvider}
+                    data-testid="button-add-to-cart"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Add to Cart
+                  </Button>
+                  <Button 
+                    onClick={handleGoToCart}
+                    variant="outline"
+                    className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                    data-testid="button-go-to-cart"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Go to Cart ({itemCount})
+                  </Button>
+                </>
               )}
             </div>
           </div>
