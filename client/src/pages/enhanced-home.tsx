@@ -20,6 +20,10 @@ export default function EnhancedHome() {
   const [isDemoVideoOpen, setIsDemoVideoOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
   const [pendingBookingService, setPendingBookingService] = useState<string>("");
+  const [pendingProviderId, setPendingProviderId] = useState<string>("");
+  const [pendingProviderName, setPendingProviderName] = useState<string>("");
+  const [selectedProviderId, setSelectedProviderId] = useState<string>("");
+  const [selectedProviderName, setSelectedProviderName] = useState<string>("");
   const [completedBookingData, setCompletedBookingData] = useState<any>(null);
   
   // Use real authentication state
@@ -58,11 +62,13 @@ export default function EnhancedHome() {
     setIsBookingModalOpen(true);
   };
 
-  const handleServiceSelect = (serviceId: string) => {
+  const handleServiceSelect = (serviceId: string, providerId?: string, providerName?: string) => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Store the service they wanted to book
+      // Phase 5.2: Store service AND provider info for Berry Stars
       setPendingBookingService(serviceId);
+      setPendingProviderId(providerId || "");
+      setPendingProviderName(providerName || "");
       // Show auth modal first
       setIsBookingAuthModalOpen(true);
       return;
@@ -70,15 +76,22 @@ export default function EnhancedHome() {
 
     // User is authenticated, proceed with booking
     setSelectedService(serviceId);
+    setSelectedProviderId(providerId || "");
+    setSelectedProviderName(providerName || "");
     setIsBookingModalOpen(true);
   };
 
   const handleAuthSuccess = () => {
-    // After successful authentication, open booking modal with pending service
+    // Phase 5.2: After successful authentication, restore both service AND provider selection
     setIsBookingAuthModalOpen(false);
     setSelectedService(pendingBookingService || "house-cleaning");
+    setSelectedProviderId(pendingProviderId);
+    setSelectedProviderName(pendingProviderName);
     setIsBookingModalOpen(true);
-    setPendingBookingService(""); // Clear pending service
+    // Clear pending state
+    setPendingBookingService("");
+    setPendingProviderId("");
+    setPendingProviderName("");
   };
 
   const handleDemoClick = () => {
@@ -138,6 +151,8 @@ export default function EnhancedHome() {
         onClose={() => {
           setIsBookingAuthModalOpen(false);
           setPendingBookingService("");
+          setPendingProviderId("");
+          setPendingProviderName("");
         }}
         onSuccess={handleAuthSuccess}
         message="Please sign in to continue with your booking"
@@ -150,8 +165,12 @@ export default function EnhancedHome() {
           onClose={() => {
             setIsBookingModalOpen(false);
             setSelectedService("");
+            setSelectedProviderId("");
+            setSelectedProviderName("");
           }}
           serviceId={selectedService || "house-cleaning"}
+          preSelectedProviderId={selectedProviderId}
+          preSelectedProviderName={selectedProviderName}
           editBookingData={completedBookingData}
           onBookingComplete={(bookingData) => {
             console.log("Booking completed:", bookingData);
@@ -166,6 +185,8 @@ export default function EnhancedHome() {
             
             setCompletedBookingData(enhancedBookingData);
             setIsBookingModalOpen(false);
+            setSelectedProviderId("");
+            setSelectedProviderName("");
             setIsConfirmationOpen(true);
           }}
         />

@@ -31,7 +31,7 @@ interface Provider {
 }
 
 interface BerryStarsSectionProps {
-  onBookService: (serviceId: string) => void;
+  onBookService: (serviceId: string, providerId?: string, providerName?: string) => void;
 }
 
 export default function BerryStarsSection({ onBookService }: BerryStarsSectionProps) {
@@ -269,7 +269,11 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                       <div className="text-xs text-gray-500">per hour</div>
                     </div>
                     <Button
-                      onClick={() => onBookService(getServiceForProvider(provider.specialties))}
+                      onClick={() => onBookService(
+                        getServiceForProvider(provider.specialties),
+                        provider.id,
+                        provider.name
+                      )}
                       size="sm"
                       className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-3 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs"
                       data-testid={`button-book-${provider.id}`}

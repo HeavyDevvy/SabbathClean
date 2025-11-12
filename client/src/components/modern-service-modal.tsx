@@ -53,6 +53,8 @@ interface ModernServiceModalProps {
   bookedServices?: string[]; // Track services already booked in this session
   pendingDrafts?: any[]; // Store service drafts before payment (multi-service)
   onAddAnotherService?: (draftData: any) => void; // Callback when adding another service with full draft data
+  preSelectedProviderId?: string; // Pre-selected provider (e.g., Berry Stars)
+  preSelectedProviderName?: string; // Pre-selected provider name
 }
 
 export default function ModernServiceModal({
@@ -64,7 +66,9 @@ export default function ModernServiceModal({
   editBookingData,
   bookedServices = [],
   pendingDrafts = [],
-  onAddAnotherService
+  onAddAnotherService,
+  preSelectedProviderId,
+  preSelectedProviderName
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const { addToCart, itemCount } = useCart();
@@ -130,7 +134,19 @@ export default function ModernServiceModal({
     
     // Selections
     selectedAddOns: editBookingData?.selectedAddOns || [] as string[],
-    selectedProvider: editBookingData?.selectedProvider || null as any,
+    selectedProvider: editBookingData?.selectedProvider || (preSelectedProviderId ? { 
+      id: preSelectedProviderId, 
+      name: preSelectedProviderName || "Berry Star Provider",
+      rating: 4.9,
+      totalReviews: 150,
+      reviews: 150,
+      hourlyRate: 350,
+      distance: "2.5 km",
+      specializations: ["Berry Star", "Top Rated"],
+      verified: true,
+      verifiedBadges: ["Berry Star", "Verified", "Top Rated"],
+      responseTime: "< 1 hour"
+    } : null) as any,
     specialRequests: editBookingData?.specialRequests || "",
     
     // Payment information
@@ -143,6 +159,11 @@ export default function ModernServiceModal({
     bankAccount: "",
     bankBranch: ""
   });
+
+  // Phase 5.2: Berry Stars pre-selection flag
+  const hasPreselectedProvider = useMemo(() => {
+    return !!preSelectedProviderId && !!formData.selectedProvider;
+  }, [preSelectedProviderId, formData.selectedProvider]);
 
   // Derive card brand from card number
   const cardBrand = useMemo(() => {
@@ -2414,7 +2435,86 @@ export default function ModernServiceModal({
     );
   };
 
-  const renderStep4 = () => (
+  const renderStep4 = () => {
+    // Phase 5.2: Show locked Berry Star provider if pre-selected
+    if (hasPreselectedProvider && formData.selectedProvider) {
+      const provider = formData.selectedProvider;
+      return (
+        <div className="space-y-6">
+          <div className="text-center mb-6">
+            <Star className="h-12 w-12 text-yellow-500 mx-auto mb-3 fill-current" />
+            <h3 className="text-lg font-semibold">Berry Star Provider Selected</h3>
+            <p className="text-gray-600 text-sm">
+              You've chosen one of our top-rated Berry Star professionals
+            </p>
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-3 mt-3">
+              <p className="text-xs text-yellow-700 flex items-center justify-center">
+                <Star className="h-4 w-4 mr-2 fill-current" />
+                Berry Stars are our highest-rated providers with proven excellence
+              </p>
+            </div>
+          </div>
+
+          {/* Locked Provider Card */}
+          <Card className="ring-2 ring-yellow-500 bg-gradient-to-br from-yellow-50/50 to-orange-50/50">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                  <Star className="h-6 w-6 text-white fill-current" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h4 className="font-semibold text-gray-900">{provider.name}</h4>
+                    <Badge className="bg-yellow-500 text-white">Berry Star</Badge>
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  </div>
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-400 mr-1 fill-current" />
+                      {provider.rating} ({provider.reviews})
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {provider.distance}
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {provider.responseTime}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {provider.verifiedBadges?.map((badge: string) => (
+                      <Badge key={badge} variant="secondary" className="text-xs">
+                        {badge}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                    <span className="text-sm font-semibold text-gray-700">
+                      R{provider.hourlyRate}/hour
+                    </span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <LockIcon className="h-3 w-3 mr-1" />
+                      Pre-Selected
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-blue-700">
+              This Berry Star provider is pre-selected for this booking. 
+              Proceed to add to cart or complete your booking.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Normal provider selection flow
+    return (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <User className="h-12 w-12 text-primary mx-auto mb-3" />
@@ -2497,7 +2597,8 @@ export default function ModernServiceModal({
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderStep5 = () => {
     // Create current draft from form data (plain variables, not hooks)
