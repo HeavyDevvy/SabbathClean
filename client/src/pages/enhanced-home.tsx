@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
 import ComprehensiveServices from "@/components/comprehensive-services";
@@ -7,6 +7,7 @@ import ComprehensiveServices from "@/components/comprehensive-services";
 import ModernServiceModal from "@/components/modern-service-modal";
 import BookingConfirmation from "@/components/booking-confirmation";
 import DemoVideoModal from "@/components/demo-video-modal";
+import BookingAuthModal from "@/components/booking-auth-modal";
 import BerryStarsSection from "@/components/berry-stars-section";
 import TrustSafetySection from "@/components/trust-safety-section";
 
@@ -14,9 +15,11 @@ import Footer from "@/components/footer";
 
 export default function EnhancedHome() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isBookingAuthModalOpen, setIsBookingAuthModalOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [isDemoVideoOpen, setIsDemoVideoOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [pendingBookingService, setPendingBookingService] = useState<string>("");
   const [completedBookingData, setCompletedBookingData] = useState<any>(null);
   
   // Use real authentication state
@@ -37,6 +40,18 @@ export default function EnhancedHome() {
   }
 
   const handleBookingClick = (serviceId?: string) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Store the service they wanted to book
+      if (serviceId) {
+        setPendingBookingService(serviceId);
+      }
+      // Show auth modal first
+      setIsBookingAuthModalOpen(true);
+      return;
+    }
+
+    // User is authenticated, proceed with booking
     if (serviceId) {
       setSelectedService(serviceId);
     }
@@ -44,8 +59,26 @@ export default function EnhancedHome() {
   };
 
   const handleServiceSelect = (serviceId: string) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Store the service they wanted to book
+      setPendingBookingService(serviceId);
+      // Show auth modal first
+      setIsBookingAuthModalOpen(true);
+      return;
+    }
+
+    // User is authenticated, proceed with booking
     setSelectedService(serviceId);
     setIsBookingModalOpen(true);
+  };
+
+  const handleAuthSuccess = () => {
+    // After successful authentication, open booking modal with pending service
+    setIsBookingAuthModalOpen(false);
+    setSelectedService(pendingBookingService || "house-cleaning");
+    setIsBookingModalOpen(true);
+    setPendingBookingService(""); // Clear pending service
   };
 
   const handleDemoClick = () => {
@@ -98,6 +131,17 @@ export default function EnhancedHome() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Booking Authentication Modal - shows when user tries to book without being logged in */}
+      <BookingAuthModal
+        isOpen={isBookingAuthModalOpen}
+        onClose={() => {
+          setIsBookingAuthModalOpen(false);
+          setPendingBookingService("");
+        }}
+        onSuccess={handleAuthSuccess}
+        message="Please sign in to continue with your booking"
+      />
 
       {/* Standardized Modern Service Modal */}
       {isBookingModalOpen && (

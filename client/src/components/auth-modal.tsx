@@ -18,30 +18,25 @@ import {
 } from "lucide-react";
 import { FaGoogle, FaApple, FaTwitter, FaInstagram } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { authClient } from "@/lib/auth-client";
-import type { LoginData, RegisterData } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "wouter";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (user: any) => void;
+  message?: string; // Optional message to show (e.g., "Please sign in to continue booking")
 }
 
-export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [, setLocation] = useLocation();
+  const { login, refreshUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    address: '',
-    city: '',
-    province: '',
-    confirmPassword: '',
     rememberMe: false
   });
   const { toast } = useToast();
@@ -73,26 +68,45 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     }
   ];
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: LoginData) => {
-      return await authClient.login(data);
-    },
-    onSuccess: (result) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter both email and password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await login(formData.email, formData.password);
+      
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${result.user.firstName || 'User'}!`,
+        description: "Welcome back!",
       });
-      onSuccess?.(result.user);
+      
+      // Refresh user data to update context
+      refreshUser();
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess({ email: formData.email });
+      }
+      
       onClose();
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
