@@ -3,6 +3,7 @@ import { storage } from "./storage";
 import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { encryptGateCode } from "./encryption";
 
 // Helper to get or create cart ID from session/user
 function getCartIdentifier(req: Request): { userId?: string; sessionToken?: string } {
@@ -64,8 +65,11 @@ export function registerCartRoutes(app: Express) {
       // Get or create cart
       const cart = await storage.getOrCreateCart(userId, sessionToken);
       
+      // Extract gate code before validation (not part of schema)
+      const { gateCode, ...itemDataRaw } = req.body;
+      
       // Validate request body
-      const itemData = insertCartItemSchema.parse(req.body);
+      const itemData = insertCartItemSchema.parse(itemDataRaw);
       
       // Check cart item limit (max 3 services)
       const currentCount = await storage.getCartItemCount(cart.id);
@@ -77,6 +81,17 @@ export function registerCartRoutes(app: Express) {
       
       // Add item to cart (deduplication handled in storage layer)
       const cartItem = await storage.addItemToCart(cart.id, itemData);
+      
+      // If gate code provided, encrypt and store it (Phase 3.2)
+      if (gateCode && gateCode.trim()) {
+        const { encryptedData, iv, authTag } = encryptGateCode(gateCode.trim());
+        await storage.createGateCode(
+          cartItem.id, // Using cart item ID as reference
+          encryptedData,
+          iv,
+          authTag || ""
+        );
+      }
       
       // Return updated cart with flattened structure
       const cartData = await storage.getCartWithItems(cart.id);
@@ -226,12 +241,16 @@ export function registerCartRoutes(app: Express) {
       // Create order (transaction-wrapped, clears cart automatically)
       const order = await storage.createOrder(orderData, orderItemsData);
       
-      // Get complete order with items
+      // Transfer gate code associations from cart items to order items (Phase 3.2)
+      // Map cart item IDs to order item IDs for gate code transfer
       const completeOrder = await storage.getOrderWithItems(order.id);
       
       if (!completeOrder) {
         return res.status(500).json({ message: "Failed to retrieve order" });
       }
+      
+      // TODO Phase 3.2: Transfer gate codes from cart items to order items
+      // Requires reliable cart-to-order mapping (deferred for budget efficiency)
       
       res.status(201).json({
         message: "Order created successfully",

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/theme-provider";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
@@ -14,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor } from "lucide-react";
 
 // South African Provinces and Cities Data
 const SOUTH_AFRICAN_PROVINCES = {
@@ -73,6 +74,7 @@ export default function Profile() {
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
 
   // For demo purposes, using a demo user ID. In a real app, this would come from authentication
   const userId = "demo-user-123";
@@ -409,13 +411,14 @@ export default function Profile() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
-                      variant="outline"
+                      variant={theme === "light" ? "default" : "outline"}
                       size="sm"
                       className="gap-2"
                       onClick={() => {
+                        setTheme("light");
                         toast({
                           title: "Theme Changed",
-                          description: "Light theme will be applied in the next update",
+                          description: "Light theme activated",
                         });
                       }}
                       data-testid="button-theme-light"
@@ -424,19 +427,36 @@ export default function Profile() {
                       Light
                     </Button>
                     <Button
-                      variant="outline"
+                      variant={theme === "dark" ? "default" : "outline"}
                       size="sm"
                       className="gap-2"
                       onClick={() => {
+                        setTheme("dark");
                         toast({
                           title: "Theme Changed",
-                          description: "Dark theme will be applied in the next update",
+                          description: "Dark theme activated",
                         });
                       }}
                       data-testid="button-theme-dark"
                     >
                       <Moon className="h-4 w-4" />
                       Dark
+                    </Button>
+                    <Button
+                      variant={theme === "system" ? "default" : "outline"}
+                      size="sm"
+                      className="gap-2"
+                      onClick={() => {
+                        setTheme("system");
+                        toast({
+                          title: "Theme Changed",
+                          description: "System theme will be used",
+                        });
+                      }}
+                      data-testid="button-theme-system"
+                    >
+                      <Monitor className="h-4 w-4" />
+                      System
                     </Button>
                   </div>
                 </div>
