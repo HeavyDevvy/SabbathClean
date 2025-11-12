@@ -222,6 +222,7 @@ export function registerCartRoutes(app: Express) {
       
       // Convert cart items to order items
       const orderItemsData = cartData.items.map(item => ({
+        sourceCartItemId: item.id, // Phase 3.2: Enable 1:1 gate code transfer
         serviceId: item.serviceId,
         providerId: item.providerId || null,
         serviceName: item.serviceName,
@@ -239,18 +240,14 @@ export function registerCartRoutes(app: Express) {
       }));
       
       // Create order (transaction-wrapped, clears cart automatically)
+      // Gate code transfer happens automatically within the createOrder transaction
       const order = await storage.createOrder(orderData, orderItemsData);
       
-      // Transfer gate code associations from cart items to order items (Phase 3.2)
-      // Map cart item IDs to order item IDs for gate code transfer
       const completeOrder = await storage.getOrderWithItems(order.id);
       
       if (!completeOrder) {
         return res.status(500).json({ message: "Failed to retrieve order" });
       }
-      
-      // TODO Phase 3.2: Transfer gate codes from cart items to order items
-      // Requires reliable cart-to-order mapping (deferred for budget efficiency)
       
       res.status(201).json({
         message: "Order created successfully",

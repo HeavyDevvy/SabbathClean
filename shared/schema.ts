@@ -839,6 +839,7 @@ export const orders = pgTable("orders", {
 export const orderItems = pgTable("order_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").references(() => orders.id, { onDelete: "cascade" }).notNull(),
+  sourceCartItemId: varchar("source_cart_item_id"), // Phase 3.2: Maps to original cart item for gate code transfer
   bookingId: varchar("booking_id").references(() => bookings.id), // Links to actual booking after creation
   serviceId: varchar("service_id").references(() => services.id), // Nullable to match cart items flexibility
   providerId: varchar("provider_id").references(() => serviceProviders.id),

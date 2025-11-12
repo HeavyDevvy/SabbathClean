@@ -64,7 +64,7 @@ import {
   type InsertWalletTransaction
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -1181,17 +1181,74 @@ export class DatabaseStorage implements IStorage {
   async createOrder(order: InsertOrder, orderItemsData: InsertOrderItem[]): Promise<Order> {
     // Wrap entire order creation in transaction
     return await db.transaction(async (tx) => {
+      // Phase 3.2: Fetch cart items first for stable 1:1 mapping
+      const cartItemById = new Map<string, CartItem>();
+      
+      if (order.cartId) {
+        const existingCartItems = await tx.select().from(cartItems)
+          .where(eq(cartItems.cartId, order.cartId));
+        
+        // Build cart item lookup by ID (guaranteed unique)
+        existingCartItems.forEach(cartItem => {
+          cartItemById.set(cartItem.id, cartItem);
+        });
+      }
+
       // Create the order
       const [newOrder] = await tx.insert(orders).values(order).returning();
 
-      // Create order items
+      // Create order items with sourceCartItemId from passed data
+      // The sourceCartItemId should be provided by the checkout flow
+      const createdOrderItems: OrderItem[] = [];
       if (orderItemsData.length > 0) {
-        await tx.insert(orderItems).values(
-          orderItemsData.map(item => ({
-            ...item,
-            orderId: newOrder.id
-          }))
-        );
+        const orderItemsWithMapping = orderItemsData.map(item => ({
+          ...item,
+          orderId: newOrder.id
+        }));
+
+        const inserted = await tx.insert(orderItems).values(orderItemsWithMapping).returning();
+        createdOrderItems.push(...inserted);
+      }
+
+      // Phase 3.2: Transfer gate codes from cart items to order items using sourceCartItemId
+      if (order.cartId && createdOrderItems.length > 0) {
+        // Collect all sourceCartItemIds from created order items
+        const sourceCartItemIds = createdOrderItems
+          .map(oi => oi.sourceCartItemId)
+          .filter(id => id !== null) as string[];
+        
+        if (sourceCartItemIds.length > 0) {
+          // Fetch all gate codes for these specific cart items using safe parameter binding
+          const cartGateCodes = await tx.select().from(bookingGateCodes)
+            .where(inArray(bookingGateCodes.bookingId, sourceCartItemIds));
+
+          // Create new gate code entries for order items with 1:1 mapping
+          const newGateCodes: InsertBookingGateCode[] = [];
+          for (const gateCode of cartGateCodes) {
+            // Find the exact order item that corresponds to this cart item
+            const orderItem = createdOrderItems.find(oi => 
+              oi.sourceCartItemId === gateCode.bookingId
+            );
+            
+            if (orderItem) {
+              newGateCodes.push({
+                bookingId: orderItem.id, // Reference order item ID
+                encryptedGateCode: gateCode.encryptedGateCode,
+                iv: gateCode.iv,
+                authTag: gateCode.authTag || ""
+              });
+            }
+          }
+
+          // Batch insert new gate codes
+          if (newGateCodes.length > 0) {
+            await tx.insert(bookingGateCodes).values(newGateCodes);
+          }
+
+          // Delete old gate codes for cart items using safe parameter binding
+          await tx.delete(bookingGateCodes)
+            .where(inArray(bookingGateCodes.bookingId, sourceCartItemIds));
+        }
       }
 
       // Clear and mark cart as checked_out

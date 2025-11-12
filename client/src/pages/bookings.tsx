@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import type { Booking } from "@shared/schema";
+import { mapBookingToReceiptData, generateCompletedBookingReceipt } from "@/lib/pdfGenerator";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Calendar,
   Clock,
@@ -112,6 +114,7 @@ export default function BookingsPage() {
   const [rebookData, setRebookData] = useState<any>(null);
   const [shareBooking, setShareBooking] = useState<any>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   // Fetch real bookings from database
   const { data: bookings = [], isLoading } = useQuery<Booking[]>({
@@ -247,7 +250,21 @@ export default function BookingsPage() {
               className="text-red-600 hover:text-red-700"
               onClick={() => {
                 if (booking.status === "completed") {
-                  // TODO: View receipt functionality
+                  try {
+                    const receiptData = mapBookingToReceiptData(booking);
+                    generateCompletedBookingReceipt(receiptData);
+                    toast({
+                      title: "Receipt Downloaded",
+                      description: "Your booking receipt has been downloaded successfully.",
+                    });
+                  } catch (error) {
+                    console.error("Error generating receipt:", error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to generate receipt. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
                 } else {
                   setCancelBooking({
                     id: booking.id,
