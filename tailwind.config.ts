@@ -63,6 +63,7 @@ export default {
         },
         neutral: "var(--neutral)",
         error: "var(--error)",
+        success: "var(--success)",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
