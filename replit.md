@@ -40,6 +40,8 @@ The platform now features:
 
 Previous comprehensive features are still available at `/enhanced` route for comparison.
 
+**Brand Styling Implementation (Nov 13, 2025):** Complete Berry Events brand color system rollout across all user-facing components. Updated CSS variables in `client/src/index.css` with brand palette: deep plum primary (#3C0B2C), light beige backgrounds (#F5E1CF), complementary error (#C23844), and success (#2D5C3F). Replaced hard-coded blue/purple colors with semantic Tailwind classes (bg-primary, text-primary, hover:bg-accent, text-success) in 8+ key components including home page, header, authentication, booking modals, cart/checkout, and order confirmation. All buttons, badges, loading states, and interactive elements now use Berry Events brand colors consistently. Maintained light-only theme enforcement for brand coherence.
+
 ## Feature Specifications
 
 - **Services**: Supports 8 comprehensive service categories (cleaning, garden-care, plumbing, electrical, chef-catering, event-staff, moving, au-pair) with streamlined 4-step booking workflow. Includes location-based booking and specific requirements for each service. **Cart-Based Booking (Nov 2025)**: Removed payment step from booking flow - users now add services to cart (max 3) and checkout together at /cart-checkout.
