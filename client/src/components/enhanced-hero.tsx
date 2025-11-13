@@ -66,22 +66,11 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
               in your area. Book instantly, pay securely, and get the job done right.
             </p>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Button 
-                onClick={onBookingClick}
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                data-testid="button-book-service-now"
-              >
-                <Calendar className="mr-2 h-5 w-5" />
-                Book Service Now
-              </Button>
-              
-              <Button 
-                variant="outline"
                 size="lg" 
-                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold px-8 py-4 rounded-xl transition-all duration-200 hover:scale-105 transform"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                 onClick={onDemoClick || (() => {
                   const demoSection = document.getElementById('how-it-works');
                   demoSection?.scrollIntoView({ behavior: 'smooth' });
