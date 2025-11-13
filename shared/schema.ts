@@ -784,6 +784,7 @@ export const cartItems = pgTable("cart_items", {
   basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
   addOnsPrice: decimal("add_ons_price", { precision: 10, scale: 2 }).default("0"),
   subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  tipAmount: decimal("tip_amount", { precision: 10, scale: 2 }).default("0"), // HOUSE CLEANING ONLY: Provider tip
   // Service configuration stored as JSON
   serviceDetails: jsonb("service_details"), // property type, size, urgency, etc.
   selectedAddOns: jsonb("selected_addons").default('[]'), // Array of add-on IDs

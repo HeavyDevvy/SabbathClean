@@ -184,8 +184,13 @@ export function registerCartRoutes(app: Express) {
         sum + parseFloat(item.subtotal as string), 0
       );
       
-      const platformFee = subtotal * 0.15; // 15% platform fee
-      const totalAmount = subtotal + platformFee;
+      // HOUSE CLEANING ONLY: Add tip amounts to total
+      const totalTips = cartData.items.reduce((sum, item) => 
+        sum + (parseFloat(item.tipAmount as string) || 0), 0
+      );
+      
+      const platformFee = subtotal * 0.15; // 15% platform fee (does not apply to tips)
+      const totalAmount = subtotal + totalTips + platformFee;
       
       // Generate order number
       const orderNumber = `BE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
@@ -233,6 +238,7 @@ export function registerCartRoutes(app: Express) {
         basePrice: item.basePrice,
         addOnsPrice: item.addOnsPrice || "0",
         subtotal: item.subtotal,
+        tipAmount: item.tipAmount || "0", // HOUSE CLEANING ONLY: Transfer tip from cart to order
         serviceDetails: item.serviceDetails || null,
         selectedAddOns: item.selectedAddOns || [],
         comments: item.comments || null,
