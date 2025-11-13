@@ -298,7 +298,52 @@ export function registerCartRoutes(app: Express) {
         return res.status(404).json({ message: "Order not found" });
       }
       
-      res.json(orderData);
+      // Map snake_case database fields to camelCase for frontend
+      const mappedOrder = {
+        ...orderData.order,
+        totalAmount: orderData.order.totalAmount || orderData.order.total_amount,
+        platformFee: orderData.order.platformFee || orderData.order.platform_fee,
+        taxAmount: orderData.order.taxAmount || orderData.order.tax_amount,
+        serviceFee: orderData.order.serviceFee || orderData.order.service_fee,
+        orderNumber: orderData.order.orderNumber || orderData.order.order_number,
+        paymentStatus: orderData.order.paymentStatus || orderData.order.payment_status,
+        paymentMethod: orderData.order.paymentMethod || orderData.order.payment_method,
+        paymentIntentId: orderData.order.paymentIntentId || orderData.order.payment_intent_id,
+        stripeChargeId: orderData.order.stripeChargeId || orderData.order.stripe_charge_id,
+        cardLast4: orderData.order.cardLast4 || orderData.order.card_last4,
+        cardBrand: orderData.order.cardBrand || orderData.order.card_brand,
+        cardholderName: orderData.order.cardholderName || orderData.order.cardholder_name,
+        accountLast4: orderData.order.accountLast4 || orderData.order.account_last4,
+        bankName: orderData.order.bankName || orderData.order.bank_name,
+        accountHolder: orderData.order.accountHolder || orderData.order.account_holder,
+        confirmationSentAt: orderData.order.confirmationSentAt || orderData.order.confirmation_sent_at,
+        createdAt: orderData.order.createdAt || orderData.order.created_at,
+        updatedAt: orderData.order.updatedAt || orderData.order.updated_at,
+        userId: orderData.order.userId || orderData.order.user_id,
+        cartId: orderData.order.cartId || orderData.order.cart_id
+      };
+      
+      // Map items as well
+      const mappedItems = orderData.items.map((item: any) => ({
+        ...item,
+        orderId: item.orderId || item.order_id,
+        sourceCartItemId: item.sourceCartItemId || item.source_cart_item_id,
+        serviceId: item.serviceId || item.service_id,
+        providerId: item.providerId || item.provider_id,
+        serviceName: item.serviceName || item.service_name,
+        serviceType: item.serviceType || item.service_type,
+        scheduledDate: item.scheduledDate || item.scheduled_date,
+        scheduledTime: item.scheduledTime || item.scheduled_time,
+        basePrice: item.basePrice || item.base_price,
+        addOnsPrice: item.addOnsPrice || item.add_ons_price,
+        tipAmount: item.tipAmount || item.tip_amount,
+        serviceDetails: item.serviceDetails || item.service_details,
+        selectedAddOns: item.selectedAddOns || item.selected_add_ons,
+        createdAt: item.createdAt || item.created_at,
+        updatedAt: item.updatedAt || item.updated_at
+      }));
+      
+      res.json({ order: mappedOrder, items: mappedItems });
     } catch (error: any) {
       console.error("Error fetching order:", error);
       res.status(500).json({ message: error.message });
