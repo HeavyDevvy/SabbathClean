@@ -1277,7 +1277,7 @@ export default function ModernServiceModal({
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
       // HOUSE CLEANING ONLY: Add tip amount
-      tipAmount: isHouseCleaning ? formData.tipAmount.toString() : "0",
+      tipAmount: isHouseCleaning && formData.tipAmount ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1403,7 +1403,7 @@ export default function ModernServiceModal({
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
       // HOUSE CLEANING ONLY: Add tip amount
-      tipAmount: isHouseCleaning ? formData.tipAmount.toString() : "0",
+      tipAmount: isHouseCleaning && formData.tipAmount ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1433,11 +1433,12 @@ export default function ModernServiceModal({
       
       toast({
         title: "Service added to cart!",
-        description: `${currentConfig.title} added successfully. Go to cart to checkout.`
+        description: `${currentConfig.title} added successfully. Redirecting to cart...`
       });
       
-      // Close modal
+      // Close modal and navigate to cart
       onClose();
+      navigate("/cart-checkout");
       
     } catch (error) {
       console.error("Failed to add to cart:", error);
