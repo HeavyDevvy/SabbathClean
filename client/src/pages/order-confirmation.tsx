@@ -349,6 +349,14 @@ export default function OrderConfirmation() {
                       </div>
                     )}
                     
+                    {/* HOUSE CLEANING ONLY: Show tip if present */}
+                    {parseDecimal(item.tipAmount || "0") > 0 && (
+                      <div className="flex justify-between text-success text-sm">
+                        <span>Provider Tip</span>
+                        <span>R{parseDecimal(item.tipAmount || "0").toFixed(2)}</span>
+                      </div>
+                    )}
+                    
                     <Separator className="my-2" />
                     
                     <div className="flex justify-between font-semibold text-primary">
@@ -377,6 +385,15 @@ export default function OrderConfirmation() {
                 {formatCurrency(order.platformFee)}
               </span>
             </div>
+            {/* HOUSE CLEANING ONLY: Show total tips if any items have tips */}
+            {order.items.some(item => parseDecimal(item.tipAmount || "0") > 0) && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Provider Tips</span>
+                <span className="font-medium text-success" data-testid="payment-tips">
+                  {formatCurrency(order.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0))}
+                </span>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total Paid</span>

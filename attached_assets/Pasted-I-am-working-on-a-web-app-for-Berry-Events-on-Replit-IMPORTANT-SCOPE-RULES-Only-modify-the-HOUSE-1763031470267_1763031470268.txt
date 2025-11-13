@@ -1,0 +1,94 @@
+I am working on a web app for Berry Events on Replit.
+
+IMPORTANT SCOPE RULES
+- Only modify the HOUSE CLEANING booking flow.
+- Do NOT change the booking flows for any other services (plumbing, electrical, moving, etc.).
+- Do NOT change the overall layout, routing, or UX steps outside of the items listed below.
+- Do NOT introduce new errors, console warnings, or blank screens.
+
+====================================
+FEATURES TO FIX – HOUSE CLEANING ONLY
+====================================
+
+Context: The House Cleaning booking process has multiple steps. Focus only on this flow.
+
+STEP 3 – ADD-ONS / ESTIMATED HOURS LOGIC
+1. Estimated Hours default:
+   - On the House Cleaning booking flow, step 3 (where add-ons and estimated time are shown), make sure:
+     - The "Estimated Hours" field automatically defaults to **6 hours minimum** as soon as this step loads.
+   - This default must apply every time the user follows the House Cleaning booking flow and reaches step 3.
+
+2. Increasing hours with each additional add-on:
+   - When the user selects **additional services/add-ons** for HOUSE CLEANING on this step:
+     - Automatically increase the Estimated Hours by **0.5 hours (30 minutes)** for every extra add-on that is selected.
+   - Calculation examples (for House Cleaning only):
+     - Base estimate: 6.0 hours (no extra add-ons selected)
+     - 1 extra add-on: 6.5 hours
+     - 2 extra add-ons: 7.0 hours
+     - 3 extra add-ons: 7.5 hours
+   - This increase must:
+     - Happen **in real time** as add-ons are selected/deselected.
+     - Correctly update the value that is shown to the user on the UI.
+     - Be used in any downstream calculations (e.g. costs or summary) that depend on the estimated hours for the House Cleaning booking.
+   - Make sure this incremental logic ONLY applies to the **House Cleaning** booking flow, not to other service types.
+
+3. Real-time display:
+   - As the user selects or unselects add-ons, the Estimated Hours display must update immediately on screen without needing to reload the page or navigate away.
+   - Ensure there are no NaN values or broken bindings; show a clean number (e.g. "6 hours", "6.5 hours", etc).
+
+AFTER SELECTING A SERVICE PROVIDER – BUTTON VISIBILITY & TIP FLOW
+4. Button text colour / visibility:
+   - On the House Cleaning booking flow, after a user selects a verified provider (the “Choose your verified provider” step and subsequent screen with cart options):
+     - Fix the **text colour** for:
+       - "Add to cart & Select Another"
+       - "Add & Go to Cart"
+     - Both buttons should be clearly readable against their background (sufficient contrast).
+     - Do not change the button behavior, layout or labels—only adjust text colour/contrast so they are fully visible.
+
+5. Tip functionality end-to-end:
+   - On the same House Cleaning provider selection / booking process:
+     - Ensure the user can add a **tip** when selecting a service provider.
+     - The tip amount must:
+       - Be stored together with the booking data.
+       - Be included in the **payment step total**.
+       - Be clearly shown on the **checkout / payment summary**.
+       - Be reflected on the **final booking summary / confirmation**.
+   - In short: the tip should follow the full payment flow and be part of what the user pays and sees at checkout.
+   - Make sure no duplicate tipping fields or double-counting is introduced.
+
+===========================
+TECHNICAL & SCOPE CONSTRAINTS
+===========================
+- Apply all new logic and styling in a way that is scoped to:
+  - House Cleaning booking components and/or the House Cleaning service type.
+- Do not break or modify:
+  - Other service booking flows (plumbing, electrical, etc.)
+  - Global header, footer, navigation, or login logic.
+  - Existing routes or API endpoints except where necessary to carry the tip through payment, and only if House Cleaning is involved.
+- Keep the current layout, UX steps, and button labels the same, except for:
+  - The Estimated Hours default and incremental logic.
+  - The colour/contrast of the two provider cart buttons (for visibility).
+  - Making sure the tip is passed through and displayed correctly.
+
+================
+FINAL CHECKLIST
+================
+After implementing the changes, please run through the House Cleaning booking process and confirm ALL of the following, then output a short report:
+
+[ ] Step 3 (House Cleaning only): Estimated Hours defaults to **6 hours** when the step loads.
+[ ] Step 3 (House Cleaning only): For every additional add-on selected, Estimated Hours increases by **0.5 hours**, updating in real time.
+[ ] Step 3 (House Cleaning only): Removing an add-on decreases the estimate accordingly without going below 6.0 hours.
+[ ] The updated Estimated Hours value is used consistently in any cost/summary calculations for the House Cleaning booking.
+[ ] Other service types (plumbing, electrical, etc.) still behave exactly as before and do NOT use the 6h + 0.5h/add-on logic.
+[ ] After choosing a provider for House Cleaning, the “Add to cart & Select Another” and “Add & Go to Cart” buttons are clearly visible and readable (text stands out against the background).
+[ ] The tip field for House Cleaning works end-to-end:
+    - Tip can be entered when selecting the provider.
+    - Tip is included in the payment total.
+    - Tip is shown correctly on the checkout/payment summary.
+    - Tip appears on the final booking summary/confirmation.
+[ ] No new console errors or warnings appear when going through the full House Cleaning booking flow.
+[ ] There are no blank screens or broken navigation; the user can start a House Cleaning booking and complete it successfully as before.
+
+Finally, list:
+- All files edited.
+- A brief description of what was changed in each file.

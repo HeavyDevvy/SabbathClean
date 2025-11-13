@@ -58,8 +58,10 @@ export default function CartCheckout() {
   }
   
   const subtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0);
-  const platformFee = subtotal * 0.15;
-  const total = subtotal + platformFee;
+  // HOUSE CLEANING ONLY: Calculate total tips
+  const totalTips = cart.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
+  const platformFee = subtotal * 0.15; // Platform fee only on subtotal, NOT on tips
+  const total = subtotal + totalTips + platformFee;
   
   // Helper function to detect card brand
   const detectCardBrand = (number: string): string => {
@@ -250,6 +252,14 @@ export default function CartCheckout() {
                           </div>
                         )}
                         
+                        {/* HOUSE CLEANING ONLY: Show tip if present */}
+                        {parseDecimal(item.tipAmount || "0") > 0 && (
+                          <div className="flex justify-between text-success text-sm">
+                            <span>Provider Tip</span>
+                            <span data-testid={`checkout-item-tip-${idx}`}>{formatCurrency(parseDecimal(item.tipAmount || "0"))}</span>
+                          </div>
+                        )}
+                        
                         <Separator className="my-2" />
                         
                         <div className="flex justify-between font-semibold text-primary">
@@ -389,6 +399,12 @@ export default function CartCheckout() {
                   <span className="text-gray-600">Platform Fee (15%)</span>
                   <span className="font-medium" data-testid="summary-platform-fee">{formatCurrency(platformFee)}</span>
                 </div>
+                {totalTips > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Provider Tips</span>
+                    <span className="font-medium text-success" data-testid="summary-tips">{formatCurrency(totalTips)}</span>
+                  </div>
+                )}
                 <Separator />
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
