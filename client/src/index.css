@@ -5,8 +5,8 @@
 
 /* Custom animations for tutorial and recommendations */
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(147, 51, 234, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.8), 0 0 30px rgba(147, 51, 234, 0.5); }
+  0%, 100% { box-shadow: 0 0 5px rgba(60, 11, 44, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(60, 11, 44, 0.8), 0 0 30px rgba(60, 11, 44, 0.5); }
 }
 
 @keyframes shake {
@@ -87,10 +87,10 @@
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 0 rgba(60, 11, 44, 0.3);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    box-shadow: 0 0 0 10px rgba(60, 11, 44, 0);
   }
 }
 
@@ -154,85 +154,89 @@
 }
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(210 25% 7.8431%);
-  --card: hsl(180 6.6667% 97.0588%);
-  --card-foreground: hsl(210 25% 7.8431%);
+  /* Berry Events Brand - Light Mode */
+  --background: hsl(30 29% 97%); /* Very light cream #FAF7F4 */
+  --foreground: hsl(320 69% 14%); /* Deep plum #3C0B2C for text */
+  --card: hsl(0 0% 100%); /* Pure white for cards */
+  --card-foreground: hsl(320 69% 14%); /* Deep plum text */
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(210 25% 7.8431%);
-  --primary: hsl(268.5 83.5% 57.1%);
-  --primary-foreground: hsl(210 40% 98%);
-  --secondary: hsl(315 35% 45%);
-  --secondary-foreground: hsl(315 35% 95%);
-  --muted: hsl(240 1.9608% 90%);
-  --muted-foreground: hsl(210 25% 7.8431%);
-  --accent: hsl(43.2 96.4% 56.3%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 72.2% 50.6%);
+  --popover-foreground: hsl(320 69% 14%);
+  --primary: hsl(320 69% 14%); /* Deep plum/burgundy #3C0B2C */
+  --primary-foreground: hsl(28 63% 89%); /* Light beige #F5E1CF */
+  --secondary: hsl(320 50% 35%); /* Medium plum for secondary actions */
+  --secondary-foreground: hsl(28 63% 89%); /* Light beige text */
+  --muted: hsl(30 20% 94%); /* Very light neutral/beige for muted areas */
+  --muted-foreground: hsl(320 30% 35%); /* Muted plum text */
+  --accent: hsl(320 60% 45%); /* Brighter plum for accents/hover #8B2E5F */
+  --accent-foreground: hsl(0 0% 100%); /* White text on accent */
+  --destructive: hsl(355 55% 49%); /* Complementary error red #C23844 */
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(201.4286 30.4348% 90.9804%);
-  --input: hsl(200 23.0769% 97.4510%);
-  --ring: hsl(202.8169 89.1213% 53.1373%);
-  --chart-1: hsl(203.8863 88.2845% 53.1373%);
-  --chart-2: hsl(159.7826 100% 36.0784%);
-  --chart-3: hsl(42.0290 92.8251% 56.2745%);
-  --chart-4: hsl(147.1429 78.5047% 41.9608%);
-  --chart-5: hsl(341.4894 75.2000% 50.9804%);
-  --sidebar: hsl(180 6.6667% 97.0588%);
-  --sidebar-foreground: hsl(210 25% 7.8431%);
-  --sidebar-primary: hsl(203.8863 88.2845% 53.1373%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(211.5789 51.3514% 92.7451%);
-  --sidebar-accent-foreground: hsl(203.8863 88.2845% 53.1373%);
-  --sidebar-border: hsl(205.0000 25.0000% 90.5882%);
-  --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
+  --border: hsl(320 15% 88%); /* Light plum-tinted border */
+  --input: hsl(30 25% 96%); /* Light beige for input backgrounds */
+  --ring: hsl(320 69% 14%); /* Deep plum for focus rings */
+  --chart-1: hsl(320 60% 45%); /* Plum */
+  --chart-2: hsl(143 34% 27%); /* Success green */
+  --chart-3: hsl(28 63% 70%); /* Light beige tone */
+  --chart-4: hsl(320 50% 65%); /* Light plum */
+  --chart-5: hsl(355 55% 49%); /* Error red */
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(320 69% 14%);
+  --sidebar-primary: hsl(320 69% 14%);
+  --sidebar-primary-foreground: hsl(28 63% 89%);
+  --sidebar-accent: hsl(30 25% 96%);
+  --sidebar-accent-foreground: hsl(320 69% 14%);
+  --sidebar-border: hsl(320 15% 88%);
+  --sidebar-ring: hsl(320 69% 14%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 1.3rem;
-  --neutral: hsl(215.4 16.3% 46.9%);
-  --error: hsl(0 72.2% 50.6%);
+  --radius: 0.75rem; /* 12px for consistent 8-16px rounding */
+  --neutral: hsl(320 15% 50%); /* Neutral plum-tinted gray */
+  --error: hsl(355 55% 49%); /* Berry Events error red #C23844 */
+  --success: hsl(143 34% 27%); /* Berry Events success green #2D5C3F */
 }
 
 .dark {
-  --background: hsl(0 0% 0%);
-  --foreground: hsl(200 6.6667% 91.1765%);
-  --card: hsl(228 9.8039% 10%);
-  --card-foreground: hsl(0 0% 85.0980%);
-  --popover: hsl(0 0% 0%);
-  --popover-foreground: hsl(200 6.6667% 91.1765%);
-  --primary: hsl(268.5 83.5% 57.1%);
-  --primary-foreground: hsl(210 40% 98%);
-  --secondary: hsl(315 35% 45%);
-  --secondary-foreground: hsl(315 35% 95%);
-  --muted: hsl(0 0% 9.4118%);
-  --muted-foreground: hsl(210 3.3898% 46.2745%);
-  --accent: hsl(43.2 96.4% 56.3%);
-  --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 72.2% 50.6%);
+  /* Berry Events Brand - Dark Mode (light-only theme enforced but keeping for completeness) */
+  --background: hsl(320 50% 8%); /* Very dark plum background */
+  --foreground: hsl(28 63% 89%); /* Light beige text */
+  --card: hsl(320 40% 12%); /* Dark plum cards */
+  --card-foreground: hsl(28 63% 89%);
+  --popover: hsl(320 50% 8%);
+  --popover-foreground: hsl(28 63% 89%);
+  --primary: hsl(320 60% 55%); /* Lighter plum for dark mode primary */
+  --primary-foreground: hsl(320 69% 14%); /* Deep plum text */
+  --secondary: hsl(320 45% 25%);
+  --secondary-foreground: hsl(28 63% 89%);
+  --muted: hsl(320 30% 18%);
+  --muted-foreground: hsl(28 40% 70%);
+  --accent: hsl(320 60% 45%);
+  --accent-foreground: hsl(28 63% 89%);
+  --destructive: hsl(355 55% 49%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(210 5.2632% 14.9020%);
-  --input: hsl(207.6923 27.6596% 18.4314%);
-  --ring: hsl(202.8169 89.1213% 53.1373%);
-  --chart-1: hsl(203.8863 88.2845% 53.1373%);
-  --chart-2: hsl(159.7826 100% 36.0784%);
-  --chart-3: hsl(42.0290 92.8251% 56.2745%);
-  --chart-4: hsl(147.1429 78.5047% 41.9608%);
-  --chart-5: hsl(341.4894 75.2000% 50.9804%);
-  --sidebar: hsl(228 9.8039% 10%);
-  --sidebar-foreground: hsl(0 0% 85.0980%);
-  --sidebar-primary: hsl(202.8169 89.1213% 53.1373%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(205.7143 70% 7.8431%);
-  --sidebar-accent-foreground: hsl(203.7736 87.6033% 52.5490%);
-  --sidebar-border: hsl(205.7143 15.7895% 26.0784%);
-  --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
+  --border: hsl(320 25% 20%);
+  --input: hsl(320 30% 15%);
+  --ring: hsl(320 60% 55%);
+  --chart-1: hsl(320 60% 55%);
+  --chart-2: hsl(143 34% 40%);
+  --chart-3: hsl(28 50% 60%);
+  --chart-4: hsl(320 50% 65%);
+  --chart-5: hsl(355 55% 49%);
+  --sidebar: hsl(320 40% 12%);
+  --sidebar-foreground: hsl(28 63% 89%);
+  --sidebar-primary: hsl(320 60% 55%);
+  --sidebar-primary-foreground: hsl(320 69% 14%);
+  --sidebar-accent: hsl(320 30% 18%);
+  --sidebar-accent-foreground: hsl(28 63% 89%);
+  --sidebar-border: hsl(320 25% 20%);
+  --sidebar-ring: hsl(320 60% 55%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 1.3rem;
-  --neutral: hsl(215.4 16.3% 46.9%);
-  --error: hsl(0 72.2% 50.6%);
+  --radius: 0.75rem;
+  --neutral: hsl(320 15% 50%);
+  --error: hsl(355 55% 49%);
+  --success: hsl(143 34% 40%);
 }
 
 @layer base {
@@ -254,12 +258,24 @@
     color: hsl(var(--error));
   }
   
+  .text-success {
+    color: hsl(var(--success));
+  }
+  
   .border-error {
     border-color: hsl(var(--error));
   }
   
+  .border-success {
+    border-color: hsl(var(--success));
+  }
+  
   .bg-neutral {
     background-color: hsl(var(--neutral));
+  }
+  
+  .bg-success {
+    background-color: hsl(var(--success));
   }
   
   .line-clamp-1 {

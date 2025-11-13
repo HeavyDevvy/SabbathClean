@@ -1,0 +1,98 @@
+I want to update ONLY the visual styling (UI look & feel) of this app to match my Berry Events brand. 
+
+IMPORTANT:
+- Do NOT change any functionality, routing, logic, form validation, or data.
+- Do NOT change the layout structure, component hierarchy, or UX flow.
+- Do NOT remove or rename components, props, functions, or files.
+- Do NOT introduce new errors, console warnings, or blank screens.
+- The user journey (booking flow, login, payments, etc.) must remain exactly the same and fully working.
+
+========================
+BRAND & STYLE DIRECTION
+========================
+
+I have a Berry Events logo with a minimalist “B” and text on a deep plum/burgundy background with light beige text.
+
+Please create a modern, minimalist UI that uses this color scheme consistently across the app.
+
+Suggested palette (you can tweak for accessibility but stay within this look):
+- Primary background: deep plum / burgundy (for key areas, accents, or hero sections)
+  e.g. #3C0B2C or similar rich plum
+- Primary text: light beige / soft cream 
+  e.g. #F5E1CF
+- Secondary/background: very light neutral/cream for content areas
+  e.g. #FAF7F4 or white
+- Accent color: a slightly lighter or brighter plum tone for hover/focus states
+- Error states: keep existing red but harmonise slightly (no functional changes)
+- Keep text highly readable (WCAG AA contrast or better).
+
+Typography:
+- Keep the current font stack if it already fits. If you adjust, use a clean, sans-serif system font (e.g. system-ui / Inter-style).
+- Maintain existing font sizes and hierarchy; only refine weights and colors as needed.
+
+UI style goals:
+- Minimalist, modern, clean.
+- Flat or very subtle shadows and borders.
+- Rounded corners consistent across buttons, cards, and inputs (use a single radius scale, e.g. 8–16px).
+- Plenty of breathing room: increase or balance paddings where needed WITHOUT changing layout structure or breaking responsiveness.
+
+========================
+TECHNICAL IMPLEMENTATION
+========================
+
+1. Identify the global styling mechanism:
+   - If using Tailwind: update `tailwind.config.js` theme colors to introduce brand colors (primary, secondary, accent, background, text).
+   - If using CSS variables: define brand tokens in a root stylesheet (e.g. :root { --color-primary: ... }).
+   - If using a global CSS/SCSS file: define a small set of brand classes and apply them.
+
+2. Apply the new color scheme and minimalist style:
+   - Navigation bar:
+     - Use the brand colors (e.g. light background with plum text, or plum bar with beige text).
+     - Keep logo and nav layout exactly as is (only color and style updates).
+   - Buttons:
+     - Primary buttons: plum background, beige text, slight radius, subtle hover state (slightly lighter/darker plum, no layout shift).
+     - Secondary buttons/links: plum text with subtle border or text-only style.
+     - Do NOT change button text, click behavior, or logic.
+   - Cards / panels / forms:
+     - Light background (cream/white) panels on a very light page background.
+     - Use plum for headings and key labels, neutral greys or soft beige for secondary text.
+   - Inputs (text fields, dropdowns, date selectors, etc.):
+     - Simple borders, light background, consistent radius.
+     - Focus state should use a subtle plum outline or border, maintaining accessibility.
+   - Icons and highlights:
+     - Recolor existing icons to use plum/neutral palette where possible without changing their meaning.
+
+3. Logo usage:
+   - If a logo is already used, do not change its placement, only ensure it visually fits with the new palette (no stretching/distortion).
+   - If you detect multiple logo variants, prefer the one that best matches the attached brand style and apply it consistently (header, footer, booking confirmation, etc.), but do not alter any functionality around it.
+
+4. Responsiveness:
+   - Preserve all existing responsive behavior.
+   - Do NOT change breakpoints, flex/grid structure, or hide/show logic.
+   - Any spacing tweaks must be small enough not to break mobile layouts.
+
+5. No structural or functional changes:
+   - Do NOT change texts, labels, button names, or flows.
+   - Do NOT alter login/session behavior, booking steps, payment behavior, or API interaction.
+   - Only CSS/Tailwind/theme-related code should change.
+
+========================
+FINAL QA & CHECKLIST
+========================
+
+When you are done, please:
+
+1. List all files you edited and briefly describe the UI-only changes in each.
+2. Confirm that you did NOT change any business logic, routing, or API calls.
+3. Run through the user journey and confirm:
+   - [ ] Home page loads with no errors; layout unchanged except for new colors/styling.
+   - [ ] Login/sign-up still work exactly as before.
+   - [ ] Booking flow (all steps) works from start to finish with no blank screens.
+   - [ ] Schedule & preferences, add-ons, provider selection, and payment still function exactly as before.
+   - [ ] Payment completes successfully and still navigates to the booking summary/complete page.
+   - [ ] Services page, profile page, and any other key pages all render correctly with the new theme.
+   - [ ] No console errors or warnings related to styling changes.
+   - [ ] All text remains readable with sufficient contrast on all backgrounds.
+   - [ ] The new color scheme (plum + beige + light neutrals) is applied consistently across navigation, buttons, inputs, cards, and key elements.
+
+If any errors occur during UI changes, fix them while staying within the scope: UI styling only, no functional or UX changes.
