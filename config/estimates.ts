@@ -76,10 +76,23 @@ export function calculateEstimatedHours(
     hours *= multiplier;
   }
   
-  // Add hours from add-ons
-  if (addOnIds && addOnIds.length > 0) {
-    // Import add-ons config to get hours per add-on
-    // This would need to be implemented when add-ons are selected
+  // HOUSE CLEANING ONLY: Special logic for estimated hours
+  const isHouseCleaning = serviceCategory === "house-cleaning" || serviceCategory === "cleaning";
+  
+  if (isHouseCleaning) {
+    // Minimum 6 hours for House Cleaning
+    hours = Math.max(hours, 6);
+    
+    // Add 0.5 hours for each add-on
+    if (addOnIds && addOnIds.length > 0) {
+      hours += (addOnIds.length * 0.5);
+    }
+  } else {
+    // Add hours from add-ons for other services (if needed in future)
+    if (addOnIds && addOnIds.length > 0) {
+      // Import add-ons config to get hours per add-on
+      // This would need to be implemented when add-ons are selected
+    }
   }
   
   return Math.round(hours * 10) / 10; // Round to 1 decimal
