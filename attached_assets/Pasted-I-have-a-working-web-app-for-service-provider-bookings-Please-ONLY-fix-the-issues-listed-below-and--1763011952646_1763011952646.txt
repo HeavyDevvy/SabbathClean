@@ -1,0 +1,93 @@
+I have a working web app for service provider bookings. Please ONLY fix the issues listed below and do not change anything else about the app (no new flows, no removed features beyond what is explicitly requested, no big styling changes, no wording changes).
+
+The goal is: everything works from start to finish for booking a service provider, with no error codes, no blank screens, and the existing user journey preserved except for the fixes below.
+
+========================
+CHANGES TO MAKE
+========================
+
+1) REMOVE DARK MODE / BLACK BACKGROUNDS
+- Remove dark mode / dark themes from the web app.
+- Replace any black or very dark page backgrounds with the existing light theme backgrounds already used in the app (for example: white or the current light background color).
+- Do not change the overall layout, spacing, or component structure; just remove dark backgrounds and dark mode styling so the app has a consistent light theme.
+- Do NOT introduce a new theme toggle; just keep a single light theme.
+
+2) FIX SCHEDULE & PREFERENCES DATE SELECTION
+- On the "Schedule & preferences" step, the user currently cannot select a date. This must be fixed.
+- Ensure the date picker or date input:
+  - Is visible
+  - Is interactive
+  - Correctly stores the selected date in the booking state.
+- Make sure there are no JS errors related to the date or schedule step.
+- After fixing, the booking flow must continue normally from this step to the next one.
+
+3) BUZZWORDS → ADD-ON AUTO SUGGESTIONS
+- On the Add-ons / Add-on services step, comments / additional details field must support “buzzwords” that automatically surface relevant add-on services.
+- Make sure:
+  - The comments / additional details textarea is used to detect these buzzwords.
+  - When a user types relevant buzzwords, the matching add-on services automatically appear as suggested/selected options.
+  - This works for all services where add-ons are defined.
+- If you have an internal mapping for this (e.g., keywords → add-on IDs), ensure it is correctly wired up and used. If it’s missing or incomplete, create or extend a simple config object / JSON map inside the project (e.g., config/keywords.json or similar) that maps buzzwords to the correct existing add-ons.
+- Do not change the structure or naming of existing add-ons; only ensure the buzzword detection triggers the add-on auto-selection / suggestions as intended.
+
+4) PAYMENT STEP MUST WORK AND GO TO BOOKING SUMMARY
+- Make sure the payment step:
+  - Allows the user to enter required payment details.
+  - Validates them correctly (but do not overcomplicate or block success with overly strict rules unless already implemented).
+  - Successfully completes the payment flow and moves the user to the final “Booking summary” / booking confirmation page.
+- Fix any issues that cause:
+  - Payment submission to fail silently.
+  - The page to get stuck.
+  - Blank screens or console errors.
+- After payment, the user must always be diverted to the correct booking summary page with their booking details.
+
+5) REMOVE “BOOK SERVICE NOW” FROM HOME PAGE
+- On the Home page:
+  - Remove the “Book Service Now” button entirely.
+- Make sure that the removal does NOT break any routing or logic.
+- The user must still be able to start a booking journey for a service provider from the Home page using the remaining CTAs/buttons.
+
+6) WATCH HOW IT WORKS BUTTON STYLE
+- On the Home page:
+  - Make sure the “Watch How It Works” button uses the same primary button styling (color and style) that “Book Service Now” used before it was removed.
+  - This should visually look like the main call-to-action button.
+- Do not change the text or behavior of “Watch How It Works” beyond this styling update.
+
+7) ENSURE FULL BOOKING FLOW WORKS FROM START TO FINISH
+- Make sure that when a user starts a booking from the Home page (or wherever the current entry points are):
+  - They can choose a service provider / service.
+  - They can proceed through all steps: choose service, schedule & preferences, add-ons, provider selection, payment, and booking summary.
+  - They can select the date on the Schedule & Preferences page without any blocking issues.
+- Fix any blank screens, missing state, or navigation issues in this flow.
+- Ensure that at least one service provider and ideally all existing service providers can be booked successfully through the full flow.
+- Do NOT change the core structure of the steps; just ensure each one works as designed.
+
+========================
+DO NOT CHANGE
+========================
+- Do NOT change any text labels or copy unless absolutely necessary to fix a bug.
+- Do NOT change the login or authentication flow.
+- Do NOT add or remove pages beyond what is explicitly requested.
+- Do NOT alter global logic, APIs, or database schemas.
+- Do NOT introduce new UI components that are not needed for the fixes.
+- Do NOT modify any other styling, spacing, or layouts outside what is required to:
+  - Remove dark mode / black backgrounds and
+  - Update the “Watch How It Works” button style as described above.
+
+========================
+FINAL QA CHECKLIST
+========================
+After making the changes, please verify and confirm:
+
+[ ] There is no dark mode or black background; the entire app uses the light theme.
+[ ] On Schedule & Preferences, the user can select a date and proceed with no errors or blank screens.
+[ ] Buzzwords in the comments/additional details field correctly trigger add-on suggestions/autoselection across relevant services.
+[ ] The payment step works end-to-end and successfully redirects to the booking summary page after completion.
+[ ] “Book Service Now” is removed from the Home page and its removal does not break any routes.
+[ ] “Watch How It Works” is styled with the same primary button color and style that “Book Service Now” had.
+[ ] A user can start from the Home page (or any normal entry point), select a service provider, go through all steps, make payment, and see the booking summary page without errors.
+[ ] No console errors, no blank screens, and no UI steps are missing from the booking journey.
+
+Finally, list:
+- All files you edited.
+- A short summary (1–2 sentences) of what changed in each edited file.
