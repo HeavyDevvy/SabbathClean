@@ -1,0 +1,116 @@
+I am working on a web app in Replit. Please ONLY update the booking flow for the **House Cleaning** service. Do not change any other services, routes, logic, layout or UX outside of this specific flow. After implementing the changes, use the checklist at the end to verify everything works with no blank screens or error codes.
+
+Context:
+The booking flow for House Cleaning currently has 4 steps:
+1) Service Details
+2) Schedule & Preferences
+3) Add-ons (and estimated hours)
+4) Payment / completion
+
+Make the following changes ONLY for the HOUSE CLEANING booking process:
+
+========================
+1) STEP 1 – SERVICE DETAILS
+========================
+- Do NOT change anything on Step 1 (Service Details) for House Cleaning.
+- All fields, labels, validations and behaviour must remain exactly as they are.
+
+========================
+2) STEP 2 – SCHEDULE & PREFERENCES (HOUSE CLEANING ONLY)
+========================
+
+(A) Same-day booking logic:
+- When the user is booking House Cleaning for **today’s date** (same-day booking):
+  - The user must NOT be able to select time slots that are already in the past.
+  - If a time slot is earlier than the current time of day, disable it or make it unselectable.
+  - The user should still be able to select valid future time slots for today.
+- This logic must ONLY apply to House Cleaning. Other services should behave exactly as they do now.
+
+(B) Rename labels to shorter wording (House Cleaning only):
+On the Schedule & Preferences step for House Cleaning:
+- Change the label **“Preferred Date”** → **“Date”**
+- Change the label **“Modern Time Preference Selection”** (or similar existing wording) → **“Preferred Time”**
+- Change the label **“Reoccurring Schedules”** → **“Reoccurring Services”**
+- Change the label **“Materials and Equipment Supplier Options”** → **“Materials and Equipment Supplier”**
+
+Only change the label text; do not change the underlying field names, bindings, or validation logic.
+
+========================
+3) STEP 3 – ADD-ONS & ESTIMATED HOURS (HOUSE CLEANING ONLY)
+========================
+
+- Keep the existing add-ons UI and logic exactly as it is (same layout, same options, same behaviour).
+- Modify the **Estimated Hours** behaviour ONLY for House Cleaning:
+
+(A) Default minimum hours:
+- When the user reaches the Add-ons step for House Cleaning, set the **Estimated Hours** to a minimum default of **6 hours**.
+- If any logic currently calculates hours automatically, keep that logic but ensure the final result is never less than 6 hours for House Cleaning (i.e., use max(currentCalculation, 6)).
+
+(B) Increase hours when additional services are added:
+- When the user adds an additional service/add-on within the House Cleaning booking:
+  - Automatically add **30 minutes (0.5 hours)** to the Estimated Hours for each additional service/add-on selected.
+  - Example:
+    - Base estimate: 6 hours
+    - 1 extra add-on: 6.5 hours
+    - 2 extra add-ons: 7.0 hours
+    - 3 extra add-ons: 7.5 hours
+- This incremental logic must only apply to the HOUSE CLEANING booking flow.
+
+========================
+4) CART / ADD TO CART BEHAVIOUR (HOUSE CLEANING ONLY)
+========================
+
+- Ensure that when the user selects House Cleaning and its add-ons, they can add the service to **the cart** (or whatever structure is currently used to carry the booking data forward), and that:
+  - The service, date/time, add-ons and estimated hours are properly carried to the payment step.
+  - All behaviour should remain as it was before, except for the updated Estimated Hours logic.
+
+- Make sure that these changes do NOT break or alter the behaviour of:
+  - Other service types
+  - Existing totals and calculations
+  - The ability to complete the booking and see the booking summary/confirmation
+
+========================
+5) SCOPE & SAFETY REQUIREMENTS
+========================
+
+- LIMIT ALL CHANGES strictly to:
+  - House Cleaning booking flow (Steps 2 & 3 as detailed above, plus any related data handling for House Cleaning only).
+- DO NOT:
+  - Change layout, styling, or behaviour for other services (plumbing, electrical, etc.).
+  - Change global styles, routing, authentication, or shared components unless absolutely necessary for the House Cleaning flow.
+  - Introduce new errors, console warnings, or blank screens.
+
+If a change must be made in a shared component, guard it with clear, explicit checks so that the new logic only applies when the selected service is House Cleaning.
+
+========================
+6) FINAL QA CHECKLIST (PLEASE EXECUTE)
+========================
+
+Run through this checklist and ensure each item passes. If anything fails, fix only the related part and re-run.
+
+[ ] 1. Start a new booking for **House Cleaning** from the normal entry point.
+[ ] 2. Step 1 – Service Details: looks and behaves exactly the same as before (no wording or behaviour changes).
+[ ] 3. Step 2 – Schedule & Preferences:
+      - Labels read: “Date”, “Preferred Time”, “Reoccurring Services”, and “Materials and Equipment Supplier”.
+      - When choosing today’s date, any time slots in the past are disabled/unselectable.
+      - Valid future time slots for today can still be selected.
+      - For non-House Cleaning services, schedule behaviour is unchanged.
+[ ] 4. Step 3 – Add-ons for House Cleaning:
+      - The UI (layout, add-ons list, other fields) is unchanged except for Estimated Hours behaviour.
+      - Estimated Hours defaults to at least 6 hours.
+      - For each additional add-on selected in the House Cleaning flow, Estimated Hours increases by 0.5 hours.
+      - Removing add-ons adjusts the hours correctly and never drops below 6 hours.
+[ ] 5. Cart / flow behaviour:
+      - House Cleaning service with selected add-ons can be added to the cart (or booking object) as before.
+      - The booking proceeds to payment with correct service, date, time, add-ons, and estimated hours.
+      - The booking can be completed successfully and shows on the booking summary/confirmation page with no errors.
+[ ] 6. Regression check:
+      - Booking any other service (non-House Cleaning) still works exactly as before, with no label changes, no time picker issues, no broken validations.
+      - No new console errors, no runtime error pop-ups, and no blank screens during any part of the booking process.
+
+Finally, list:
+- All files edited
+- A one-line summary of what changed in each file
+- Any TODO comments left in the code
+
+Please implement these changes now.

@@ -2110,7 +2110,9 @@ export default function ModernServiceModal({
 
       <div className="space-y-4">
         <div>
-          <Label htmlFor="preferred-date">Preferred Date *</Label>
+          <Label htmlFor="preferred-date">
+            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Date *" : "Preferred Date *"}
+          </Label>
           <Input
             id="preferred-date"
             type="date"
@@ -2131,7 +2133,9 @@ export default function ModernServiceModal({
         </div>
 
         <div>
-          <Label>Modern Time Preference Selection *</Label>
+          <Label>
+            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Preferred Time *" : "Modern Time Preference Selection *"}
+          </Label>
           <Select 
             value={formData.timePreference} 
             onValueChange={(value) => setFormData(prev => ({ ...prev, timePreference: value }))}
@@ -2144,11 +2148,39 @@ export default function ModernServiceModal({
               {formData.urgency === "emergency" && (
                 <SelectItem value="ASAP">As Soon As Possible</SelectItem>
               )}
-              <SelectItem value="08:00">08:00 - Morning</SelectItem>
-              <SelectItem value="10:00">10:00 - Late Morning</SelectItem>
-              <SelectItem value="12:00">12:00 - Noon</SelectItem>
-              <SelectItem value="14:00">14:00 - Afternoon</SelectItem>
-              <SelectItem value="16:00">16:00 - Late Afternoon</SelectItem>
+              {(() => {
+                // HOUSE CLEANING ONLY: Check if booking for today
+                const isHouseCleaning = serviceId === "house-cleaning" || mappedServiceId === "cleaning";
+                const isToday = formData.preferredDate === new Date().toISOString().split('T')[0];
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+                
+                const timeSlots = [
+                  { value: "08:00", label: "08:00 - Morning", hour: 8 },
+                  { value: "10:00", label: "10:00 - Late Morning", hour: 10 },
+                  { value: "12:00", label: "12:00 - Noon", hour: 12 },
+                  { value: "14:00", label: "14:00 - Afternoon", hour: 14 },
+                  { value: "16:00", label: "16:00 - Late Afternoon", hour: 16 }
+                ];
+                
+                return timeSlots.map((slot) => {
+                  // For House Cleaning + today's date: disable past time slots
+                  const isPast = isHouseCleaning && isToday && 
+                    (slot.hour < currentHour || (slot.hour === currentHour && currentMinute > 0));
+                  
+                  return (
+                    <SelectItem 
+                      key={slot.value} 
+                      value={slot.value}
+                      disabled={isPast}
+                    >
+                      {slot.label}
+                      {isPast && " (Past)"}
+                    </SelectItem>
+                  );
+                });
+              })()}
             </SelectContent>
           </Select>
           {formData.urgency === "emergency" && (
@@ -2159,7 +2191,9 @@ export default function ModernServiceModal({
         </div>
 
         <div>
-          <Label>Recurring Schedule Options</Label>
+          <Label>
+            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Reoccurring Services" : "Recurring Schedule Options"}
+          </Label>
           <Select value={formData.recurringSchedule} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, recurringSchedule: value }))
           }>
@@ -2184,7 +2218,9 @@ export default function ModernServiceModal({
         </div>
 
         <div>
-          <Label>Materials & Equipment Supply Options</Label>
+          <Label>
+            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Materials and Equipment Supplier" : "Materials & Equipment Supply Options"}
+          </Label>
           <Select value={formData.materials} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, materials: value }))
           }>

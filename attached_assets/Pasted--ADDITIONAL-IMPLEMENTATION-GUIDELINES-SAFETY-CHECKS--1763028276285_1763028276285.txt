@@ -1,0 +1,255 @@
+========================
+ADDITIONAL IMPLEMENTATION GUIDELINES & SAFETY CHECKS
+========================
+
+PRE-IMPLEMENTATION: TECH STACK CONFIRMATION
+--------------------------------------------
+Before making changes, confirm you can identify:
+1. Which framework is used: React / Vue / Next.js / other?
+2. How services are identified in the code (service.name? service.id? serviceType?)
+3. Where the booking state is stored (useState? Context? Redux? Vuex?)
+4. File names for Steps 2 and 3 of the booking flow
+5. How time slots are currently rendered (custom component? library like react-datepicker?)
+
+If any of these are unclear, list what you find and I'll clarify before you proceed.
+
+FILE STRUCTURE GUIDANCE
+-----------------------
+To help locate the correct files, search for:
+- Keywords: "schedule", "preference", "add-on", "estimated hours", "house cleaning"
+- Time picker components or date selectors
+- Functions that calculate hours or totals
+- Booking flow components typically in: /src/components/booking/ or /pages/booking/
+- Service data/config typically in: /src/data/services.js or /api/services/
+
+DETAILED IMPLEMENTATION SPECIFICATIONS
+---------------------------------------
+
+A) SAME-DAY TIME SLOT LOGIC - DETAILED BEHAVIOR:
+- When the user is booking House Cleaning for **today's date**:
+  - Time slots earlier than the current time must be:
+    ✓ PREFERRED: Visually disabled (grayed out, reduced opacity 0.5) but still visible
+    ✓ OR: Completely hidden from the time picker
+    ✓ Include a clear UI indicator if needed (e.g., "Past times unavailable" or subtle text)
+  - If the user somehow attempts to select a past time slot, show a validation error:
+    "Please select a time slot in the future"
+  - Valid future time slots for today remain fully selectable with normal styling
+
+CRITICAL: CURRENT TIME DETERMINATION
+- Source of "current time": 
+  ✓ RECOMMENDED: Server-side API call to get current time (for consistency)
+  ✓ OR: Browser's new Date() (easier but timezone-dependent)
+- Use server/system timezone consistently - NOT the user's browser timezone
+- Comparison logic:
+  - If a time slot is "2:00 PM" and current time is "3:15 PM", disable it
+  - If current time is "1:45 PM", keep 2:00 PM enabled
+  - Optional: Consider adding a small buffer (e.g., slots starting within the next 30-60 minutes are also disabled to allow for booking processing time)
+
+TIMEZONE CONSIDERATIONS:
+- Use consistent timezone handling (South Africa Standard Time / UTC+2 / or your app's configured timezone)
+- Do NOT rely solely on browser local time
+- If your app already has timezone logic, maintain it and apply same-day restrictions accordingly
+
+B) ESTIMATED HOURS CALCULATION - DETAILED LOGIC:
+- CALCULATION FORMULA:
+  estimatedHours = max(6, 6 + (numberOfAddOns × 0.5))
+  
+- BASE RULES:
+  - Minimum base hours: 6.0 hours (always)
+  - Each add-on selected adds: +0.5 hours
+  - Example calculations:
+    * 0 add-ons: 6.0 hours
+    * 1 add-on: 6.5 hours
+    * 2 add-ons: 7.0 hours
+    * 3 add-ons: 7.5 hours
+    * 4 add-ons: 8.0 hours
+
+- EDGE CASES & BEHAVIOR:
+  - User selects 0 add-ons: Display 6.0 hours (minimum)
+  - User removes add-ons: Recalculate immediately, never drop below 6.0 hours
+  - User adds/removes/re-adds same add-on: Each change updates hours in real-time
+  - If existing auto-calculation logic runs: Use max(existingCalculation, 6 + (addOns × 0.5))
+  - Decimal precision: Always show 1 decimal place (e.g., "6.5 hours", "7.0 hours", never "6.50000001")
+
+- DISPLAY & UX:
+  - Show estimated hours prominently on Step 3
+  - Update the display immediately when add-ons change (real-time, no page refresh)
+  - Format as: "Estimated Hours: 6.5" or "Duration: 6.5 hours"
+
+- TERMINOLOGY CLARIFICATION:
+  - "Add-ons" and "additional services" mean the same thing in this prompt
+  - These are the extra options in Step 3 (e.g., deep clean, window cleaning, appliance cleaning, etc.)
+  - Each checkbox/selection in the add-ons section counts as +1 for the calculation
+  - Do NOT count the base service itself, only extras
+
+SERVICE IDENTIFICATION LOGIC
+-----------------------------
+The code must correctly identify when the user is booking House Cleaning:
+
+Common patterns to check in your codebase:
+  - service.name === "House Cleaning" 
+  - service.id === "house-cleaning" 
+  - serviceId === 1 (or whatever ID is used)
+  - service.type === "cleaning"
+  - serviceSlug === "house-cleaning"
+
+Implementation pattern:
+```javascript
+// Example guard for House Cleaning-specific logic
+if (service.name === "House Cleaning" || service.id === "house-cleaning") {
+  // Apply House Cleaning-specific logic here
+} else {
+  // Standard logic for other services
+}
+```
+
+IMPORTANT: 
+- Service names may be case-sensitive - match exactly as stored in database
+- If service identification is unclear, search for where service data is set/stored
+- Test thoroughly to ensure logic only activates for House Cleaning
+
+LABEL RENAME IMPLEMENTATION
+----------------------------
+When changing labels for House Cleaning Step 2:
+- ONLY change the visible label text displayed to users
+- Do NOT change:
+  - Underlying field names or variable names in code
+  - Form input name attributes
+  - API request field names
+  - Database column references
+  - Data bindings or validation logic
+
+TESTING IMPACT:
+- If your app has automated tests (Jest, Cypress, Playwright) that target labels by text, you may need to update test selectors
+- Check for any aria-label, data-testid, or htmlFor attributes that reference old label text
+- Update ONLY test assertions if tests fail - do NOT revert label changes
+
+CART / ADD TO CART - DETAILED REQUIREMENTS
+-------------------------------------------
+WHAT TO PRESERVE:
+- Existing method for adding services to cart (button click, API call, state update, etc.)
+- All data fields currently captured (service name, price, date, time, frequency, supplier preference, etc.)
+- Any existing cart display/preview functionality
+- Subtotal and total calculations (unless they need to reflect new estimated hours)
+- Navigation flow to payment/checkout
+
+WHAT TO UPDATE:
+The **updated Estimated Hours** (6+ hours with add-on increments) must be:
+  ✓ Saved to the cart/booking object correctly
+  ✓ Displayed accurately in any cart preview or summary
+  ✓ Passed to the payment/checkout step without data loss
+  ✓ Included in the final booking confirmation
+  ✓ Used in any price calculations if hours affect pricing
+
+VALIDATION BEFORE PAYMENT:
+Before user proceeds to payment, verify:
+  - All House Cleaning data is present and correct
+  - Estimated hours matches: 6 + (number of add-ons × 0.5)
+  - Date/time selections are valid
+  - No data from other service types is accidentally overwritten
+  - The booking object/cart state exactly matches user selections
+
+SAFETY & VALIDATION CHECKS
+---------------------------
+
+1. NO CROSS-SERVICE CONTAMINATION:
+   - The "6 hours minimum" must NEVER apply to services other than House Cleaning
+   - The "+0.5 hours per add-on" must NEVER apply to other services
+   - Same-day time restrictions must NEVER apply to other services
+   - Use explicit conditional checks to isolate House Cleaning logic
+
+2. STATE MANAGEMENT INTEGRITY:
+   - If using React Context/Redux/Vuex, verify state updates don't affect other services
+   - Check that House Cleaning-specific data doesn't persist when user switches to another service
+   - Clear/reset House Cleaning-specific state when user navigates away or changes service type
+   - Test: Select House Cleaning → go to Step 3 → navigate back → select different service → verify no House Cleaning rules apply
+
+3. UI FEEDBACK & USER COMMUNICATION:
+   - When time slots are disabled: Show why (tooltip, helper text, or visual indicator like "This time has passed")
+   - When hours auto-increment with add-ons: User should see the change immediately (not on next page)
+   - No silent failures: If validation fails, show clear, specific error messages
+   - Loading states: If checking current time via API, show loading indicator
+
+4. DATA PERSISTENCE & NAVIGATION:
+   - If user goes back from Step 3 to Step 2: Preserve all selections
+   - If user goes forward from Step 2 to Step 3, then back to Step 2: Maintain date/time/preferences
+   - If page refresh happens mid-booking (and your app supports this): Don't lose progress
+   - Estimated hours should recalculate correctly if user modifies add-ons after initial selection
+   - Test: Add 3 add-ons (7.5 hours) → remove 1 add-on → verify it shows 7.0 hours
+
+5. CALCULATION ACCURACY:
+   - Verify decimal hours display correctly: 6.5 (not 6,5 or 6.50000001)
+   - Test with various add-on combinations: 0, 1, 2, 5, 10 add-ons
+   - Ensure no floating-point errors (use proper rounding: e.g., Math.round(value * 10) / 10)
+   - If hours affect pricing, verify price calculations update correctly
+
+6. BROWSER COMPATIBILITY:
+   - Test date/time pickers work in Chrome, Firefox, Safari, and Edge (if possible)
+   - Verify new Date() behaves consistently across browsers
+   - Check that disabled time slots appear correctly in all browsers
+   - Ensure decimal formatting works across locales
+
+REGRESSION TESTING - DETAILED CHECKLIST
+----------------------------------------
+After implementing changes, test these services (if they exist in your app):
+  □ Plumbing
+  □ Electrical
+  □ Landscaping/Gardening
+  □ Pest Control
+  □ HVAC
+  □ Painting
+  □ Carpentry
+  □ [Any other services in your app]
+
+For EACH non-House Cleaning service, verify:
+  □ Step 2 labels remain unchanged (original wording: "Preferred Date", "Modern Time Preference Selection", etc.)
+  □ Time picker works normally - NO same-day restrictions
+  □ Can select any time slot for today without restrictions
+  □ Estimated hours calculation works exactly as before (no +0.5 per add-on)
+  □ Add-ons don't automatically increase hours
+  □ No 6-hour minimum is enforced
+  □ Booking completes successfully to confirmation page
+  □ Check browser console: No new errors during navigation
+  □ Verify no React/Vue warnings about missing keys, props, undefined variables
+
+CONSOLE & ERROR MONITORING:
+  - Open browser DevTools Console before testing
+  - Watch for: Errors (red), Warnings (yellow), Failed network requests
+  - Common issues to catch:
+    * "Cannot read property X of undefined"
+    * "X is not a function"
+    * "Maximum update depth exceeded"
+    * Missing dependency warnings in useEffect
+    * Failed API calls or 404s
+
+IF SOMETHING BREAKS - ROLLBACK PLAN
+------------------------------------
+
+If implementation causes errors or blank screens:
+
+STEP 1 - TRY TO FIX WITHIN SCOPE:
+  - Check browser console for specific error messages (file name, line number)
+  - Verify service identification logic correctly detects "House Cleaning"
+  - Check all variables/functions are defined before use
+  - Verify imports are correct (e.g., React hooks, utility functions)
+  - Check for typos in property names or function calls
+
+STEP 2 - IF FIX IS NOT OBVIOUS:
+  - Document the specific error message(s) - copy full error text
+  - Note which step/page shows the error
+  - Note whether error appears for House Cleaning only or all services
+  - Note what action triggers the error (e.g., "clicking Next on Step 2")
+  - DO NOT attempt to fix by changing unrelated code or adding hacky workarounds
+
+STEP 3 - PRESERVE WORKING STATE:
+  - If using Git: Commit working changes before attempting risky fixes
+  - Keep backup copies of modified files
+  - Test small changes incrementally rather than large refactors
+  - If stuck, revert the specific broken change and document the issue
+
+STEP 4 - ASK FOR HELP:
+  - Provide: Error message, affected file/component, what you tried
+  - Include: Browser used, which step fails, whether it's House Cleaning-specific
+  - Don't proceed if errors persist - better to ask than break the entire app
+
+========================
