@@ -3473,8 +3473,8 @@ export default function ModernServiceModal({
             </Button>
 
             <div className="flex gap-3">
-              {/* HOUSE CLEANING ONLY: 3-button CTA layout */}
-              {step === 4 && isHouseCleaning ? (
+              {/* HOUSE CLEANING & PLUMBING: 3-button CTA layout */}
+              {step === 4 && showEnhancedProviderDetails ? (
                 <>
                   <Button 
                     variant="outline"
