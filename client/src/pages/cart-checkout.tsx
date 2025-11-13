@@ -36,7 +36,7 @@ export default function CartCheckout() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-gray-600">Loading checkout...</p>
         </div>
       </div>
@@ -252,7 +252,7 @@ export default function CartCheckout() {
                         
                         <Separator className="my-2" />
                         
-                        <div className="flex justify-between font-semibold text-purple-600">
+                        <div className="flex justify-between font-semibold text-primary">
                           <span>Service Subtotal</span>
                           <span data-testid={`checkout-item-subtotal-${idx}`}>{formatCurrency(itemSubtotal)}</span>
                         </div>
@@ -272,7 +272,7 @@ export default function CartCheckout() {
                   <label className="flex items-center space-x-3 cursor-pointer" data-testid="radio-card-payment">
                     <RadioGroupItem value="card" />
                     <div className="flex items-center">
-                      <CreditCard className="w-5 h-5 mr-2 text-purple-600" />
+                      <CreditCard className="w-5 h-5 mr-2 text-primary" />
                       <span className="font-medium">Credit/Debit Card</span>
                     </div>
                   </label>
@@ -280,7 +280,7 @@ export default function CartCheckout() {
                   <label className="flex items-center space-x-3 cursor-pointer" data-testid="radio-bank-payment">
                     <RadioGroupItem value="bank" />
                     <div className="flex items-center">
-                      <Building className="w-5 h-5 mr-2 text-purple-600" />
+                      <Building className="w-5 h-5 mr-2 text-primary" />
                       <span className="font-medium">Bank Account</span>
                     </div>
                   </label>

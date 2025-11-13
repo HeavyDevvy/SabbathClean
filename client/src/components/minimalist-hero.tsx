@@ -32,14 +32,14 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
   return (
     <section className="relative bg-white pt-20 pb-16 overflow-hidden">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-white"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-muted/30 to-white"></div>
       
       {/* Floating particles animation */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-blue-200/30 rounded-full"
+            className="absolute w-2 h-2 bg-primary/30 rounded-full"
             initial={{ 
               x: Math.random() * window.innerWidth, 
               y: Math.random() * window.innerHeight,
@@ -70,7 +70,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
           >
             {/* Trust Badge */}
             <motion.div 
-              className="inline-flex items-center space-x-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm border border-green-200"
+              className="inline-flex items-center space-x-2 bg-success/10 text-success px-4 py-2 rounded-full text-sm border border-success/20"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
@@ -105,12 +105,12 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                   Home Services
                 </motion.span>
                 <motion.span 
-                  className="block text-blue-600"
+                  className="block text-primary"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8, duration: 0.5 }}
                   whileHover={{ 
-                    textShadow: "0 0 20px rgba(59, 130, 246, 0.4)",
+                    textShadow: "0 0 20px hsl(var(--primary) / 0.4)",
                     transition: { duration: 0.3 }
                   }}
                 >
@@ -147,7 +147,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                 >
                   <motion.div
                     animate={{ 
-                      color: isTyping ? "#3b82f6" : "#9ca3af",
+                      color: isTyping ? "hsl(var(--primary))" : "#9ca3af",
                       scale: isTyping ? 1.1 : 1
                     }}
                     transition={{ duration: 0.2 }}
@@ -159,7 +159,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                     placeholder="Enter your address"
                     value={address}
                     onChange={handleInputChange}
-                    className="pl-10 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="pl-10 h-12 text-lg border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
                     data-testid="address-input"
                   />
                   
@@ -331,10 +331,10 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.8 }}
                   >
-                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-blue-900">
+                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-foreground">
                       Verified ✓
                     </div>
-                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-blue-900">
+                    <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-foreground">
                       Insured ✓
                     </div>
                   </motion.div>
@@ -344,7 +344,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                 <motion.div
                   className="absolute inset-0 rounded-3xl"
                   style={{
-                    background: "linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent, rgba(59, 130, 246, 0.1), transparent)",
+                    background: "linear-gradient(45deg, transparent, hsl(var(--primary) / 0.1), transparent, hsl(var(--primary) / 0.1), transparent)",
                     backgroundSize: "400% 400%"
                   }}
                   animate={{
@@ -368,10 +368,10 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
               >
                 <div className="flex items-center space-x-3">
                   <motion.div 
-                    className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"
+                    className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center"
                     whileHover={{ rotate: 360, transition: { duration: 0.3 } }}
                   >
-                    <Calendar className="w-5 h-5 text-green-600" />
+                    <Calendar className="w-5 h-5 text-success" />
                   </motion.div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Same Day</div>
@@ -393,10 +393,10 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
               >
                 <div className="flex items-center space-x-3">
                   <motion.div 
-                    className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"
+                    className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center"
                     whileHover={{ rotate: 360, transition: { duration: 0.3 } }}
                   >
-                    <Star className="w-5 h-5 text-blue-600 fill-current" />
+                    <Star className="w-5 h-5 text-primary fill-current" />
                   </motion.div>
                   <div>
                     <div className="text-sm font-semibold text-gray-900">Verified</div>

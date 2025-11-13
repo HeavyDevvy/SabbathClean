@@ -317,7 +317,7 @@ export default function OrderConfirmation() {
                         )}
                       </div>
                       <div className="mt-2">
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                        <Badge className="bg-success/10 text-success hover:bg-success/10">
                           {item.status || 'Confirmed'}
                         </Badge>
                       </div>
