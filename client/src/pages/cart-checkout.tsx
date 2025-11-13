@@ -147,14 +147,8 @@ export default function CartCheckout() {
         
         // Navigate to order confirmation page
         navigate(`/order-confirmation/${order.id}`);
-      } else {
-        // Handle case where order is returned but invalid
-        toast({
-          title: "Checkout incomplete",
-          description: "Please try again or contact support",
-          variant: "destructive",
-        });
       }
+      // If order is null, the checkout function already showed an error toast
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
