@@ -1276,6 +1276,8 @@ export default function ModernServiceModal({
       subtotal: pricing.totalPrice.toString(),
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
+      // HOUSE CLEANING ONLY: Add tip amount
+      tipAmount: isHouseCleaning ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1294,7 +1296,9 @@ export default function ModernServiceModal({
         customMenuItems: formData.customMenuItems,
         dietaryRequirements: formData.dietaryRequirements,
         eventSize: formData.eventSize,
-        provider: formData.selectedProvider
+        provider: formData.selectedProvider,
+        // HOUSE CLEANING ONLY: Store tip in details too
+        tipAmount: isHouseCleaning ? formData.tipAmount : 0
       })
     };
 
@@ -1331,6 +1335,7 @@ export default function ModernServiceModal({
         selectedAddOns: [],
         specialRequests: "",
         selectedProvider: null,
+        tipAmount: 0, // HOUSE CLEANING ONLY: Reset tip
         paymentMethod: "card",
         cardNumber: "",
         expiryDate: "",
@@ -1397,6 +1402,8 @@ export default function ModernServiceModal({
       subtotal: pricing.totalPrice.toString(),
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
+      // HOUSE CLEANING ONLY: Add tip amount
+      tipAmount: isHouseCleaning ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1415,7 +1422,9 @@ export default function ModernServiceModal({
         customMenuItems: formData.customMenuItems,
         dietaryRequirements: formData.dietaryRequirements,
         eventSize: formData.eventSize,
-        provider: formData.selectedProvider
+        provider: formData.selectedProvider,
+        // HOUSE CLEANING ONLY: Store tip in details too
+        tipAmount: isHouseCleaning ? formData.tipAmount : 0
       })
     };
 
@@ -3356,60 +3365,87 @@ export default function ModernServiceModal({
             </Button>
 
             <div className="flex gap-3">
-              {/* Add to Cart button - Show at step 4 (provider selection) */}
-              {step === 4 && formData.selectedProvider && itemCount < 3 && (
-                <Button 
-                  variant="outline"
-                  onClick={handleAddToCartAndContinue}
-                  disabled={!formData.selectedProvider}
-                  className="border-primary text-primary hover:bg-muted"
-                  data-testid="button-add-to-cart-continue"
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart & Select Another
-                </Button>
-              )}
-
-              {step < currentConfig.steps ? (
-                <Button 
-                  onClick={handleNext}
-                  disabled={
-                    (step === 1 && (!formData.propertyType || !formData.address || 
-                      (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
-                      (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
-                      (serviceId === "plumbing" && !formData.urgency) ||
-                      (serviceId === "electrical" && !formData.electricalIssue) ||
-                      (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
-                      (serviceId === "event-staff" && (!formData.cleaningType || !formData.propertySize)) ||
-                      (serviceId === "moving" && (!formData.cleaningType || !formData.propertySize)) ||
-                      (serviceId === "au-pair" && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
-                    )) ||
-                    (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
-                    (step === 4 && !formData.selectedProvider)
-                  }
-                >
-                  Next
-                </Button>
-              ) : (
+              {/* HOUSE CLEANING ONLY: 3-button CTA layout */}
+              {step === 4 && isHouseCleaning ? (
                 <>
+                  <Button 
+                    variant="outline"
+                    onClick={handleAddToCartAndContinue}
+                    disabled={!formData.selectedProvider}
+                    className="border-primary text-primary hover:bg-muted"
+                    data-testid="button-add-to-cart-select-another"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add to Cart & Select Another
+                  </Button>
                   <Button 
                     onClick={handleAddToCart}
                     className="bg-success hover:bg-success/90 text-white"
                     disabled={!formData.selectedProvider}
-                    data-testid="button-add-to-cart"
+                    data-testid="button-add-and-go-to-cart"
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
+                    Add & Go to Cart
                   </Button>
-                  <Button 
-                    onClick={handleGoToCart}
-                    variant="outline"
-                    className="border-primary text-primary hover:bg-muted"
-                    data-testid="button-go-to-cart"
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Go to Cart ({itemCount})
-                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* NON-HOUSE CLEANING: Original button layout */}
+                  {step === 4 && formData.selectedProvider && itemCount < 3 && (
+                    <Button 
+                      variant="outline"
+                      onClick={handleAddToCartAndContinue}
+                      disabled={!formData.selectedProvider}
+                      className="border-primary text-primary hover:bg-muted"
+                      data-testid="button-add-to-cart-continue"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart & Select Another
+                    </Button>
+                  )}
+
+                  {step < currentConfig.steps ? (
+                    <Button 
+                      onClick={handleNext}
+                      disabled={
+                        (step === 1 && (!formData.propertyType || !formData.address || 
+                          (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
+                          (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
+                          (serviceId === "plumbing" && !formData.urgency) ||
+                          (serviceId === "electrical" && !formData.electricalIssue) ||
+                          (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
+                          (serviceId === "event-staff" && (!formData.cleaningType || !formData.propertySize)) ||
+                          (serviceId === "moving" && (!formData.cleaningType || !formData.propertySize)) ||
+                          (serviceId === "au-pair" && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
+                        )) ||
+                        (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
+                        (step === 4 && !formData.selectedProvider)
+                      }
+                    >
+                      Next
+                    </Button>
+                  ) : (
+                    <>
+                      <Button 
+                        onClick={handleAddToCart}
+                        className="bg-success hover:bg-success/90 text-white"
+                        disabled={!formData.selectedProvider}
+                        data-testid="button-add-to-cart"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                      <Button 
+                        onClick={handleGoToCart}
+                        variant="outline"
+                        className="border-primary text-primary hover:bg-muted"
+                        data-testid="button-go-to-cart"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Go to Cart ({itemCount})
+                      </Button>
+                    </>
+                  )}
                 </>
               )}
             </div>
