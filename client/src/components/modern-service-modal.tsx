@@ -3380,7 +3380,7 @@ export default function ModernServiceModal({
                   </Button>
                   <Button 
                     onClick={handleAddToCart}
-                    className="bg-success hover:bg-success/90 text-white"
+                    className="bg-success hover:bg-success/90 text-primary"
                     disabled={!formData.selectedProvider}
                     data-testid="button-add-and-go-to-cart"
                   >
