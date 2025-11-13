@@ -72,6 +72,7 @@ export default function CartCheckout() {
   };
 
   const handleCheckout = async () => {
+    // Validate payment information
     if (paymentMethod === "card") {
       if (!cardNumber || !cardExpiry || !cardCVV || !cardName) {
         toast({
@@ -81,11 +82,32 @@ export default function CartCheckout() {
         });
         return;
       }
+      
+      // Additional card validation
+      const cleanCardNumber = cardNumber.replace(/\s/g, '');
+      if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+        toast({
+          title: "Invalid card number",
+          description: "Please enter a valid card number",
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
       if (!bankName || !accountNumber || !accountHolder) {
         toast({
           title: "Missing information",
           description: "Please fill in all bank account details",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate account number length
+      if (accountNumber.length < 8 || accountNumber.length > 12) {
+        toast({
+          title: "Invalid account number",
+          description: "Account number must be 8-12 digits",
           variant: "destructive",
         });
         return;
@@ -113,7 +135,7 @@ export default function CartCheckout() {
       
       const order = await checkout(paymentData);
       
-      if (order) {
+      if (order && order.id) {
         // Clear sensitive payment data from state
         setCardNumber("");
         setCardExpiry("");
@@ -123,13 +145,21 @@ export default function CartCheckout() {
         setBankName("");
         setAccountHolder("");
         
+        // Navigate to order confirmation page
         navigate(`/order-confirmation/${order.id}`);
+      } else {
+        // Handle case where order is returned but invalid
+        toast({
+          title: "Checkout incomplete",
+          description: "Please try again or contact support",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
         title: "Checkout failed",
-        description: "Please try again or contact support",
+        description: "Please try again or contact support. If the issue persists, contact Berry Events support.",
         variant: "destructive",
       });
     } finally {
