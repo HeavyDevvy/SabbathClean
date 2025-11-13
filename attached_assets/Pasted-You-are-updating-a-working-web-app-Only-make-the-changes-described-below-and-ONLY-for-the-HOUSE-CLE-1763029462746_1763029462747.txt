@@ -1,0 +1,134 @@
+You are updating a working web app. Only make the changes described below and ONLY for the HOUSE CLEANING booking flow. 
+
+Do NOT change:
+- Any other service booking flows (plumbing, moving, etc.).
+- Any existing functionality, routing, DB structure, or UX outside the House Cleaning booking flow.
+- Any text, styles, or layout unless explicitly requested below.
+- Any auth logic or cart logic outside where specified.
+
+The goal is to fix and improve the HOUSE CLEANING booking journey only.
+
+==================================================
+SCOPE: HOUSE CLEANING BOOKING FLOW ONLY
+==================================================
+
+A) "Choose your verified Provider" step (House Cleaning only)
+
+1. Provider profile details
+On the "Choose your verified Provider" step for House Cleaning:
+- For each service provider card/profile, ensure the profile includes and *visibly displays* the following fields (using existing data fields if they already exist):
+  - Description / Bio written by the service provider when signing up.
+  - Reviews left by past users (star rating + review count or list of latest reviews).
+  - Profile picture of the provider.
+  - Jobs completed (number).
+  - Qualifications / certificates (list or badges).
+  - Experience (e.g., "5 years" or similar field).
+  - Days available during the week (e.g., "Mon–Fri", "Weekends only", etc.).
+
+If some of these fields don’t exist yet in the data model, use placeholder or optional fields that won’t break anything else (e.g., show “Not provided yet” when missing), but do NOT change the global data structure in a way that breaks other services.
+
+2. Add ability for tipping when selecting provider
+- On the same provider selection step (House Cleaning only), add the ability for the user to add a **tip** when they select the provider.
+- This can be a simple input control (e.g., numeric field or pre-set buttons like 0, R20, R50, R100).
+- The tip amount must:
+  - Be stored in the booking state for that House Cleaning booking.
+  - Be included as a separate line item in the final payment summary and booking summary.
+  - Be included in the total amount charged (i.e., total = services + add-ons + platform fee + tip).
+- Ensure that if the user does NOT add a tip, the tip defaults to 0 and nothing breaks.
+
+B) Provider page CTA buttons (House Cleaning only)
+
+On the House Cleaning service provider page (the page where the user sees provider details and can add to cart):
+
+Currently there are two separate buttons: "Add to cart" and "Go to cart". 
+Please merge/adjust them so that at the bottom there are exactly THREE buttons:
+
+1. **Back**
+2. **Add to cart & Select Another**
+3. **Add & Go to Cart**
+
+Behaviour:
+- **Back**: Goes back to the previous step exactly as it does now.
+- **Add to cart & Select Another**:
+  - Adds the current House Cleaning booking to the cart.
+  - After adding, redirect the user to the **Home page** so they can select/book another service.
+- **Add & Go to Cart**:
+  - Adds the current House Cleaning booking to the cart.
+  - Then redirects the user directly to the cart page as it currently does for “Go to cart”.
+
+Make sure the underlying cart logic remains exactly the same. Only adjust which buttons appear and what they are called/where they redirect.
+
+C) Estimated Hours logic (House Cleaning only)
+
+This is currently NOT working correctly. Right now it still shows 2 hours. We need the following logic, only for the HOUSE CLEANING booking flow:
+
+Base rule:
+- The **Estimated Hours** field for House Cleaning must default to **6 hours** minimum (not 2).
+
+Increment rule:
+- For each additional service/add-on selected within the House Cleaning booking:
+  - Automatically add **30 minutes (0.5 hours)** to the Estimated Hours.
+
+The logic must work as follows:
+
+- Base estimate: 6.0 hours
+- If 1 extra add-on is selected: 6.5 hours
+- If 2 extra add-ons are selected: 7.0 hours
+- If 3 extra add-ons are selected: 7.5 hours
+- etc.
+
+Details:
+- “Additional services/add-ons” refers to extra add-ons the user selects on the House Cleaning Add-ons step.
+- The Estimated Hours value must always accurately reflect:
+  base 6.0 hours + 0.5 * (number of selected add-ons) for the House Cleaning booking.
+- Ensure this logic only applies to House Cleaning. Other services must keep their existing estimated time logic unchanged.
+- Make sure the updated Estimated Hours value is reflected wherever it is displayed (summary, receipt, etc.) but do NOT alter the layout/content otherwise.
+
+D) General constraints
+
+- Apply all changes ONLY to components, routes, and state branches that are part of the **House Cleaning** booking flow.
+- Do not change cart behaviour for other services.
+- Do not change payment logic except to ensure it correctly incorporates any added tip and correct estimated hours for House Cleaning.
+- Ensure no new console errors are introduced and no existing working flows break.
+
+==================================================
+FINAL CHECKLIST (MUST VERIFY BEFORE COMPLETING)
+==================================================
+
+Please go through this checklist and confirm each item is working as expected. If something fails, fix it before finishing.
+
+[ ] HOUSE CLEANING – Choose your verified Provider step:
+    - Provider profile shows description/bio, reviews, profile pic, jobs completed, qualifications, experience, and days available.
+[ ] HOUSE CLEANING – Tipping:
+    - User can add a tip when selecting a provider.
+    - Tip appears as a separate line item in the final payment/booking summary.
+    - Tip is included in the total charge.
+    - If no tip is added, everything still works (tip = 0).
+
+[ ] HOUSE CLEANING – Provider page buttons:
+    - Bottom of provider page shows exactly three buttons: 
+      “Back”, “Add to cart & Select Another”, “Add & Go to Cart”.
+    - “Add to cart & Select Another” adds the booking to the cart and redirects to the Home page.
+    - “Add & Go to Cart” adds the booking to the cart and redirects to the cart view.
+    - Cart contents reflect the correct House Cleaning booking details.
+
+[ ] HOUSE CLEANING – Estimated Hours:
+    - Base estimated hours for House Cleaning is 6.0 hours.
+    - Each additional add-on increases Estimated Hours by 0.5 hours (30 minutes).
+    - The example scenarios work correctly:
+      - 0 add-ons: 6.0 hours
+      - 1 add-on: 6.5 hours
+      - 2 add-ons: 7.0 hours
+      - 3 add-ons: 7.5 hours
+    - This logic is ONLY applied to the House Cleaning booking flow; other services are unchanged.
+
+[ ] No blank screens, no new 4xx/5xx errors, and no console errors occur during:
+    - House Cleaning booking from start to finish.
+    - Adding to cart and navigating Home / Cart.
+    - Viewing summaries and any related pages.
+
+[ ] All other services (non–House Cleaning) still behave exactly as before with no UI or logic changes.
+
+Finally, list:
+- All files you edited.
+- A one-line summary of what changed in each file.

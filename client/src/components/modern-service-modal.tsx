@@ -149,6 +149,9 @@ export default function ModernServiceModal({
     } : null) as any,
     specialRequests: editBookingData?.specialRequests || "",
     
+    // HOUSE CLEANING ONLY: Tip amount for provider
+    tipAmount: editBookingData?.tipAmount || 0,
+    
     // Payment information
     paymentMethod: "card",
     cardNumber: "",
@@ -381,7 +384,14 @@ export default function ModernServiceModal({
       distance: 3.2,
       specializations: ["Deep Cleaning", "Move In/Out"],
       verified: true,
-      responseTime: "< 2 hours"
+      responseTime: "< 2 hours",
+      // Enhanced profile fields (conditionally displayed based on service type)
+      bio: "Professional service provider with 7+ years experience in home services. Known for reliability, attention to detail, and customer satisfaction.",
+      profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      jobsCompleted: 156,
+      qualifications: ["Certified Professional", "Health & Safety Trained", "Background Checked"],
+      experience: 7,
+      availability: "Mon-Sat"
     },
     {
       id: 2,
@@ -391,7 +401,14 @@ export default function ModernServiceModal({
       distance: 5.7,
       specializations: ["Garden Design", "Lawn Care"],
       verified: true,
-      responseTime: "< 1 hour"
+      responseTime: "< 1 hour",
+      // Enhanced profile fields (conditionally displayed based on service type)
+      bio: "Experienced home service professional with expertise across multiple service areas. Known for attention to detail and reliability. Fully insured and background-checked.",
+      profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+      jobsCompleted: 203,
+      qualifications: ["Certified Professional", "First Aid Trained", "Insured"],
+      experience: 10,
+      availability: "Mon-Fri"
     },
     {
       id: 3,
@@ -399,9 +416,16 @@ export default function ModernServiceModal({
       rating: 4.7,
       reviews: 98,
       distance: 8.1,
-      specializations: ["Emergency Plumbing"],
+      specializations: ["Emergency Services", "Quick Response"],
       verified: true,
-      responseTime: "< 30 min"
+      responseTime: "< 30 min",
+      // Enhanced profile fields (conditionally displayed based on service type)
+      bio: "Multi-skilled home services provider with fast response time and excellent problem-solving skills. Committed to quality service delivery.",
+      profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+      jobsCompleted: 98,
+      qualifications: ["Multi-Service Certified", "Emergency Response", "Licensed Professional"],
+      experience: 5,
+      availability: "7 days/week"
     }
   ]);
 
@@ -815,6 +839,12 @@ export default function ModernServiceModal({
 
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
+  
+  // HOUSE CLEANING ONLY: Service-specific feature flag
+  const isHouseCleaning = useMemo(() => 
+    serviceId === "house-cleaning" || mappedServiceId === "cleaning", 
+    [serviceId, mappedServiceId]
+  );
   
   // Service-specific placeholder suggestions for Comments field
   const servicePlaceholders: Record<string, string> = {
@@ -2111,7 +2141,7 @@ export default function ModernServiceModal({
       <div className="space-y-4">
         <div>
           <Label htmlFor="preferred-date">
-            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Date *" : "Preferred Date *"}
+            {isHouseCleaning ? "Date *" : "Preferred Date *"}
           </Label>
           <Input
             id="preferred-date"
@@ -2134,7 +2164,7 @@ export default function ModernServiceModal({
 
         <div>
           <Label>
-            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Preferred Time *" : "Modern Time Preference Selection *"}
+            {isHouseCleaning ? "Preferred Time *" : "Modern Time Preference Selection *"}
           </Label>
           <Select 
             value={formData.timePreference} 
@@ -2150,7 +2180,6 @@ export default function ModernServiceModal({
               )}
               {(() => {
                 // HOUSE CLEANING ONLY: Check if booking for today
-                const isHouseCleaning = serviceId === "house-cleaning" || mappedServiceId === "cleaning";
                 const isToday = formData.preferredDate === new Date().toISOString().split('T')[0];
                 const now = new Date();
                 const currentHour = now.getHours();
@@ -2192,7 +2221,7 @@ export default function ModernServiceModal({
 
         <div>
           <Label>
-            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Reoccurring Services" : "Recurring Schedule Options"}
+            {isHouseCleaning ? "Reoccurring Services" : "Recurring Schedule Options"}
           </Label>
           <Select value={formData.recurringSchedule} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, recurringSchedule: value }))
@@ -2219,7 +2248,7 @@ export default function ModernServiceModal({
 
         <div>
           <Label>
-            {(serviceId === "house-cleaning" || mappedServiceId === "cleaning") ? "Materials and Equipment Supplier" : "Materials & Equipment Supply Options"}
+            {isHouseCleaning ? "Materials and Equipment Supplier" : "Materials & Equipment Supply Options"}
           </Label>
           <Select value={formData.materials} onValueChange={(value) =>
             setFormData(prev => ({ ...prev, materials: value }))
@@ -2578,11 +2607,20 @@ export default function ModernServiceModal({
             }`}
           >
             <CardContent className="p-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
+              <div className="flex items-start space-x-4">
+                {/* HOUSE CLEANING ONLY: Show profile image */}
+                {isHouseCleaning && provider.profileImage ? (
+                  <img 
+                    src={provider.profileImage} 
+                    alt={provider.name}
+                    className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <User className="h-6 w-6 text-primary" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-1">
                     <h4 
                       className="font-semibold text-primary underline cursor-pointer hover:text-primary/80"
@@ -2594,10 +2632,16 @@ export default function ModernServiceModal({
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     )}
                   </div>
+                  
+                  {/* HOUSE CLEANING ONLY: Show bio */}
+                  {isHouseCleaning && provider.bio && (
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{provider.bio}</p>
+                  )}
+                  
                   <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                      {provider.rating} ({provider.reviews})
+                      <Star className="h-4 w-4 text-yellow-400 mr-1 fill-current" />
+                      {provider.rating} ({provider.reviews} reviews)
                     </div>
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 mr-1" />
@@ -2608,18 +2652,59 @@ export default function ModernServiceModal({
                       {provider.responseTime}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {provider.specializations.slice(0, 2).map((spec: string) => (
-                      <Badge key={spec} variant="secondary" className="text-xs">
-                        {spec}
-                      </Badge>
-                    ))}
-                  </div>
+                  
+                  {/* HOUSE CLEANING ONLY: Show jobs completed and experience */}
+                  {isHouseCleaning && (
+                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                      {provider.jobsCompleted && (
+                        <div className="flex items-center">
+                          <CheckCircle className="h-4 w-4 mr-1 text-success" />
+                          {provider.jobsCompleted} jobs completed
+                        </div>
+                      )}
+                      {provider.experience && (
+                        <div className="flex items-center">
+                          <Shield className="h-4 w-4 mr-1" />
+                          {provider.experience} years exp.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* HOUSE CLEANING ONLY: Show qualifications */}
+                  {isHouseCleaning && provider.qualifications && provider.qualifications.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {provider.qualifications.map((qual: string) => (
+                        <Badge key={qual} variant="secondary" className="text-xs">
+                          {qual}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Show specializations for all services OR availability for House Cleaning */}
+                  {!isHouseCleaning && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {provider.specializations.slice(0, 2).map((spec: string) => (
+                        <Badge key={spec} variant="secondary" className="text-xs">
+                          {spec}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {isHouseCleaning && provider.availability && (
+                    <div className="text-xs text-gray-600 mb-2">
+                      Available: {provider.availability}
+                    </div>
+                  )}
+                  
                   <Button
                     size="sm"
                     variant={formData.selectedProvider?.id === provider.id ? "default" : "outline"}
                     onClick={() => setFormData(prev => ({ ...prev, selectedProvider: provider }))}
                     className="w-full"
+                    data-testid={`button-select-provider-${provider.id}`}
                   >
                     {formData.selectedProvider?.id === provider.id ? "Selected" : "Select Provider"}
                   </Button>
@@ -2629,6 +2714,72 @@ export default function ModernServiceModal({
           </Card>
         ))}
       </div>
+      
+      {/* HOUSE CLEANING ONLY: Tip input section */}
+      {isHouseCleaning && formData.selectedProvider && (
+        <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+          <CardContent className="p-4">
+            <Label className="text-sm font-semibold mb-2 block">Add a tip for your provider (optional)</Label>
+            <p className="text-xs text-gray-600 mb-3">Show your appreciation for excellent service</p>
+            
+            <div className="flex gap-2 mb-3">
+              {[0, 20, 50, 100].map((amount) => (
+                <Button
+                  key={amount}
+                  type="button"
+                  size="sm"
+                  variant={formData.tipAmount === amount ? "default" : "outline"}
+                  onClick={() => setFormData(prev => ({ ...prev, tipAmount: amount }))}
+                  className="flex-1"
+                  data-testid={`button-tip-${amount}`}
+                >
+                  R{amount}
+                </Button>
+              ))}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Label htmlFor="custom-tip" className="text-xs whitespace-nowrap">Custom:</Label>
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">R</span>
+                <Input
+                  id="custom-tip"
+                  type="number"
+                  min="0"
+                  max="1000"
+                  step="0.01"
+                  value={formData.tipAmount || ''}
+                  onChange={(e) => {
+                    const rawValue = e.target.value;
+                    // Handle empty string as 0
+                    if (rawValue === '' || rawValue === null || rawValue === undefined) {
+                      setFormData(prev => ({ ...prev, tipAmount: 0 }));
+                      return;
+                    }
+                    
+                    const value = parseFloat(rawValue);
+                    // Validate number and range
+                    if (!isNaN(value) && value >= 0 && value <= 1000) {
+                      // Round to 2 decimal places for currency
+                      const rounded = Math.round(value * 100) / 100;
+                      setFormData(prev => ({ ...prev, tipAmount: rounded }));
+                    }
+                  }}
+                  className="pl-8"
+                  placeholder="0"
+                  data-testid="input-custom-tip"
+                />
+              </div>
+            </div>
+            
+            {formData.tipAmount > 0 && (
+              <p className="text-xs text-success mt-2">
+                ✓ R{formData.tipAmount.toFixed(2)} tip will be added to your total
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {bookedServices.length > 0 && (
         <div className="text-sm text-gray-600 text-center mt-4">

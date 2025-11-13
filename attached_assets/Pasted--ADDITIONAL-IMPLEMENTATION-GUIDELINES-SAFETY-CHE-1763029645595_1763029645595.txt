@@ -1,0 +1,871 @@
+==================================================
+ADDITIONAL IMPLEMENTATION GUIDELINES & SAFETY CHECKS
+==================================================
+
+PRE-IMPLEMENTATION: TECH STACK & FILE LOCATION CONFIRMATION
+------------------------------------------------------------
+Before making changes, confirm you can identify:
+
+1. **Framework & Structure:**
+   - Which framework: React / Vue / Next.js / other?
+   - Routing system: React Router / Next.js routing / Vue Router?
+   - State management: useState / Context / Redux / Zuex / other?
+
+2. **Provider Selection Component:**
+   - File location for "Choose your verified Provider" step
+   - How providers are fetched (API endpoint / static data / context?)
+   - Provider data structure (what fields currently exist?)
+
+3. **Cart Implementation:**
+   - Where cart state is stored (Context / Redux / localStorage / backend session?)
+   - File(s) handling "Add to cart" logic
+   - Navigation/redirect functions used in the app
+
+4. **Data Model for Providers:**
+   - Database schema or data structure for service providers
+   - Which fields already exist: bio, reviews, profile_pic, jobs_completed, qualifications, experience, availability?
+   - API endpoint for fetching provider details
+
+If any of these are unclear, document what you find before proceeding.
+
+DETAILED IMPLEMENTATION SPECIFICATIONS
+---------------------------------------
+
+SECTION A: PROVIDER PROFILE ENHANCEMENTS (HOUSE CLEANING ONLY)
+---------------------------------------------------------------
+
+1. PROVIDER DATA FIELDS - DISPLAY REQUIREMENTS:
+
+For each provider card/profile on the "Choose your verified Provider" step:
+
+**Required Fields to Display (priority order):**
+
+a) **Profile Picture:**
+   - Display provider's profile image
+   - If image URL exists: Show image (max size: 150x150px or existing card design)
+   - If missing: Show placeholder avatar or initials (e.g., "JD" for John Doe)
+   - Ensure image loads responsively and doesn't break layout
+
+b) **Provider Name:**
+   - Display full name prominently (should already exist)
+   - Verify: Name is clickable if it links to full profile
+
+c) **Description / Bio:**
+   - Display provider's bio/description text
+   - Field names to check: `bio`, `description`, `about`, `profile_description`
+   - If missing: Show "No description provided" or hide this section gracefully
+   - Truncate long text: Show first 150-200 characters with "Read more..." if needed
+   - Keep existing text styling
+
+d) **Reviews & Ratings:**
+   - Display: Star rating (e.g., ⭐ 4.5/5) + review count (e.g., "23 reviews")
+   - Field names to check: `rating`, `average_rating`, `review_count`, `reviews`
+   - If reviews exist as array: Show count and average
+   - If no reviews: Show "No reviews yet" or hide section
+   - Optional: Show 1-3 latest review snippets (first 100 chars each)
+   - DO NOT break existing review display if it already works
+
+e) **Jobs Completed:**
+   - Display number: "X jobs completed" or "Completed X bookings"
+   - Field names to check: `jobs_completed`, `completed_jobs`, `total_jobs`, `bookings_count`
+   - If field doesn't exist: Show "0 jobs completed" or hide section
+   - Format numbers: Use commas for 1000+ (e.g., "1,234 jobs")
+
+f) **Qualifications / Certificates:**
+   - Display as list or badges: "Certified Cleaner", "Health & Safety Trained", etc.
+   - Field names to check: `qualifications`, `certificates`, `certifications`, `skills`
+   - If array of strings: Display as comma-separated list or bullet points
+   - If empty: Show "No certifications listed" or hide section
+   - If badges/icons exist: Use them; otherwise plain text is fine
+
+g) **Experience:**
+   - Display: "X years experience" or "Experience: X years"
+   - Field names to check: `experience`, `years_experience`, `experience_years`
+   - If numeric: Convert to readable format (e.g., 5 → "5 years")
+   - If missing: Show "Experience not specified" or hide section
+
+h) **Days Available:**
+   - Display: Days of the week provider is available
+   - Field names to check: `availability`, `available_days`, `days_available`, `working_days`
+   - Format examples: "Mon-Fri", "Weekends only", "Mon, Wed, Fri", "7 days/week"
+   - If array of days: Convert to readable string
+   - If missing: Show "Availability not specified" or hide section
+
+**CRITICAL: HANDLING MISSING DATA**
+- For each field, check if data exists BEFORE rendering
+- Use conditional rendering (e.g., `{provider.bio && <div>{provider.bio}</div>}`)
+- Never assume all providers have all fields populated
+- DO NOT throw errors if field is undefined/null
+- Graceful degradation: Show partial profile if some fields missing
+
+**LAYOUT & STYLING:**
+- Maintain existing card/profile layout structure
+- Add new fields within existing card design (don't create new layout)
+- Ensure card doesn't become too tall - use scrolling or "View Full Profile" link if needed
+- Keep responsive design - test on mobile (320px) and desktop (1024px+)
+- Use existing CSS classes/styles - only add minimal styling if absolutely necessary
+
+**DATA FETCHING:**
+- If provider data comes from API: Verify API returns all needed fields
+- If API doesn't return some fields: Add them to API response OR use placeholder values
+- Do NOT modify API endpoint to break other service types
+- If using GraphQL: Update query to include new fields
+- Handle loading states: Show skeleton/loading indicator while fetching
+
+**IMPLEMENTATION PATTERN:**
+```javascript
+// Example React implementation
+const ProviderCard = ({ provider }) => {
+  return (
+    <div className="provider-card">
+      {/* Profile Picture */}
+      {provider.profile_pic ? (
+        <img src={provider.profile_pic} alt={provider.name} />
+      ) : (
+        <div className="avatar-placeholder">{provider.name?.charAt(0)}</div>
+      )}
+      
+      {/* Name */}
+      <h3>{provider.name}</h3>
+      
+      {/* Bio */}
+      {provider.bio && <p className="bio">{provider.bio}</p>}
+      
+      {/* Reviews */}
+      {provider.rating && (
+        <div className="reviews">
+          ⭐ {provider.rating}/5 ({provider.review_count || 0} reviews)
+        </div>
+      )}
+      
+      {/* Jobs Completed */}
+      {provider.jobs_completed !== undefined && (
+        <div>{provider.jobs_completed} jobs completed</div>
+      )}
+      
+      {/* Qualifications */}
+      {provider.qualifications?.length > 0 && (
+        <div className="qualifications">
+          {provider.qualifications.join(', ')}
+        </div>
+      )}
+      
+      {/* Experience */}
+      {provider.experience && (
+        <div>{provider.experience} years experience</div>
+      )}
+      
+      {/* Days Available */}
+      {provider.available_days && (
+        <div>Available: {provider.available_days}</div>
+      )}
+    </div>
+  );
+};
+```
+
+2. TIPPING FUNCTIONALITY (HOUSE CLEANING ONLY):
+
+**UI IMPLEMENTATION:**
+
+Location: On the "Choose your verified Provider" step, add tipping input AFTER user selects a provider but BEFORE proceeding to next step.
+
+Placement options:
+- Option A: Inside each provider card (appears when provider is selected)
+- Option B: At bottom of provider selection step (after provider is chosen)
+- Option C: In a modal/popup when user clicks provider's "Select" button
+
+**Tipping Input Design:**
+
+Recommended approach - Preset buttons + custom input:
+```
+Add a tip for your provider (optional):
+[R0]  [R20]  [R50]  [R100]  [Custom: R___]
+
+Or use simple input field:
+Tip amount (optional): R [____]
+```
+
+**Implementation Requirements:**
+
+a) **Input Control:**
+   - Type: Number input OR button group
+   - Currency: South African Rand (R) - ensure proper formatting
+   - Validation: 
+     * Must be numeric
+     * Must be >= 0 (no negative tips)
+     * Max reasonable limit (e.g., R1000) to prevent typos
+     * Round to 2 decimal places if needed
+   - Default: 0 or empty (both acceptable)
+
+b) **State Management:**
+   - Store tip amount in booking state: `bookingState.tip` or `booking.tip_amount`
+   - Tip must persist when navigating between steps
+   - If user goes back and changes provider: Option to keep/reset tip
+   - Tip must be included in cart data structure
+
+c) **Data Flow:**
+```
+   Provider Selection → Tip Input → Booking State → Cart → Payment Summary → Total Calculation
+```
+
+d) **Booking State Update:**
+   When user adds tip:
+```javascript
+   // Example
+   const handleTipChange = (tipValue) => {
+     setBooking({
+       ...booking,
+       tip_amount: parseFloat(tipValue) || 0,
+       tip_enabled: true
+     });
+   };
+```
+
+e) **Cart Integration:**
+   When adding to cart, ensure cart item includes:
+```javascript
+   {
+     service: "House Cleaning",
+     provider: selectedProvider,
+     date: selectedDate,
+     time: selectedTime,
+     addOns: selectedAddOns,
+     estimatedHours: calculatedHours,
+     tip_amount: tipAmount || 0,  // NEW FIELD
+     // ... other existing fields
+   }
+```
+
+f) **Payment Summary Display:**
+   In payment/checkout summary, show tip as separate line item:
+```
+   Service: House Cleaning          R500.00
+   Add-ons (2)                      R100.00
+   Estimated Hours: 7.0             -
+   Platform Fee                     R50.00
+   Tip for Provider                 R50.00  ← NEW LINE
+   ─────────────────────────────────────────
+   Total:                           R700.00
+```
+
+g) **Total Calculation:**
+   Update total calculation formula:
+```javascript
+   const calculateTotal = (booking) => {
+     const serviceTotal = booking.service_price || 0;
+     const addOnsTotal = booking.addOns.reduce((sum, addon) => sum + addon.price, 0);
+     const platformFee = booking.platform_fee || 0;
+     const tipAmount = booking.tip_amount || 0;  // NEW
+     
+     return serviceTotal + addOnsTotal + platformFee + tipAmount;
+   };
+```
+
+h) **Edge Cases & Validation:**
+   - No tip (tip = 0): Everything must work normally, no errors
+   - Large tips (R500+): Show confirmation "Are you sure? That's a generous tip!"
+   - Invalid input (letters, symbols): Show error "Please enter a valid amount"
+   - Decimal amounts (R25.50): Support up to 2 decimal places
+   - Empty field: Treat as 0, not undefined/null
+
+i) **Booking Confirmation:**
+   On final booking confirmation/receipt, display:
+   - Tip amount clearly labeled
+   - Indicate tip goes to provider (e.g., "Tip for [Provider Name]: R50")
+   - Include in grand total
+
+**CRITICAL: ISOLATION TO HOUSE CLEANING**
+- Tip functionality must ONLY appear for House Cleaning bookings
+- Guard with conditional:
+```javascript
+  {booking.service === "House Cleaning" && (
+    <TipInput value={tip} onChange={handleTipChange} />
+  )}
+```
+- Other services must NOT show tip input
+- Cart must handle bookings with and without tips (backward compatible)
+
+SECTION B: PROVIDER PAGE CTA BUTTONS (HOUSE CLEANING ONLY)
+-----------------------------------------------------------
+
+**CURRENT STATE:**
+- Two buttons exist: "Add to cart" and "Go to cart"
+
+**TARGET STATE:**
+- Three buttons: "Back", "Add to cart & Select Another", "Add & Go to Cart"
+
+**BUTTON SPECIFICATIONS:**
+
+1. **BACK Button:**
+   - Label: "Back" or "← Back" (with arrow icon optional)
+   - Position: Bottom left of provider page
+   - Behavior: Navigate to previous step (provider selection or schedule step)
+   - Existing functionality: Keep exactly as is
+   - Styling: Secondary/outline button style
+   - No changes needed if already works
+
+2. **Add to cart & Select Another Button:**
+   - Label: "Add to cart & Select Another" OR "Add & Book Another Service"
+   - Position: Bottom center or bottom center-left
+   - Behavior:
+     a) Execute existing "Add to cart" logic (save booking to cart state)
+     b) Show success message/toast: "House Cleaning added to cart!"
+     c) Navigate to Home page/Service selection page
+   - Implementation:
+```javascript
+     const handleAddAndSelectAnother = async () => {
+       // Add to cart (existing logic)
+       await addToCart(currentBooking);
+       
+       // Show success feedback
+       showToast("Added to cart successfully!");
+       
+       // Redirect to home page
+       navigate('/'); // or router.push('/home')
+     };
+```
+   - Styling: Primary or secondary button (consistent with existing design)
+   - Loading state: Show spinner while adding to cart
+
+3. **Add & Go to Cart Button:**
+   - Label: "Add & Go to Cart" OR "Add to Cart & Checkout"
+   - Position: Bottom right or bottom center-right
+   - Behavior:
+     a) Execute existing "Add to cart" logic
+     b) Show success message/toast: "Added to cart!"
+     c) Navigate to Cart page (/cart or wherever cart is displayed)
+   - Implementation:
+```javascript
+     const handleAddAndGoToCart = async () => {
+       // Add to cart (existing logic)
+       await addToCart(currentBooking);
+       
+       // Show success feedback
+       showToast("Added to cart!");
+       
+       // Redirect to cart page
+       navigate('/cart'); // or router.push('/cart')
+     };
+```
+   - Styling: Primary button (most prominent call-to-action)
+   - Loading state: Show spinner while adding to cart
+
+**LAYOUT ARRANGEMENT:**
+
+Recommended desktop layout:
+```
+[  Back  ]                    [Add to cart & Select Another]  [Add & Go to Cart]
+```
+
+Mobile layout (stacked):
+```
+[       Add & Go to Cart       ]  ← Primary
+[  Add to cart & Select Another ]  ← Secondary
+[            Back               ]  ← Tertiary
+```
+
+**IMPLEMENTATION CHECKLIST:**
+
+- [ ] Remove or hide existing "Add to cart" standalone button
+- [ ] Remove or hide existing "Go to cart" standalone button
+- [ ] Create three new buttons with specified labels
+- [ ] Wire "Add to cart & Select Another" to: addToCart → navigate('/')
+- [ ] Wire "Add & Go to Cart" to: addToCart → navigate('/cart')
+- [ ] "Back" button unchanged (keep existing behavior)
+- [ ] Test navigation works correctly for all three buttons
+- [ ] Ensure cart data persists after navigation
+- [ ] Verify success messages appear (toast/notification)
+- [ ] Check responsive layout on mobile (buttons stack or wrap appropriately)
+
+**CART LOGIC PRESERVATION:**
+
+DO NOT change:
+- How cart state is stored (Context/Redux/localStorage)
+- Cart data structure (fields, format)
+- Cart validation logic
+- How items are merged or kept separate in cart
+- Any backend API calls for cart operations
+
+ONLY change:
+- Which buttons appear on provider page
+- Button labels/text
+- Post-add-to-cart navigation destination
+
+**TESTING SCENARIOS:**
+
+1. **Add & Go to Cart:**
+   - Click button → Booking added → Redirected to /cart → Cart shows House Cleaning booking
+
+2. **Add to cart & Select Another:**
+   - Click button → Booking added → Redirected to / (home) → Can select another service → Cart still contains House Cleaning booking
+
+3. **Multiple bookings:**
+   - Add House Cleaning → Select Another → Add Plumbing → Cart contains both services
+
+4. **Back button:**
+   - Click Back → Returns to previous step → Current selections preserved
+
+SECTION C: ESTIMATED HOURS LOGIC (HOUSE CLEANING ONLY)
+-------------------------------------------------------
+
+**PROBLEM STATEMENT:**
+Currently shows 2 hours for House Cleaning. Should be 6 hours base + 0.5 per add-on.
+
+**TARGET LOGIC:**
+
+Base Rule:
+- Estimated Hours for House Cleaning = 6.0 hours (minimum)
+
+Increment Rule:
+- Each add-on selected adds +0.5 hours
+
+Formula:
+```javascript
+estimatedHours = 6.0 + (numberOfAddOns * 0.5)
+```
+
+**CALCULATION EXAMPLES:**
+
+| Add-ons Selected | Calculation        | Estimated Hours |
+|------------------|--------------------|--------------------|
+| 0                | 6.0 + (0 × 0.5)    | 6.0 hours          |
+| 1                | 6.0 + (1 × 0.5)    | 6.5 hours          |
+| 2                | 6.0 + (2 × 0.5)    | 7.0 hours          |
+| 3                | 6.0 + (3 × 0.5)    | 7.5 hours          |
+| 4                | 6.0 + (4 × 0.5)    | 8.0 hours          |
+| 5                | 6.0 + (5 × 0.5)    | 8.5 hours          |
+
+**IMPLEMENTATION REQUIREMENTS:**
+
+1. **Locate Estimated Hours Calculation:**
+   - Find where estimated hours are calculated (likely in add-ons step component)
+   - Common file names: `AddOnsStep.js`, `BookingAddOns.jsx`, `HouseCleaningAddOns.vue`
+   - Common function names: `calculateEstimatedHours`, `updateEstimatedTime`, `getEstimatedDuration`
+
+2. **Replace/Update Calculation Logic:**
+
+Current (broken) logic might be:
+```javascript
+const estimatedHours = 2; // Hardcoded - WRONG
+```
+
+New logic should be:
+```javascript
+const calculateEstimatedHours = (service, addOns) => {
+  // Only apply 6-hour minimum for House Cleaning
+  if (service.name === "House Cleaning" || service.id === "house-cleaning") {
+    const baseHours = 6.0;
+    const addOnCount = addOns?.length || 0;
+    return baseHours + (addOnCount * 0.5);
+  }
+  
+  // For other services, use existing logic
+  return service.default_hours || 2; // Or whatever existing logic
+};
+```
+
+3. **Integration Points:**
+
+Update estimated hours in ALL these places (where applicable):
+
+a) **Add-ons Step Display:**
+   - Show estimated hours prominently: "Estimated Duration: 6.5 hours"
+   - Update in real-time when user checks/unchecks add-ons
+
+b) **Booking State:**
+   - Store in booking object: `booking.estimated_hours`
+   - Ensure it persists when navigating between steps
+
+c) **Cart Display:**
+   - Show in cart: "Duration: 7.0 hours"
+   - Include when displaying House Cleaning cart item
+
+d) **Payment Summary:**
+   - Display on checkout: "Estimated Hours: 6.5"
+   - May affect pricing if hourly rate applies
+
+e) **Booking Confirmation:**
+   - Show on receipt: "Duration: 6.5 hours"
+   - Include in confirmation email/PDF (if applicable)
+
+f) **Backend/Database:**
+   - If hours are saved to database: Ensure correct value is sent
+   - Check API payload includes updated estimated_hours
+
+4. **Add-on Selection Handling:**
+
+When user checks/unchecks add-ons:
+```javascript
+const handleAddOnChange = (addOn, isSelected) => {
+  let updatedAddOns;
+  
+  if (isSelected) {
+    updatedAddOns = [...selectedAddOns, addOn];
+  } else {
+    updatedAddOns = selectedAddOns.filter(a => a.id !== addOn.id);
+  }
+  
+  setSelectedAddOns(updatedAddOns);
+  
+  // Recalculate estimated hours immediately
+  if (currentService.name === "House Cleaning") {
+    const newEstimatedHours = 6.0 + (updatedAddOns.length * 0.5);
+    setEstimatedHours(newEstimatedHours);
+  }
+};
+```
+
+5. **Display Formatting:**
+   - Show with 1 decimal place: "6.5 hours" NOT "6.50" or "6.500000"
+   - Use `toFixed(1)` for consistency: `estimatedHours.toFixed(1)`
+   - Label variations: "Estimated Hours", "Duration", "Estimated Time"
+
+6. **Edge Cases:**
+
+a) **No Add-ons:**
+   - User selects no add-ons → Show 6.0 hours (not 0, not 2)
+
+b) **Many Add-ons:**
+   - User selects 10 add-ons → Show 11.0 hours (6 + 10×0.5)
+   - No maximum limit unless business logic requires it
+
+c) **Add/Remove Repeatedly:**
+   - User adds 3, removes 1, adds 2 → Hours update correctly each time
+   - Always recalculate from scratch, don't increment/decrement
+
+d) **Navigation:**
+   - User goes to add-ons step → Shows 6.0 hours
+   - User selects 2 add-ons → Shows 7.0 hours
+   - User goes back, then forward → Still shows 7.0 hours (preserved state)
+
+7. **Service-Specific Guarding:**
+
+CRITICAL: Only apply 6-hour logic to House Cleaning:
+```javascript
+// Good - explicit check
+if (service.name === "House Cleaning" || service.id === "house-cleaning") {
+  return 6.0 + (addOns.length * 0.5);
+}
+
+// Bad - affects all services
+return 6.0 + (addOns.length * 0.5);
+```
+
+Test with other services:
+- Plumbing estimated hours: Should NOT be 6+ hours (use existing logic)
+- Electrical estimated hours: Should NOT be 6+ hours (use existing logic)
+
+8. **Pricing Impact (if applicable):**
+
+If pricing is hourly-based:
+- Verify: Updated hours correctly affect price calculation
+- Example: If House Cleaning is R100/hour:
+  - 6.5 hours = R650
+  - 7.0 hours = R700
+- Ensure price updates when hours update
+- Test: Add add-on → Hours increase → Price increases accordingly
+
+**DEBUGGING CHECKLIST:**
+
+If estimated hours not updating:
+- [ ] Check console for errors
+- [ ] Verify add-on change handler is called (add console.log)
+- [ ] Confirm service identification works (console.log service name/id)
+- [ ] Check if estimated hours state is updated (React DevTools / Vue DevTools)
+- [ ] Verify UI is bound to correct state variable
+- [ ] Check if re-render is triggered after state update
+
+GENERAL SAFETY & TESTING REQUIREMENTS
+--------------------------------------
+
+**ISOLATION TO HOUSE CLEANING:**
+
+Every change must be guarded with service type check:
+```javascript
+// Pattern to follow
+if (isHouseCleaning(currentService)) {
+  // Apply House Cleaning-specific logic
+} else {
+  // Keep existing logic for other services
+}
+
+// Helper function
+const isHouseCleaning = (service) => {
+  return service?.name === "House Cleaning" || 
+         service?.id === "house-cleaning" ||
+         service?.slug === "house-cleaning";
+};
+```
+
+**STATE MANAGEMENT INTEGRITY:**
+
+1. **Booking State Structure:**
+   Ensure House Cleaning bookings include:
+```javascript
+   {
+     service: "House Cleaning",
+     service_id: "house-cleaning",
+     provider: { ...providerDetails },
+     date: "2025-11-15",
+     time: "10:00 AM",
+     addOns: [...selectedAddOns],
+     estimated_hours: 7.0,  // Updated calculation
+     tip_amount: 50.00,     // NEW FIELD
+     // ... other existing fields
+   }
+```
+
+2. **Cart State:**
+   - Multiple services can be in cart simultaneously
+   - Each cart item is independent
+   - House Cleaning items have tip_amount and correct estimated_hours
+   - Other service items are unaffected
+
+3. **Navigation Persistence:**
+   - If user navigates away and comes back: State preserved
+   - If user refreshes page mid-booking: State handling per existing app behavior
+   - Tip amount and estimated hours must persist across navigation
+
+**ERROR HANDLING:**
+
+1. **Provider Data Missing:**
+```javascript
+   // Safe rendering
+   const ProfileField = ({ label, value }) => {
+     if (!value) return null; // Or return <span>Not provided</span>
+     return <div><strong>{label}:</strong> {value}</div>;
+   };
+```
+
+2. **Tip Input Validation:**
+```javascript
+   const validateTip = (value) => {
+     const numValue = parseFloat(value);
+     if (isNaN(numValue)) return { valid: false, error: "Please enter a valid number" };
+     if (numValue < 0) return { valid: false, error: "Tip cannot be negative" };
+     if (numValue > 1000) return { valid: false, error: "Tip amount seems too high" };
+     return { valid: true, value: numValue };
+   };
+```
+
+3. **Cart Operations:**
+```javascript
+   const addToCart = async (booking) => {
+     try {
+       // Validate booking data
+       if (!booking.service || !booking.provider) {
+         throw new Error("Incomplete booking data");
+       }
+       
+       // Add to cart
+       await cartService.add(booking);
+       
+       return { success: true };
+     } catch (error) {
+       console.error("Add to cart failed:", error);
+       showError("Failed to add to cart. Please try again.");
+       return { success: false, error };
+     }
+   };
+```
+
+**CONSOLE ERROR MONITORING:**
+
+During implementation, watch for:
+- ❌ "Cannot read property 'X' of undefined" → Check optional chaining
+- ❌ "X is not a function" → Verify function exists before calling
+- ❌ "Maximum update depth exceeded" → Check for infinite re-render loops
+- ❌ "Failed to fetch" → Check API endpoints and network requests
+- ❌ "Warning: Each child in a list should have a unique key prop" → Add keys to mapped elements
+
+**RESPONSIVE DESIGN:**
+
+Test layouts on:
+- Mobile: 320px, 375px, 414px widths
+- Tablet: 768px, 1024px widths
+- Desktop: 1280px, 1440px, 1920px widths
+
+Ensure:
+- Provider cards stack properly on mobile
+- Tip input is tappable on touchscreens
+- Buttons don't overlap or get cut off
+- Text remains readable at all sizes
+
+**CROSS-BROWSER COMPATIBILITY:**
+
+Test in:
+- Chrome (desktop & mobile)
+- Safari (desktop & mobile)
+- Firefox
+- Edge
+
+Verify:
+- Date/time inputs work consistently
+- Number inputs for tip work properly
+- Navigation works in all browsers
+- Styling appears consistent
+
+REGRESSION TESTING REQUIREMENTS
+--------------------------------
+
+**FOR EACH NON-HOUSE CLEANING SERVICE:**
+
+Test these services (if they exist):
+- Plumbing
+- Electrical
+- Moving/Relocation
+- Landscaping/Gardening
+- Pest Control
+- Painting
+- HVAC
+- Carpentry
+- [Any other services in your app]
+
+For each service, verify:
+
+1. **Provider Selection (if applicable):**
+   - [ ] Provider cards display normally (no new fields added)
+   - [ ] NO tip input appears
+   - [ ] Selection works as before
+
+2. **Add-ons / Estimated Hours:**
+   - [ ] Estimated hours use ORIGINAL calculation (NOT 6+ hours)
+   - [ ] Add-ons don't add 0.5 hours automatically
+   - [ ] Display shows correct duration for that service
+
+3. **Cart & Buttons:**
+   - [ ] Add to cart works normally
+   - [ ] Buttons appear as they did before (no 3-button layout)
+   - [ ] Navigation works correctly
+
+4. **Payment:**
+   - [ ] NO tip line item appears
+   - [ ] Total calculation is correct
+   - [ ] Booking completes successfully
+
+5. **Booking Confirmation:**
+   - [ ] Confirmation shows correct details
+   - [ ] No reference to House Cleaning-specific features
+
+**CROSS-SERVICE CART TEST:**
+
+1. Add House Cleaning with 2 add-ons and R50 tip
+2. Add Plumbing service (no tip, different hours)
+3. Go to cart
+4. Verify:
+   - [ ] Both services appear separately
+   - [ ] House Cleaning shows: 7.0 hours, R50 tip
+   - [ ] Plumbing shows: Original hours, NO tip
+   - [ ] Total is correct (sum of both + tips)
+   - [ ] Can proceed to checkout
+   - [ ] Both bookings complete successfully
+
+**SERVICE SWITCHING TEST:**
+
+1. Start House Cleaning booking
+2. Go to provider step, add tip
+3. Navigate back to home
+4. Start different service booking
+5. Verify:
+   - [ ] NO tip input appears for other service
+   - [ ] NO 6-hour minimum for other service
+   - [ ] House Cleaning booking still in cart with tip
+   - [ ] Can complete both bookings
+
+DATA PERSISTENCE & BACKEND INTEGRATION
+---------------------------------------
+
+**IF YOUR APP USES A BACKEND API:**
+
+1. **Provider Data:**
+   - Verify API returns all needed fields (bio, reviews, jobs_completed, etc.)
+   - If fields missing: Add to API response OR handle gracefully in frontend
+   - API endpoint: GET /api/providers/:id or similar
+
+2. **Tip Storage:**
+   - Add `tip_amount` field to booking POST/PUT requests
+   - Example API payload:
+```json
+     {
+       "service_id": "house-cleaning",
+       "provider_id": 123,
+       "date": "2025-11-15",
+       "time": "10:00",
+       "add_ons": [1, 2],
+       "estimated_hours": 7.0,
+       "tip_amount": 50.00,
+       "total": 700.00
+     }
+```
+   - Verify backend accepts and stores tip_amount
+   - Check database schema has tip_amount column (or add it)
+
+3. **Estimated Hours:**
+   - Ensure correct hours are sent to backend
+   - Verify backend doesn't override with hardcoded values
+   - Check if hours affect pricing calculations on backend
+
+**IF USING LOCAL STORAGE / SESSION STORAGE:**
+
+- Verify cart data persists across page refreshes
+- Check localStorage keys don't conflict
+- Ensure tip_amount and estimated_hours are saved/loaded correctly
+
+**IF USING CONTEXT/REDUX:**
+
+- Update Context/Redux state shape to include new fields
+- Verify reducers handle new fields correctly
+- Check that state updates trigger re-renders appropriately
+
+FINAL PRE-SUBMISSION CHECKS
+----------------------------
+
+Before considering the task complete:
+
+1. **Code Quality:**
+   - [ ] No console.log statements left in production code
+   - [ ] No commented-out code blocks
+   - [ ] Consistent code formatting
+   - [ ] Meaningful variable names
+   - [ ] Comments added for complex logic
+
+2. **Error States:**
+   - [ ] All try-catch blocks handle errors properly
+   - [ ] User-friendly error messages displayed
+   - [ ] No unhandled promise rejections
+   - [ ] Loading indicators work correctly
+
+3. **Accessibility:**
+   - [ ] Buttons have descriptive labels
+   - [ ] Form inputs have proper labels
+   - [ ] Focus states are visible
+   - [ ] Keyboard navigation works
+   - [ ] Screen reader friendly (aria-labels where needed)
+
+4. **Performance:**
+   - [ ] No unnecessary re-renders
+   - [ ] Images optimized (provider photos)
+   - [ ] No memory leaks (event listeners cleaned up)
+   - [ ] Debounce/throttle expensive operations if needed
+
+5. **Documentation:**
+   - [ ] Update README if needed
+   - [ ] Document new fields in data models
+   - [ ] Add comments for House Cleaning-specific logic
+   - [ ] Note any environment variables or config changes
+
+IF SOMETHING BREAKS - TROUBLESHOOTING GUIDE
+--------------------------------------------
+
+**SYMPTOM: Provider details don't display**
+- [ ] Check if API returns provider data (Network tab)
+- [ ] Verify field names match what API returns
+- [ ] Check for console errors when rendering
+- [ ] Ensure conditional rendering handles missing data
+
+**SYMPTOM: Tip doesn't appear in total**
+- [ ] Verify tip state is updated (React/Vue DevTools)
+- [ ] Check total calculation includes tip_amount
+- [ ] Ensure tip is added to cart object
+- [ ] Verify payment summary renders tip
