@@ -859,6 +859,12 @@ export default function ModernServiceModal({
     [isHouseCleaning, isPlumbing]
   );
   
+  // Check if plumbing service has urgent priority requiring one-time booking
+  const isUrgentPlumbing = useMemo(() => 
+    isPlumbing && ['emergency', 'urgent', 'same-day'].includes(formData.urgency),
+    [isPlumbing, formData.urgency]
+  );
+  
   // Service-specific placeholder suggestions for Comments field
   const servicePlaceholders: Record<string, string> = {
     "cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
@@ -913,6 +919,7 @@ export default function ModernServiceModal({
         gardenSize: "",
         gardenCondition: "",
         urgency: "standard",
+        plumbingIssue: "",
         electricalIssue: "",
         cuisineType: "",
         menuSelection: "popular",
@@ -923,6 +930,7 @@ export default function ModernServiceModal({
         selectedAddOns: [] as string[],
         selectedProvider: null as any,
         specialRequests: "",
+        tipAmount: 0,
         paymentMethod: "card",
         cardNumber: "",
         expiryDate: "",
@@ -955,6 +963,13 @@ export default function ModernServiceModal({
       });
     }
   }, [serviceId, editBookingData]);
+  
+  // Lock recurring schedule to one-time for urgent plumbing services
+  useEffect(() => {
+    if (isUrgentPlumbing && formData.recurringSchedule !== "one-time") {
+      setFormData(prev => ({ ...prev, recurringSchedule: "one-time" }));
+    }
+  }, [isUrgentPlumbing, formData.recurringSchedule]);
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -1298,8 +1313,8 @@ export default function ModernServiceModal({
       subtotal: pricing.totalPrice.toString(),
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
-      // HOUSE CLEANING ONLY: Add tip amount
-      tipAmount: isHouseCleaning && formData.tipAmount ? formData.tipAmount.toString() : "0",
+      // HOUSE CLEANING & PLUMBING: Add tip amount
+      tipAmount: showEnhancedProviderDetails && formData.tipAmount ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1319,8 +1334,8 @@ export default function ModernServiceModal({
         dietaryRequirements: formData.dietaryRequirements,
         eventSize: formData.eventSize,
         provider: formData.selectedProvider,
-        // HOUSE CLEANING ONLY: Store tip in details too
-        tipAmount: isHouseCleaning ? formData.tipAmount : 0
+        // HOUSE CLEANING & PLUMBING: Store tip in details too
+        tipAmount: showEnhancedProviderDetails ? formData.tipAmount : 0
       })
     };
 
@@ -1424,8 +1439,8 @@ export default function ModernServiceModal({
       subtotal: pricing.totalPrice.toString(),
       selectedAddOns: formData.selectedAddOns || [],
       comments: formData.specialRequests || "",
-      // HOUSE CLEANING ONLY: Add tip amount
-      tipAmount: isHouseCleaning && formData.tipAmount ? formData.tipAmount.toString() : "0",
+      // HOUSE CLEANING & PLUMBING: Add tip amount
+      tipAmount: showEnhancedProviderDetails && formData.tipAmount ? formData.tipAmount.toString() : "0",
       serviceDetails: JSON.stringify({
         propertyType: formData.propertyType,
         address: formData.address,
@@ -1445,8 +1460,8 @@ export default function ModernServiceModal({
         dietaryRequirements: formData.dietaryRequirements,
         eventSize: formData.eventSize,
         provider: formData.selectedProvider,
-        // HOUSE CLEANING ONLY: Store tip in details too
-        tipAmount: isHouseCleaning ? formData.tipAmount : 0
+        // HOUSE CLEANING & PLUMBING: Store tip in details too
+        tipAmount: showEnhancedProviderDetails ? formData.tipAmount : 0
       })
     };
 
@@ -2312,9 +2327,11 @@ export default function ModernServiceModal({
           <Label>
             {isHouseCleaning ? "Reoccurring Services" : "Recurring Schedule Options"}
           </Label>
-          <Select value={formData.recurringSchedule} onValueChange={(value) =>
-            setFormData(prev => ({ ...prev, recurringSchedule: value }))
-          }>
+          <Select 
+            value={formData.recurringSchedule} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, recurringSchedule: value }))}
+            disabled={isUrgentPlumbing}
+          >
             <SelectTrigger className="h-12">
               <SelectValue placeholder="Choose booking frequency" />
             </SelectTrigger>
@@ -2327,10 +2344,15 @@ export default function ModernServiceModal({
               <SelectItem value="custom">Custom Schedule (contact for pricing)</SelectItem>
             </SelectContent>
           </Select>
-          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && (
+          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && !isUrgentPlumbing && (
             <p className="text-sm text-green-600 mt-2 flex items-center">
               <CheckCircle className="h-4 w-4 mr-1" />
               Recurring discount applied to total pricing
+            </p>
+          )}
+          {isUrgentPlumbing && (
+            <p className="text-xs text-red-600 mt-1">
+              Recurring schedule unavailable for {formData.urgency} plumbing services
             </p>
           )}
         </div>
@@ -2804,8 +2826,8 @@ export default function ModernServiceModal({
         ))}
       </div>
       
-      {/* HOUSE CLEANING ONLY: Tip input section */}
-      {isHouseCleaning && formData.selectedProvider && (
+      {/* HOUSE CLEANING & PLUMBING: Tip input section */}
+      {showEnhancedProviderDetails && formData.selectedProvider && (
         <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
           <CardContent className="p-4">
             <Label className="text-sm font-semibold mb-2 block">Add a tip for your provider (optional)</Label>

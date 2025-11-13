@@ -19,7 +19,7 @@ export const serviceEstimates: Record<string, ServiceEstimate> = {
   },
   
   "plumbing": {
-    baseHours: 2,
+    baseHours: 4,
     description: "Standard plumbing service call",
   },
   
