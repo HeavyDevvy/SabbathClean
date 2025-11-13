@@ -909,6 +909,7 @@ export default function ModernServiceModal({
       setFormData({
         propertyType: "",
         address: "",
+        gateCode: "",
         preferredDate: "",
         timePreference: "",
         recurringSchedule: "one-time",
@@ -1352,6 +1353,7 @@ export default function ModernServiceModal({
       setFormData({
         propertyType: "",
         address: "",
+        gateCode: "",
         preferredDate: "",
         timePreference: "",
         recurringSchedule: "one-time",
@@ -1362,6 +1364,7 @@ export default function ModernServiceModal({
         gardenSize: "",
         gardenCondition: "",
         urgency: "standard",
+        plumbingIssue: "",
         electricalIssue: "",
         cuisineType: "",
         menuSelection: "popular",
@@ -1372,7 +1375,7 @@ export default function ModernServiceModal({
         selectedAddOns: [],
         specialRequests: "",
         selectedProvider: null,
-        tipAmount: 0, // HOUSE CLEANING ONLY: Reset tip
+        tipAmount: 0,
         paymentMethod: "card",
         cardNumber: "",
         expiryDate: "",
@@ -1540,6 +1543,7 @@ export default function ModernServiceModal({
       // Reset all form data
       propertyType: "",
       address: "",
+      gateCode: "",
       preferredDate: "",
       timePreference: "",
       recurringSchedule: "one-time",
@@ -1550,6 +1554,7 @@ export default function ModernServiceModal({
       gardenSize: "",
       gardenCondition: "",
       urgency: "standard",
+      plumbingIssue: "",
       electricalIssue: "",
       cuisineType: "",
       eventSize: "",
@@ -1560,6 +1565,7 @@ export default function ModernServiceModal({
       selectedAddOns: [],
       selectedProvider: null,
       specialRequests: "",
+      tipAmount: 0,
       paymentMethod: "card",
       cardNumber: "",
       expiryDate: "",
