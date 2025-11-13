@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import EnhancedHeader from "@/components/enhanced-header";
 import ModernServiceModal from "@/components/modern-service-modal";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Home as HomeIcon, 
   Wrench, 
@@ -119,6 +120,7 @@ export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState("");
+  const { user, isAuthenticated } = useAuth();
 
   const filteredServices = allServices.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,7 +136,11 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <EnhancedHeader onBookingClick={() => setIsBookingModalOpen(true)} />
+      <EnhancedHeader 
+        onBookingClick={() => setIsBookingModalOpen(true)} 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+      />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}

@@ -113,7 +113,7 @@ export default function BookingsPage() {
   const [cancelBooking, setCancelBooking] = useState<any>(null);
   const [rebookData, setRebookData] = useState<any>(null);
   const [shareBooking, setShareBooking] = useState<any>(null);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
   // Fetch real bookings from database
@@ -287,7 +287,11 @@ export default function BookingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <EnhancedHeader onBookingClick={() => {}} />
+      <EnhancedHeader 
+        onBookingClick={() => {}} 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+      />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import EnhancedHeader from "@/components/enhanced-header";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   CheckCircle2,
   CreditCard,
@@ -43,6 +44,7 @@ export default function PaymentPage() {
   const [, setLocation] = useLocation();
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     // Simulate payment processing and fetch booking details
@@ -86,7 +88,11 @@ export default function PaymentPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <EnhancedHeader onBookingClick={() => {}} />
+        <EnhancedHeader 
+          onBookingClick={() => {}} 
+          isAuthenticated={isAuthenticated}
+          user={user || undefined}
+        />
         <div className="max-w-2xl mx-auto px-4 py-16">
           <Card>
             <CardContent className="p-12 text-center">
@@ -103,7 +109,11 @@ export default function PaymentPage() {
   if (!bookingDetails) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <EnhancedHeader onBookingClick={() => {}} />
+        <EnhancedHeader 
+          onBookingClick={() => {}} 
+          isAuthenticated={isAuthenticated}
+          user={user || undefined}
+        />
         <div className="max-w-2xl mx-auto px-4 py-16">
           <Card>
             <CardContent className="p-12 text-center">
@@ -119,7 +129,11 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <EnhancedHeader onBookingClick={() => {}} />
+      <EnhancedHeader 
+        onBookingClick={() => {}} 
+        isAuthenticated={isAuthenticated}
+        user={user || undefined}
+      />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Success Header */}
