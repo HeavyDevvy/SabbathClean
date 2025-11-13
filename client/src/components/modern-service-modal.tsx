@@ -122,6 +122,7 @@ export default function ModernServiceModal({
     gardenSize: editBookingData?.gardenSize || "",
     gardenCondition: editBookingData?.gardenCondition || "",
     urgency: editBookingData?.urgency || "standard",
+    plumbingIssue: editBookingData?.plumbingIssue || "",
     electricalIssue: editBookingData?.electricalIssue || "",
     
     // Chef & Catering specific
@@ -846,6 +847,18 @@ export default function ModernServiceModal({
     [serviceId, mappedServiceId]
   );
   
+  // PLUMBING SERVICE: Service-specific feature flag
+  const isPlumbing = useMemo(() => 
+    serviceId === "plumbing" || mappedServiceId === "plumbing", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // Show enhanced provider details for both House Cleaning and Plumbing
+  const showEnhancedProviderDetails = useMemo(() => 
+    isHouseCleaning || isPlumbing,
+    [isHouseCleaning, isPlumbing]
+  );
+  
   // Service-specific placeholder suggestions for Comments field
   const servicePlaceholders: Record<string, string> = {
     "cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
@@ -1028,8 +1041,17 @@ export default function ModernServiceModal({
 
     if (mappedServiceId === "plumbing") {
       // Use the specific plumbing issue price as base price
-      const plumbingIssue = config.plumbingIssues?.find((i: any) => i.value === formData.urgency);
+      const plumbingIssue = config.plumbingIssues?.find((i: any) => i.value === formData.plumbingIssue);
       if (plumbingIssue) basePrice = plumbingIssue.price;
+      
+      // Apply urgency fee if applicable (emergency/urgent/same-day)
+      if (formData.urgency === "emergency") {
+        basePrice += 150; // R150 emergency callout fee
+      } else if (formData.urgency === "urgent") {
+        basePrice += 100; // R100 priority fee
+      } else if (formData.urgency === "same-day") {
+        basePrice += 50; // R50 same-day fee
+      }
     }
 
     if (mappedServiceId === "electrical") {
@@ -1776,26 +1798,83 @@ export default function ModernServiceModal({
         )}
 
         {serviceId === "plumbing" && (
-          <div>
-            <Label>What needs to be fixed? *</Label>
-            <Select value={formData.urgency} onValueChange={(value) =>
-              setFormData(prev => ({ ...prev, urgency: value }))
-            }>
-              <SelectTrigger data-testid="select-plumbing-urgency">
-                <SelectValue placeholder="Select the plumbing issue" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72 overflow-y-auto">
-                {currentConfig.plumbingIssues?.map((issue: any) => (
-                  <SelectItem key={issue.value} value={issue.value}>
+          <>
+            <div>
+              <Label>What needs to be fixed? *</Label>
+              <Select value={formData.plumbingIssue} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, plumbingIssue: value }))
+              }>
+                <SelectTrigger data-testid="select-plumbing-issue">
+                  <SelectValue placeholder="Select the plumbing issue" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72 overflow-y-auto">
+                  {currentConfig.plumbingIssues?.map((issue: any) => (
+                    <SelectItem key={issue.value} value={issue.value}>
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{issue.label} - R{issue.price}</span>
+                        <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Booking Urgency *</Label>
+              <Select value={formData.urgency} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, urgency: value }))
+              }>
+                <SelectTrigger data-testid="select-plumbing-urgency">
+                  <SelectValue placeholder="Select urgency level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="emergency">
                     <div className="flex flex-col items-start">
-                      <span className="font-medium">{issue.label} - R{issue.price}</span>
-                      <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
+                      <span className="font-medium text-red-600">Emergency (Immediate)</span>
+                      <span className="text-xs text-gray-500 mt-1">Provider dispatched within 1 hour - Burst pipes, flooding</span>
                     </div>
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                  <SelectItem value="urgent">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium text-orange-600">Urgent (Same Day)</span>
+                      <span className="text-xs text-gray-500 mt-1">Service within 24 hours - Major leaks, no water</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="same-day">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium text-yellow-600">Same Day</span>
+                      <span className="text-xs text-gray-500 mt-1">Service today if available</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="next-day">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">Next Day</span>
+                      <span className="text-xs text-gray-500 mt-1">Service tomorrow</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="standard">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">Standard (Flexible)</span>
+                      <span className="text-xs text-gray-500 mt-1">Schedule at your convenience - Non-urgent repairs</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {(formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day") && (
+                <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-xs text-orange-700 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    <span>
+                      {formData.urgency === "emergency" && "Emergency service includes R150 callout fee. Provider will contact you immediately."}
+                      {formData.urgency === "urgent" && "Urgent service includes R100 priority fee. Service scheduled for today."}
+                      {formData.urgency === "same-day" && "Same-day service subject to availability. Additional R50 fee may apply."}
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {serviceId === "electrical" && (
@@ -2204,8 +2283,8 @@ export default function ModernServiceModal({
                 ];
                 
                 return timeSlots.map((slot) => {
-                  // For House Cleaning + today's date: disable past time slots
-                  const isPast = isHouseCleaning && isToday && 
+                  // For House Cleaning & Plumbing + today's date: disable past time slots
+                  const isPast = showEnhancedProviderDetails && isToday && 
                     (slot.hour < currentHour || (slot.hour === currentHour && currentMinute > 0));
                   
                   return (
@@ -2618,8 +2697,8 @@ export default function ModernServiceModal({
           >
             <CardContent className="p-4">
               <div className="flex items-start space-x-4">
-                {/* HOUSE CLEANING ONLY: Show profile image */}
-                {isHouseCleaning && provider.profileImage ? (
+                {/* ENHANCED DETAILS: Show profile image for House Cleaning & Plumbing */}
+                {showEnhancedProviderDetails && provider.profileImage ? (
                   <img 
                     src={provider.profileImage} 
                     alt={provider.name}
@@ -2643,8 +2722,8 @@ export default function ModernServiceModal({
                     )}
                   </div>
                   
-                  {/* HOUSE CLEANING ONLY: Show bio */}
-                  {isHouseCleaning && provider.bio && (
+                  {/* ENHANCED DETAILS: Show bio for House Cleaning & Plumbing */}
+                  {showEnhancedProviderDetails && provider.bio && (
                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">{provider.bio}</p>
                   )}
                   
@@ -2663,8 +2742,8 @@ export default function ModernServiceModal({
                     </div>
                   </div>
                   
-                  {/* HOUSE CLEANING ONLY: Show jobs completed and experience */}
-                  {isHouseCleaning && (
+                  {/* ENHANCED DETAILS: Show jobs completed and experience for House Cleaning & Plumbing */}
+                  {showEnhancedProviderDetails && (
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
                       {provider.jobsCompleted && (
                         <div className="flex items-center">
@@ -2681,8 +2760,8 @@ export default function ModernServiceModal({
                     </div>
                   )}
                   
-                  {/* HOUSE CLEANING ONLY: Show qualifications */}
-                  {isHouseCleaning && provider.qualifications && provider.qualifications.length > 0 && (
+                  {/* ENHANCED DETAILS: Show qualifications for House Cleaning & Plumbing */}
+                  {showEnhancedProviderDetails && provider.qualifications && provider.qualifications.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
                       {provider.qualifications.map((qual: string) => (
                         <Badge key={qual} variant="secondary" className="text-xs">
@@ -3412,7 +3491,7 @@ export default function ModernServiceModal({
                         (step === 1 && (!formData.propertyType || !formData.address || 
                           (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
                           (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
-                          (serviceId === "plumbing" && !formData.urgency) ||
+                          (serviceId === "plumbing" && (!formData.plumbingIssue || !formData.urgency)) ||
                           (serviceId === "electrical" && !formData.electricalIssue) ||
                           (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
                           (serviceId === "event-staff" && (!formData.cleaningType || !formData.propertySize)) ||
