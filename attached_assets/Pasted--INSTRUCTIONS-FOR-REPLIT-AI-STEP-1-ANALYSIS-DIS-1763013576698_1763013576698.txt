@@ -1,0 +1,62 @@
+========================
+INSTRUCTIONS FOR REPLIT AI
+========================
+
+STEP 1: ANALYSIS & DISCOVERY
+Before making any changes, please analyze the codebase and locate:
+
+Payment Issue (Issue #1):
+- The checkout/payment page component
+- The "Complete Payment" button and its click handler
+- Where the "Checkout Incomplete, please try again your contact report" error is triggered
+- The Booking Summary/Booking Complete page component and its route
+- How booking data is stored/passed between checkout and summary pages
+
+Login/Session Issue (Issue #2):
+- The authentication state management system (context, hooks, localStorage, sessionStorage, cookies, etc.)
+- Header/navigation components that display sign-in prompts
+- All conditional rendering logic tied to logged-in vs logged-out state
+- Components on Services page and My Profile page that show sign-in prompts
+
+STEP 2: CLARIFICATIONS
+Please note:
+
+For Payment Validation:
+- If this app uses mock/test payment, accept any reasonably formatted input:
+  • Card: 16 digits, future expiry (MM/YY), 3-digit CVV
+  • Bank: Whatever fields the form currently expects
+- Don't block valid formats with unnecessary custom validation
+- Only show errors for actual validation failures (missing fields, invalid formats, etc.)
+- You may change the error message to something clearer like "Payment failed. Please check your details and try again."
+
+For Auth State:
+- Work with whatever authentication method the app currently uses (JWT, session, localStorage, etc.)
+- Don't change how authentication works—just fix how the UI responds to auth state
+- Ensure auth state is checked consistently across all pages
+
+STEP 3: IMPLEMENTATION
+Make the fixes in this order:
+1. Fix payment completion and redirect to Booking Summary (Issue #1)
+   - Fix the payment handler logic
+   - Ensure successful redirect to Booking Summary page
+   - Verify booking data displays correctly
+2. Fix sign-in prompt visibility for logged-in users (Issue #2)
+   - Update header/navigation conditional rendering
+   - Fix Services page sign-in prompts
+   - Fix My Profile page sign-in prompts
+   - Ensure auth state persists across navigation
+
+STEP 4: TESTING
+After each fix:
+- Test the specific functionality
+- Verify no new errors appear in console
+- Confirm no existing features break
+- Move to next fix only after current one works
+
+STEP 5: DELIVERABLES
+When complete, provide:
+✓ List of all files you edited
+✓ Brief summary (1-2 sentences) of what changed in each file
+✓ Confirmation that all items in the QA checklist pass
+
+Begin now by analyzing the codebase to locate all relevant files and components.

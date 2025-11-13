@@ -1,0 +1,116 @@
+Please fix ONLY the issues described below in this web app related to service provider bookings. Do not change anything else. The rest of the app’s functionality, layout, styling, and copy must remain exactly the same.
+
+========================
+SCOPE OF FIXES
+========================
+
+1) Checkout / Payment Error
+
+Current issue:
+- When I am on the checkout page and I capture card OR bank account details and click **Complete Payment**, I get an error that says something like:
+  "Checkout Incomplete, please try again your contact report."
+- This is incorrect behavior. After completing valid payment details and clicking Complete Payment, the user should be taken to the **Booking Summary** or **Booking Complete** page and see the booking details.
+
+Required behavior:
+- Fix the payment handling so that when the payment details are valid (card OR bank account, as supported by the app):
+  - The payment step completes successfully.
+  - The user is redirected to the correct **Booking Summary** / **Booking Complete** page.
+  - The Booking Summary / Booking Complete page must display the booking details as intended (services, date, provider, pricing, etc.), using the existing UI that is already designed for this.
+- Only show an error message when there is a genuine validation or processing error (e.g., invalid card format, missing fields, etc.), and keep it user-friendly.
+- Do not change the text, layout, or design of the Booking Summary / Booking Complete page except what is strictly necessary to wire this flow correctly.
+- Do not add new payment gateways or external integrations—just make the existing flow work as intended with no “Checkout Incomplete” error on valid input.
+
+2) Login / Session UI State (Sign-in prompts showing when already logged in)
+
+Current issue:
+- I can log in as a user, but when I:
+  - Go to **My Profile**, or
+  - Go to the **Services** page,
+  I still see a prompt or UI at the top asking me to **Sign In** (or an option to sign in / join).
+- This should not appear if I am already signed in.
+
+Required behavior:
+- Update the UI and auth state handling so that:
+  - If a user is **signed in**, the app recognizes this across all pages (home, profile, services, booking, etc.).
+  - When the user is signed in, the app must NOT show sign-in prompts or “Sign in / Join” call-to-actions at the top or in the header where they currently appear.
+  - Those sign-in / join options should only be visible to **unauthenticated** users (users who have not yet logged in during this session).
+- Ensure that once a user signs in:
+  - Their authenticated state persists while they navigate through the platform.
+  - They do NOT get asked to sign in again while already authenticated (unless they explicitly log out).
+- Do not change any existing login endpoints, password logic, or registration flow; only adjust the UI logic and any conditional rendering related to whether the user is logged in or not.
+
+========================
+STRICT NON-GOALS
+========================
+
+- Do NOT change any text content (copy), button labels, or wording anywhere, except if you need to slightly adjust the error message string related to checkout being incomplete.
+- Do NOT change the design, colors, layout, or structure of pages outside what is necessary to:
+  - Fix the payment completion and redirect.
+  - Hide sign-in prompts for logged-in users.
+- Do NOT add, remove, or rename routes or pages.
+- Do NOT remove or break any existing functionality (service selection, booking flow, provider selection, add-ons, etc.).
+- Do NOT introduce new dependencies or major refactors; keep changes minimal and focused.
+
+========================
+IMPLEMENTATION GUIDANCE
+========================
+
+Payment:
+- Identify the function / handler that runs when the user clicks **Complete Payment** on the checkout page.
+- Fix any logic that incorrectly treats valid payment attempts as incomplete or failed.
+- Ensure that on successful payment, it:
+  - Saves the booking as it already does (if that logic exists).
+  - Redirects/navigates to the correct Booking Summary / Booking Complete component/route.
+- Confirm that the Booking Summary / Booking Complete component reads the booking data correctly (from state, context, or backend) and renders without errors.
+
+Login / UI State:
+- Find where the app determines whether the user is logged in (e.g., auth context, JWT, session, etc.).
+- Update the header/top-bar / relevant components so that:
+  - Sign-in and join options only render when auth state = not logged in.
+  - For logged-in users, show the logged-in state (e.g., profile link, name, etc.) but not the sign-in prompt.
+- Make sure this applies at least on:
+  - Home (if relevant),
+  - Services page,
+  - Profile page,
+  - Booking-related pages, where appropriate.
+
+========================
+FINAL QA CHECKLIST
+========================
+
+Please verify all of the following and fix anything that fails. When done, output:
+- The list of files you edited.
+- A short description (1–2 lines) of what changed in each file.
+
+Checklist:
+[ ] From a fresh session, log in as a user, go through to the checkout page, enter valid payment details, click **Complete Payment**, and:
+    - The payment does NOT show the “Checkout Incomplete…” error on valid input.
+    - The user is redirected to the Booking Summary / Booking Complete page.
+    - The Booking Summary / Booking Complete page shows the correct booking details.
+
+[ ] Intentionally try invalid card or bank details and confirm that:
+    - Appropriate error messages appear.
+    - The user stays on the checkout page and is not redirected until the errors are fixed.
+
+[ ] After logging in, navigate to:
+    - Home (if applicable),
+    - Services page,
+    - My Profile,
+    - Booking-related pages.
+    Confirm that:
+    - No “Sign In” or “Join” prompts appear at the top or in the header for a logged-in user.
+    - The user clearly appears as logged in.
+
+[ ] From a logged-in state, navigate across the app (Home → Services → Profile → Booking → Checkout) and confirm:
+    - The user remains signed in (no surprise logouts).
+    - No extra sign-in prompts appear unless the user is actually logged out.
+
+[ ] From a logged-out state, confirm that:
+    - Sign-in or join prompts DO appear where expected, so that new or anonymous users can log in or register.
+
+[ ] Confirm there are:
+    - No new console errors,
+    - No blank screens,
+    - No broken navigation steps in the booking flow.
+
+Only after all of the above pass should the changes be considered complete.
