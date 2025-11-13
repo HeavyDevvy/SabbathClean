@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -15,7 +17,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor, CheckCircle2, Loader2 } from "lucide-react";
+import { parseDecimal, formatCurrency } from "@/lib/currency";
+import type { Order, OrderItem } from "@shared/schema";
 
 // South African Provinces and Cities Data
 const SOUTH_AFRICAN_PROVINCES = {
@@ -69,15 +73,19 @@ const profileFormSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileFormSchema>;
 
+interface OrderWithItems extends Order {
+  items: OrderItem[];
+}
+
 export default function Profile() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
-
-  // For demo purposes, using a demo user ID. In a real app, this would come from authentication
-  const userId = "demo-user-123";
+  const { user, isAuthenticated } = useAuth();
+  
+  const userId = user?.id;
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -96,6 +104,13 @@ export default function Profile() {
   const { data: userData, isLoading: isLoadingUser } = useQuery({
     queryKey: [`/api/users/${userId}`],
     retry: false,
+    enabled: !!userId,
+  });
+
+  // Fetch user's orders
+  const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
+    queryKey: ['/api/orders', userId],
+    enabled: !!userId && isAuthenticated,
   });
 
   // Update form when user data loads
@@ -186,39 +201,138 @@ export default function Profile() {
           </TabsList>
 
           <TabsContent value="bookings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Upcoming Bookings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Calendar className="h-12 w-12 text-neutral mx-auto mb-4" />
-                  <p className="text-neutral">No upcoming bookings found.</p>
-                  <Button 
-                    onClick={openBooking}
-                    className="mt-4" 
-                    data-testid="button-book-service"
-                  >
-                    Book a Service
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {isLoadingOrders ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2" />
+                      Upcoming Bookings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {orders.filter(o => o.status === "confirmed" || o.status === "pending").length > 0 ? (
+                      <div className="space-y-4">
+                        {orders
+                          .filter(o => o.status === "confirmed" || o.status === "pending")
+                          .map((order) => (
+                            <div
+                              key={order.id}
+                              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              data-testid={`order-${order.id}`}
+                            >
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Order #{order.orderNumber}</h4>
+                                  <p className="text-sm text-gray-500">
+                                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                                  </p>
+                                </div>
+                                <Badge className="bg-primary/10 text-primary">
+                                  {order.status}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Total Amount:</span>
+                                  <span className="font-semibold">{formatCurrency(order.totalAmount)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Payment Status:</span>
+                                  <Badge variant="outline">{order.paymentStatus}</Badge>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-3 w-full"
+                                onClick={() => window.location.href = `/order-confirmation/${order.id}`}
+                                data-testid={`button-view-order-${order.id}`}
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Calendar className="h-12 w-12 text-neutral mx-auto mb-4" />
+                        <p className="text-neutral">No upcoming bookings found.</p>
+                        <Button 
+                          onClick={openBooking}
+                          className="mt-4" 
+                          data-testid="button-book-service"
+                        >
+                          Book a Service
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Booking History</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Clock className="h-12 w-12 text-neutral mx-auto mb-4" />
-                  <p className="text-neutral">No previous bookings found.</p>
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Booking History</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {orders.filter(o => o.status === "completed" || o.status === "cancelled").length > 0 ? (
+                      <div className="space-y-4">
+                        {orders
+                          .filter(o => o.status === "completed" || o.status === "cancelled")
+                          .map((order) => (
+                            <div
+                              key={order.id}
+                              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                              data-testid={`order-history-${order.id}`}
+                            >
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Order #{order.orderNumber}</h4>
+                                  <p className="text-sm text-gray-500">
+                                    {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                                  </p>
+                                </div>
+                                <Badge className={order.status === "completed" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}>
+                                  {order.status === "completed" && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                                  {order.status}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Total Amount:</span>
+                                  <span className="font-semibold">{formatCurrency(order.totalAmount)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Payment Status:</span>
+                                  <Badge variant="outline">{order.paymentStatus}</Badge>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-3 w-full"
+                                onClick={() => window.location.href = `/order-confirmation/${order.id}`}
+                                data-testid={`button-view-order-history-${order.id}`}
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Clock className="h-12 w-12 text-neutral mx-auto mb-4" />
+                        <p className="text-neutral">No previous bookings found.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="profile">
