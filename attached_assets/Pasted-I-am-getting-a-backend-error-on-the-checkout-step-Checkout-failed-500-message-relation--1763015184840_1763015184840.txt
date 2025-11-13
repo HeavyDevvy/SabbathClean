@@ -1,0 +1,56 @@
+I am getting a backend error on the checkout step:
+
+"Checkout failed
+500: {\"message\":\"relation \\\"booking_gate_codes\\\" does not exist\"}"
+
+This means the backend is trying to read/write from a table called booking_gate_codes that does not exist. Please fix ONLY what is necessary to make checkout work end-to-end, and do not change anything else in the app unless it directly relates to this error.
+
+Required actions:
+
+1) Find the source of the error
+- Search the codebase for any references to "booking_gate_codes".
+- List the files, functions and lines where this table name is used (controllers, services, models, migrations, SQL, etc).
+- Confirm which database is being used (e.g. Postgres/Prisma/ORM) and how migrations are handled.
+
+2) Fix the missing table / schema issue
+- If the application is clearly designed to use a booking_gate_codes table (for storing booking codes, OTPs, or similar), then:
+  - Create the appropriate model/schema/migration for booking_gate_codes with the fields required by the existing code (infer column names and types from how it is queried and written).
+  - Run/apply the migration or ensure it is included in the project’s migration flow so the table exists when the app runs.
+- If the table name is a mistake (e.g. it should be something like booking_gate_code or booking_gatecodes or another existing table), then:
+  - Correct the table name in the queries/models to match the actual existing table name used elsewhere in the code.
+- Do NOT guess a completely different design. Use the existing code and database schema to infer the correct structure or correct name.
+
+3) Keep business logic and UX the same
+- Do not change any of the booking flow logic except what is required to fix this specific error.
+- Do not change pricing, fees, totals, or how the Payment Summary is calculated.
+- Do not change any UI text, colors, or layout outside of what is absolutely necessary to get past this error.
+
+4) After fixing the table/schema or name, make sure the payment flow works as intended:
+- When I enter valid card or bank account details and click “Complete Payment”:
+  - The backend should no longer throw a 500 error about booking_gate_codes.
+  - The booking and any related gate/confirmation codes should be saved correctly.
+  - I should be redirected to the Booking Summary / Booking Complete page that shows the details of the booking.
+
+5) Error handling
+- If payment fails for a real validation reason (e.g. invalid card, missing field), show a clear, user-friendly error message on the UI instead of a raw 500 or raw JSON message.
+- Log technical details only on the server side, not in the UI.
+
+6) Do NOT:
+- Do not remove the payment feature.
+- Do not remove or bypass database writes just to hide the error.
+- Do not change any other tables, routes, or business logic that are unrelated to booking_gate_codes.
+- Do not introduce new dependencies unless absolutely required; prefer using the existing database/ORM setup.
+
+7) Final checklist (run and confirm each item):
+[ ] No 500 error mentioning "booking_gate_codes" when clicking Complete Payment.
+[ ] A new booking record (and any associated gate/confirmation code record, if applicable) is created successfully in the database.
+[ ] After successful payment, the user is redirected to the Booking Summary / Booking Complete page.
+[ ] The Payment Summary values (subtotal, fees, total) are unchanged and remain correct.
+[ ] No new console errors in the browser.
+[ ] No new errors in the server logs related to this change.
+[ ] No other parts of the app have been modified beyond what is required to fix this issue.
+
+After you implement the fix, please output:
+- The list of files edited.
+- A short explanation of what you changed in each file.
+- Whether you added a migration or altered an existing one, and how to apply it if needed.

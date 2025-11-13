@@ -1,0 +1,161 @@
+========================
+INSTRUCTIONS FOR REPLIT AI
+========================
+
+STEP 1: DIAGNOSTIC ANALYSIS
+Before making any changes, perform a thorough investigation:
+
+Database & Schema Discovery:
+- Identify the database system in use (PostgreSQL, MySQL, SQLite, etc.)
+- Identify the ORM/database library (Prisma, Sequelize, TypeORM, Knex, raw SQL, etc.)
+- Locate the database schema files (schema.prisma, migrations folder, models directory, etc.)
+- List ALL existing tables related to bookings (e.g., bookings, booking_codes, gate_codes, etc.)
+
+Error Source Investigation:
+- Search the entire codebase for "booking_gate_codes" (exact string match)
+- Search for variations: "booking_gate_code", "bookingGateCodes", "booking-gate-codes"
+- For each occurrence, document:
+  • File path and line number
+  • Context (is it a SELECT, INSERT, UPDATE, DELETE, or model definition?)
+  • What columns/fields are being accessed
+  • What data is being written or read
+
+Related Code Analysis:
+- Find the checkout/payment completion handler that triggers this error
+- Trace the full code path from "Complete Payment" button to database operation
+- Identify what booking-related data should be stored at checkout
+- Determine if gate codes/confirmation codes are a real business requirement or leftover code
+
+STEP 2: DETERMINE THE CORRECT FIX
+Based on your analysis, choose ONE of these approaches:
+
+Option A: Create the Missing Table (if it's intentionally designed)
+- If the code clearly needs booking_gate_codes for storing confirmation/access codes
+- If there are multiple references showing it's an intentional feature
+- Then: Create the table with appropriate schema
+
+Option B: Rename to Existing Table (if it's a typo/wrong reference)
+- If there's an existing table like "booking_codes" or "gate_codes" that serves the same purpose
+- If booking_gate_codes references appear to be mistakes/typos
+- Then: Update the code to use the correct existing table name
+
+Option C: Remove Dead Code (only if clearly unused)
+- If the booking_gate_codes reference is in dead/unreachable code
+- If removing it doesn't affect the booking flow
+- Then: Remove the problematic code safely
+
+**IMPORTANT:** State which option you're choosing and why before implementing.
+
+STEP 3: IMPLEMENTATION PLAN
+
+If Creating a New Table (Option A):
+1. Examine how booking_gate_codes is queried to infer required columns:
+   - Look for column names in SELECT/INSERT statements
+   - Common fields might include: id, booking_id, gate_code, created_at, expires_at, etc.
+2. Create the migration file in the correct location for your ORM
+3. Define appropriate data types, constraints, and foreign keys
+4. Document the migration application command
+
+If Renaming References (Option B):
+1. List all files where booking_gate_codes needs to be changed
+2. Identify the correct existing table name
+3. Update all references consistently
+4. Verify foreign key relationships remain intact
+
+If Removing Code (Option C):
+1. Verify the code is truly unreachable
+2. Comment it out first and test
+3. Only delete if tests pass
+
+STEP 4: FOCUSED IMPLEMENTATION
+Make ONLY the changes required to fix the booking_gate_codes error:
+
+Backend Changes:
+- Fix the database schema/migration (create table or rename references)
+- Update models/queries as needed
+- Ensure proper error handling in the payment completion endpoint
+- Add user-friendly error messages (hide technical details from UI)
+
+Do NOT change:
+- Any pricing, fee, or total calculations
+- The booking flow logic (beyond fixing this error)
+- UI text, styling, or layout
+- Any unrelated database tables or models
+- Authentication, routing, or other app features
+
+STEP 5: MIGRATION HANDLING
+After creating or modifying migrations:
+
+For Prisma:
+- Run: `npx prisma migrate dev --name fix-booking-gate-codes`
+- Run: `npx prisma generate`
+
+For TypeORM:
+- Run: `npm run migration:run` (or equivalent)
+
+For Sequelize:
+- Run: `npx sequelize-cli db:migrate`
+
+For other ORMs:
+- Document the appropriate command
+
+Include these commands in your final output.
+
+STEP 6: TESTING PROTOCOL
+Test in this exact order:
+
+1. **Backend Test**: Verify the table exists
+   - Check database directly or via ORM query
+   - Confirm the table has the expected columns
+
+2. **Payment Flow Test**: Complete a booking
+   - Enter valid card/bank details
+   - Click "Complete Payment"
+   - Verify: NO 500 error about booking_gate_codes
+   - Verify: Successful database write
+
+3. **Redirect Test**: After successful payment
+   - Verify: User redirects to Booking Summary/Complete page
+   - Verify: Booking details display correctly
+
+4. **Error Handling Test**: Try invalid payment
+   - Verify: User-friendly error message (not raw JSON/500)
+   - Verify: User stays on payment page
+
+5. **Data Integrity Test**: Check database
+   - Verify: New booking record created
+   - Verify: Gate code record created (if applicable)
+   - Verify: All relationships/foreign keys intact
+
+6. **Regression Test**: Check other features
+   - Verify: No new console errors
+   - Verify: No new server log errors
+   - Verify: Payment summary values unchanged
+
+STEP 7: DELIVERABLES
+Provide a complete report with:
+
+✓ **Analysis Summary**:
+  - Which option (A, B, or C) you chose and why
+  - List of all files where booking_gate_codes was found
+  - Explanation of what the table/code is supposed to do
+
+✓ **Changes Made**:
+  - List of all files edited
+  - 1-2 sentence summary of changes in each file
+  - If migration created: file name and location
+
+✓ **Migration Instructions**:
+  - Exact command(s) to run to apply database changes
+  - Any prerequisites or warnings
+
+✓ **Test Results**:
+  - Confirmation that all 7 checklist items pass
+  - Screenshots or logs if helpful
+
+✓ **Schema Documentation** (if table created):
+  - Table name: booking_gate_codes
+  - Columns: [list with types]
+  - Relationships: [foreign keys, if any]
+
+Begin now by performing the diagnostic analysis in STEP 1.
