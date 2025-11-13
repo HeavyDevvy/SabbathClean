@@ -1649,7 +1649,7 @@ export default function ModernServiceModal({
               autoComplete="off"
             />
             <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-              <Lock className="h-3 w-3" />
+              <LockIcon className="h-3 w-3" />
               Encrypted and only shared with your assigned provider
             </p>
           </div>
