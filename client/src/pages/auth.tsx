@@ -197,7 +197,7 @@ export default function Auth() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  className="w-full bg-primary hover:bg-accent text-primary-foreground" 
                   disabled={isLoading}
                   data-testid="button-signin"
                 >
@@ -327,7 +327,7 @@ export default function Auth() {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  className="w-full bg-primary hover:bg-accent text-primary-foreground" 
                   disabled={isLoading}
                   data-testid="button-signup"
                 >

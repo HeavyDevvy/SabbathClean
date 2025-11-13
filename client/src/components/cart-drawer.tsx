@@ -150,7 +150,7 @@ export function CartDrawer() {
           <ShoppingCart className="h-5 w-5" />
           {itemCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-purple-600"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground"
               data-testid="cart-badge-count"
             >
               {itemCount}
@@ -183,7 +183,7 @@ export function CartDrawer() {
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
               <p className="text-sm text-gray-500">Loading cart...</p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export function CartDrawer() {
                 </Button>
                 <Button
                   onClick={handleCheckout}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  className="flex-1 bg-primary hover:bg-accent text-primary-foreground"
                   data-testid="button-proceed-checkout"
                 >
                   Checkout
@@ -264,7 +264,7 @@ export function CartIcon() {
       <ShoppingCart className="h-5 w-5" data-testid="cart-icon" />
       {itemCount > 0 && (
         <Badge
-          className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-purple-600"
+          className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground"
           data-testid="cart-icon-badge"
         >
           {itemCount}

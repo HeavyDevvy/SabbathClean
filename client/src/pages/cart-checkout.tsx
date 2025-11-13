@@ -392,12 +392,12 @@ export default function CartCheckout() {
                 <Separator />
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span className="text-purple-600" data-testid="summary-total">{formatCurrency(total)}</span>
+                  <span className="text-primary" data-testid="summary-total">{formatCurrency(total)}</span>
                 </div>
               </div>
               
               <Button
-                className="w-full bg-purple-600 hover:bg-purple-700 mb-4"
+                className="w-full bg-primary hover:bg-accent text-primary-foreground mb-4"
                 size="lg"
                 onClick={handleCheckout}
                 disabled={isProcessing || isCheckingOut}
@@ -416,12 +416,12 @@ export default function CartCheckout() {
                 )}
               </Button>
               
-              <div className="bg-purple-50 rounded-lg p-4 text-sm">
+              <div className="bg-muted rounded-lg p-4 text-sm">
                 <div className="flex items-start">
-                  <Shield className="w-5 h-5 text-purple-600 mr-2 flex-shrink-0 mt-0.5" />
+                  <Shield className="w-5 h-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-medium text-purple-900 mb-1">Berry Events Bank Protection</p>
-                    <p className="text-purple-700 text-xs">
+                    <p className="font-medium text-foreground mb-1">Berry Events Bank Protection</p>
+                    <p className="text-muted-foreground text-xs">
                       Your payment is held securely until services are completed. 
                       Full refund if service is not delivered as promised.
                     </p>

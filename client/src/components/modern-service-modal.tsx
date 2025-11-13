@@ -3175,7 +3175,7 @@ export default function ModernServiceModal({
                   variant="outline"
                   onClick={handleAddToCartAndContinue}
                   disabled={!formData.selectedProvider}
-                  className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                  className="border-primary text-primary hover:bg-muted"
                   data-testid="button-add-to-cart-continue"
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
@@ -3207,7 +3207,7 @@ export default function ModernServiceModal({
                 <>
                   <Button 
                     onClick={handleAddToCart}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600"
+                    className="bg-success hover:bg-success/90 text-white"
                     disabled={!formData.selectedProvider}
                     data-testid="button-add-to-cart"
                   >
@@ -3217,7 +3217,7 @@ export default function ModernServiceModal({
                   <Button 
                     onClick={handleGoToCart}
                     variant="outline"
-                    className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                    className="border-primary text-primary hover:bg-muted"
                     data-testid="button-go-to-cart"
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
@@ -3247,7 +3247,7 @@ export default function ModernServiceModal({
                 <div>
                   <h3 className="font-bold text-lg">{providerDetailsModal.name}</h3>
                   {providerDetailsModal.verified && (
-                    <div className="flex items-center text-green-600 text-sm">
+                    <div className="flex items-center text-success text-sm">
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Verified Provider
                     </div>
