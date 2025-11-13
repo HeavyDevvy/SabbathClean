@@ -118,7 +118,7 @@ export default function EnhancedHeader({
               <input
                 type="text"
                 placeholder="Search services, providers, or help..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="search-input"
               />
             </div>
@@ -128,7 +128,7 @@ export default function EnhancedHeader({
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
               href="/" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
+              className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-home"
             >
               <Home className="h-4 w-4 mr-1" />
@@ -136,7 +136,7 @@ export default function EnhancedHeader({
             </Link>
             <Link 
               href="/services" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium flex items-center"
+              className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-services"
             >
               <Briefcase className="h-4 w-4 mr-1" />
@@ -145,7 +145,7 @@ export default function EnhancedHeader({
             {/* Admin Portal - Always visible */}
             <Link 
               href="/admin" 
-              className="text-purple-600 hover:text-purple-700 transition-colors duration-200 font-medium flex items-center"
+              className="text-primary hover:text-accent transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-admin-portal"
             >
               <Shield className="h-4 w-4 mr-1" />
@@ -154,7 +154,7 @@ export default function EnhancedHeader({
             {!isAuthenticated && (
               <Link 
                 href="/auth"
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium"
                 data-testid="nav-sign-in"
               >
                 Sign In
@@ -163,7 +163,7 @@ export default function EnhancedHeader({
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
-                className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium"
                 data-testid="nav-provider-dashboard"
               >
                 Provider Hub
@@ -188,7 +188,7 @@ export default function EnhancedHeader({
             <div className="relative">
               <CartDrawer />
               {itemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-purple-600 text-white text-xs p-0 flex items-center justify-center animate-pulse">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs p-0 flex items-center justify-center animate-pulse">
                   {itemCount > 9 ? '9+' : itemCount}
                 </Badge>
               )}
@@ -280,7 +280,7 @@ export default function EnhancedHeader({
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-medium"
+                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium"
                     data-testid="button-join-as-provider"
                   >
                     Join as Provider
@@ -310,7 +310,7 @@ export default function EnhancedHeader({
               <input
                 type="text"
                 placeholder="Search services or providers..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 data-testid="search-input-mobile"
               />
             </div>

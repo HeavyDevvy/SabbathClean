@@ -106,16 +106,16 @@ export default function MinimalistHome() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-blue-600">Berry Events</div>
+              <div className="text-2xl font-bold text-primary">Berry Events</div>
             </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-4">
               <CartDrawer />
-              <Button variant="outline" className="border-blue-200 text-blue-600 hover:bg-blue-50">
+              <Button variant="outline" className="border-primary text-primary hover:bg-muted">
                 Sign In
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-primary hover:bg-accent text-primary-foreground">
                 Get Started
               </Button>
             </nav>
@@ -138,7 +138,7 @@ export default function MinimalistHome() {
                 <CartDrawer />
               </div>
               <Button variant="outline" className="w-full">Sign In</Button>
-              <Button className="w-full bg-blue-600">Get Started</Button>
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-accent">Get Started</Button>
             </div>
           </div>
         )}
