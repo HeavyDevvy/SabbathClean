@@ -154,89 +154,89 @@
 }
 
 :root {
-  /* Berry Events Brand - Light Mode */
-  --background: hsl(30 29% 97%); /* Very light cream #FAF7F4 */
-  --foreground: hsl(320 69% 14%); /* Deep plum #3C0B2C for text */
+  /* Berry Events Brand - Purple/Coral Theme */
+  --background: hsl(0 0% 98%); /* Light neutral background #FAFAFA */
+  --foreground: hsl(240 10% 20%); /* Dark gray for text #2D2F3E */
   --card: hsl(0 0% 100%); /* Pure white for cards */
-  --card-foreground: hsl(320 69% 14%); /* Deep plum text */
+  --card-foreground: hsl(240 10% 20%); /* Dark gray text */
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(320 69% 14%);
-  --primary: hsl(320 69% 14%); /* Deep plum/burgundy #3C0B2C */
-  --primary-foreground: hsl(28 63% 89%); /* Light beige #F5E1CF */
-  --secondary: hsl(320 50% 35%); /* Medium plum for secondary actions */
-  --secondary-foreground: hsl(28 63% 89%); /* Light beige text */
-  --muted: hsl(30 20% 94%); /* Very light neutral/beige for muted areas */
-  --muted-foreground: hsl(320 30% 35%); /* Muted plum text */
-  --accent: hsl(320 60% 45%); /* Brighter plum for accents/hover #8B2E5F */
+  --popover-foreground: hsl(240 10% 20%);
+  --primary: hsl(263 70% 62%); /* Vibrant purple #8B5CF6 */
+  --primary-foreground: hsl(0 0% 100%); /* White text on purple */
+  --secondary: hsl(9 85% 65%); /* Coral accent #FF7A66 */
+  --secondary-foreground: hsl(0 0% 100%); /* White text on coral */
+  --muted: hsl(240 10% 95%); /* Light gray for muted areas */
+  --muted-foreground: hsl(240 5% 45%); /* Muted gray text */
+  --accent: hsl(9 85% 65%); /* Coral for accents/hover #FF7A66 */
   --accent-foreground: hsl(0 0% 100%); /* White text on accent */
-  --destructive: hsl(355 55% 49%); /* Complementary error red #C23844 */
+  --destructive: hsl(0 72% 51%); /* Error red #DC2626 */
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(320 15% 88%); /* Light plum-tinted border */
-  --input: hsl(30 25% 96%); /* Light beige for input backgrounds */
-  --ring: hsl(320 69% 14%); /* Deep plum for focus rings */
-  --chart-1: hsl(320 60% 45%); /* Plum */
-  --chart-2: hsl(143 34% 27%); /* Success green */
-  --chart-3: hsl(28 63% 70%); /* Light beige tone */
-  --chart-4: hsl(320 50% 65%); /* Light plum */
-  --chart-5: hsl(355 55% 49%); /* Error red */
+  --border: hsl(240 10% 90%); /* Light gray border */
+  --input: hsl(240 10% 96%); /* Light gray for input backgrounds */
+  --ring: hsl(263 70% 62%); /* Purple for focus rings */
+  --chart-1: hsl(263 70% 62%); /* Purple */
+  --chart-2: hsl(142 71% 45%); /* Success green */
+  --chart-3: hsl(9 85% 65%); /* Coral */
+  --chart-4: hsl(263 55% 75%); /* Light purple */
+  --chart-5: hsl(0 72% 51%); /* Error red */
   --sidebar: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(320 69% 14%);
-  --sidebar-primary: hsl(320 69% 14%);
-  --sidebar-primary-foreground: hsl(28 63% 89%);
-  --sidebar-accent: hsl(30 25% 96%);
-  --sidebar-accent-foreground: hsl(320 69% 14%);
-  --sidebar-border: hsl(320 15% 88%);
-  --sidebar-ring: hsl(320 69% 14%);
+  --sidebar-foreground: hsl(240 10% 20%);
+  --sidebar-primary: hsl(263 70% 62%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 10% 96%);
+  --sidebar-accent-foreground: hsl(240 10% 20%);
+  --sidebar-border: hsl(240 10% 90%);
+  --sidebar-ring: hsl(263 70% 62%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.75rem; /* 12px for consistent 8-16px rounding */
-  --neutral: hsl(320 15% 50%); /* Neutral plum-tinted gray */
-  --error: hsl(355 55% 49%); /* Berry Events error red #C23844 */
-  --success: hsl(143 34% 27%); /* Berry Events success green #2D5C3F */
+  --neutral: hsl(240 5% 50%); /* Neutral gray */
+  --error: hsl(0 72% 51%); /* Error red #DC2626 */
+  --success: hsl(142 71% 45%); /* Success green #22C55E */
 }
 
 .dark {
-  /* Berry Events Brand - Dark Mode (light-only theme enforced but keeping for completeness) */
-  --background: hsl(320 50% 8%); /* Very dark plum background */
-  --foreground: hsl(28 63% 89%); /* Light beige text */
-  --card: hsl(320 40% 12%); /* Dark plum cards */
-  --card-foreground: hsl(28 63% 89%);
-  --popover: hsl(320 50% 8%);
-  --popover-foreground: hsl(28 63% 89%);
-  --primary: hsl(320 60% 55%); /* Lighter plum for dark mode primary */
-  --primary-foreground: hsl(320 69% 14%); /* Deep plum text */
-  --secondary: hsl(320 45% 25%);
-  --secondary-foreground: hsl(28 63% 89%);
-  --muted: hsl(320 30% 18%);
-  --muted-foreground: hsl(28 40% 70%);
-  --accent: hsl(320 60% 45%);
-  --accent-foreground: hsl(28 63% 89%);
-  --destructive: hsl(355 55% 49%);
+  /* Berry Events Brand - Purple/Coral Dark Mode */
+  --background: hsl(240 15% 10%); /* Very dark background */
+  --foreground: hsl(0 0% 95%); /* Light text */
+  --card: hsl(240 10% 15%); /* Dark cards */
+  --card-foreground: hsl(0 0% 95%);
+  --popover: hsl(240 15% 10%);
+  --popover-foreground: hsl(0 0% 95%);
+  --primary: hsl(263 70% 65%); /* Lighter purple for dark mode */
+  --primary-foreground: hsl(0 0% 100%); /* White text */
+  --secondary: hsl(9 80% 60%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(240 10% 20%);
+  --muted-foreground: hsl(0 0% 65%);
+  --accent: hsl(9 80% 60%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 72% 51%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(320 25% 20%);
-  --input: hsl(320 30% 15%);
-  --ring: hsl(320 60% 55%);
-  --chart-1: hsl(320 60% 55%);
-  --chart-2: hsl(143 34% 40%);
-  --chart-3: hsl(28 50% 60%);
-  --chart-4: hsl(320 50% 65%);
-  --chart-5: hsl(355 55% 49%);
-  --sidebar: hsl(320 40% 12%);
-  --sidebar-foreground: hsl(28 63% 89%);
-  --sidebar-primary: hsl(320 60% 55%);
-  --sidebar-primary-foreground: hsl(320 69% 14%);
-  --sidebar-accent: hsl(320 30% 18%);
-  --sidebar-accent-foreground: hsl(28 63% 89%);
-  --sidebar-border: hsl(320 25% 20%);
-  --sidebar-ring: hsl(320 60% 55%);
+  --border: hsl(240 10% 25%);
+  --input: hsl(240 10% 18%);
+  --ring: hsl(263 70% 65%);
+  --chart-1: hsl(263 70% 65%);
+  --chart-2: hsl(142 71% 50%);
+  --chart-3: hsl(9 80% 60%);
+  --chart-4: hsl(263 55% 75%);
+  --chart-5: hsl(0 72% 51%);
+  --sidebar: hsl(240 10% 15%);
+  --sidebar-foreground: hsl(0 0% 95%);
+  --sidebar-primary: hsl(263 70% 65%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 10% 20%);
+  --sidebar-accent-foreground: hsl(0 0% 95%);
+  --sidebar-border: hsl(240 10% 25%);
+  --sidebar-ring: hsl(263 70% 65%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.75rem;
-  --neutral: hsl(320 15% 50%);
-  --error: hsl(355 55% 49%);
-  --success: hsl(143 34% 40%);
+  --neutral: hsl(240 5% 50%);
+  --error: hsl(0 72% 51%);
+  --success: hsl(142 71% 50%);
 }
 
 @layer base {
