@@ -110,6 +110,25 @@ export default function Profile() {
   // Fetch user's orders
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
     queryKey: ['/api/orders', userId],
+    queryFn: async () => {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers: Record<string, string> = {};
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      
+      const res = await fetch('/api/orders', {
+        headers,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        const text = (await res.text()) || res.statusText;
+        throw new Error(`${res.status}: ${text}`);
+      }
+      
+      return res.json();
+    },
     enabled: !!userId && isAuthenticated,
   });
 
