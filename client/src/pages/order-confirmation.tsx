@@ -259,11 +259,11 @@ export default function OrderConfirmation() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white py-12">
+    <div className="min-h-screen bg-gradient-to-b from-muted to-white py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-success/10 rounded-full mb-4">
+            <CheckCircle2 className="w-10 h-10 text-success" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="confirmation-title">
             Booking Confirmed!
@@ -271,9 +271,9 @@ export default function OrderConfirmation() {
           <p className="text-gray-600">
             Your services have been successfully booked
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 bg-purple-100 px-4 py-2 rounded-full">
-            <FileText className="w-4 h-4 text-purple-600" />
-            <span className="text-sm font-medium text-purple-900" data-testid="booking-reference">
+          <div className="mt-4 inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-full">
+            <FileText className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-foreground" data-testid="booking-reference">
               Ref: {bookingReference}
             </span>
           </div>
@@ -351,7 +351,7 @@ export default function OrderConfirmation() {
                     
                     <Separator className="my-2" />
                     
-                    <div className="flex justify-between font-semibold text-purple-600">
+                    <div className="flex justify-between font-semibold text-primary">
                       <span>Service Subtotal</span>
                       <span>R{itemSubtotal.toFixed(2)}</span>
                     </div>
@@ -380,7 +380,7 @@ export default function OrderConfirmation() {
             <Separator />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total Paid</span>
-              <span className="text-purple-600" data-testid="payment-total">
+              <span className="text-primary" data-testid="payment-total">
                 {formatCurrency(order.totalAmount)}
               </span>
             </div>
@@ -390,12 +390,12 @@ export default function OrderConfirmation() {
           </div>
         </Card>
         
-        <Card className="mb-6 p-6 bg-purple-50 border-purple-200">
+        <Card className="mb-6 p-6 bg-muted border-border">
           <div className="flex items-start">
-            <Shield className="w-6 h-6 text-purple-600 mr-3 flex-shrink-0 mt-1" />
+            <Shield className="w-6 h-6 text-primary mr-3 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-semibold text-purple-900 mb-2">Berry Events Bank Protection</h3>
-              <p className="text-sm text-purple-700">
+              <h3 className="font-semibold text-foreground mb-2">Berry Events Bank Protection</h3>
+              <p className="text-sm text-muted-foreground">
                 Your payment is held securely until all services are completed. 
                 You'll receive a full refund if services are not delivered as promised.
                 Our 15% platform fee ensures quality service and customer protection.
@@ -416,7 +416,7 @@ export default function OrderConfirmation() {
           </Button>
           <Button
             onClick={() => navigate("/")}
-            className="flex-1 bg-purple-600 hover:bg-purple-700"
+            className="flex-1 bg-primary hover:bg-accent text-primary-foreground"
             data-testid="button-back-to-home"
           >
             <Home className="w-4 h-4 mr-2" />

@@ -177,7 +177,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                           {[0, 1, 2].map((i) => (
                             <motion.div
                               key={i}
-                              className="w-1 h-1 bg-blue-500 rounded-full"
+                              className="w-1 h-1 bg-primary rounded-full"
                               animate={{ y: [0, -3, 0] }}
                               transition={{ 
                                 duration: 0.6, 
@@ -195,7 +195,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button 
                     onClick={handleQuickBooking}
-                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300"
+                    className="w-full h-12 bg-primary hover:bg-accent text-primary-foreground font-medium rounded-xl transition-all duration-300"
                     disabled={!address.trim()}
                     data-testid="quick-book-button"
                   >
@@ -267,7 +267,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
             <div className="relative">
               {/* Main Image Placeholder */}
               <motion.div 
-                className="aspect-[4/5] bg-gradient-to-br from-blue-100 to-blue-50 rounded-3xl shadow-2xl overflow-hidden relative"
+                className="aspect-[4/5] bg-gradient-to-br from-muted to-background rounded-3xl shadow-2xl overflow-hidden relative"
                 whileHover={{ 
                   scale: 1.02,
                   rotate: [0, 1, -1, 0],
@@ -286,15 +286,15 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                   />
                   
                   {/* Overlay gradient to ensure text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-100/50 via-transparent to-blue-100/50 rounded-3xl" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-muted/50 via-transparent to-muted/50 rounded-3xl" />
                 </div>
 
                 {/* Content overlay */}
                 <div className="relative z-10 text-center space-y-6 p-8 h-full flex flex-col justify-center">
                   <motion.div 
-                    className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg"
+                    className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-lg"
                     animate={{ 
-                      boxShadow: ["0 4px 20px rgba(59, 130, 246, 0.3)", "0 8px 30px rgba(59, 130, 246, 0.5)", "0 4px 20px rgba(59, 130, 246, 0.3)"]
+                      boxShadow: ["0 4px 20px hsl(var(--primary) / 0.3)", "0 8px 30px hsl(var(--primary) / 0.5)", "0 4px 20px hsl(var(--primary) / 0.3)"]
                     }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
@@ -302,12 +302,12 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                       animate={{ rotate: [0, 360] }}
                       transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                     >
-                      <Star className="w-10 h-10 text-white fill-current" />
+                      <Star className="w-10 h-10 text-primary-foreground fill-current" />
                     </motion.div>
                   </motion.div>
                   
                   <motion.h3 
-                    className="text-2xl font-bold text-blue-900"
+                    className="text-2xl font-bold text-foreground"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.4 }}
@@ -316,7 +316,7 @@ export default function MinimalistHero({ onGetStarted }: MinimalistHeroProps) {
                   </motion.h3>
                   
                   <motion.p 
-                    className="text-blue-700 text-lg"
+                    className="text-muted-foreground text-lg"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.6 }}
