@@ -2110,15 +2110,18 @@ export default function ModernServiceModal({
 
       <div className="space-y-4">
         <div>
-          <Label>Preferred Date *</Label>
+          <Label htmlFor="preferred-date">Preferred Date *</Label>
           <Input
+            id="preferred-date"
             type="date"
             value={formData.preferredDate}
             onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full"
+            className="w-full h-12 text-base"
             readOnly={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
             disabled={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
+            data-testid="input-preferred-date"
+            required
           />
           {(formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day") && (
             <p className="text-xs text-orange-600 mt-1">
