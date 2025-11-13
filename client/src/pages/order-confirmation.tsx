@@ -401,8 +401,9 @@ export default function OrderConfirmation() {
                 {formatCurrency(order.totalAmount)}
               </span>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
-              <p>Payment Status: <Badge className="ml-2">{order.paymentStatus}</Badge></p>
+            <div className="mt-4 text-sm text-gray-600 flex items-center">
+              <span>Payment Status:</span>
+              <Badge className="ml-2">{order.paymentStatus}</Badge>
             </div>
           </div>
         </Card>
