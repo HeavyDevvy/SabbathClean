@@ -9,7 +9,7 @@ export interface ServiceEstimate {
 
 export const serviceEstimates: Record<string, ServiceEstimate> = {
   "house-cleaning": {
-    baseHours: 3,
+    baseHours: 6,
     propertyMultiplier: {
       "1-2-bedrooms": 1,
       "3-4-bedrooms": 1.5,
