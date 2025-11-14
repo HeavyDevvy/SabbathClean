@@ -1,0 +1,97 @@
+Task: Redesign Home Page with SweepSouth-Inspired Look and Feel
+Objective:
+Update the home page design to match the modern, clean aesthetic of the SweepSouth campaign page while maintaining all existing content, features, and functionality.
+Design Elements to Implement:
+
+Overall Style & Layout:
+
+Modern, clean, and minimalist design with generous white space
+Smooth scrolling and seamless sections
+Mobile-responsive design that works flawlessly across all devices
+Professional color scheme with a primary brand color and complementary accents
+
+
+Hero Section:
+
+Full-width hero banner with engaging headline
+Clear call-to-action button with hover effects
+High-quality background imagery or gradient
+Centered, bold typography for maximum impact
+
+
+Typography:
+
+Modern, readable font family (similar to sans-serif professional fonts)
+Clear hierarchy with varying font sizes and weights
+Bold headlines with lighter body text
+Proper line spacing and letter spacing for readability
+
+
+Visual Elements:
+
+Rounded corners on buttons and cards
+Subtle shadows for depth and dimension
+Smooth transitions and hover effects
+Clean, organized card layouts for services/features
+Professional iconography if applicable
+
+
+Color Scheme:
+
+Implement a cohesive color palette
+Use of white/light backgrounds with colored accent sections
+Strategic use of brand colors for CTAs and highlights
+Ensure good contrast for accessibility
+
+
+Sections & Components:
+
+Well-structured sections with clear visual separation
+Promotional banners with discount codes/offers styled attractively
+Service showcase with clean card designs
+Testimonial/social proof sections with modern styling
+Referral program section with engaging visuals
+
+
+Buttons & CTAs:
+
+Modern button styling with rounded edges
+Clear hover states with smooth transitions
+Consistent sizing and spacing
+Strategic placement for maximum conversion
+
+
+Spacing & Grid:
+
+Consistent padding and margins throughout
+Grid-based layout for alignment
+Balanced composition with breathing room
+Strategic use of full-width and contained sections
+
+
+
+Critical Requirements:
+
+DO NOT change any existing content, text, or copy
+DO NOT remove or modify any existing features or functionality
+DO NOT break any existing user flows or interactions
+ONLY update the visual styling (CSS, layout, design elements)
+Ensure there are no error codes or console errors
+Test all interactive elements to confirm they still work
+Verify mobile responsiveness
+Check that all links, buttons, and forms function correctly
+Ensure fast loading times and smooth performance
+
+Testing Checklist:
+
+ All buttons and links work correctly
+ Forms submit properly
+ Navigation functions as expected
+ Mobile view displays correctly
+ No console errors
+ No blank screens or broken layouts
+ All images load properly
+ Animations/transitions work smoothly
+
+Expected Outcome:
+A visually refreshed home page that looks modern, professional, and polished (similar to SweepSouth's aesthetic) while maintaining 100% of the original functionality and content.
