@@ -107,21 +107,21 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <section className="py-20 lg:py-32 bg-gradient-to-br from-background via-white to-primary-foreground/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 text-sm font-semibold border-0 mb-4">
+        <div className="text-center mb-20">
+          <Badge className="bg-accent text-accent-foreground px-5 py-2 text-sm font-semibold border-0 mb-6 rounded-full">
             <Star className="h-4 w-4 mr-2" />
             Berry Stars
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6">
             Meet our top-rated
-            <span className="block bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+            <span className="block text-primary mt-2">
               professionals
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Our Berry Stars are the highest-rated, most experienced professionals on our platform. 
             They've earned their status through exceptional service and customer satisfaction.
           </p>
@@ -263,10 +263,10 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                   </div>
 
                   {/* Pricing & CTA */}
-                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
                     <div>
-                      <div className="text-lg font-bold text-blue-600">R{provider.hourlyRate}</div>
-                      <div className="text-xs text-gray-500">per hour</div>
+                      <div className="text-lg font-bold text-primary">R{provider.hourlyRate}</div>
+                      <div className="text-xs text-muted-foreground">per hour</div>
                     </div>
                     <Button
                       onClick={() => onBookService(
@@ -275,7 +275,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                         provider.name
                       )}
                       size="sm"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-3 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs"
+                      className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs"
                       data-testid={`button-book-${provider.id}`}
                     >
                       Book Now
@@ -317,7 +317,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   window.open('/provider-onboarding', '_blank');
                 }}
@@ -329,7 +329,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
               
               <Button 
                 variant="outline"
-                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 font-semibold px-8 py-3 rounded-xl transition-all duration-200"
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-10 py-4 rounded-xl transition-all duration-300"
                 onClick={() => {
                   const servicesSection = document.getElementById('services');
                   servicesSection?.scrollIntoView({ behavior: 'smooth' });
