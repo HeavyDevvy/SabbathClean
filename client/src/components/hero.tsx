@@ -9,7 +9,7 @@ interface HeroProps {
 export default function Hero({ onBookingClick }: HeroProps) {
   const [, setLocation] = useLocation();
   return (
-    <section className="bg-white py-16 lg:py-24">
+    <section className="bg-background py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold text-foreground sm:text-6xl lg:text-7xl leading-tight mb-8">

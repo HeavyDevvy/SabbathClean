@@ -125,7 +125,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section className="py-16 lg:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
@@ -142,7 +142,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
             return (
               <button
                 key={service.id}
-                className="group p-6 bg-white border border-gray-200 hover:border-primary/30 rounded-lg transition-all duration-200 hover:shadow-md text-center"
+                className="group p-6 bg-card border border-border hover:border-primary/30 rounded-lg transition-all duration-200 hover:shadow-md text-center"
                 onClick={() => onServiceSelect(service.id)}
                 data-testid={`service-card-${service.id}`}
               >
