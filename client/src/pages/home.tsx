@@ -32,7 +32,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <SweepSouthStyleHeader onBookingClick={() => openBooking('all-services')} />
       <main>
         <Hero onBookingClick={() => openBooking('all-services')} />
