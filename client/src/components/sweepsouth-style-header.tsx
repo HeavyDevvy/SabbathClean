@@ -34,16 +34,16 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">B</span>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">B</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Berry Events</span>
+              <span className="text-2xl font-bold text-foreground">Berry Events</span>
             </div>
           </Link>
 
@@ -51,19 +51,19 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/services" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
             >
               Services
             </Link>
             <Link 
               href="/pricing" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
             >
               Pricing
             </Link>
             <Link 
               href="/about" 
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
             >
               About
             </Link>
@@ -76,7 +76,7 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 <Button
                   onClick={() => setLocation("/auth")}
                   variant="ghost"
-                  className="text-gray-700 hover:text-blue-600 font-medium"
+                  className="text-muted-foreground hover:text-primary font-medium"
                   data-testid="button-sign-in"
                 >
                   Sign In
@@ -84,18 +84,18 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 
                 <Button
                   onClick={onBookingClick}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                   data-testid="button-book-service"
                 >
                   Book a Service
                 </Button>
 
-                <div className="border-l border-gray-200 pl-4 ml-4">
-                  <span className="text-sm text-gray-600 mr-2">Are you a worker?</span>
+                <div className="border-l border-border pl-6 ml-4">
+                  <span className="text-sm text-muted-foreground mr-3">Are you a worker?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-medium"
+                    className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium rounded-xl px-6 py-3 transition-all duration-300"
                     data-testid="button-apply-now"
                   >
                     Apply Now
@@ -106,7 +106,7 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
               <>
                 <Button
                   onClick={onBookingClick}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                   data-testid="button-book-service"
                 >
                   Book a Service
@@ -119,13 +119,13 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                       className="flex items-center space-x-2" 
                       data-testid="button-user-menu"
                     >
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-10 w-10">
                         <AvatarImage src={user?.profileImage} alt={user?.firstName} />
-                        <AvatarFallback className="bg-blue-600 text-white text-sm">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-foreground">
                         {user?.firstName || "Account"}
                       </span>
                     </Button>
@@ -209,20 +209,20 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      className="w-full bg-primary hover:bg-accent text-primary-foreground rounded-xl"
                     >
                       Book a Service
                     </Button>
                     
                     <div className="text-center pt-2">
-                      <span className="text-sm text-gray-600 block mb-2">Are you a worker?</span>
+                      <span className="text-sm text-muted-foreground block mb-2">Are you a worker?</span>
                       <Button
                         onClick={() => {
                           setLocation("/provider-onboarding");
                           setIsMobileMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                        className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-xl"
                       >
                         Apply Now
                       </Button>
@@ -242,7 +242,7 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      className="w-full bg-primary hover:bg-accent text-primary-foreground rounded-xl"
                     >
                       Book a Service
                     </Button>
