@@ -315,4 +315,60 @@ export function registerCartRoutes(app: Express) {
       res.status(500).json({ message: error.message });
     }
   });
+
+  // PATCH /api/orders/:id/cancel - Cancel an order with refund policy
+  app.patch("/api/orders/:id/cancel", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const orderId = req.params.id;
+      const userId = (req as any).user?.id;
+      const { reason, refundAmount, deductionAmount } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      if (!reason || !reason.trim()) {
+        return res.status(400).json({ message: "Cancellation reason is required" });
+      }
+
+      // Get the order to verify ownership
+      const orderData = await storage.getOrderWithItems(orderId);
+      
+      if (!orderData) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Verify the order belongs to the authenticated user
+      if (orderData.order.userId !== userId) {
+        return res.status(403).json({ message: "You can only cancel your own orders" });
+      }
+
+      // Check if order is already cancelled or completed
+      if (orderData.order.status === "cancelled") {
+        return res.status(400).json({ message: "This order is already cancelled" });
+      }
+
+      if (orderData.order.status === "completed") {
+        return res.status(400).json({ message: "Completed orders cannot be cancelled" });
+      }
+
+      // Update order with cancellation information (single update for efficiency)
+      await storage.updateOrder(orderId, {
+        status: "cancelled",
+        paymentStatus: refundAmount > 0 ? "refund_pending" : "no_refund",
+        cancellationReason: reason.trim(),
+        cancelledAt: new Date(),
+        refundAmount: refundAmount?.toString() || "0",
+      } as any);
+
+      res.json({
+        message: "Order cancelled successfully",
+        refundAmount: refundAmount || 0,
+        refundStatus: refundAmount > 0 ? "pending" : "no_refund"
+      });
+    } catch (error: any) {
+      console.error("Error cancelling order:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
 }

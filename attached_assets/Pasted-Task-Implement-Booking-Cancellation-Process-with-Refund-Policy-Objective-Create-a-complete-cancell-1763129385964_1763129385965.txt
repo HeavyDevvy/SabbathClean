@@ -1,0 +1,56 @@
+Task: Implement Booking Cancellation Process with Refund Policy
+Objective:
+Create a complete cancellation workflow for bookings in the "Upcoming Bookings" section with a refund policy based on cancellation timing.
+Requirements:
+
+Cancellation Button & Pop-up:
+
+When a user clicks "Cancel" on an upcoming booking, display a cancellation pop-up modal
+The pop-up should include a text field/textarea for the user to provide a reason for cancellation (required field)
+
+
+Refund Policy Display:
+
+Display the following refund policy in bold red text within the pop-up:
+
+Any cancellation: 10% will be deducted from the amount paid and will be paid to the service provider
+Cancellations made 4 days or less before the booking: 50% will be deducted from the amount paid
+Cancellations made 24 hours or less before the booking: No refund will be issued
+
+
+
+
+Consent Mechanism:
+
+Include a checkbox with text: "I agree to the cancellation terms and refund policy"
+The user MUST tick this checkbox to proceed
+The "Confirm Cancellation" button should be disabled until the checkbox is ticked
+User must also provide a cancellation reason before proceeding
+
+
+Cancellation Logic:
+
+Calculate the appropriate refund amount based on the time between cancellation and booking date
+Process the refund according to the policy outlined above
+Update the booking status to "Cancelled"
+Record the cancellation reason and timestamp
+
+
+Post-Cancellation:
+
+Once cancellation is confirmed, immediately move the booking from "Upcoming Bookings" to "Past Bookings" section
+Display the booking with "Cancelled" status and refund information in Past Bookings
+
+
+Quality Assurance:
+
+Ensure there are no error codes or blank screens throughout the process
+Test the complete cancellation flow from start to finish
+Verify all other existing functionality remains unchanged and working
+Ensure the cancellation pop-up closes properly after completion
+
+
+
+Expected User Flow:
+User clicks "Cancel" → Pop-up appears with refund policy and reason field → User enters reason → User reads policy (in bold red) → User ticks consent checkbox → User clicks "Confirm Cancellation" → Booking moves to Past Bookings with cancelled status
+Please implement this functionality while preserving all existing features and ensuring no errors occur.

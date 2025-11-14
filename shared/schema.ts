@@ -833,6 +833,11 @@ export const orders = pgTable("orders", {
   // Order status
   status: text("status").default("pending").notNull(), // pending, confirmed, processing, completed, cancelled
   confirmationSentAt: timestamp("confirmation_sent_at"),
+  // Cancellation metadata (nullable - only populated when cancelled)
+  cancellationReason: text("cancellation_reason"),
+  cancelledAt: timestamp("cancelled_at"),
+  refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+  // Timestamps
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
