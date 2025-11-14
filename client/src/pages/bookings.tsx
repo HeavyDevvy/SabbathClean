@@ -116,10 +116,54 @@ export default function BookingsPage() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  // Fetch real bookings from database
-  const { data: bookings = [], isLoading } = useQuery<Booking[]>({
-    queryKey: ['/api/bookings/customer', user?.id],
-    enabled: !!user?.id,
+  // Fetch orders from the new cart-based booking system
+  const { data: orders = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/orders', user?.id],
+    queryFn: async () => {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers: Record<string, string> = {};
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      
+      const res = await fetch('/api/orders', {
+        headers,
+        credentials: "include",
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Failed to fetch orders: ${res.statusText}`);
+      }
+      
+      return res.json();
+    },
+    enabled: !!user?.id && isAuthenticated,
+  });
+
+  // Transform orders with items into individual booking cards
+  const bookings = orders.flatMap((order: any) => {
+    if (!order.items || order.items.length === 0) {
+      return [];
+    }
+    
+    // Create a booking card for each order item (service)
+    return order.items.map((item: any) => ({
+      id: item.id,
+      bookingNumber: order.orderNumber,
+      serviceType: item.serviceName || item.serviceType,
+      scheduledDate: item.scheduledDate,
+      scheduledTime: item.scheduledTime,
+      duration: item.duration || 2,
+      status: order.status, // Use order status (confirmed, pending, completed, cancelled)
+      address: item.serviceDetails?.address || "Address not provided",
+      totalPrice: item.subtotal,
+      specialInstructions: item.comments || item.serviceDetails?.specialRequests || "",
+      // Additional fields from order
+      paymentStatus: order.paymentStatus,
+      createdAt: order.createdAt,
+      // Store order reference for actions
+      orderId: order.id,
+    }));
   });
 
   const upcomingBookings = bookings.filter((b: any) => 

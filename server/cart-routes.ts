@@ -270,7 +270,7 @@ export function registerCartRoutes(app: Express) {
     }
   });
   
-  // GET /api/orders - Get user's orders
+  // GET /api/orders - Get user's orders with items
   app.get("/api/orders", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user?.id;
@@ -281,7 +281,16 @@ export function registerCartRoutes(app: Express) {
       
       const orders = await storage.getUserOrders(userId);
       
-      res.json(orders);
+      // Fetch items for each order and flatten the structure
+      const ordersWithItems = await Promise.all(
+        orders.map(async (order) => {
+          const orderData = await storage.getOrderWithItems(order.id);
+          // Return flat structure: order properties + items array
+          return orderData ? { ...orderData.order, items: orderData.items } : order;
+        })
+      );
+      
+      res.json(ordersWithItems);
     } catch (error: any) {
       console.error("Error fetching orders:", error);
       res.status(500).json({ message: error.message });
