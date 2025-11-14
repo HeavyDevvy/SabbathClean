@@ -853,10 +853,16 @@ export default function ModernServiceModal({
     [serviceId, mappedServiceId]
   );
   
-  // Show enhanced provider details for both House Cleaning and Plumbing
+  // ELECTRICAL SERVICE: Service-specific feature flag
+  const isElectrical = useMemo(() => 
+    serviceId === "electrical" || mappedServiceId === "electrical", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // Show enhanced provider details for House Cleaning, Plumbing, and Electrical
   const showEnhancedProviderDetails = useMemo(() => 
-    isHouseCleaning || isPlumbing,
-    [isHouseCleaning, isPlumbing]
+    isHouseCleaning || isPlumbing || isElectrical,
+    [isHouseCleaning, isPlumbing, isElectrical]
   );
   
   // Check if plumbing service has urgent priority requiring one-time booking
