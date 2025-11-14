@@ -4,6 +4,7 @@ import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema } from "
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { encryptGateCode } from "./encryption";
+import { authenticateToken } from "./auth-routes";
 
 // Helper to get or create cart ID from session/user
 function getCartIdentifier(req: Request): { userId?: string; sessionToken?: string } {
@@ -270,7 +271,7 @@ export function registerCartRoutes(app: Express) {
   });
   
   // GET /api/orders - Get user's orders
-  app.get("/api/orders", async (req: Request, res: Response) => {
+  app.get("/api/orders", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user?.id;
       
