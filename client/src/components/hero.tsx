@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Play, Shield, UserCheck, Clock, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
+import heroImage from "@assets/stock_images/professional_female__eea5c596.jpg";
 
 interface HeroProps {
   onBookingClick: () => void;
@@ -54,8 +55,8 @@ export default function Hero({ onBookingClick }: HeroProps) {
           <div className="relative">
             <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
               <img 
-                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=900" 
-                alt="Professional cleaner at work in modern home" 
+                src={heroImage}
+                alt="Professional Berry Events service provider" 
                 className="w-full h-full object-cover"
               />
             </div>

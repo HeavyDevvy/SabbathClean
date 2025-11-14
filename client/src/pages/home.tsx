@@ -1,6 +1,7 @@
 import SweepSouthStyleHeader from "@/components/sweepsouth-style-header";
 import Hero from "@/components/hero";
 import SweepSouthStyleServices from "@/components/sweepsouth-style-services";
+import ServicesShowcase from "@/components/services-showcase";
 import TrustSafetySection from "@/components/trust-safety-section";
 import BerryStarsSection from "@/components/berry-stars-section";
 import Footer from "@/components/footer";
@@ -37,6 +38,7 @@ export default function Home() {
       <main>
         <Hero onBookingClick={() => openBooking('all-services')} />
         <SweepSouthStyleServices onServiceSelect={openBooking} />
+        <ServicesShowcase />
         <BerryStarsSection onBookService={openBooking} />
         <TrustSafetySection />
       </main>
