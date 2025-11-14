@@ -107,23 +107,15 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section className="py-20 lg:py-32 bg-gradient-to-br from-background via-white to-primary-foreground/10">
+    <section className="py-16 lg:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <Badge className="bg-accent text-accent-foreground px-5 py-2 text-sm font-semibold border-0 mb-6 rounded-full">
-            <Star className="h-4 w-4 mr-2" />
-            Berry Stars
-          </Badge>
-          <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6">
-            Meet our top-rated
-            <span className="block text-primary mt-2">
-              professionals
-            </span>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Meet some of your Berry Stars
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Our Berry Stars are the highest-rated, most experienced professionals on our platform. 
-            They've earned their status through exceptional service and customer satisfaction.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            They're experienced, vetted and rated – ready to take care of your home.
           </p>
         </div>
 

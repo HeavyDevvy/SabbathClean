@@ -125,80 +125,53 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-gradient-to-b from-white to-background">
+    <section className="py-16 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Choose the service you need
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From comprehensive cleaning to specialized care, our verified professionals are ready to help with all your home service needs.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto">
           {mainServices.map((service) => {
             const Icon = service.icon;
             return (
-              <Card
+              <button
                 key={service.id}
-                className="cursor-pointer transition-all duration-300 hover:shadow-2xl group relative overflow-hidden border-2 border-border hover:border-primary/20 bg-white"
-                onMouseEnter={() => setHoveredService(service.id)}
-                onMouseLeave={() => setHoveredService(null)}
+                className="group p-6 bg-white border border-gray-200 hover:border-primary/30 rounded-lg transition-all duration-200 hover:shadow-md text-center"
                 onClick={() => onServiceSelect(service.id)}
                 data-testid={`service-card-${service.id}`}
               >
-                <CardContent className="p-8 text-center h-full flex flex-col justify-between">
-                  {/* Service Icon */}
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/5 flex items-center justify-center transform group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-300">
-                    <Icon className="h-10 w-10 text-primary" />
-                  </div>
-                  
-                  {/* Service Name */}
-                  <div className="mb-4">
-                    <h3 className="text-lg font-bold whitespace-pre-line text-foreground group-hover:text-primary transition-colors">
-                      {service.name}
-                    </h3>
-                    <p className="text-sm font-semibold text-muted-foreground mt-2">
-                      From R{service.basePrice}/{service.priceUnit}
-                    </p>
-                  </div>
-                  
-                  {/* Service Description - Always visible on desktop, hover for mobile */}
-                  <div className={`transition-all duration-300 md:opacity-100 md:max-h-24 ${
-                    hoveredService === service.id 
-                      ? 'opacity-100 max-h-24' 
-                      : 'opacity-0 max-h-0 md:opacity-100 md:max-h-24'
-                  } overflow-hidden`}>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {service.description}
-                    </p>
-                  </div>
-
-                  {/* Hover Arrow */}
-                  <div className={`absolute bottom-6 right-6 transition-all duration-300 ${
-                    hoveredService === service.id ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2'
-                  }`}>
-                    <ArrowRight className="h-6 w-6 text-primary" />
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Service Icon */}
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <Icon className="h-8 w-8 text-primary" />
+                </div>
+                
+                {/* Service Name */}
+                <h3 className="text-base font-bold whitespace-pre-line text-foreground mb-1">
+                  {service.name}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  From R{service.basePrice}/{service.priceUnit}
+                </p>
+              </button>
             );
           })}
         </div>
 
         {/* Primary CTA */}
-        <div className="text-center mt-16">
+        <div className="text-center mt-12">
           <Button 
             onClick={() => onServiceSelect('all-services')}
-            className="bg-primary hover:bg-accent text-primary-foreground px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            className="bg-primary hover:bg-accent text-primary-foreground px-8 py-3 text-base font-semibold rounded-lg transition-colors"
             data-testid="button-book-service-main"
           >
             Book a Service
           </Button>
-          <p className="text-sm text-muted-foreground mt-3">
-            Choose from all available services and options
-          </p>
         </div>
       </div>
     </section>

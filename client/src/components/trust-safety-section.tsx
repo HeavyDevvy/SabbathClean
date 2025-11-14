@@ -98,23 +98,15 @@ const certifications = [
 
 export default function TrustSafetySection() {
   return (
-    <section className="py-20 lg:py-32 bg-background">
+    <section className="py-16 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-20">
-          <Badge className="bg-success/10 text-success px-5 py-2 text-sm font-semibold border-0 mb-6 rounded-full">
-            <Shield className="h-4 w-4 mr-2" />
-            Trust & Safety First
-          </Badge>
-          <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6">
-            Your safety is our
-            <span className="block text-success mt-2">
-              top priority
-            </span>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            Safety and security is our top priority
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We've built comprehensive safety measures and verification processes to ensure 
-            you can book services with complete confidence and peace of mind.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            We connect you to hardworking, trusted individuals who are experienced, vetted, rated and dependable.
           </p>
         </div>
 
