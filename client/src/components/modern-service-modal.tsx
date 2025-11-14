@@ -853,6 +853,12 @@ export default function ModernServiceModal({
     [serviceId, mappedServiceId]
   );
   
+  // ELECTRICAL SERVICE: Service-specific feature flag
+  const isElectrical = useMemo(() => 
+    serviceId === "electrical" || mappedServiceId === "electrical", 
+    [serviceId, mappedServiceId]
+  );
+  
   // Show enhanced provider details for both House Cleaning and Plumbing
   const showEnhancedProviderDetails = useMemo(() => 
     isHouseCleaning || isPlumbing,
@@ -3613,24 +3619,39 @@ export default function ModernServiceModal({
                     </Button>
                   ) : (
                     <>
-                      <Button 
-                        onClick={handleAddToCart}
-                        className="bg-success hover:bg-success/90 text-white"
-                        disabled={!formData.selectedProvider}
-                        data-testid="button-add-to-cart"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Add to Cart
-                      </Button>
-                      <Button 
-                        onClick={handleGoToCart}
-                        variant="outline"
-                        className="border-primary text-primary hover:bg-muted"
-                        data-testid="button-go-to-cart"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Go to Cart ({itemCount})
-                      </Button>
+                      {/* ELECTRICAL SERVICE: Single merged button with border */}
+                      {isElectrical ? (
+                        <Button 
+                          onClick={handleAddToCart}
+                          className="bg-success hover:bg-success/90 text-white border-2 border-primary"
+                          disabled={!formData.selectedProvider}
+                          data-testid="button-add-and-go-to-cart-electrical"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Add to Cart & Checkout
+                        </Button>
+                      ) : (
+                        <>
+                          <Button 
+                            onClick={handleAddToCart}
+                            className="bg-success hover:bg-success/90 text-white"
+                            disabled={!formData.selectedProvider}
+                            data-testid="button-add-to-cart"
+                          >
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Add to Cart
+                          </Button>
+                          <Button 
+                            onClick={handleGoToCart}
+                            variant="outline"
+                            className="border-primary text-primary hover:bg-muted"
+                            data-testid="button-go-to-cart"
+                          >
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Go to Cart ({itemCount})
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </>
