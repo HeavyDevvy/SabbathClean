@@ -165,6 +165,30 @@ export const authenticateToken = async (req: any, res: any, next: any) => {
   }
 };
 
+// Optional authentication middleware - authenticates if token present, continues if not
+export const optionalAuth = async (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    // No token present, continue as guest
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const user = await storage.getUserById(decoded.userId);
+    
+    if (user) {
+      req.user = user;
+    }
+    next();
+  } catch (error) {
+    // Invalid token, but continue as guest
+    next();
+  }
+};
+
 // Middleware to authorize provider access - ensures user owns the provider resource
 export const authorizeProviderAccess = async (req: any, res: any, next: any) => {
   try {

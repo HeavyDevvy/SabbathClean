@@ -4,7 +4,7 @@ import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema } from "
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { encryptGateCode } from "./encryption";
-import { authenticateToken } from "./auth-routes";
+import { authenticateToken, optionalAuth } from "./auth-routes";
 
 // Helper to get or create cart ID from session/user
 function getCartIdentifier(req: Request): { userId?: string; sessionToken?: string } {
@@ -33,7 +33,7 @@ function getCartIdentifier(req: Request): { userId?: string; sessionToken?: stri
 export function registerCartRoutes(app: Express) {
   
   // GET /api/cart - Get current cart with items
-  app.get("/api/cart", async (req: Request, res: Response) => {
+  app.get("/api/cart", optionalAuth, async (req: Request, res: Response) => {
     try {
       const { userId, sessionToken } = getCartIdentifier(req);
       
@@ -59,7 +59,7 @@ export function registerCartRoutes(app: Express) {
   });
   
   // POST /api/cart/items - Add item to cart
-  app.post("/api/cart/items", async (req: Request, res: Response) => {
+  app.post("/api/cart/items", optionalAuth, async (req: Request, res: Response) => {
     try {
       const { userId, sessionToken } = getCartIdentifier(req);
       
@@ -168,7 +168,7 @@ export function registerCartRoutes(app: Express) {
   });
   
   // POST /api/cart/checkout - Convert cart to order
-  app.post("/api/cart/checkout", async (req: Request, res: Response) => {
+  app.post("/api/cart/checkout", optionalAuth, async (req: Request, res: Response) => {
     try {
       const { userId, sessionToken } = getCartIdentifier(req);
       
