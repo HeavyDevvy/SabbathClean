@@ -1,0 +1,74 @@
+Prompt for Replit AI (UI make-over)
+
+You are working on my existing house-cleaning booking web app in this Replit project.
+
+I have uploaded reference screenshots of the SweepSouth booking flow. Please carefully study those images and then update my app’s UI so that the entire booking journey visually matches the style and layout of the screenshots, while still using my existing brand colours already defined in the project.
+
+What I want
+	1.	Overall look & feel
+	•	Use my existing brand colour palette, but apply it in the same way as the SweepSouth UI:
+	•	Light off-white / cream page background.
+	•	White cards with soft shadows and rounded corners.
+	•	Solid primary action buttons in my main brand colour (similar size and shape to the green “Find a Worker” / “Proceed to Payment Method” buttons in the screenshots).
+	•	Secondary buttons with white background, rounded border, and outlined in a darker colour.
+	•	Keep typography clean and modern (a single sans-serif family) with hierarchy similar to the screenshots (large headings, medium sub-headings, smaller body text and labels).
+	2.	Page structure & components (match the screenshots)
+	•	Step progress bar at the top:
+	•	3 steps: Details, Worker, Payment.
+	•	Use round step indicators connected with a line, with a filled state for completed steps and an outlined/greyed state for upcoming ones.
+	•	Address page (“Where do you need help?”):
+	•	Centered card with two stacked input fields for street address and optional unit/apartment, matching the layout in the screenshot.
+	•	Frequency page (“How often do you need help?”):
+	•	Booking Details card on the left (see below).
+	•	In the main content area: two large selectable cards for One Time and Repeat with icons and description text, styled like the screenshots.
+	•	Extra Details page (tasks & time):
+	•	Left side: Booking Details card showing address & service, with total estimated hours and price in the black footer area, similar to the screenshots.
+	•	Right side: main card titled “Add details about your booking”:
+	•	Grid of circular/outlined icons for each extra task.
+	•	“How Long?” selector with minus and plus buttons around the hour value.
+	•	Date picker and time dropdown styled like the screenshots.
+	•	Large textarea at the bottom for “Add specific instructions”.
+	•	“Find a Worker” and “Back” buttons at the bottom, full-width across the card, using my brand colours but same shape and layout.
+	•	Choose worker page:
+	•	Left: Booking Details card exactly as above.
+	•	Right: stacked worker cards showing:
+	•	Worker image, name, recommendation %, jobs completed.
+	•	“View profile” and “Choose me” actions in the same layout as the screenshots.
+	•	Include a “Choose for me” card on the left below Booking Details, matching the style in the screenshots.
+	•	Worker profile modal:
+	•	Full card/modal with:
+	•	Worker photo and name at the top.
+	•	Recommendation %, jobs completed.
+	•	Experience tags (e.g. Dog Walking, Hospitality) as small items with icons.
+	•	“About me” section with paragraph text.
+	•	Availability row with circular day indicators.
+	•	“Choose me” and “Close” buttons at the bottom, matching the screenshots’ layout and style.
+	•	Payment page:
+	•	Left: Booking Details panel with where/what/when and total cost footer.
+	•	Middle: “Price Breakdown” card showing Booking Cost, Other Costs, Booking Cover toggle, Service Fee, Booking Total and Total Due, laid out like the screenshots.
+	•	Include a tip section for the selected worker with preset tip chips (R0, R25, R50, etc.) and “Custom amount” option in a horizontal row, matching the screenshots.
+	•	Place the “Proceed to Payment Method” and “Back” buttons at the bottom just like the screenshots.
+	•	Right: optional “Booking Cover” information panel if already present in my app – style it to look like the example screenshot (simple text block with heading and bullet points).
+	3.	Styling rules
+	•	Use my existing theme variables / brand colour tokens wherever possible; do not hard-code SweepSouth colours. Instead, map:
+	•	Their primary green → my main primary brand colour.
+	•	Their icon/outline green → my secondary accent colour.
+	•	Their cream background → a light tone from my palette (or a very light neutral).
+	•	Keep spacing generous: use consistent padding and margins so the cards look airy like the screenshots.
+	•	Use consistent border-radius and shadow across all cards and buttons.
+	4.	Functionality
+	•	Do not change any core functionality or business logic.
+	•	Only adjust HTML structure (if required), CSS, and component composition to achieve the desired layout and style.
+	•	Ensure that all existing steps and interactions still work as before: navigation between steps, selecting tasks, selecting workers, adding notes, adding tips, and proceeding to payment.
+	5.	Checklist before you finish
+	•	Background, cards, buttons, and typography visually match the uploaded screenshots in layout and spacing.
+	•	Booking Details left-hand card exists and looks consistent across all steps.
+	•	Step progress bar at the top matches the 3-step style and updates as the user moves between steps.
+	•	Extra tasks grid, worker list, worker profile modal, and payment breakdown are laid out like the reference.
+	•	My brand colours are used instead of SweepSouth’s exact colours.
+	•	No console errors or broken interactions.
+	•	No other features or flows in the app are changed.
+
+Make all of these UI changes directly in this Replit project and keep the code clean and well-structured.
+
+⸻
