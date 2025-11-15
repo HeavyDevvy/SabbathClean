@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor, CheckCircle2, Loader2, Heart, X } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor, CheckCircle2, Loader2, Heart, X, Home } from "lucide-react";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
 
@@ -375,7 +375,16 @@ export default function Profile() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">My Profile</h1>
-          <p className="text-lg text-neutral">Manage your bookings and account settings</p>
+          <p className="text-lg text-neutral mb-6">Manage your bookings and account settings</p>
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/'} 
+            className="inline-flex items-center gap-2"
+            data-testid="button-back-home"
+          >
+            <Home className="h-4 w-4" />
+            Back to Home
+          </Button>
         </div>
 
         <Tabs defaultValue="bookings" className="space-y-8">

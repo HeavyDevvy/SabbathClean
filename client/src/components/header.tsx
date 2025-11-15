@@ -73,16 +73,10 @@ export default function Header({ onBookingClick }: HeaderProps) {
               <Link href="/providers" className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-providers">
                 Our Experts
               </Link>
-              <a href="#pricing" className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-pricing">
-                Pricing
-              </a>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <Link href="/provider-onboarding" className="text-foreground/80 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-become-provider">
-              Become a Provider
-            </Link>
             
             {/* Dynamic Authentication UI */}
             {!isLoading && (
