@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, CheckCircle2, Clock, Shield, MapPin, ArrowRight } from "lucide-react";
+import { Star, ArrowRight } from "lucide-react";
 
 interface AnimatedServiceCardProps {
   service: any;
@@ -102,51 +102,6 @@ export default function AnimatedServiceCard({
           </div>
         </div>
 
-        {/* Enhanced Interactive Features */}
-        <div className="space-y-3 mb-5">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <span className="flex items-center justify-center bg-green-50 text-green-700 py-1 px-2 rounded group-hover:scale-105 transition-transform duration-200">
-              <Clock className="h-3 w-3 mr-1 group-hover:animate-wiggle" />
-              Same day
-            </span>
-            <span className="flex items-center justify-center bg-yellow-50 text-yellow-700 py-1 px-2 rounded group-hover:scale-105 transition-transform duration-200">
-              <Star className="h-3 w-3 mr-1 group-hover:animate-wiggle" />
-              4.8+ rated
-            </span>
-            <span className="flex items-center justify-center bg-blue-50 text-blue-700 py-1 px-2 rounded group-hover:scale-105 transition-transform duration-200">
-              <Shield className="h-3 w-3 mr-1 group-hover:animate-wiggle" />
-              Verified
-            </span>
-            <span className="flex items-center justify-center bg-purple-50 text-purple-700 py-1 px-2 rounded group-hover:scale-105 transition-transform duration-200">
-              <MapPin className="h-3 w-3 mr-1 group-hover:animate-wiggle" />
-              20km
-            </span>
-          </div>
-
-          {/* Animated Discount highlights */}
-          <div className="text-xs text-green-600 font-medium group-hover:text-green-700 transition-colors duration-300 animate-shimmer">
-            Weekly: -15% | Materials: -15% | Early: -10%
-          </div>
-
-          {/* Service Types Preview with Animations */}
-          <div className="space-y-1 max-h-16 overflow-y-auto">
-            {service.serviceTypes.slice(0, 2).map((type: string, typeIndex: number) => (
-              <div key={typeIndex} className="flex items-start text-xs text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-                <CheckCircle2 className="h-2.5 w-2.5 text-green-500 mr-1.5 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform duration-300" />
-                <span className="line-clamp-1">{type}</span>
-              </div>
-            ))}
-            {service.serviceTypes.length > 2 && (
-              <div className={`text-xs font-medium text-center transition-colors duration-300 ${
-                theme === 'blue' ? 'text-blue-600 group-hover:text-blue-700' :
-                theme === 'green' ? 'text-green-600 group-hover:text-green-700' :
-                'text-purple-600 group-hover:text-purple-700'
-              }`}>
-                +{service.serviceTypes.length - 2} more
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* Single Booking Button */}
         <div className="mt-auto">
