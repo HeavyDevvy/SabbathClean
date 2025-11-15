@@ -66,13 +66,13 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       {/* Newsletter Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+      <div className="py-16" style={{ backgroundColor: '#44062D' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h3 className="text-3xl font-bold text-white mb-4">
               Stay connected with Berry Events
             </h3>
-            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: '#EED1C4' }}>
               Get the latest updates on new services, special offers, and home care tips 
               delivered straight to your inbox.
             </p>
@@ -82,18 +82,20 @@ export default function Footer() {
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white"
+                  className="flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 text-white"
+                  style={{ backgroundColor: '#3C0920', borderColor: '#C56B86' }}
                   data-testid="input-newsletter-email"
                 />
                 <Button 
-                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-lg shadow-lg"
+                  className="font-semibold px-6 py-3 rounded-lg shadow-lg text-white"
+                  style={{ backgroundColor: '#C56B86' }}
                   data-testid="button-newsletter-subscribe"
                 >
                   Subscribe
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-blue-100 text-sm mt-3">
+              <p className="text-sm mt-3" style={{ color: '#EED1C4' }}>
                 We respect your privacy. Unsubscribe at any time.
               </p>
             </div>
@@ -108,8 +110,8 @@ export default function Footer() {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-xl">B</span>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: '#C56B86' }}>
+                  <span className="font-bold text-xl">B</span>
                 </div>
                 <div className="ml-3">
                   <div className="text-2xl font-bold">Berry Events</div>
@@ -126,19 +128,19 @@ export default function Footer() {
               {/* Trust Indicators */}
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-white" style={{ backgroundColor: '#C56B86' }}>
                     <Shield className="h-5 w-5" />
                   </div>
                   <div className="text-sm text-gray-300">Fully Insured</div>
                 </div>
                 <div className="text-center">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-white" style={{ backgroundColor: '#C56B86' }}>
                     <Star className="h-5 w-5" />
                   </div>
                   <div className="text-sm text-gray-300">Top Rated</div>
                 </div>
                 <div className="text-center">
-                  <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-white" style={{ backgroundColor: '#C56B86' }}>
                     <Heart className="h-5 w-5" />
                   </div>
                   <div className="text-sm text-gray-300">Trusted</div>
@@ -149,25 +151,31 @@ export default function Footer() {
               <div className="flex space-x-4">
                 <a 
                   href="https://facebook.com/berryevents" 
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors duration-200"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center transition-colors duration-200"
                   aria-label="Facebook"
                   data-testid="link-facebook"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C56B86'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1F2937'}
                 >
                   <Facebook className="h-5 w-5" />
                 </a>
                 <a 
                   href="https://twitter.com/berryevents" 
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-blue-400 transition-colors duration-200"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center transition-colors duration-200"
                   aria-label="Twitter"
                   data-testid="link-twitter"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C56B86'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1F2937'}
                 >
                   <Twitter className="h-5 w-5" />
                 </a>
                 <a 
                   href="https://instagram.com/berryevents" 
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors duration-200"
+                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center transition-colors duration-200"
                   aria-label="Instagram"
                   data-testid="link-instagram"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C56B86'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1F2937'}
                 >
                   <Instagram className="h-5 w-5" />
                 </a>

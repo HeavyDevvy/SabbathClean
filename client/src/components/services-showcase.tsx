@@ -28,13 +28,13 @@ export default function ServicesShowcase() {
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-16 lg:py-24" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4" style={{ color: '#44062D' }}>
             Real people, real service
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: '#3C0920' }}>
             Our verified professionals are ready to help with all your home service needs
           </p>
         </div>
@@ -49,10 +49,10 @@ export default function ServicesShowcase() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
+              <h3 className="text-lg font-bold mb-2" style={{ color: '#44062D' }}>
                 {item.title}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm" style={{ color: '#3C0920' }}>
                 {item.description}
               </p>
             </div>
