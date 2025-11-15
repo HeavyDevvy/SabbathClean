@@ -1,35 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Play, Shield, UserCheck, Clock, Sparkles } from "lucide-react";
-import { useLocation } from "wouter";
-import heroImage from "@assets/stock_images/professional_female__eea5c596.jpg";
+import { Shield, UserCheck, Clock } from "lucide-react";
+import heroImage from "@assets/homepage-hero.png";
 
 interface HeroProps {
   onBookingClick: () => void;
 }
 
 export default function Hero({ onBookingClick }: HeroProps) {
-  const [, setLocation] = useLocation();
   return (
-    <section className="bg-background py-12 lg:py-20">
+    <section className="bg-background py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
           {/* Left: Text Content */}
-          <div className="text-center lg:text-left mb-12 lg:mb-0">
-            <h1 className="text-4xl font-bold text-foreground sm:text-5xl lg:text-6xl leading-tight mb-6">
+          <div className="text-center lg:text-left mb-12 lg:mb-0 space-y-8">
+            <h1 className="text-5xl font-bold text-foreground sm:text-6xl lg:text-7xl leading-tight">
               All the help your home needs.
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+            <p className="text-xl text-foreground/80 leading-relaxed">
               Whether you need a quick clean, or full-time help, Berry Events connects you with reliable professionals you can trust.
             </p>
             
             {/* Simple trust badges */}
-            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-sm text-muted-foreground mb-8">
+            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-8 text-sm text-foreground/70">
               <div className="flex items-center gap-2">
                 <Shield className="text-success h-5 w-5" />
                 <span>Fully Insured</span>
               </div>
               <div className="flex items-center gap-2">
-                <UserCheck className="text-primary h-5 w-5" />
+                <UserCheck className="text-secondary h-5 w-5" />
                 <span>Background Verified</span>
               </div>
               <div className="flex items-center gap-2">
@@ -39,24 +37,24 @@ export default function Hero({ onBookingClick }: HeroProps) {
             </div>
 
             {/* CTA Button */}
-            <div className="flex justify-center lg:justify-start">
+            <div className="flex justify-center lg:justify-start pt-4">
               <Button 
                 onClick={onBookingClick}
                 size="lg"
-                className="bg-primary hover:bg-accent text-primary-foreground px-8 py-6 text-lg font-semibold rounded-lg transition-colors"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground px-10 py-7 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl"
                 data-testid="button-book-service-hero"
               >
-                Book a Service
+                Quick Quote
               </Button>
             </div>
           </div>
 
           {/* Right: Image */}
           <div className="relative">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+            <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
               <img 
                 src={heroImage}
-                alt="Professional Berry Events service provider" 
+                alt="Happy couple using Berry Events services" 
                 className="w-full h-full object-cover"
               />
             </div>

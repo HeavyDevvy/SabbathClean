@@ -154,46 +154,46 @@
 }
 
 :root {
-  /* Berry Events Brand - Light Mode */
-  --background: hsl(30 29% 97%); /* Very light cream #FAF7F4 */
-  --foreground: hsl(320 69% 14%); /* Deep plum #3C0B2C for text */
+  /* Berry Events Brand - New 5-Color Palette */
+  --background: hsl(27 38% 96%); /* Soft off-white #F7F2EF */
+  --foreground: hsl(313 76% 15%); /* Deep plum #44062D for text */
   --card: hsl(0 0% 100%); /* Pure white for cards */
-  --card-foreground: hsl(320 69% 14%); /* Deep plum text */
+  --card-foreground: hsl(313 76% 15%); /* Deep plum text */
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(320 69% 14%);
-  --primary: hsl(320 69% 14%); /* Deep plum/burgundy #3C0B2C */
-  --primary-foreground: hsl(28 63% 89%); /* Light beige #F5E1CF */
-  --secondary: hsl(320 50% 35%); /* Medium plum for secondary actions */
-  --secondary-foreground: hsl(28 63% 89%); /* Light beige text */
-  --muted: hsl(30 20% 94%); /* Very light neutral/beige for muted areas */
-  --muted-foreground: hsl(320 30% 35%); /* Muted plum text */
-  --accent: hsl(320 60% 45%); /* Brighter plum for accents/hover #8B2E5F */
+  --popover-foreground: hsl(313 76% 15%);
+  --primary: hsl(313 76% 15%); /* Deep plum #44062D */
+  --primary-foreground: hsl(21 32% 86%); /* Warm cream #EED1C4 */
+  --secondary: hsl(317 70% 13%); /* Wine/berry #3C0920 */
+  --secondary-foreground: hsl(21 32% 86%); /* Warm cream text */
+  --muted: hsl(21 32% 86%); /* Warm cream for muted areas #EED1C4 */
+  --muted-foreground: hsl(313 76% 15%); /* Deep plum text */
+  --accent: hsl(349 43% 60%); /* Muted rose accent #C56B86 */
   --accent-foreground: hsl(0 0% 100%); /* White text on accent */
-  --destructive: hsl(355 55% 49%); /* Complementary error red #C23844 */
+  --destructive: hsl(355 55% 49%); /* Error red #C23844 */
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(320 15% 88%); /* Light plum-tinted border */
-  --input: hsl(30 25% 96%); /* Light beige for input backgrounds */
-  --ring: hsl(320 69% 14%); /* Deep plum for focus rings */
-  --chart-1: hsl(320 60% 45%); /* Plum */
+  --border: hsl(21 20% 88%); /* Light warm border */
+  --input: hsl(27 38% 96%); /* Soft off-white for inputs */
+  --ring: hsl(313 76% 15%); /* Deep plum for focus rings */
+  --chart-1: hsl(349 43% 60%); /* Rose accent */
   --chart-2: hsl(143 34% 27%); /* Success green */
-  --chart-3: hsl(28 63% 70%); /* Light beige tone */
-  --chart-4: hsl(320 50% 65%); /* Light plum */
-  --chart-5: hsl(355 55% 49%); /* Error red */
+  --chart-3: hsl(21 32% 86%); /* Warm cream */
+  --chart-4: hsl(313 76% 15%); /* Deep plum */
+  --chart-5: hsl(317 70% 13%); /* Wine/berry */
   --sidebar: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(320 69% 14%);
-  --sidebar-primary: hsl(320 69% 14%);
-  --sidebar-primary-foreground: hsl(28 63% 89%);
-  --sidebar-accent: hsl(30 25% 96%);
-  --sidebar-accent-foreground: hsl(320 69% 14%);
-  --sidebar-border: hsl(320 15% 88%);
-  --sidebar-ring: hsl(320 69% 14%);
+  --sidebar-foreground: hsl(313 76% 15%);
+  --sidebar-primary: hsl(313 76% 15%);
+  --sidebar-primary-foreground: hsl(21 32% 86%);
+  --sidebar-accent: hsl(27 38% 96%);
+  --sidebar-accent-foreground: hsl(313 76% 15%);
+  --sidebar-border: hsl(21 20% 88%);
+  --sidebar-ring: hsl(313 76% 15%);
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 0.75rem; /* 12px for consistent 8-16px rounding */
-  --neutral: hsl(320 15% 50%); /* Neutral plum-tinted gray */
-  --error: hsl(355 55% 49%); /* Berry Events error red #C23844 */
-  --success: hsl(143 34% 27%); /* Berry Events success green #2D5C3F */
+  --radius: 0.75rem; /* 12px for consistent rounding */
+  --neutral: hsl(313 20% 50%); /* Neutral gray */
+  --error: hsl(355 55% 49%); /* Error red #C23844 */
+  --success: hsl(143 34% 27%); /* Success green #2D5C3F */
 }
 
 .dark {

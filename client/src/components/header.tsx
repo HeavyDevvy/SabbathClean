@@ -55,48 +55,41 @@ export default function Header({ onBookingClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-card shadow-sm sticky top-0 z-50 border-b border-border">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center">
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
+        <div className="flex justify-between items-center h-20">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-full overflow-hidden bg-transparent">
               <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="ml-3 text-xl font-bold text-gray-900">Berry Events</span>
-            <span className="ml-2 text-sm text-gray-600">- All your Home Services In One</span>
+            <div className="hidden sm:block">
+              <div className="text-2xl font-bold text-foreground">Berry Events</div>
+              <div className="text-xs text-foreground/60">All your Home Services In One</div>
+            </div>
           </Link>
           
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/providers" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-providers">
-                Our Home Experts
+            <div className="ml-10 flex items-baseline space-x-8">
+              <Link href="/providers" className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-providers">
+                Our Experts
               </Link>
-              <Link href="/provider-training" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-training">
-                Training Center
-              </Link>
-              <a href="#pricing" className="text-neutral hover:text-primary transition-colors duration-200" data-testid="link-pricing">
+              <a href="#pricing" className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-pricing">
                 Pricing
               </a>
-              {/* Admin Portal - Always accessible */}
-              <Link href="/admin" className="text-purple-600 hover:text-purple-700 transition-colors duration-200 text-sm font-medium" data-testid="link-admin-portal">
-                <Shield className="h-4 w-4 inline mr-1" />
-                Admin Portal
-              </Link>
             </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            <Link href="/provider-onboarding" className="text-primary hover:text-primary/80 transition-colors duration-200 text-sm font-medium" data-testid="link-become-provider">
+            <Link href="/provider-onboarding" className="text-foreground/80 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-become-provider">
               Become a Provider
             </Link>
             
             {/* Dynamic Authentication UI */}
             {!isLoading && (
               user ? (
-                // User is logged in - Show user menu with logout
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-gray-600 hover:text-gray-900" data-testid="button-user-menu">
+                    <Button variant="ghost" className="text-foreground/70 hover:text-foreground" data-testid="button-user-menu">
                       <span className="hidden sm:inline mr-2">
                         Hello, {user.firstName || 'User'}
                       </span>
@@ -111,7 +104,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       onClick={handleLogout}
-                      className="text-red-600"
+                      className="text-destructive"
                       data-testid="button-logout"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -120,9 +113,8 @@ export default function Header({ onBookingClick }: HeaderProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                // User is not logged in - Show Sign In button
                 <Link href="/auth">
-                  <Button variant="ghost" className="text-gray-600 hover:text-gray-900" data-testid="button-signin">
+                  <Button variant="ghost" className="text-foreground/70 hover:text-foreground" data-testid="button-signin">
                     <span className="hidden sm:inline">Sign In</span>
                     <User className="h-4 w-4 sm:hidden" />
                   </Button>
@@ -132,7 +124,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
             
             <Button 
               onClick={onBookingClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-sm"
               data-testid="button-book-now"
             >
               <span className="hidden sm:inline">Book Now</span>

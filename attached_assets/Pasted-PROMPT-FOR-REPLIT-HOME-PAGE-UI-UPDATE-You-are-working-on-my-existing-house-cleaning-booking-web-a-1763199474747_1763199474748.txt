@@ -1,0 +1,100 @@
+PROMPT FOR REPLIT – HOME PAGE UI UPDATE
+
+You are working on my existing house-cleaning booking web app in this Replit project.
+Please update ONLY the home page UI according to the instructions below, and make sure there are no error codes, no blank screen, and all existing functionality still works exactly as before.
+
+⸻
+
+1. Colour scheme (use these 5 colours only)
+
+Use the following 5 colours as the main palette for the home page:
+	•	#44062D – deep plum (primary dark)
+	•	#3C0920 – wine / berry (secondary dark)
+	•	#EED1C4 – warm cream
+	•	#F7F2EF – soft off-white / background
+	•	#C56B86 – muted rose accent
+
+Rules:
+	•	Use #F7F2EF and #EED1C4 mainly for backgrounds and sections.
+	•	Use #44062D and #3C0920 for headings, key text, and some card tops.
+	•	Use #C56B86 as the main accent/CTA colour (buttons, links, small highlights).
+	•	Do not let one colour dominate everything; balance them across sections.
+	•	Remove or replace any other old colours so the home page uses only this palette.
+
+⸻
+
+2. Home page layout clean-up
+	1.	Remove top banner / border with buttons
+	•	Remove the top banner or top border area on the home page that currently holds extra buttons or clutter.
+	•	Keep the navigation clean and minimal.
+	2.	Update hero section
+	•	Remove the current front-page image of the lounge/couch.
+	•	Prepare the layout so that I can easily upload a new hero image later:
+	•	Use a hero section that has:
+	•	Left side: heading, short subheading, main CTA button (e.g. “Quick quote” / “Book now”).
+	•	Right side: placeholder area for the new image (background-image or img tag) that aligns with the colour scheme.
+	•	Ensure the hero’s background uses #F7F2EF or #EED1C4 so it feels light and clean.
+	3.	Spacing & alignment
+	•	Increase vertical and horizontal spacing between sections and cards so the home page feels airy and modern (similar to SweepSouth’s layout style).
+	•	Make sure all sections are aligned consistently (titles aligned, buttons in straight lines, equal padding on cards).
+
+⸻
+
+3. Content simplification & service cards
+	1.	Indoor / Outdoor / House cleaning wording
+	•	Wherever the home page currently refers to indoor services, outdoor services, etc., simplify the wording so it just says “House Cleaning” (or “House cleaning services”) instead of long or cluttered labels.
+	•	Remove any unnecessary descriptive clutter; keep the copy short and clear.
+	2.	Special services placeholders
+	•	On the home page, update the placeholder cards/tiles for “special services” so that:
+	•	They use the new colour palette (light background, subtle border, dark text, accent hover states).
+	•	Any icons or images used on these cards should visually fit the palette (no clashing neon colours).
+	•	The layout and spacing of these cards should feel similar to service tiles on SweepSouth: simple, clean, with plenty of white/cream space.
+	3.	Buttons (Quick quote / Book now)
+	•	Ensure the Quick Quote / Book Now buttons keep the same functionality and positioning, but update their styling:
+	•	Use #C56B86 (accent) as the main fill colour.
+	•	Rounded corners, subtle shadow, clear readable label.
+	•	Hover state: slightly darker or lighter shade of the same colour.
+	•	All other buttons on the home page should follow this same style system (primary vs secondary).
+
+⸻
+
+4. “Need customer service?” section
+	•	Locate the “Need customer service” (or similar help/contact) area on the home page.
+	•	Clean up and update this section so that:
+	•	It uses the new colour palette.
+	•	Text is short, clear, and readable.
+	•	Buttons/links match the new button styling.
+	•	Spacing and alignment fit with the rest of the page (no cramped text, proper margins).
+
+⸻
+
+5. Logo update
+	•	Increase the size of the logo on the home page slightly so that it is more visible and proportionate to the header.
+	•	Make sure the logo:
+	•	Appears as part of the page (no obvious square or hard box around it).
+	•	If it is in a square container, adjust CSS so the background is transparent or matches the header colour, and round edges if needed.
+	•	Ensure the logo remains crisp and not stretched.
+
+⸻
+
+6. Keep functionality intact
+	•	All underlying behaviour must remain unchanged:
+	•	Indoor/outdoor/house cleaning selection logic,
+	•	Quick quote / Book now actions,
+	•	Navigation to other pages and booking flows.
+	•	Only adjust HTML structure (where necessary) and CSS/Styling for the home page.
+	•	Do not remove or break any event handlers, links, or JavaScript logic.
+
+⸻
+
+7. Final checks (very important)
+
+Before you finish, please:
+	•	Run the app and ensure:
+	•	✅ No console errors or warnings.
+	•	✅ No blank screen at any point.
+	•	✅ Home page loads correctly and is fully interactive.
+	•	✅ All previous functionality works as before.
+	•	✅ Home page visually uses only the 5 specified colours and looks clean, modern, and streamlined, similar in feel to SweepSouth’s UI.
+
+Make all these changes directly in this Replit project, keep the code neat and well-structured, and do not modify other pages beyond what is necessary for this home page redesign.

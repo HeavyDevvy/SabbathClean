@@ -125,37 +125,37 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
   ];
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-20 lg:py-28 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Choose the service you need
+        <div className="text-center mb-20">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5">
+            House Cleaning Services
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            From comprehensive cleaning to specialized care, our verified professionals are ready to help with all your home service needs.
+          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+            Professional home care services, all in one place
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {mainServices.map((service) => {
             const Icon = service.icon;
             return (
               <button
                 key={service.id}
-                className="group p-6 bg-card border border-border hover:border-primary/30 rounded-lg transition-all duration-200 hover:shadow-md text-center"
+                className="group p-8 bg-card border border-border hover:border-accent/50 rounded-2xl transition-all duration-200 hover:shadow-lg hover:-translate-y-1 text-center"
                 onClick={() => onServiceSelect(service.id)}
                 data-testid={`service-card-${service.id}`}
               >
                 {/* Service Icon */}
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Icon className="h-8 w-8 text-primary" />
+                <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Icon className="h-10 w-10 text-accent" />
                 </div>
                 
                 {/* Service Name */}
-                <h3 className="text-base font-bold whitespace-pre-line text-foreground mb-1">
+                <h3 className="text-lg font-bold whitespace-pre-line text-foreground mb-2">
                   {service.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-foreground/60 font-medium">
                   From R{service.basePrice}/{service.priceUnit}
                 </p>
               </button>
@@ -164,13 +164,13 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
         </div>
 
         {/* Primary CTA */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-16">
           <Button 
             onClick={() => onServiceSelect('all-services')}
-            className="bg-primary hover:bg-accent text-primary-foreground px-8 py-3 text-base font-semibold rounded-lg transition-colors"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground px-10 py-6 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl"
             data-testid="button-book-service-main"
           >
-            Book a Service
+            Get a Quote
           </Button>
         </div>
       </div>
