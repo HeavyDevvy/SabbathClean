@@ -125,9 +125,9 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
   ];
 
   return (
-    <section className="py-20 lg:py-28" style={{ backgroundColor: '#EED1C4' }}>
+    <section className="py-8 md:py-12 lg:py-16" style={{ backgroundColor: '#EED1C4' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <h2 className="text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#44062D' }}>
             House Cleaning Services
           </h2>
@@ -136,7 +136,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {mainServices.map((service) => {
             const Icon = service.icon;
             return (
@@ -164,7 +164,7 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
         </div>
 
         {/* Primary CTA */}
-        <div className="text-center mt-16">
+        <div className="text-center mt-12">
           <Button 
             onClick={() => onServiceSelect('all-services')}
             className="px-10 py-6 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl text-white"

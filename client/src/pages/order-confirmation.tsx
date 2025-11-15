@@ -10,6 +10,7 @@ import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
+import WhatsAppShareButton from "@/components/whatsapp-share-button";
 
 interface OrderWithItems extends Order {
   items: OrderItem[];
@@ -432,6 +433,18 @@ export default function OrderConfirmation() {
             <Download className="w-4 h-4 mr-2" />
             Download Receipt
           </Button>
+          <WhatsAppShareButton
+            bookingDetails={{
+              serviceName: order.items.map(item => item.serviceName).join(', '),
+              date: order.items[0]?.scheduledDate ? new Date(order.items[0].scheduledDate).toLocaleDateString() : '',
+              time: order.items[0]?.scheduledTime || '',
+              providerName: order.items[0]?.providerName,
+              bookingReference: bookingReference,
+              totalAmount: parseDecimal(order.totalAmount)
+            }}
+            variant="outline"
+            className="flex-1"
+          />
           <Button
             onClick={() => navigate("/")}
             className="flex-1 bg-primary hover:bg-accent text-primary-foreground"

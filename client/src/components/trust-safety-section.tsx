@@ -98,10 +98,10 @@ const certifications = [
 
 export default function TrustSafetySection() {
   return (
-    <section className="py-20 lg:py-28" style={{ backgroundColor: '#F7F2EF' }}>
+    <section className="py-8 md:py-12 lg:py-16" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <h2 className="text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#44062D' }}>
             Your safety is our priority
           </h2>
@@ -111,7 +111,7 @@ export default function TrustSafetySection() {
         </div>
 
         {/* Trust Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {trustFeatures.map((feature, index) => (
             <Card key={index} className="bg-white border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
               <CardContent className="p-8">

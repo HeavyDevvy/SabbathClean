@@ -107,10 +107,10 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section className="py-20 lg:py-28" style={{ backgroundColor: '#EED1C4' }}>
+    <section className="py-8 md:py-12 lg:py-16" style={{ backgroundColor: '#EED1C4' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-12">
           <h2 className="text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#44062D' }}>
             Meet Your Berry Stars
           </h2>
@@ -120,7 +120,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
         </div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {[
             { icon: Users, value: "500+", label: "Verified Professionals" },
             { icon: Star, value: "4.9/5", label: "Average Rating" },

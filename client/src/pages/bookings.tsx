@@ -9,6 +9,7 @@ import { RescheduleDialog } from "@/components/reschedule-dialog";
 import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
 import { ShareBookingDialog } from "@/components/share-booking-dialog";
 import ModernServiceModal from "@/components/modern-service-modal";
+import WhatsAppShareButton from "@/components/whatsapp-share-button";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -286,6 +287,18 @@ export default function BookingsPage() {
                 <Share2 className="h-4 w-4 mr-1" />
                 Share
               </Button>
+              <WhatsAppShareButton
+                bookingDetails={{
+                  serviceName: booking.serviceType,
+                  date: format(new Date(booking.scheduledDate), "MMMM d, yyyy"),
+                  time: booking.scheduledTime,
+                  providerName: booking.providerName,
+                  bookingReference: booking.bookingNumber,
+                  totalAmount: parseFloat(booking.totalPrice)
+                }}
+                variant="outline"
+                size="sm"
+              />
             </div>
             
             <Button 
