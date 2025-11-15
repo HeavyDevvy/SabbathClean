@@ -56,20 +56,19 @@ export const serviceEstimates: Record<string, ServiceEstimate> = {
 };
 
 // House Cleaning specific: Cleaning type base hours
+// Keys match modal cleaningTypes values: basic, deep-clean, move-clean
 export const cleaningTypeHours: Record<string, number> = {
-  "standard": 3,
+  "basic": 3,
   "deep-clean": 5,
-  "move-in-out": 6,
-  "spring-clean": 7,
-  "office": 4,
+  "move-clean": 6,
 };
 
 // House Cleaning specific: Room count multipliers
+// Keys match modal propertySizes values: small, medium, large
 export const roomCountMultipliers: Record<string, number> = {
-  "1-2": 1.0,      // 1-2 rooms: no multiplier
-  "3-4": 1.3,      // 3-4 rooms: 30% increase
-  "5-6": 1.6,      // 5-6 rooms: 60% increase
-  "7+": 2.0,       // 7+ rooms: 100% increase
+  "small": 1.0,    // Small (1-2 bedrooms): no multiplier
+  "medium": 1.3,   // Medium (3-4 bedrooms): 30% increase
+  "large": 1.6,    // Large (5+ bedrooms): 60% increase
 };
 
 interface HouseCleaningParams {
@@ -80,10 +79,10 @@ interface HouseCleaningParams {
 
 // Calculate time for House Cleaning specifically
 export function calculateHouseCleaningHours(params: HouseCleaningParams): number {
-  const { cleaningType = "standard", roomCount = "1-2", addOnCount = 0 } = params;
+  const { cleaningType = "basic", roomCount = "small", addOnCount = 0 } = params;
   
   // Start with cleaning type base hours
-  let hours = cleaningTypeHours[cleaningType] || cleaningTypeHours["standard"];
+  let hours = cleaningTypeHours[cleaningType] || cleaningTypeHours["basic"];
   
   // Apply room count multiplier
   const multiplier = roomCountMultipliers[roomCount] || 1.0;

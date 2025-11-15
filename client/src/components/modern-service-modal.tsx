@@ -1015,12 +1015,7 @@ export default function ModernServiceModal({
       // Map propertySize to room count for house cleaning
       let roomCount: string | undefined;
       if (mappedServiceId === "cleaning" && formData.propertySize) {
-        const roomMapping: Record<string, string> = {
-          "small": "1-2",
-          "medium": "3-4",
-          "large": "5-6"
-        };
-        roomCount = roomMapping[formData.propertySize];
+        roomCount = formData.propertySize;
       }
       
       const hours = calculateEstimatedHours(
