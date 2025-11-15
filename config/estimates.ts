@@ -1,98 +1,127 @@
-// Industry standard hours estimation for services
-// TODO: Update these with actual market research data
+// Service time estimation logic
+// Base: 5 hours for most services, 3 hours for plumbing/electrical
+// +30 minutes per additional option
+// House Cleaning: Special logic based on cleaning type and room count
 
 export interface ServiceEstimate {
   baseHours: number;
-  propertyMultiplier?: Record<string, number>; // Property size multipliers
   description: string;
 }
 
 export const serviceEstimates: Record<string, ServiceEstimate> = {
   "house-cleaning": {
-    baseHours: 6,
-    propertyMultiplier: {
-      "1-2-bedrooms": 1,
-      "3-4-bedrooms": 1.5,
-      "5+-bedrooms": 2,
-    },
-    description: "Standard home cleaning",
+    baseHours: 5,
+    description: "Standard home cleaning with room-based calculation",
   },
   
   "plumbing": {
-    baseHours: 4,
-    description: "Standard plumbing service call",
+    baseHours: 3,
+    description: "Plumbing service call",
   },
   
   "electrical": {
-    baseHours: 1.5,
+    baseHours: 3,
     description: "Electrical repair/installation",
   },
   
-  "garden-maintenance": {
-    baseHours: 2,
-    propertyMultiplier: {
-      "small": 1,
-      "medium": 1.5,
-      "large": 2.5,
-    },
+  "garden-care": {
+    baseHours: 5,
     description: "Garden maintenance and care",
   },
   
   "chef-catering": {
-    baseHours: 4,
+    baseHours: 5,
     description: "Chef services including prep and cooking",
   },
   
   "event-staff": {
-    baseHours: 6,
+    baseHours: 5,
     description: "Event staffing services",
   },
   
-  "handyman": {
-    baseHours: 2,
-    description: "General handyman services",
+  "moving": {
+    baseHours: 5,
+    description: "Moving and relocation services",
   },
   
-  "beauty-wellness": {
-    baseHours: 1.5,
-    description: "Beauty and wellness treatment",
+  "au-pair": {
+    baseHours: 5,
+    description: "Au pair and childcare services",
+  },
+  
+  "waitering": {
+    baseHours: 5,
+    description: "Waitering and event staff services",
   },
 };
 
-// Calculate total hours based on service, property size, and add-ons
+// House Cleaning specific: Cleaning type base hours
+export const cleaningTypeHours: Record<string, number> = {
+  "standard": 3,
+  "deep-clean": 5,
+  "move-in-out": 6,
+  "spring-clean": 7,
+  "office": 4,
+};
+
+// House Cleaning specific: Room count multipliers
+export const roomCountMultipliers: Record<string, number> = {
+  "1-2": 1.0,      // 1-2 rooms: no multiplier
+  "3-4": 1.3,      // 3-4 rooms: 30% increase
+  "5-6": 1.6,      // 5-6 rooms: 60% increase
+  "7+": 2.0,       // 7+ rooms: 100% increase
+};
+
+interface HouseCleaningParams {
+  cleaningType?: string;
+  roomCount?: string;
+  addOnCount?: number;
+}
+
+// Calculate time for House Cleaning specifically
+export function calculateHouseCleaningHours(params: HouseCleaningParams): number {
+  const { cleaningType = "standard", roomCount = "1-2", addOnCount = 0 } = params;
+  
+  // Start with cleaning type base hours
+  let hours = cleaningTypeHours[cleaningType] || cleaningTypeHours["standard"];
+  
+  // Apply room count multiplier
+  const multiplier = roomCountMultipliers[roomCount] || 1.0;
+  hours *= multiplier;
+  
+  // Add 30 minutes (0.5 hours) per additional option
+  hours += (addOnCount * 0.5);
+  
+  return Math.round(hours * 10) / 10; // Round to 1 decimal
+}
+
+// Calculate estimated hours for any service
 export function calculateEstimatedHours(
   serviceCategory: string,
-  propertySize?: string,
-  addOnIds?: string[]
+  options?: {
+    cleaningType?: string;
+    roomCount?: string;
+    addOnCount?: number;
+  }
 ): number {
+  // Special handling for house cleaning
+  if (serviceCategory === "house-cleaning" || serviceCategory === "cleaning") {
+    return calculateHouseCleaningHours({
+      cleaningType: options?.cleaningType,
+      roomCount: options?.roomCount,
+      addOnCount: options?.addOnCount || 0,
+    });
+  }
+  
+  // For all other services
   const estimate = serviceEstimates[serviceCategory];
-  if (!estimate) return 2; // Default fallback
+  if (!estimate) return 5; // Default fallback
   
   let hours = estimate.baseHours;
   
-  // Apply property size multiplier if applicable
-  if (propertySize && estimate.propertyMultiplier) {
-    const multiplier = estimate.propertyMultiplier[propertySize] || 1;
-    hours *= multiplier;
-  }
-  
-  // HOUSE CLEANING ONLY: Special logic for estimated hours
-  const isHouseCleaning = serviceCategory === "house-cleaning" || serviceCategory === "cleaning";
-  
-  if (isHouseCleaning) {
-    // Minimum 6 hours for House Cleaning
-    hours = Math.max(hours, 6);
-    
-    // Add 0.5 hours for each add-on
-    if (addOnIds && addOnIds.length > 0) {
-      hours += (addOnIds.length * 0.5);
-    }
-  } else {
-    // Add hours from add-ons for other services (if needed in future)
-    if (addOnIds && addOnIds.length > 0) {
-      // Import add-ons config to get hours per add-on
-      // This would need to be implemented when add-ons are selected
-    }
+  // Add 30 minutes per additional option
+  if (options?.addOnCount) {
+    hours += (options.addOnCount * 0.5);
   }
   
   return Math.round(hours * 10) / 10; // Round to 1 decimal

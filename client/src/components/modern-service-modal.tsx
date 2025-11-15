@@ -1012,14 +1012,28 @@ export default function ModernServiceModal({
   // Auto-calculate estimated hours
   useEffect(() => {
     if (mappedServiceId) {
+      // Map propertySize to room count for house cleaning
+      let roomCount: string | undefined;
+      if (mappedServiceId === "cleaning" && formData.propertySize) {
+        const roomMapping: Record<string, string> = {
+          "small": "1-2",
+          "medium": "3-4",
+          "large": "5-6"
+        };
+        roomCount = roomMapping[formData.propertySize];
+      }
+      
       const hours = calculateEstimatedHours(
         mappedServiceId,
-        formData.propertySize || formData.gardenSize,
-        formData.selectedAddOns
+        {
+          cleaningType: formData.cleaningType,
+          roomCount: roomCount,
+          addOnCount: formData.selectedAddOns?.length || 0
+        }
       );
       setEstimatedHours(hours);
     }
-  }, [mappedServiceId, formData.propertySize, formData.gardenSize, formData.selectedAddOns]);
+  }, [mappedServiceId, formData.cleaningType, formData.propertySize, formData.gardenSize, formData.selectedAddOns]);
 
   useEffect(() => {
     // FIX: Don't default to cleaning - wait for valid service selection
