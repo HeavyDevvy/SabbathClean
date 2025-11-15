@@ -924,16 +924,6 @@ export default function ModernServiceModal({
     const isEditing = !!editBookingData;
     const isPrefilling = !isEditing && prefillFromRecent && Object.keys(prefillFromRecent).length > 0;
     
-    // Debug logging to understand data structure
-    if (isPrefilling) {
-      console.log('Prefilling form with recent booking data:', {
-        serviceId,
-        prefillFromRecent,
-        dataSource,
-        keys: Object.keys(dataSource)
-      });
-    }
-    
     // Format date for input field (convert from timestamp if needed)
     let formattedDate = "";
     if ((isEditing || isPrefilling) && dataSource.scheduledDate) {
