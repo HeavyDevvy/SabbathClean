@@ -1,0 +1,223 @@
+# 🔴 CRITICAL: RE-VERIFICATION AND COMPLETION OF PREVIOUS PROMPT
+
+## STOP AND READ THIS CAREFULLY
+
+You previously received instructions to update the home page. However, **multiple changes from that prompt have NOT been completed**. 
+
+**DO NOT tell me you're done until EVERY single requirement below is verified and completed.**
+
+---
+
+## MANDATORY RE-VERIFICATION PROCESS
+
+You MUST go through each requirement below and **actually check the live frontend** (not just the code). For each item, you must:
+
+1. Open the app preview
+2. Visually inspect the home page
+3. Use browser DevTools to inspect elements
+4. Verify the change was actually made
+5. If NOT done, make the change NOW
+
+---
+
+## CHECKLIST - VERIFY EACH ITEM ON THE ACTUAL FRONTEND
+
+### ✅ 1. HERO IMAGE
+- [ ] Open the home page in preview
+- [ ] Can you see the NEW hero image that was uploaded?
+- [ ] Is it in the correct position at the top of the page?
+- [ ] Does it look good on desktop view?
+- [ ] Does it look good on mobile/tablet view?
+
+**If ANY answer is NO:** Find where the hero image is rendered and replace it with the uploaded image file NOW.
+
+---
+
+### ✅ 2. COLOUR PALETTE - EXHAUSTIVE CHECK
+
+**You must check EVERY visible element on the home page:**
+
+#### A. Check ALL Buttons:
+- [ ] Inspect every button on the home page (Quick Quote, Book Now, Learn More, etc.)
+- [ ] Use DevTools to check the background colour
+- [ ] Is it `#C56B86` or another approved colour?
+- [ ] Check hover states - are they using approved colours?
+- [ ] Are there ANY buttons still using blue, purple, or other colours?
+
+**If ANY button uses a non-approved colour:** Update it NOW.
+
+#### B. Check ALL Text:
+- [ ] Main headings - are they `#44062D` or `#3C0920`?
+- [ ] Subheadings - approved colours?
+- [ ] Body text - approved colours?
+- [ ] Any link text - approved colours?
+- [ ] Card titles - approved colours?
+
+**If ANY text uses non-approved colours:** Update it NOW.
+
+#### C. Check ALL Backgrounds:
+- [ ] Page background - is it `#F7F2EF`?
+- [ ] Section backgrounds - are they `#F7F2EF` or `#EED1C4`?
+- [ ] Card backgrounds - approved colours?
+- [ ] Any overlay backgrounds - approved colours?
+
+**If ANY background uses non-approved colours:** Update it NOW.
+
+#### D. Check ALL Borders, Icons, Badges:
+- [ ] Inspect every border on cards, sections, dividers
+- [ ] Check every icon colour
+- [ ] Check any badge backgrounds/text
+- [ ] Are ALL of these using approved colours?
+
+**If ANY use non-approved colours:** Update them NOW.
+
+#### E. Final Colour Sweep:
+- [ ] Use DevTools to inspect random elements across the page
+- [ ] Look for any hint of blue, purple, teal, or other colours
+- [ ] Check dropdown menus, tooltips, or hidden elements
+
+**APPROVED COLOURS ONLY:**
+- `#44062D` (deep plum)
+- `#3C0920` (wine/berry)
+- `#EED1C4` (warm cream)
+- `#F7F2EF` (soft off-white)
+- `#C56B86` (muted rose)
+
+---
+
+### ✅ 3. SERVICE CARDS - ELEMENT REMOVAL
+
+**For EVERY service card on the home page (House Cleaning, Outdoor, Specials, etc.):**
+
+- [ ] Can you see "Same day" text? → **MUST BE REMOVED**
+- [ ] Can you see "Rated" or rating badges? → **MUST BE REMOVED**
+- [ ] Can you see "Verified" labels? → **MUST BE REMOVED**
+- [ ] Can you see "20km" or distance labels? → **MUST BE REMOVED**
+- [ ] Can you see discount information (bulk discounts, etc.)? → **MUST BE REMOVED**
+
+**What SHOULD remain on each card:**
+- Service title
+- Short description (if present)
+- Hourly rate
+- CTA button (Quick Quote/Book Now)
+
+**Check EVERY SINGLE CARD individually:**
+- [ ] Card 1 - all unwanted elements removed?
+- [ ] Card 2 - all unwanted elements removed?
+- [ ] Card 3 - all unwanted elements removed?
+- [ ] Continue for ALL cards...
+
+**If ANY card still shows these elements:** Remove them from the component NOW.
+
+---
+
+### ✅ 4. SPACING & LAYOUT
+
+- [ ] Scroll through the entire home page
+- [ ] Is there consistent vertical spacing between sections?
+- [ ] Are cards properly spaced with adequate padding?
+- [ ] Is there any cramped content that needs more breathing room?
+- [ ] Are there any huge gaps that waste space?
+- [ ] Does the page look balanced and clean?
+
+**If spacing looks off:** Adjust padding/margins NOW.
+
+---
+
+### ✅ 5. FUNCTIONALITY TEST
+
+**Click through EVERY interactive element:**
+
+- [ ] Click "Quick Quote" on each service card - does it work?
+- [ ] Click "Book Now" on each service card - does it work?
+- [ ] Click any navigation links - do they work?
+- [ ] Try any dropdowns or interactive elements - do they work?
+- [ ] Check browser console - are there ANY errors?
+
+**If ANYTHING is broken:** Fix it NOW before proceeding.
+
+---
+
+### ✅ 6. RESPONSIVE CHECK
+
+- [ ] Open DevTools responsive design mode
+- [ ] Test mobile view (375px width)
+- [ ] Test tablet view (768px width)
+- [ ] Test desktop view (1920px width)
+- [ ] Does everything look good at all sizes?
+- [ ] Is the hero image responsive?
+- [ ] Are cards stacking properly on mobile?
+
+**If responsive design is broken:** Fix it NOW.
+
+---
+
+## 🔴 BEFORE YOU TELL ME YOU'RE DONE
+
+**Complete this final verification:**
+
+1. **Screenshot test:** If I took a screenshot of the home page right now:
+   - Would I see the new hero image?
+   - Would I see ONLY the 5 approved colours?
+   - Would the service cards be clean (no ratings, distance, etc.)?
+   - Would spacing look professional?
+
+2. **Code search test:**
+   - Search your CSS/styling files for old colour hex codes
+   - Search for "blue", "purple", "#3b82f6", "rgb(", etc.
+   - Did you replace ALL instances on the home page?
+
+3. **Component check:**
+   - Open the service card component
+   - Can you still see code that renders "Same day", "Rated", "Verified", "20km", discounts?
+   - If YES, you're NOT done - remove that code NOW
+
+---
+
+## IMPLEMENTATION INSTRUCTIONS
+
+**If you find incomplete work:**
+
+1. **DO NOT** just tell me what needs to be fixed
+2. **DO NOT** say "I'll fix it" without actually fixing it
+3. **MAKE THE ACTUAL CHANGES** to the code right now
+4. **TEST** the changes in the preview
+5. **VERIFY** each item again after making changes
+
+**Only respond "COMPLETED" when:**
+- You have personally verified EVERY checkbox above
+- You have opened the preview and visually confirmed each change
+- You have used DevTools to inspect and confirm colours
+- You have clicked buttons to test functionality
+- You have checked responsive views
+- There are ZERO incomplete items remaining
+
+---
+
+## YOUR RESPONSE FORMAT
+
+Respond in this format:
+
+```
+VERIFICATION REPORT:
+
+1. HERO IMAGE: [COMPLETE / INCOMPLETE - if incomplete, describe what's wrong]
+2. COLOURS: [COMPLETE / INCOMPLETE - if incomplete, list specific elements still wrong]
+3. SERVICE CARDS: [COMPLETE / INCOMPLETE - if incomplete, list which cards need work]
+4. SPACING: [COMPLETE / INCOMPLETE - if incomplete, describe issues]
+5. FUNCTIONALITY: [COMPLETE / INCOMPLETE - if incomplete, list broken features]
+6. RESPONSIVE: [COMPLETE / INCOMPLETE - if incomplete, describe issues]
+
+INCOMPLETE ITEMS FOUND: [Number]
+
+[If any items incomplete:]
+NOW MAKING THE FOLLOWING CHANGES:
+- [List each change you're making]
+
+[After making changes:]
+RE-VERIFICATION COMPLETE: ALL ITEMS NOW COMPLETE ✅
+```
+
+---
+
+**DO NOT skip this process. DO NOT tell me you're done without actually checking. Make ALL changes before responding.**
