@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLocation } from "wouter";
 import { 
   Star,
   MapPin,
@@ -35,6 +36,8 @@ interface BerryStarsSectionProps {
 }
 
 export default function BerryStarsSection({ onBookService }: BerryStarsSectionProps) {
+  const [, setLocation] = useLocation();
+  
   const featuredProviders: Provider[] = [
     {
       id: "1",
@@ -240,10 +243,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                 variant="outline"
                 className="border-2 font-semibold px-10 py-4 rounded-xl transition-all duration-300"
                 style={{ borderColor: '#C56B86', color: '#C56B86' }}
-                onClick={() => {
-                  const servicesSection = document.getElementById('services');
-                  servicesSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => setLocation('/services')}
                 data-testid="button-browse-services"
               >
                 <Heart className="mr-2 h-5 w-5" />
