@@ -8,30 +8,35 @@ interface HeroProps {
 
 export default function Hero({ onBookingClick }: HeroProps) {
   return (
-    <section className="py-16 lg:py-24" style={{ backgroundColor: '#F7F2EF' }}>
+    <section 
+      className="py-16 lg:py-24" 
+      style={{ 
+        background: 'linear-gradient(to bottom, #44062D 0%, #EED1C4 100%)'
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
           {/* Left: Text Content */}
           <div className="text-center lg:text-left mb-12 lg:mb-0 space-y-8">
-            <h1 className="text-5xl font-bold sm:text-6xl lg:text-7xl leading-tight" style={{ color: '#44062D' }}>
+            <h1 className="text-5xl font-bold sm:text-6xl lg:text-7xl leading-tight text-white">
               All the help your home needs.
             </h1>
-            <p className="text-xl leading-relaxed" style={{ color: '#3C0920' }}>
+            <p className="text-xl leading-relaxed text-white/90">
               Whether you need a quick clean, or full-time help, Berry Events connects you with reliable professionals you can trust.
             </p>
             
             {/* Simple trust badges */}
-            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-8 text-sm" style={{ color: '#3C0920' }}>
+            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-8 text-sm text-white/90">
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5" style={{ color: '#44062D' }} />
+                <Shield className="h-5 w-5 text-white" />
                 <span>Fully Insured</span>
               </div>
               <div className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5" style={{ color: '#44062D' }} />
+                <UserCheck className="h-5 w-5 text-white" />
                 <span>Background Verified</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5" style={{ color: '#C56B86' }} />
+                <Clock className="h-5 w-5" style={{ color: '#EED1C4' }} />
                 <span>Same Day Booking</span>
               </div>
             </div>

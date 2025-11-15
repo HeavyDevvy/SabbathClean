@@ -409,6 +409,36 @@ export default function OrderConfirmation() {
           </div>
         </Card>
         
+        <Card className="mb-6 p-6" style={{ backgroundColor: '#F7F2EF', borderColor: '#EED1C4' }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: '#44062D' }}>What's Next?</h2>
+          <div className="space-y-3">
+            <div className="flex items-start">
+              <div className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: '#C56B86' }}></div>
+              <p className="text-sm" style={{ color: '#3C0920' }}>
+                <strong>Provider Assignment:</strong> Your service provider will be assigned within 24 hours. You'll receive their profile and contact details via email and SMS.
+              </p>
+            </div>
+            <div className="flex items-start">
+              <div className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: '#C56B86' }}></div>
+              <p className="text-sm" style={{ color: '#3C0920' }}>
+                <strong>Pre-Service Confirmation:</strong> Your provider will contact you 24 hours before your scheduled service to confirm details and answer any questions.
+              </p>
+            </div>
+            <div className="flex items-start">
+              <div className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: '#C56B86' }}></div>
+              <p className="text-sm" style={{ color: '#3C0920' }}>
+                <strong>Service Day:</strong> Your provider will arrive at the scheduled time with all necessary equipment and supplies to complete your service professionally.
+              </p>
+            </div>
+            <div className="flex items-start">
+              <div className="w-2 h-2 rounded-full mt-2 mr-3 flex-shrink-0" style={{ backgroundColor: '#C56B86' }}></div>
+              <p className="text-sm" style={{ color: '#3C0920' }}>
+                <strong>Post-Service Review:</strong> After completion, you'll receive a request to rate your experience and provide feedback to help us maintain our high-quality standards.
+              </p>
+            </div>
+          </div>
+        </Card>
+        
         <Card className="mb-6 p-6 bg-muted border-border">
           <div className="flex items-start">
             <Shield className="w-6 h-6 text-primary mr-3 flex-shrink-0 mt-1" />
