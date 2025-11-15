@@ -107,16 +107,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section 
-      className="py-20 lg:py-28" 
-      style={{ 
-        backgroundColor: '#EED1C4',
-        border: '3px solid #3C0920',
-        borderRadius: '12px',
-        margin: '0 16px',
-        padding: '48px 16px'
-      }}
-    >
+    <section className="py-20 lg:py-28" style={{ backgroundColor: '#EED1C4' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-20">
