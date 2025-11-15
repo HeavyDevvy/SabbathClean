@@ -55,6 +55,7 @@ interface ModernServiceModalProps {
   onAddAnotherService?: (draftData: any) => void; // Callback when adding another service with full draft data
   preSelectedProviderId?: string; // Pre-selected provider (e.g., Berry Stars)
   preSelectedProviderName?: string; // Pre-selected provider name
+  recentOrders?: any[]; // Recent order history to show last used services
 }
 
 export default function ModernServiceModal({
@@ -68,7 +69,8 @@ export default function ModernServiceModal({
   pendingDrafts = [],
   onAddAnotherService,
   preSelectedProviderId,
-  preSelectedProviderName
+  preSelectedProviderName,
+  recentOrders = []
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const { addToCart, itemCount } = useCart();
@@ -1605,6 +1607,37 @@ export default function ModernServiceModal({
       { id: "au-pair", config: serviceConfigs["au-pair"], description: "Trusted childcare and au pair services" }
     ];
 
+    // Extract last 5 unique services from recent orders
+    const recentServiceIds: string[] = [];
+    if (recentOrders && recentOrders.length > 0) {
+      const serviceIdMapping: Record<string, string> = {
+        'house-cleaning': 'cleaning',
+        'gardening': 'garden-care',
+        'plumbing': 'plumbing',
+        'electrical': 'electrical',
+        'chef-catering': 'chef-catering',
+        'event-staff': 'event-staff',
+        'moving': 'moving',
+        'au-pair': 'au-pair'
+      };
+      
+      for (const order of recentOrders) {
+        if (order.items && Array.isArray(order.items)) {
+          for (const item of order.items) {
+            const mappedId = serviceIdMapping[item.serviceId] || item.serviceId;
+            if (!recentServiceIds.includes(mappedId) && recentServiceIds.length < 5) {
+              recentServiceIds.push(mappedId);
+            }
+          }
+        }
+        if (recentServiceIds.length >= 5) break;
+      }
+    }
+
+    const recentServices = recentServiceIds
+      .map(id => availableServices.find(s => s.id === id))
+      .filter(Boolean) as typeof availableServices;
+
     return (
       <div className="space-y-6">
         <div className="text-center mb-6">
@@ -1618,49 +1651,116 @@ export default function ModernServiceModal({
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {availableServices.map((service) => {
-            const isBooked = bookedServices.includes(service.id);
-            const Icon = service.config.icon;
-            
-            return (
-              <Card
-                key={service.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  isBooked ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={() => {
-                  if (!isBooked && bookedServices.length < 3) {
-                    onServiceSelect?.(service.id);
-                    setStep(1);
-                  } else if (bookedServices.length >= 3) {
-                    toast({
-                      variant: "destructive",
-                      title: "Maximum services reached",
-                      description: "You can only book up to 3 services at once."
-                    });
-                  }
-                }}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                      isBooked ? 'bg-gray-200' : 'bg-primary/10'
-                    }`}>
-                      <Icon className={`h-6 w-6 ${isBooked ? 'text-gray-400' : 'text-primary'}`} />
+        {/* Recently Used Services */}
+        {recentServices.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-5 w-5 text-primary" />
+              <h4 className="font-semibold text-gray-900">Recently Used Services</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recentServices.map((service) => {
+                const isBooked = bookedServices.includes(service.id);
+                const Icon = service.config.icon;
+                
+                return (
+                  <Card
+                    key={service.id}
+                    className={`cursor-pointer transition-all hover:shadow-lg border-2 border-primary/20 ${
+                      isBooked ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary'
+                    }`}
+                    onClick={() => {
+                      if (!isBooked && bookedServices.length < 3) {
+                        onServiceSelect?.(service.id);
+                        setStep(1);
+                      } else if (bookedServices.length >= 3) {
+                        toast({
+                          variant: "destructive",
+                          title: "Maximum services reached",
+                          description: "You can only book up to 3 services at once."
+                        });
+                      }
+                    }}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4">
+                        <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                          isBooked ? 'bg-gray-200' : 'bg-primary/10'
+                        }`}>
+                          <Icon className={`h-6 w-6 ${isBooked ? 'text-gray-400' : 'text-primary'}`} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{service.config.title}</h4>
+                          <p className="text-sm text-gray-600">{service.description}</p>
+                          {isBooked ? (
+                            <Badge variant="secondary" className="mt-2 bg-gray-100">Already Selected</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="mt-2 bg-green-50 text-green-700 border-green-200">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Recently Used
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* All Services */}
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-4">All Services</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {availableServices.map((service) => {
+              const isBooked = bookedServices.includes(service.id);
+              const isRecent = recentServiceIds.includes(service.id);
+              const Icon = service.config.icon;
+              
+              // Skip if already shown in recent services
+              if (isRecent) return null;
+              
+              return (
+                <Card
+                  key={service.id}
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    isBooked ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  onClick={() => {
+                    if (!isBooked && bookedServices.length < 3) {
+                      onServiceSelect?.(service.id);
+                      setStep(1);
+                    } else if (bookedServices.length >= 3) {
+                      toast({
+                        variant: "destructive",
+                        title: "Maximum services reached",
+                        description: "You can only book up to 3 services at once."
+                      });
+                    }
+                  }}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                        isBooked ? 'bg-gray-200' : 'bg-primary/10'
+                      }`}>
+                        <Icon className={`h-6 w-6 ${isBooked ? 'text-gray-400' : 'text-primary'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{service.config.title}</h4>
+                        <p className="text-sm text-gray-600">{service.description}</p>
+                        {isBooked && (
+                          <Badge variant="secondary" className="mt-2 bg-gray-100">Already Selected</Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{service.config.title}</h4>
-                      <p className="text-sm text-gray-600">{service.description}</p>
-                      {isBooked && (
-                        <Badge variant="secondary" className="mt-2 bg-gray-100">Already Selected</Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
         {/* Custom Service Solution Form */}

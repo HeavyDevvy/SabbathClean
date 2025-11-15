@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import ServiceSpecificBooking from "@/components/service-specific-booking";
+import ModernServiceModal from "@/components/modern-service-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -246,6 +246,7 @@ function PreferredProvidersList({ userId, userData }: { userId: string | undefin
 
 export default function Profile() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -831,10 +832,21 @@ export default function Profile() {
       </main>
       <Footer />
       
-      <ServiceSpecificBooking 
+      <ModernServiceModal 
         isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        serviceId=""
+        onClose={() => {
+          setIsBookingOpen(false);
+          setSelectedServiceId("");
+        }}
+        serviceId={selectedServiceId}
+        onServiceSelect={(serviceId: string) => setSelectedServiceId(serviceId)}
+        onBookingComplete={(bookingData: any) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingOpen(false);
+          setSelectedServiceId("");
+          queryClient.invalidateQueries({ queryKey: ['/api/orders', userId] });
+        }}
+        recentOrders={orders}
       />
     </div>
   );
