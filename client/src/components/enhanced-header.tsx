@@ -245,7 +245,7 @@ export default function EnhancedHeader({
                       </p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
+                    <DropdownMenuItem onClick={() => setLocation("/profile")} data-testid="link-profile-settings">
                       <User className="mr-2 h-4 w-4" />
                       Profile & Settings
                     </DropdownMenuItem>
