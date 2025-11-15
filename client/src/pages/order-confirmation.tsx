@@ -374,20 +374,24 @@ export default function OrderConfirmation() {
         <Card className="mb-6 p-6">
           <h2 className="text-xl font-semibold mb-4">Payment Summary</h2>
           <div className="space-y-3">
+            {/* Use authoritative order values from backend, not recomputed */}
             <div className="flex justify-between text-sm text-gray-600">
               <span>Base Services ({order.items.length} {order.items.length === 1 ? 'service' : 'services'})</span>
               <span className="font-medium" data-testid="payment-base-services">
                 {formatCurrency(order.items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0))}
               </span>
             </div>
-            {order.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0) > 0 && (
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Add-ons & Extras</span>
-                <span className="font-medium" data-testid="payment-add-ons">
-                  {formatCurrency(order.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0))}
-                </span>
-              </div>
-            )}
+            {(() => {
+              const totalAddOns = order.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
+              return totalAddOns > 0 ? (
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Add-ons & Extras</span>
+                  <span className="font-medium" data-testid="payment-add-ons">
+                    {formatCurrency(totalAddOns)}
+                  </span>
+                </div>
+              ) : null;
+            })()}
             <Separator className="my-2" />
             <div className="flex justify-between text-sm">
               <span className="font-medium text-gray-900">Services Subtotal</span>
@@ -401,15 +405,18 @@ export default function OrderConfirmation() {
                 {formatCurrency(order.platformFee)}
               </span>
             </div>
-            {/* HOUSE CLEANING ONLY: Show total tips if any items have tips */}
-            {order.items.some(item => parseDecimal(item.tipAmount || "0") > 0) && (
-              <div className="flex justify-between text-sm">
-                <span className="text-success font-medium">Provider Tips</span>
-                <span className="font-medium text-success" data-testid="payment-tips">
-                  {formatCurrency(order.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0))}
-                </span>
-              </div>
-            )}
+            {/* HOUSE CLEANING ONLY: Show total tips using backend-stored values */}
+            {(() => {
+              const totalTips = order.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
+              return totalTips > 0 ? (
+                <div className="flex justify-between text-sm">
+                  <span className="text-success font-medium">Provider Tips</span>
+                  <span className="font-medium text-success" data-testid="payment-tips">
+                    {formatCurrency(totalTips)}
+                  </span>
+                </div>
+              ) : null;
+            })()}
             <Separator className="my-2" />
             <div className="flex justify-between text-lg font-semibold">
               <span>Total Paid</span>
