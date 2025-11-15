@@ -61,6 +61,12 @@ export default function CartCheckout() {
   const baseServicesTotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0);
   const totalAddOns = cart.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
   const servicesSubtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0); // Base + Add-ons - Discounts
+  // Calculate total discounts: (basePrice + addOns) - subtotal for each item
+  const totalDiscounts = cart.items.reduce((sum, item) => {
+    const itemBeforeDiscount = parseDecimal(item.basePrice) + parseDecimal(item.addOnsPrice || "0");
+    const itemAfterDiscount = parseDecimal(item.subtotal);
+    return sum + (itemBeforeDiscount - itemAfterDiscount);
+  }, 0);
   const totalTips = cart.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
   const platformFee = servicesSubtotal * 0.15; // Platform fee only on services subtotal, NOT on tips
   const total = servicesSubtotal + totalTips + platformFee;
@@ -401,6 +407,12 @@ export default function CartCheckout() {
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Add-ons & Extras</span>
                     <span className="font-medium" data-testid="summary-add-ons">{formatCurrency(totalAddOns)}</span>
+                  </div>
+                )}
+                {totalDiscounts > 0 && (
+                  <div className="flex justify-between text-sm text-success">
+                    <span>Discounts</span>
+                    <span className="font-medium" data-testid="summary-discounts">-{formatCurrency(totalDiscounts)}</span>
                   </div>
                 )}
                 <Separator className="my-2" />

@@ -392,6 +392,20 @@ export default function OrderConfirmation() {
                 </div>
               ) : null;
             })()}
+            {(() => {
+              // Calculate total discounts: (basePrice + addOns) - subtotal
+              const totalDiscounts = order.items.reduce((sum, item) => {
+                const itemBeforeDiscount = parseDecimal(item.basePrice) + parseDecimal(item.addOnsPrice || "0");
+                const itemAfterDiscount = parseDecimal(item.subtotal);
+                return sum + (itemBeforeDiscount - itemAfterDiscount);
+              }, 0);
+              return totalDiscounts > 0 ? (
+                <div className="flex justify-between text-sm text-success">
+                  <span>Discounts</span>
+                  <span className="font-medium" data-testid="payment-discounts">-{formatCurrency(totalDiscounts)}</span>
+                </div>
+              ) : null;
+            })()}
             <Separator className="my-2" />
             <div className="flex justify-between text-sm">
               <span className="font-medium text-gray-900">Services Subtotal</span>
