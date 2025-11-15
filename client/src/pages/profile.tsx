@@ -247,6 +247,7 @@ function PreferredProvidersList({ userId, userData }: { userId: string | undefin
 export default function Profile() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [prefillData, setPrefillData] = useState<any>(null);
   const [selectedProvince, setSelectedProvince] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -837,16 +838,22 @@ export default function Profile() {
         onClose={() => {
           setIsBookingOpen(false);
           setSelectedServiceId("");
+          setPrefillData(null);
         }}
         serviceId={selectedServiceId}
-        onServiceSelect={(serviceId: string) => setSelectedServiceId(serviceId)}
+        onServiceSelect={(serviceId: string, prefillData?: any) => {
+          setSelectedServiceId(serviceId);
+          setPrefillData(prefillData || null);
+        }}
         onBookingComplete={(bookingData: any) => {
           console.log("Booking completed:", bookingData);
           setIsBookingOpen(false);
           setSelectedServiceId("");
+          setPrefillData(null);
           queryClient.invalidateQueries({ queryKey: ['/api/orders', userId] });
         }}
         recentOrders={orders}
+        prefillFromRecent={prefillData}
       />
     </div>
   );

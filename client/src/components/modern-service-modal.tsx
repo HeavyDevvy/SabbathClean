@@ -47,7 +47,7 @@ interface ModernServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   serviceId: string;
-  onServiceSelect?: (serviceId: string) => void;
+  onServiceSelect?: (serviceId: string, prefillData?: any) => void;
   onBookingComplete: (bookingData: any) => void;
   editBookingData?: any; // For editing existing bookings
   bookedServices?: string[]; // Track services already booked in this session
@@ -56,6 +56,7 @@ interface ModernServiceModalProps {
   preSelectedProviderId?: string; // Pre-selected provider (e.g., Berry Stars)
   preSelectedProviderName?: string; // Pre-selected provider name
   recentOrders?: any[]; // Recent order history to show last used services
+  prefillFromRecent?: any; // Pre-fill data from recent booking
 }
 
 export default function ModernServiceModal({
@@ -70,7 +71,8 @@ export default function ModernServiceModal({
   onAddAnotherService,
   preSelectedProviderId,
   preSelectedProviderName,
-  recentOrders = []
+  recentOrders = [],
+  prefillFromRecent
 }: ModernServiceModalProps) {
   const { toast } = useToast();
   const { addToCart, itemCount } = useCart();
@@ -900,78 +902,117 @@ export default function ModernServiceModal({
   // Track if we need to show service selection (Step 0)
   const needsServiceSelection = !serviceId || !currentConfig;
 
-  // ADDED: Multi-service booking feature - Reset modal state when serviceId changes
-  // FIX: Fixes bug where selecting a service opens wrong booking flow
+  // ADDED: Multi-service booking feature - Reset modal state when serviceId or prefillFromRecent changes
+  // FIX: Properly reinitialize form on every service selection or prefill change
   useEffect(() => {
-    if (serviceId && !editBookingData) {
-      // Reset to step 1 when a new service is selected (not editing)
-      setStep(1);
-      setShowConfirmation(false);
-      setConfirmedBookingData(null);
-      
-      // ADDED: Reset add-ons comment and suggestions to avoid stale recommendations
-      setAddOnsComment("");
-      setSuggestedAddOnsFromComment([]);
-      
-      // Reset form data to empty state for new service
-      setFormData({
-        propertyType: "",
-        address: "",
-        gateCode: "",
-        preferredDate: "",
-        timePreference: "",
-        recurringSchedule: "one-time",
-        materials: "supply",
-        insurance: false,
-        cleaningType: "",
-        propertySize: "",
-        gardenSize: "",
-        gardenCondition: "",
-        urgency: "standard",
-        plumbingIssue: "",
-        electricalIssue: "",
-        cuisineType: "",
-        menuSelection: "popular",
-        selectedMenu: "",
-        customMenuItems: [] as string[],
-        dietaryRequirements: [] as string[],
-        eventSize: "",
-        selectedAddOns: [] as string[],
-        selectedProvider: null as any,
-        specialRequests: "",
-        tipAmount: 0,
-        paymentMethod: "card",
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-        cardholderName: "",
-        selectedBank: "",
-        bankAccount: "",
-        bankBranch: ""
-      });
-      
-      // Reset payment validation state
-      setPaymentTouched({
-        cardNumber: false,
-        expiryDate: false,
-        cvv: false,
-        cardholderName: false,
-        selectedBank: false,
-        bankAccount: false,
-        bankBranch: false
-      });
-      
-      setPaymentErrors({
-        cardNumber: "",
-        expiryDate: "",
-        cvv: "",
-        cardholderName: "",
-        selectedBank: "",
-        bankAccount: "",
-        bankBranch: ""
+    // Don't reset if no serviceId
+    if (!serviceId) {
+      return;
+    }
+    
+    // Reset to step 1 when a new service is selected
+    setStep(1);
+    setShowConfirmation(false);
+    setConfirmedBookingData(null);
+    
+    // ADDED: Reset add-ons comment and suggestions to avoid stale recommendations
+    setAddOnsComment("");
+    setSuggestedAddOnsFromComment([]);
+    
+    // Determine data source: editBookingData takes precedence over prefillFromRecent
+    const dataSource = editBookingData || prefillFromRecent || {};
+    const isEditing = !!editBookingData;
+    const isPrefilling = !isEditing && prefillFromRecent && Object.keys(prefillFromRecent).length > 0;
+    
+    // Debug logging to understand data structure
+    if (isPrefilling) {
+      console.log('Prefilling form with recent booking data:', {
+        serviceId,
+        prefillFromRecent,
+        dataSource,
+        keys: Object.keys(dataSource)
       });
     }
-  }, [serviceId, editBookingData]);
+    
+    // Format date for input field (convert from timestamp if needed)
+    let formattedDate = "";
+    if ((isEditing || isPrefilling) && dataSource.scheduledDate) {
+      try {
+        const date = new Date(dataSource.scheduledDate);
+        formattedDate = date.toISOString().split('T')[0];
+      } catch (e) {
+        console.error('Failed to format date:', e);
+      }
+    }
+    
+    // Reset form data - ALWAYS reinitialize to prevent stale data
+    // Priority: editBookingData > prefillFromRecent > defaults
+    setFormData({
+      propertyType: (isEditing || isPrefilling) ? (dataSource.propertyType || "") : "",
+      address: (isEditing || isPrefilling) ? (dataSource.address || "") : "",
+      gateCode: isEditing ? (dataSource.gateCode || "") : "", // Never prefill gate code except in edit mode
+      preferredDate: formattedDate,
+      timePreference: (isEditing || isPrefilling) ? (dataSource.scheduledTime || dataSource.timePreference || "") : "",
+      recurringSchedule: (isEditing || isPrefilling) ? (dataSource.recurringSchedule || "one-time") : "one-time",
+      materials: (isEditing || isPrefilling) ? (dataSource.materials || "supply") : "supply",
+      insurance: (isEditing || isPrefilling) ? (dataSource.insurance || false) : false,
+      cleaningType: (isEditing || isPrefilling) ? (dataSource.cleaningType || "") : "",
+      propertySize: (isEditing || isPrefilling) ? (dataSource.propertySize || "") : "",
+      gardenSize: (isEditing || isPrefilling) ? (dataSource.gardenSize || "") : "",
+      gardenCondition: (isEditing || isPrefilling) ? (dataSource.gardenCondition || "") : "",
+      urgency: (isEditing || isPrefilling) ? (dataSource.urgency || "standard") : "standard",
+      plumbingIssue: (isEditing || isPrefilling) ? (dataSource.plumbingIssue || "") : "",
+      electricalIssue: (isEditing || isPrefilling) ? (dataSource.electricalIssue || "") : "",
+      cuisineType: (isEditing || isPrefilling) ? (dataSource.cuisineType || "") : "",
+      menuSelection: (isEditing || isPrefilling) ? (dataSource.menuSelection || "popular") : "popular",
+      selectedMenu: (isEditing || isPrefilling) ? (dataSource.selectedMenu || "") : "",
+      customMenuItems: (isEditing || isPrefilling) && Array.isArray(dataSource.customMenuItems) ? [...dataSource.customMenuItems] : [],
+      dietaryRequirements: (isEditing || isPrefilling) && Array.isArray(dataSource.dietaryRequirements) ? [...dataSource.dietaryRequirements] : [],
+      eventSize: (isEditing || isPrefilling) ? (dataSource.eventSize || "") : "",
+      selectedAddOns: (isEditing || isPrefilling) && Array.isArray(dataSource.selectedAddOns) ? [...dataSource.selectedAddOns] : [],
+      selectedProvider: (isEditing || isPrefilling) && dataSource.provider ? {...dataSource.provider} : null,
+      specialRequests: isEditing ? (dataSource.specialRequests || "") : "", // Only prefill comments in edit mode
+      tipAmount: isEditing ? (dataSource.tipAmount || 0) : 0, // Only prefill tip in edit mode
+      paymentMethod: "card",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      selectedBank: "",
+      bankAccount: "",
+      bankBranch: ""
+    });
+    
+    // Show toast if prefill data was used (but not for edit mode)
+    if (isPrefilling) {
+      toast({
+        title: "Previous booking details loaded",
+        description: "We've pre-filled the form with your last booking details. Feel free to make any changes.",
+        duration: 3000
+      });
+    }
+    
+    // Reset payment validation state
+    setPaymentTouched({
+      cardNumber: false,
+      expiryDate: false,
+      cvv: false,
+      cardholderName: false,
+      selectedBank: false,
+      bankAccount: false,
+      bankBranch: false
+    });
+    
+    setPaymentErrors({
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      cardholderName: "",
+      selectedBank: "",
+      bankAccount: "",
+      bankBranch: ""
+    });
+  }, [serviceId, prefillFromRecent, editBookingData, toast]);
   
   // Lock recurring schedule to one-time for urgent plumbing services
   useEffect(() => {
@@ -1607,8 +1648,10 @@ export default function ModernServiceModal({
       { id: "au-pair", config: serviceConfigs["au-pair"], description: "Trusted childcare and au pair services" }
     ];
 
-    // Extract last 5 unique services from recent orders
+    // Extract last 5 unique services from recent orders with their last used details
     const recentServiceIds: string[] = [];
+    const recentServiceDetails: Map<string, any> = new Map();
+    
     if (recentOrders && recentOrders.length > 0) {
       const serviceIdMapping: Record<string, string> = {
         'house-cleaning': 'cleaning',
@@ -1627,6 +1670,23 @@ export default function ModernServiceModal({
             const mappedId = serviceIdMapping[item.serviceId] || item.serviceId;
             if (!recentServiceIds.includes(mappedId) && recentServiceIds.length < 5) {
               recentServiceIds.push(mappedId);
+              // Store the last used details for this service
+              let parsedDetails = {};
+              try {
+                parsedDetails = typeof item.serviceDetails === 'string' 
+                  ? JSON.parse(item.serviceDetails) 
+                  : item.serviceDetails || {};
+              } catch (e) {
+                console.error('Failed to parse service details:', e);
+              }
+              
+              recentServiceDetails.set(mappedId, {
+                ...parsedDetails,
+                orderDate: order.createdAt,
+                scheduledDate: item.scheduledDate,
+                scheduledTime: item.scheduledTime,
+                selectedAddOns: Array.isArray(item.selectedAddOns) ? item.selectedAddOns : []
+              });
             }
           }
         }
@@ -1652,12 +1712,13 @@ export default function ModernServiceModal({
         </div>
 
         {/* Recently Used Services */}
-        {recentServices.length > 0 && (
+        {recentOrders && recentOrders.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="h-5 w-5 text-primary" />
               <h4 className="font-semibold text-gray-900">Recently Used Services</h4>
             </div>
+            {recentServices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recentServices.map((service) => {
                 const isBooked = bookedServices.includes(service.id);
@@ -1671,7 +1732,8 @@ export default function ModernServiceModal({
                     }`}
                     onClick={() => {
                       if (!isBooked && bookedServices.length < 3) {
-                        onServiceSelect?.(service.id);
+                        const prefillData = recentServiceDetails.get(service.id);
+                        onServiceSelect?.(service.id, prefillData);
                         setStep(1);
                       } else if (bookedServices.length >= 3) {
                         toast({
@@ -1707,6 +1769,12 @@ export default function ModernServiceModal({
                 );
               })}
             </div>
+            ) : (
+              <div className="text-center py-6 bg-gray-50 rounded-lg">
+                <Clock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">No recent service bookings found</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -1730,7 +1798,7 @@ export default function ModernServiceModal({
                   }`}
                   onClick={() => {
                     if (!isBooked && bookedServices.length < 3) {
-                      onServiceSelect?.(service.id);
+                      onServiceSelect?.(service.id, null); // Clear prefill data for regular service
                       setStep(1);
                     } else if (bookedServices.length >= 3) {
                       toast({
