@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut, ShoppingBag, Settings } from "lucide-react";
+import { Menu, X, User, LogOut, ShoppingBag } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import berryLogo from "@assets/berry-events-new-logo.jpg";
 
 interface SweepSouthStyleHeaderProps {
   onBookingClick: () => void;
@@ -34,38 +35,27 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
   };
 
   return (
-    <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+    <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">B</span>
-              </div>
-              <span className="text-2xl font-bold text-foreground">Berry Events</span>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-16 h-16 rounded-full overflow-hidden bg-transparent">
+              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-2xl font-bold text-foreground">Berry Events</div>
+              <div className="text-xs text-foreground/60">All your Home Services In One</div>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
-              href="/services" 
-              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
-            >
-              Services
-            </Link>
-            <Link 
               href="/pricing" 
-              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
+              className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium"
             >
               Pricing
-            </Link>
-            <Link 
-              href="/about" 
-              className="text-muted-foreground hover:text-primary transition-colors duration-200 font-medium"
-            >
-              About
             </Link>
           </nav>
 
@@ -76,7 +66,7 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 <Button
                   onClick={() => setLocation("/auth")}
                   variant="ghost"
-                  className="text-muted-foreground hover:text-primary font-medium"
+                  className="text-foreground/70 hover:text-foreground font-medium"
                   data-testid="button-sign-in"
                 >
                   Sign In
@@ -84,18 +74,18 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 
                 <Button
                   onClick={onBookingClick}
-                  className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   data-testid="button-book-service"
                 >
-                  Book a Service
+                  Book Now
                 </Button>
 
                 <div className="border-l border-border pl-6 ml-4">
-                  <span className="text-sm text-muted-foreground mr-3">Are you a worker?</span>
+                  <span className="text-sm text-foreground/70 mr-3">Are you a provider?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium rounded-xl px-6 py-3 transition-all duration-300"
+                    className="border-2 border-border text-foreground hover:bg-muted font-medium rounded-xl px-6 py-3 transition-all duration-300"
                     data-testid="button-apply-now"
                   >
                     Apply Now
@@ -106,10 +96,10 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
               <>
                 <Button
                   onClick={onBookingClick}
-                  className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                   data-testid="button-book-service"
                 >
-                  Book a Service
+                  Book Now
                 </Button>
 
                 <DropdownMenu>
@@ -209,9 +199,9 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-primary hover:bg-accent text-primary-foreground rounded-xl"
+                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl"
                     >
-                      Book a Service
+                      Book Now
                     </Button>
                     
                     <div className="text-center pt-2">
@@ -242,9 +232,9 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-primary hover:bg-accent text-primary-foreground rounded-xl"
+                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl"
                     >
-                      Book a Service
+                      Book Now
                     </Button>
 
                     <Button

@@ -98,31 +98,31 @@ const certifications = [
 
 export default function TrustSafetySection() {
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-20 lg:py-28 bg-muted/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Safety and security is our top priority
+        <div className="text-center mb-20">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5">
+            Your safety is our priority
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            We connect you to hardworking, trusted individuals who are experienced, vetted, rated and dependable.
+          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+            We connect you to trusted, vetted, and dependable professionals.
           </p>
         </div>
 
         {/* Trust Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {trustFeatures.map((feature, index) => (
-            <Card key={index} className="bg-white border-2 border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 group">
+            <Card key={index} className="bg-card border border-border hover:border-accent/50 hover:shadow-lg transition-all duration-300 group">
               <CardContent className="p-8">
                 {/* Icon */}
-                <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mb-6 mx-auto shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className="h-8 w-8 text-white" />
+                <div className="w-20 h-20 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-accent/20 transition-colors duration-300">
+                  <feature.icon className="h-10 w-10 text-accent" />
                 </div>
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-xl font-bold text-foreground mb-3">
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed mb-6">

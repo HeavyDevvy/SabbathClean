@@ -107,22 +107,22 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-background">
+    <section className="py-20 lg:py-28 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Meet some of your Berry Stars
+        <div className="text-center mb-20">
+          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5">
+            Meet Your Berry Stars
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            They're experienced, vetted and rated – ready to take care of your home.
+          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+            Experienced, vetted professionals ready to help.
           </p>
         </div>
 
         {/* Stats Bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {[
-            { icon: Users, value: "500+", label: "Verified Professionals", color: "blue" },
+            { icon: Users, value: "500+", label: "Verified Professionals", color: "accent" },
             { icon: Star, value: "4.9/5", label: "Average Rating", color: "yellow" },
             { icon: Shield, value: "100%", label: "Background Checked", color: "green" },
             { icon: Award, value: "50+", label: "Berry Stars", color: "purple" },
