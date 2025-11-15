@@ -1,0 +1,267 @@
+# 🎯 HEADER/NAVIGATION BAR UPDATE - MANDATORY CHANGES
+
+## CRITICAL: READ THE SCREENSHOT FIRST
+I have attached a screenshot showing the exact section that needs to be changed. Look at it carefully before making any changes.
+
+---
+
+## REQUIRED CHANGES - ALL MUST BE COMPLETED
+
+### 1. BACKGROUND COLOUR CHANGE
+**Current state:** The top navigation bar has a background colour that doesn't match our palette  
+**Required change:** Change the navigation bar background colour to one of our approved colours:
+- Use `#F7F2EF` (soft off-white) OR `#EED1C4` (warm cream) for a light background
+- OR use `#44062D` (deep plum) if you want a dark header
+
+**How to do this:**
+1. Find the navigation/header component (likely named Header.jsx, Navbar.jsx, Navigation.jsx, or similar)
+2. Locate the background colour property (could be in inline styles, CSS class, or Tailwind class)
+3. Replace the current colour with one of the approved colours above
+4. Save the file
+5. **VERIFY:** Refresh the preview and check the header background changed
+
+---
+
+### 2. INCREASE LOGO SIZE
+**Current state:** The logo is too small  
+**Required change:** Make the logo significantly larger (at least 1.5x to 2x current size)
+
+**How to do this:**
+1. Find where the logo image is rendered in the header component
+2. Look for width/height properties (could be `width="40"`, `className="w-10"`, or CSS styles)
+3. Increase the size:
+   - If it's a number value like `width={40}`, increase to `width={80}` or `width={100}`
+   - If it's Tailwind like `w-10`, change to `w-20` or `w-24`
+   - If it's CSS, increase the width/height values
+4. Make sure the logo maintains its aspect ratio (don't make it distorted)
+5. Save the file
+6. **VERIFY:** Refresh the preview and check the logo is visibly larger
+
+---
+
+### 3. REMOVE BORDER/FRAME
+**Current state:** There's a border or frame around the navigation bar  
+**Required change:** Remove any borders, frames, or dividing lines on the navigation bar
+
+**How to do this:**
+1. In the header component, look for:
+   - `border` property
+   - `border-bottom` property  
+   - Tailwind classes like `border`, `border-b`, `border-t`
+   - Box shadow that creates a frame effect: `shadow`, `box-shadow`
+2. Remove or set to `none`/`0`:
+   - CSS: `border: none;` or remove the border property
+   - Tailwind: remove classes like `border`, `border-b-2`, `shadow-md`
+3. Save the file
+4. **VERIFY:** Refresh the preview and check no border/frame is visible
+
+---
+
+### 4. USER LOGO/ICON COLOUR ALIGNMENT
+**Current state:** The user profile icon/logo doesn't match our colour scheme  
+**Required change:** Update the user icon colour to match our approved palette
+
+**What to look for:**
+- User avatar icon
+- Profile icon
+- Account icon
+- User menu button
+
+**How to do this:**
+1. Find the user icon element in the header component
+2. Check its colour properties:
+   - If it's an icon component: look for `color`, `fill`, or `stroke` props
+   - If it's using Tailwind: look for classes like `text-blue-500`, `fill-purple-600`
+3. Change to an approved colour:
+   - For icon color: use `#44062D`, `#3C0920`, or `#C56B86`
+   - Tailwind equivalent: remove any blue/purple classes
+4. If there's a background or border on the user icon, update those too
+5. Save the file
+6. **VERIFY:** Refresh preview and check the user icon matches colour scheme
+
+---
+
+## APPROVED COLOUR PALETTE (ONLY USE THESE)
+- `#44062D` – deep plum (primary dark)
+- `#3C0920` – wine / berry (secondary dark)  
+- `#EED1C4` – warm cream
+- `#F7F2EF` – soft off-white / background
+- `#C56B86` – muted rose accent
+
+---
+
+## STEP-BY-STEP IMPLEMENTATION PROCESS
+
+### STEP 1: LOCATE THE HEADER COMPONENT
+1. Look in your project files for the header/navigation component
+2. Common locations:
+   - `/components/Header.jsx`
+   - `/components/Navbar.jsx`
+   - `/components/Navigation.jsx`
+   - `/components/layout/Header.jsx`
+   - Or check the main app/layout file for inline header code
+
+**Once found, write down the filename here:** ________________
+
+---
+
+### STEP 2: MAKE CHANGES ONE AT A TIME
+
+#### Change 1: Background Colour
+- [ ] Found the background colour property
+- [ ] Changed to: `____________` (write the colour you chose)
+- [ ] Saved the file
+- [ ] Refreshed preview
+- [ ] Visually confirmed the background changed ✅
+
+#### Change 2: Logo Size
+- [ ] Found the logo width/height properties
+- [ ] Changed from: `____________` to: `____________`
+- [ ] Saved the file
+- [ ] Refreshed preview  
+- [ ] Visually confirmed the logo is larger ✅
+
+#### Change 3: Remove Border
+- [ ] Found border/shadow properties: `____________`
+- [ ] Removed or set to none
+- [ ] Saved the file
+- [ ] Refreshed preview
+- [ ] Visually confirmed no border/frame visible ✅
+
+#### Change 4: User Icon Colour
+- [ ] Found the user icon element
+- [ ] Found its colour properties: `____________`
+- [ ] Changed to: `____________` (approved colour)
+- [ ] Saved the file
+- [ ] Refreshed preview
+- [ ] Visually confirmed user icon matches colour scheme ✅
+
+---
+
+### STEP 3: ERROR CHECKING
+
+After making ALL changes:
+
+1. **Check the browser console:**
+   - Press F12 or right-click → Inspect
+   - Go to Console tab
+   - Are there any red error messages? 
+   - **If YES:** Fix them before proceeding
+   - **If NO:** Continue to next step
+
+2. **Check for blank screens:**
+   - Is the page displaying correctly?
+   - Can you see the header/navigation?
+   - Can you see the rest of the page content?
+   - **If anything is blank:** Undo your last change and debug
+
+3. **Check functionality:**
+   - Click the logo - does it work?
+   - Click the user icon - does it open a menu?
+   - Click navigation links - do they work?
+   - **If anything is broken:** Fix it before completing
+
+---
+
+### STEP 4: RESPONSIVE CHECK
+
+Test the header at different screen sizes:
+
+1. Open DevTools (F12)
+2. Click the device toolbar icon (toggle device toolbar)
+3. Test these sizes:
+   - Mobile (375px) - Does the header look good?
+   - Tablet (768px) - Does the header look good?
+   - Desktop (1920px) - Does the header look good?
+   - Is the logo size appropriate at all sizes?
+
+**If anything looks broken at any size:** Adjust the sizes/spacing to be responsive
+
+---
+
+## MANDATORY RESPONSE FORMAT
+
+You MUST respond in this exact format:
+
+```
+CHANGES MADE TO HEADER/NAVIGATION:
+
+1. BACKGROUND COLOUR:
+   - File changed: [filename]
+   - Line number: [line]
+   - Old value: [old colour]
+   - New value: [new colour - must be from approved palette]
+   - Verified in preview: ✅/❌
+
+2. LOGO SIZE:
+   - File changed: [filename]
+   - Line number: [line]
+   - Old size: [old dimensions]
+   - New size: [new dimensions]
+   - Verified in preview: ✅/❌
+
+3. BORDER REMOVAL:
+   - File changed: [filename]
+   - Line number: [line]
+   - Removed property: [what was removed]
+   - Verified in preview: ✅/❌
+
+4. USER ICON COLOUR:
+   - File changed: [filename]
+   - Line number: [line]
+   - Old colour: [old value]
+   - New colour: [new value - must be from approved palette]
+   - Verified in preview: ✅/❌
+
+ERROR CHECK:
+- Console errors: None ✅ / [List errors if any] ❌
+- Blank screens: None ✅ / [Describe issue] ❌
+- Functionality: All working ✅ / [List broken features] ❌
+- Responsive: All sizes good ✅ / [List issues] ❌
+
+SCREENSHOT COMPARISON:
+- Looking at the attached screenshot, all requested changes have been made: ✅/❌
+- If ❌, explain what still needs to be changed: [explanation]
+
+COMPLETION STATUS: COMPLETE ✅ / INCOMPLETE ❌
+```
+
+---
+
+## 🔴 CRITICAL REQUIREMENTS
+
+**DO NOT respond with:**
+- ❌ "I've made the changes"
+- ❌ "The header should now be updated"
+- ❌ "I've applied the new colours"
+
+**ONLY respond with:**
+- ✅ The exact format above showing specific files, lines, and values changed
+- ✅ Confirmation you opened the preview and saw the changes with your eyes
+- ✅ Confirmation you checked the console for errors
+- ✅ Confirmation the screenshot comparison shows all changes were made
+
+**If you encounter ANY errors or blank screens:**
+1. STOP immediately
+2. Fix the error
+3. Test again
+4. Only proceed once everything works perfectly
+
+**If any change doesn't work:**
+1. Try a different approach
+2. Check if there are multiple files affecting the header
+3. Search for the element in all files
+4. Make sure you're editing the right component
+
+---
+
+## START NOW
+
+1. Look at the attached screenshot carefully
+2. Find the header component file
+3. Make each change one at a time
+4. Test after each change
+5. Fill out the response format above with actual values
+6. Only say "COMPLETE" when all 4 changes are visible in the preview and there are no errors
+
+**NO SHORTCUTS. NO ASSUMPTIONS. MAKE THE ACTUAL CHANGES AND VERIFY THEM.**
