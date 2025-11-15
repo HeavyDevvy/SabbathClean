@@ -298,21 +298,21 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
   const filteredSpecializedServices = filteredServices.filter(s => s.category === "Specialized Services");
 
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-blue-50" data-testid="comprehensive-services-section">
+    <section className="py-16 lg:py-24" style={{ backgroundColor: '#EED1C4' }} data-testid="comprehensive-services-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 text-sm font-semibold border-0 mb-4">
+          <Badge className="text-white px-4 py-2 text-sm font-semibold border-0 mb-4" style={{ backgroundColor: '#C56B86' }}>
             <Sparkles className="h-4 w-4 mr-2" />
             Complete Home Services
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-6" style={{ color: '#44062D' }}>
             Everything your home needs,
-            <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="block" style={{ color: '#C56B86' }}>
               all in one platform
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl max-w-3xl mx-auto leading-relaxed" style={{ color: '#3C0920' }}>
             From emergency repairs to regular maintenance, event catering to childcare - 
             professional services delivered by verified South African specialists.
           </p>
@@ -449,18 +449,19 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 lg:p-12 text-white">
+        <div className="text-center rounded-3xl p-8 lg:p-12 text-white" style={{ backgroundColor: '#44062D' }}>
           <h3 className="text-3xl font-bold mb-4">
             Need a custom service solution?
           </h3>
-          <p className="text-blue-100 text-lg mb-6 max-w-2xl mx-auto">
+          <p className="text-lg mb-6 max-w-2xl mx-auto" style={{ color: '#EED1C4' }}>
             Our platform connects you with verified professionals for any home service need. 
             Book multiple services together for better coordination and pricing.
           </p>
           <Button 
             variant="secondary" 
             size="lg" 
-            className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-3"
+            className="font-semibold px-8 py-3 text-white"
+            style={{ backgroundColor: '#C56B86' }}
             data-testid="contact-custom-services"
           >
             Contact Us for Custom Solutions

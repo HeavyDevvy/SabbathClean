@@ -34,34 +34,29 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
   ];
 
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 lg:py-24 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-blue-200 to-purple-200 rounded-full blur-3xl opacity-20 -translate-y-32 translate-x-32"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-r from-green-200 to-blue-200 rounded-full blur-3xl opacity-20 translate-y-32 -translate-x-32"></div>
-
+    <section className="relative py-16 lg:py-24 overflow-hidden" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-12 lg:gap-12 lg:items-center">
           {/* Content Column */}
           <div className="lg:col-span-6">
             {/* Hero Badge */}
             <div className="mb-6">
-              <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-sm font-semibold border-0">
+              <Badge className="text-white px-4 py-2 text-sm font-semibold border-0" style={{ backgroundColor: '#C56B86' }}>
                 <Sparkles className="h-4 w-4 mr-2" />
                 South Africa's #1 Home Services Platform
               </Badge>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6" style={{ color: '#44062D' }}>
               All the help your
-              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="block" style={{ color: '#C56B86' }}>
                 home needs
               </span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-xl text-gray-600 leading-relaxed mb-8 max-w-2xl">
+            <p className="text-xl leading-relaxed mb-8 max-w-2xl" style={{ color: '#3C0920' }}>
               From cleaning to gardening, plumbing to catering - connect with vetted, insured professionals 
               in your area. Book instantly, pay securely, and get the job done right.
             </p>
@@ -70,7 +65,8 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                style={{ backgroundColor: '#C56B86' }}
                 onClick={onDemoClick || (() => {
                   const demoSection = document.getElementById('how-it-works');
                   demoSection?.scrollIntoView({ behavior: 'smooth' });
@@ -86,10 +82,10 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {trustIndicators.map((indicator, index) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${indicator.color}`}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: '#C56B86' }}>
                     <indicator.icon className="h-5 w-5" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700 leading-tight">
+                  <span className="text-sm font-medium leading-tight" style={{ color: '#3C0920' }}>
                     {indicator.text}
                   </span>
                 </div>
