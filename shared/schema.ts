@@ -39,6 +39,13 @@ export const users = pgTable("users", {
   // User preferences and settings
   preferences: jsonb("preferences"), // UI preferences, notification settings
   notificationSettings: jsonb("notification_settings").default('{"email": true, "sms": true, "push": true, "marketing": false}'),
+  // Profile customization
+  preferredServices: text("preferred_services").array(), // Array of service types user frequently books
+  preferredProviders: text("preferred_providers").array(), // Array of provider IDs user prefers
+  savedAddresses: jsonb("saved_addresses"), // Array of frequently used addresses
+  defaultAddress: text("default_address"),
+  defaultCity: text("default_city"),
+  defaultPostalCode: text("default_postal_code"),
   lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
