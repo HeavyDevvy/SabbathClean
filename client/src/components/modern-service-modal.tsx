@@ -1676,13 +1676,12 @@ export default function ModernServiceModal({
 
   const renderStep1 = () => (
     <div className="space-y-6">
-      <div className="text-center mb-6">
-        <currentConfig.icon className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="text-lg font-semibold">Service Details</h3>
-        <p className="text-gray-600 text-sm">Tell us about your property and needs</p>
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-foreground mb-2">Where do you need help?</h3>
+        <p className="text-sm text-muted-foreground">Tell us about your property and location</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div>
           <Label htmlFor="property-type">Property Type *</Label>
           <Select value={formData.propertyType} onValueChange={(value) => 
@@ -2308,13 +2307,12 @@ export default function ModernServiceModal({
 
   const renderStep2 = () => (
     <div className="space-y-6">
-      <div className="text-center mb-6">
-        <CalendarIcon className="h-12 w-12 text-primary mx-auto mb-3" />
-        <h3 className="text-lg font-semibold">Schedule & Preferences</h3>
-        <p className="text-gray-600 text-sm">Choose your preferred date and time</p>
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-foreground mb-2">When do you need help?</h3>
+        <p className="text-sm text-muted-foreground">Choose your preferred date and time</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div>
           <Label htmlFor="preferred-date">
             {isHouseCleaning ? "Date *" : "Preferred Date *"}
@@ -3503,56 +3501,63 @@ export default function ModernServiceModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background">
           {needsServiceSelection ? (
             <>
-              <DialogHeader>
-                <DialogTitle>Book Your Service</DialogTitle>
-                <DialogDescription>Select a service to get started</DialogDescription>
+              <DialogHeader className="pb-4">
+                <DialogTitle className="text-2xl font-bold text-foreground">Book Your Service</DialogTitle>
+                <DialogDescription className="text-muted-foreground">Select a service to get started</DialogDescription>
               </DialogHeader>
               {renderServiceSelection()}
-              <div className="flex justify-end pt-6 border-t">
-                <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <div className="flex justify-end pt-6 border-t border-border">
+                <Button variant="outline" onClick={onClose} className="rounded-lg">Cancel</Button>
               </div>
             </>
           ) : (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center space-x-2">
-                  <currentConfig.icon className="h-6 w-6" />
+              <DialogHeader className="pb-2">
+                <DialogTitle className="flex items-center gap-3 text-2xl font-bold text-foreground">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <currentConfig.icon className="h-5 w-5 text-primary" />
+                  </div>
                   <span>{currentConfig.title}</span>
                 </DialogTitle>
-            <DialogDescription>
-              Complete your booking in {currentConfig.steps} simple steps - Step {step} of {currentConfig.steps}
-            </DialogDescription>
-          </DialogHeader>
+                <DialogDescription className="text-muted-foreground pt-1">
+                  Step {step} of {currentConfig.steps}
+                </DialogDescription>
+              </DialogHeader>
 
           {/* Progress indicator */}
-          <div className="flex space-x-2 mb-6">
+          <div className="flex items-center gap-2 my-6 px-1">
             {Array.from({ length: currentConfig.steps }, (_, i) => (
-              <div
-                key={i}
-                className={`flex-1 h-2 rounded-full transition-all ${
-                  i + 1 <= step ? 'bg-primary' : 'bg-gray-200'
-                }`}
-              />
+              <div key={i} className="flex items-center flex-1">
+                <div
+                  className={`h-1.5 rounded-full transition-all flex-1 ${
+                    i + 1 <= step ? 'bg-primary' : 'bg-border'
+                  }`}
+                />
+                {i < currentConfig.steps - 1 && <div className="w-2" />}
+              </div>
             ))}
           </div>
 
-          {/* Step content */}
-          <div className="min-h-[400px]">
-            {step === 1 && renderStep1()}
-            {step === 2 && renderStep2()}
-            {step === 3 && renderStep3()}
-            {step === 4 && renderStep4()}
-          </div>
+          {/* Step content with white card background */}
+          <Card className="bg-card border-border shadow-sm mb-6">
+            <CardContent className="p-6 min-h-[400px]">
+              {step === 1 && renderStep1()}
+              {step === 2 && renderStep2()}
+              {step === 3 && renderStep3()}
+              {step === 4 && renderStep4()}
+            </CardContent>
+          </Card>
 
           {/* Navigation */}
-          <div className="flex justify-between pt-6 border-t">
+          <div className="flex justify-between pt-4 border-t border-border">
             <Button
               variant="outline"
               onClick={handleBack}
               disabled={step === 1}
+              className="rounded-lg px-6"
             >
               Back
             </Button>
@@ -3565,7 +3570,7 @@ export default function ModernServiceModal({
                     variant="outline"
                     onClick={handleAddToCartAndContinue}
                     disabled={!formData.selectedProvider}
-                    className="border-primary text-primary hover:bg-muted"
+                    className="border-2 border-border text-foreground hover:bg-muted rounded-lg px-6"
                     data-testid="button-add-to-cart-select-another"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -3573,7 +3578,7 @@ export default function ModernServiceModal({
                   </Button>
                   <Button 
                     onClick={handleAddToCart}
-                    className="bg-success hover:bg-success/90 text-primary"
+                    className="bg-primary hover:bg-accent text-primary-foreground rounded-lg px-6 shadow-sm"
                     disabled={!formData.selectedProvider}
                     data-testid="button-add-and-go-to-cart"
                   >
@@ -3589,7 +3594,7 @@ export default function ModernServiceModal({
                       variant="outline"
                       onClick={handleAddToCartAndContinue}
                       disabled={!formData.selectedProvider}
-                      className="border-primary text-primary hover:bg-muted"
+                      className="border-2 border-border text-foreground hover:bg-muted rounded-lg px-6"
                       data-testid="button-add-to-cart-continue"
                     >
                       <ShoppingCart className="h-4 w-4 mr-2" />
@@ -3600,6 +3605,7 @@ export default function ModernServiceModal({
                   {step < currentConfig.steps ? (
                     <Button 
                       onClick={handleNext}
+                      className="bg-primary hover:bg-accent text-primary-foreground rounded-lg px-8 shadow-sm"
                       disabled={
                         (step === 1 && (!formData.propertyType || !formData.address || 
                           (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
@@ -3621,7 +3627,7 @@ export default function ModernServiceModal({
                     <>
                       <Button 
                         onClick={handleAddToCart}
-                        className="bg-success hover:bg-success/90 text-white"
+                        className="bg-primary hover:bg-accent text-primary-foreground rounded-lg px-6 shadow-sm"
                         disabled={!formData.selectedProvider}
                         data-testid="button-add-to-cart"
                       >
@@ -3631,7 +3637,7 @@ export default function ModernServiceModal({
                       <Button 
                         onClick={handleGoToCart}
                         variant="outline"
-                        className="border-primary text-primary hover:bg-muted"
+                        className="border-2 border-border text-foreground hover:bg-muted rounded-lg px-6"
                         data-testid="button-go-to-cart"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
