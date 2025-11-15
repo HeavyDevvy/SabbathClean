@@ -41,7 +41,7 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-transparent">
-              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
+              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block">
               <div className="text-2xl font-bold" style={{ color: '#44062D' }}>Berry Events</div>

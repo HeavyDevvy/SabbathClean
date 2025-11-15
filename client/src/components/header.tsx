@@ -60,7 +60,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
         <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-14 h-14 rounded-full overflow-hidden bg-transparent">
-              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
+              <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block">
               <div className="text-2xl font-bold text-foreground">Berry Events</div>
