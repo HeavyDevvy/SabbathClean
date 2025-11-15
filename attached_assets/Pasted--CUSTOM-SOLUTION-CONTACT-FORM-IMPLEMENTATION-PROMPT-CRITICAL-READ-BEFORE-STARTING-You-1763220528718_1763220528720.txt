@@ -1,0 +1,560 @@
+# 🎯 CUSTOM SOLUTION CONTACT FORM - IMPLEMENTATION PROMPT
+
+## ⚠️ CRITICAL: READ BEFORE STARTING
+
+You are implementing a **contact form popup** for the "Contact Us for Custom Solutions" button on the homepage.
+
+**DO NOT:**
+- ❌ Change any other functionality on the homepage
+- ❌ Modify any existing working features
+- ❌ Break any existing buttons or links
+- ❌ Introduce any error codes
+- ❌ Cause any blank screens
+- ❌ Change colours outside the approved palette
+
+**DO:**
+- ✅ Make the "Contact Us for Custom Solutions" button functional
+- ✅ Create a popup modal with the required form
+- ✅ Match the existing colour scheme and UI style
+- ✅ Implement form validation
+- ✅ Add email functionality
+- ✅ Add success message and redirect
+- ✅ Test thoroughly before completing
+
+---
+
+## 📋 REQUIRED IMPLEMENTATION
+
+### 1. LOCATE THE BUTTON
+
+**Find the "Contact Us for Custom Solutions" button:**
+- Search the homepage component files for:
+  - "Contact Us for Custom Solutions"
+  - "Custom Solutions"
+  - "Custom Service"
+- The button is currently not functional (onClick handler missing or empty)
+
+**Document where you found it:**
+- File name: `________________`
+- Line number: `________________`
+
+---
+
+### 2. CREATE THE POPUP MODAL
+
+**Modal Requirements:**
+
+#### A. Modal Structure
+Create a modal/popup that appears when the button is clicked with:
+- Clean, centered layout
+- Matches the existing app UI style
+- Responsive (works on mobile and desktop)
+- Can be closed with an X button or clicking outside
+
+#### B. Form Fields (ALL COMPULSORY)
+
+1. **Name** (text input)
+   - Placeholder: "Enter your name"
+   - Required validation
+   - Max length: 100 characters
+
+2. **Surname** (text input)
+   - Placeholder: "Enter your surname"
+   - Required validation
+   - Max length: 100 characters
+
+3. **Email Address** (email input)
+   - Placeholder: "your.email@example.com"
+   - Required validation
+   - Email format validation (must contain @ and .)
+   - Max length: 150 characters
+
+4. **Contact Number** (tel input)
+   - Placeholder: "e.g. 0812345678"
+   - Required validation
+   - Number validation (only digits, spaces, +, -, ( ) allowed)
+   - Min length: 10 characters
+   - Max length: 15 characters
+
+5. **Description** (textarea)
+   - Placeholder: "Please describe what you're looking for..."
+   - Required validation
+   - Character counter showing "X/500 characters"
+   - Max length: 500 characters
+   - Minimum 10 characters required
+
+#### C. Form Heading and Text
+- Heading: "Request Custom Solution"
+- Subheading: "Tell us what you need and our team will be in touch"
+
+#### D. Buttons
+
+1. **Submit Button:**
+   - Text: "Send to Berry Team"
+   - Disabled state if form is incomplete/invalid
+   - Loading state while submitting
+   - Uses primary button style from your colour scheme
+
+2. **Close Button (X):**
+   - Top-right corner of modal
+   - Closes modal without submitting
+
+---
+
+### 3. COLOUR SCHEME & STYLING
+
+**Use ONLY these colours from your existing app:**
+
+Based on your app's colour scheme:
+- `#44062D` – Deep plum (primary dark) - for headings/text
+- `#3C0920` – Wine/berry (secondary dark) - for borders
+- `#EED1C4` – Warm cream - for backgrounds/sections
+- `#F7F2EF` – Soft off-white - for modal background
+- `#C56B86` – Muted rose accent - for buttons/CTAs
+
+**Apply these colours to:**
+- Modal background: `#F7F2EF`
+- Modal overlay (backdrop): `rgba(68, 6, 45, 0.5)` (transparent plum)
+- Heading text: `#44062D`
+- Body text/labels: `#3C0920`
+- Input borders: `#EED1C4` (normal) and `#C56B86` (focused)
+- Submit button background: `#C56B86`
+- Submit button text: `#F7F2EF`
+- Submit button hover: Slightly darker `#C56B86` (use opacity or darken 10%)
+- Character counter: `#3C0920`
+- Error messages: `#C56B86` (to indicate validation issues)
+
+**Styling requirements:**
+- Match the existing app's font family
+- Match the existing app's button style (rounded corners, padding, shadows if any)
+- Input fields should have consistent padding and spacing
+- Modal should have rounded corners matching existing UI
+- Form should be clean, spacious, not cramped
+
+---
+
+### 4. FORM VALIDATION
+
+**Client-side validation (before submission):**
+
+For each field, validate:
+
+1. **Name:**
+   - Not empty
+   - Show error: "Name is required"
+
+2. **Surname:**
+   - Not empty
+   - Show error: "Surname is required"
+
+3. **Email:**
+   - Not empty
+   - Valid email format (contains @ and domain)
+   - Show error: "Valid email address is required"
+
+4. **Contact Number:**
+   - Not empty
+   - At least 10 characters
+   - Only contains valid phone characters
+   - Show error: "Valid contact number is required (min 10 digits)"
+
+5. **Description:**
+   - Not empty
+   - At least 10 characters
+   - Max 500 characters (enforced)
+   - Show error: "Description must be between 10 and 500 characters"
+
+**Validation behavior:**
+- Show error messages below each field when user leaves field (onBlur)
+- Submit button is disabled if any field is invalid
+- Errors clear when user corrects the input
+- All errors must be visible before allowing submission
+
+---
+
+### 5. EMAIL FUNCTIONALITY
+
+**When form is valid and user clicks "Send to Berry Team":**
+
+#### A. Prepare Email Data
+Collect all form data:
+```javascript
+{
+  name: "[user's name]",
+  surname: "[user's surname]",
+  email: "[user's email]",
+  contactNumber: "[user's contact number]",
+  description: "[user's description]"
+}
+```
+
+#### B. Email Details
+Send an email to: **support@berryevents.co.za**
+
+**Email subject:**
+"New Custom Solution Request from [Name] [Surname]"
+
+**Email body (formatted nicely):**
+```
+Custom Solution Request
+
+Name: [Name] [Surname]
+Email: [Email]
+Contact Number: [Contact Number]
+
+Description:
+[Description]
+
+---
+Submitted from Berry Events Website
+Date: [Current date and time]
+```
+
+#### C. Implementation Options
+
+**Option 1 - Using EmailJS (Recommended for frontend-only):**
+1. Set up a free EmailJS account
+2. Add EmailJS SDK to your project
+3. Configure email template
+4. Send email using EmailJS service
+5. Add TODO comment: "EmailJS service ID and template ID need to be configured with support@berryevents.co.za"
+
+**Option 2 - Backend API endpoint:**
+1. Create an API endpoint (if you have backend)
+2. Use nodemailer or similar
+3. Send POST request to API with form data
+4. API sends email
+
+**Option 3 - Placeholder (if no email service available):**
+1. Log the data to console
+2. Store in memory/localStorage
+3. Add clear TODO comment: "EMAIL FUNCTIONALITY NOT IMPLEMENTED - Integrate with email service to send to support@berryevents.co.za"
+4. Still show success message to user
+
+**Choose the option that works with your current setup. Document your choice clearly in comments.**
+
+---
+
+### 6. SUCCESS MESSAGE & REDIRECT
+
+**After successful submission:**
+
+#### A. Close the form modal
+
+#### B. Show success popup with:
+- Icon: ✓ checkmark (green or using `#C56B86`)
+- Heading: "Thank You!"
+- Message: "Your custom solution request has been received. Our Berry team will be in touch shortly."
+- Auto-close timer: 3 seconds
+- Or manual close button: "OK"
+
+#### C. After success popup closes:
+- Redirect user to homepage (if not already on homepage, refresh the page)
+- Clear the form data
+- Reset form validation states
+
+#### D. Success popup styling:
+- Use same colour scheme as form modal
+- Centered on screen
+- Clean and simple design
+- Matches existing app UI style
+
+---
+
+### 7. ERROR HANDLING
+
+**If email submission fails:**
+
+Show error popup:
+- Heading: "Oops!"
+- Message: "Something went wrong. Please try again or contact us directly at support@berryevents.co.za"
+- Button: "Try Again" (reopens the form with data preserved)
+- Button: "Close"
+
+**Log error to console:**
+- Full error details for debugging
+- Don't show technical error details to user
+
+---
+
+## 🔧 STEP-BY-STEP IMPLEMENTATION CHECKLIST
+
+Work through these steps in order. After each step, test before proceeding.
+
+### Phase 1: Setup
+- [ ] Located "Contact Us for Custom Solutions" button
+- [ ] Created modal component file (if separate) or added to existing component
+- [ ] Set up state management for modal open/close
+- [ ] Button now opens modal when clicked
+- [ ] Modal closes when X button clicked
+- [ ] Modal closes when clicking outside (backdrop)
+- [ ] **Test:** Button opens modal, modal closes correctly
+
+### Phase 2: Form Structure
+- [ ] Created form with all 5 required fields
+- [ ] Added proper labels and placeholders
+- [ ] Added character counter for description (X/500)
+- [ ] Added "Send to Berry Team" submit button
+- [ ] Applied colour scheme from existing app
+- [ ] Form matches existing UI style
+- [ ] **Test:** Form displays correctly, all fields present
+
+### Phase 3: Validation
+- [ ] Implemented validation for Name field
+- [ ] Implemented validation for Surname field
+- [ ] Implemented validation for Email field
+- [ ] Implemented validation for Contact Number field
+- [ ] Implemented validation for Description field (10-500 chars)
+- [ ] Submit button disables when form invalid
+- [ ] Error messages appear on blur
+- [ ] Error messages clear on correction
+- [ ] **Test:** Try submitting with empty/invalid fields, all validations work
+
+### Phase 4: Email Functionality
+- [ ] Chosen email implementation method (EmailJS/API/Placeholder)
+- [ ] Implemented email sending logic
+- [ ] Email includes all form data
+- [ ] Email sends to support@berryevents.co.za
+- [ ] Added TODO comments if using placeholder
+- [ ] **Test:** Submit form, check email received or console log shows correct data
+
+### Phase 5: Success Flow
+- [ ] Created success popup component
+- [ ] Success popup shows after submission
+- [ ] Success message displays correctly
+- [ ] Success popup uses correct colours
+- [ ] Auto-redirect after 3 seconds OR manual close works
+- [ ] Form data clears after success
+- [ ] **Test:** Submit valid form, success popup appears, redirects to homepage
+
+### Phase 6: Error Handling
+- [ ] Created error popup for failed submissions
+- [ ] Error popup shows on submission failure
+- [ ] Error popup has "Try Again" and "Close" buttons
+- [ ] Form data preserved when clicking "Try Again"
+- [ ] Errors logged to console
+- [ ] **Test:** Simulate error, error popup works correctly
+
+### Phase 7: Responsive Design
+- [ ] Tested modal on mobile view (375px width)
+- [ ] Tested modal on tablet view (768px width)
+- [ ] Tested modal on desktop view (1920px width)
+- [ ] Form is readable and usable at all sizes
+- [ ] Buttons are properly sized for touch
+- [ ] **Test:** Resize browser, form works at all sizes
+
+### Phase 8: Final QA
+- [ ] No TypeScript/JavaScript errors in console
+- [ ] No blank screens at any point
+- [ ] All existing homepage functionality still works
+- [ ] Other buttons and links unaffected
+- [ ] Form submission works end-to-end
+- [ ] Success and error flows work correctly
+- [ ] Colours match existing app perfectly
+- [ ] UI style matches existing app
+- [ ] Can open, close, and reopen modal multiple times
+- [ ] Form validation is consistent and user-friendly
+- [ ] **Test:** Complete multiple submissions, test all scenarios
+
+---
+
+## 🚨 MANDATORY ERROR PREVENTION
+
+**Before you say you're done:**
+
+1. **Console Check:**
+   - Open browser DevTools (F12)
+   - Go to Console tab
+   - Click the button to open modal
+   - Fill and submit the form
+   - **Verify:** Zero red error messages
+
+2. **Visual Check:**
+   - Navigate to homepage
+   - **Verify:** Page loads completely (no blank screen)
+   - Click "Contact Us for Custom Solutions"
+   - **Verify:** Modal opens (no blank modal)
+   - Fill form and submit
+   - **Verify:** Success popup shows (not blank)
+   - **Verify:** Redirects to homepage (no blank screen)
+
+3. **Functionality Check:**
+   - Click other homepage buttons
+   - **Verify:** All other features still work
+   - Navigate to other pages
+   - **Verify:** Navigation still works
+   - Return to homepage
+   - **Verify:** Modal still works
+
+4. **Colour Check:**
+   - Open modal
+   - Use DevTools to inspect elements
+   - **Verify:** Only approved colours are used
+   - **Verify:** No old colours remain
+
+---
+
+## 📝 REQUIRED RESPONSE FORMAT
+
+You MUST respond in this exact format:
+
+```
+CUSTOM SOLUTION FORM IMPLEMENTATION COMPLETE
+
+1. BUTTON LOCATION:
+   - File: [filename]
+   - Line: [line number]
+   - Button now opens modal: ✅
+
+2. MODAL CREATED:
+   - Component file: [filename] or [inline in parent component]
+   - All 5 fields present: ✅
+   - Character counter (500 max): ✅
+   - Validation working: ✅
+
+3. COLOUR SCHEME:
+   - Using only approved colours: ✅
+   - Matches existing UI style: ✅
+   - Files updated: [list files where colours applied]
+
+4. EMAIL FUNCTIONALITY:
+   - Method used: [EmailJS / API / Placeholder]
+   - Sends to support@berryevents.co.za: ✅ / [TODO if placeholder]
+   - Email includes all form data: ✅
+   - Configuration needed: [describe if any]
+
+5. SUCCESS FLOW:
+   - Success popup created: ✅
+   - Shows thank you message: ✅
+   - Auto-redirect after 3 seconds: ✅
+   - Returns to homepage: ✅
+
+6. ERROR HANDLING:
+   - Error popup created: ✅
+   - Shows on submission failure: ✅
+   - Logs errors to console: ✅
+
+7. TESTING RESULTS:
+   - Zero console errors: ✅
+   - No blank screens: ✅
+   - Existing features unaffected: ✅
+   - Form submits successfully: ✅
+   - Validation works correctly: ✅
+   - Responsive on mobile/tablet/desktop: ✅
+   - Tested multiple submissions: ✅
+
+8. CHECKLIST COMPLETION:
+   - Phase 1 (Setup): ✅
+   - Phase 2 (Form Structure): ✅
+   - Phase 3 (Validation): ✅
+   - Phase 4 (Email): ✅
+   - Phase 5 (Success Flow): ✅
+   - Phase 6 (Error Handling): ✅
+   - Phase 7 (Responsive): ✅
+   - Phase 8 (Final QA): ✅
+
+ALL REQUIREMENTS MET: ✅
+READY FOR PRODUCTION: ✅
+```
+
+---
+
+## 🎯 IMPLEMENTATION TIPS
+
+**Finding the button:**
+```javascript
+// Search for text like:
+"Contact Us for Custom Solutions"
+// or similar button labels
+```
+
+**Creating the modal:**
+```javascript
+// Use state to control modal visibility
+const [showModal, setShowModal] = useState(false);
+
+// Button onClick
+onClick={() => setShowModal(true)}
+```
+
+**Form validation:**
+```javascript
+// Use controlled inputs with state
+const [formData, setFormData] = useState({
+  name: '',
+  surname: '',
+  email: '',
+  contactNumber: '',
+  description: ''
+});
+
+const [errors, setErrors] = useState({});
+
+// Validate on blur or on submit
+```
+
+**Character counter:**
+```javascript
+// Show current length vs max
+{formData.description.length}/500 characters
+```
+
+**Email sending (EmailJS example):**
+```javascript
+// Install: npm install @emailjs/browser
+import emailjs from '@emailjs/browser';
+
+emailjs.send(
+  'YOUR_SERVICE_ID',
+  'YOUR_TEMPLATE_ID',
+  formData,
+  'YOUR_PUBLIC_KEY'
+);
+```
+
+---
+
+## ⚡ TROUBLESHOOTING
+
+**If modal doesn't open:**
+- Check button onClick handler is calling the right function
+- Check modal state is updating
+- Check modal component is rendering conditionally
+
+**If validation doesn't work:**
+- Check each validation function returns boolean
+- Check error messages are rendering
+- Check submit button disabled state
+
+**If colours don't match:**
+- Use browser DevTools to inspect existing buttons
+- Copy exact hex codes from existing elements
+- Apply same Tailwind classes if using Tailwind
+
+**If email doesn't send:**
+- Check EmailJS configuration
+- Check API endpoint if using backend
+- Check console for error messages
+- Use placeholder method if needed
+
+---
+
+## 🚀 START IMPLEMENTATION NOW
+
+1. Find the "Contact Us for Custom Solutions" button
+2. Create the modal component
+3. Build the form with validation
+4. Implement email functionality
+5. Add success and error popups
+6. Test thoroughly
+7. Complete the checklist
+8. Respond with the required format
+
+**DO NOT respond until you have:**
+- ✅ Tested the entire flow multiple times
+- ✅ Confirmed zero errors in console
+- ✅ Confirmed no blank screens
+- ✅ Completed all 8 phases of the checklist
+- ✅ Verified colours match existing app
+
+**MAKE IT WORK. TEST IT THOROUGHLY. THEN REPORT COMPLETION.**

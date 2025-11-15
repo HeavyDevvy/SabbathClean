@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import ModernServiceModal from "@/components/modern-service-modal";
 import AnimatedServiceCard from "@/components/animated-service-card";
+import CustomServiceContact from "@/components/custom-service-contact";
 import { useState, useMemo } from "react";
 import { 
   Home, 
@@ -457,15 +458,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             Our platform connects you with verified professionals for any home service need. 
             Book multiple services together for better coordination and pricing.
           </p>
-          <Button 
-            variant="secondary" 
-            size="lg" 
-            className="font-semibold px-8 py-3 text-white"
-            style={{ backgroundColor: '#C56B86' }}
-            data-testid="contact-custom-services"
-          >
-            Contact Us for Custom Solutions
-          </Button>
+          <CustomServiceContact />
         </div>
       </div>
 
