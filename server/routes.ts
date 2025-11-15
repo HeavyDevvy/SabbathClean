@@ -102,6 +102,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user profile with preferences
+  app.get("/api/user/profile", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Update user profile preferences
+  app.patch("/api/user/profile", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { 
+        preferredServices, 
+        preferredProviders, 
+        savedAddresses,
+        defaultAddress,
+        defaultCity,
+        defaultPostalCode,
+        phone,
+        address,
+        city,
+        province,
+        postalCode
+      } = req.body;
+
+      const updatedUser = await storage.updateUser(userId, {
+        preferredServices,
+        preferredProviders,
+        savedAddresses,
+        defaultAddress,
+        defaultCity,
+        defaultPostalCode,
+        phone,
+        address,
+        city,
+        province,
+        postalCode,
+        updatedAt: new Date()
+      });
+
+      res.json({ 
+        message: "Profile preferences updated successfully", 
+        user: updatedUser 
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Service routes
   app.get("/api/services", async (req, res) => {
     try {

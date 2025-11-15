@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import ServiceSpecificBooking from "@/components/service-specific-booking";
@@ -17,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor, CheckCircle2, Loader2 } from "lucide-react";
+import { Calendar, User, Star, Clock, Save, MapPin, Settings as SettingsIcon, Moon, Sun, Monitor, CheckCircle2, Loader2, Heart, X } from "lucide-react";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
 
@@ -75,6 +76,172 @@ type ProfileFormData = z.infer<typeof profileFormSchema>;
 
 interface OrderWithItems extends Order {
   items: OrderItem[];
+}
+
+const SERVICES = [
+  { id: "house-cleaning", label: "House Cleaning", icon: "🏠" },
+  { id: "garden-care", label: "Garden Care", icon: "🌿" },
+  { id: "plumbing", label: "Plumbing", icon: "🔧" },
+  { id: "electrical", label: "Electrical", icon: "⚡" },
+  { id: "chef-catering", label: "Chef & Catering", icon: "👨‍🍳" },
+  { id: "event-staff", label: "Event Staff", icon: "🎉" },
+  { id: "moving", label: "Moving & Relocation", icon: "📦" },
+  { id: "au-pair", label: "Au Pair Services", icon: "👶" },
+];
+
+// Preferred Services Selector Component
+function PreferredServicesSelector({ userId, userData }: { userId: string | undefined, userData: any }) {
+  const { toast } = useToast();
+
+  const updateServicesMutation = useMutation({
+    mutationFn: async (preferredServices: string[]) => {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers,
+        credentials: "include",
+        body: JSON.stringify({ preferredServices }),
+      });
+      
+      if (!res.ok) throw new Error('Failed to update preferences');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}`] });
+      toast({
+        title: "Success",
+        description: "Service preferences updated!",
+      });
+    },
+  });
+
+  const handleServiceToggle = (serviceId: string) => {
+    const currentPreferences = userData?.preferredServices || [];
+    const newPreferences = currentPreferences.includes(serviceId)
+      ? currentPreferences.filter((id: string) => id !== serviceId)
+      : [...currentPreferences, serviceId];
+
+    updateServicesMutation.mutate(newPreferences);
+  };
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {SERVICES.map((service) => {
+        const isSelected = userData?.preferredServices?.includes(service.id);
+        return (
+          <div
+            key={service.id}
+            onClick={() => handleServiceToggle(service.id)}
+            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+              isSelected
+                ? "border-primary bg-primary/5"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+            data-testid={`service-option-${service.id}`}
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <span className="text-2xl">{service.icon}</span>
+              <span className="text-sm font-medium">{service.label}</span>
+              {isSelected && (
+                <Badge
+                  className="bg-primary text-white"
+                  data-testid={`badge-selected-${service.id}`}
+                >
+                  <Heart className="w-3 h-3 mr-1" />
+                  Selected
+                </Badge>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Preferred Providers List Component  
+function PreferredProvidersList({ userId, userData }: { userId: string | undefined, userData: any }) {
+  const { toast } = useToast();
+
+  const updateProvidersMutation = useMutation({
+    mutationFn: async (preferredProviders: string[]) => {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers,
+        credentials: "include",
+        body: JSON.stringify({ preferredProviders }),
+      });
+      
+      if (!res.ok) throw new Error('Failed to update preferences');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}`] });
+      toast({
+        title: "Success",
+        description: "Provider preferences updated!",
+      });
+    },
+  });
+
+  const handleRemoveProvider = (providerId: string) => {
+    const currentProviders = userData?.preferredProviders || [];
+    const newProviders = currentProviders.filter((id: string) => id !== providerId);
+    updateProvidersMutation.mutate(newProviders);
+  };
+
+  if (!userData?.preferredProviders || userData.preferredProviders.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <Star className="w-12 h-12 mx-auto mb-2 opacity-50" />
+        <p>No saved providers yet</p>
+        <p className="text-sm mt-1">
+          After completing a booking, you can add providers to your favorites
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {userData.preferredProviders.map((providerId: string) => (
+        <div
+          key={providerId}
+          className="flex items-center justify-between p-3 rounded-lg border"
+          data-testid={`provider-item-${providerId}`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium">Provider #{providerId.slice(0, 8)}</p>
+              <p className="text-sm text-gray-600">Saved provider</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleRemoveProvider(providerId)}
+            data-testid={`button-remove-provider-${providerId}`}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function Profile() {
@@ -354,11 +521,11 @@ export default function Profile() {
             )}
           </TabsContent>
 
-          <TabsContent value="profile">
+          <TabsContent value="profile" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <User className="h-5 w-5 mr-2" />
+                  <User className="h-5 h-5 mr-2" />
                   Profile Information
                 </CardTitle>
               </CardHeader>
@@ -524,6 +691,40 @@ export default function Profile() {
                     </div>
                   </form>
                 </Form>
+              </CardContent>
+            </Card>
+
+            {/* Preferred Services Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Star className="h-5 w-5 mr-2" style={{ color: "#C56B86" }} />
+                  Preferred Services
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Select the services you frequently use to get personalized recommendations
+                </p>
+                
+                <PreferredServicesSelector userId={userId} userData={userData} />
+              </CardContent>
+            </Card>
+
+            {/* Preferred Providers Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Star className="h-5 w-5 mr-2" style={{ color: "#C56B86" }} />
+                  Saved Providers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Manage your favorite service providers for quick rebooking
+                </p>
+                
+                <PreferredProvidersList userId={userId} userData={userData} />
               </CardContent>
             </Card>
           </TabsContent>
