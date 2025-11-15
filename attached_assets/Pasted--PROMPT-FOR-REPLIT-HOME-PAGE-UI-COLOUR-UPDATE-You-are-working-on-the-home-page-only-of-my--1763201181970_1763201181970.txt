@@ -1,0 +1,130 @@
+# PROMPT FOR REPLIT – HOME PAGE UI + COLOUR UPDATE
+
+You are working on the **home page only** of my existing web app in this Replit project.
+Please implement ALL of the following changes without breaking any existing functionality (no errors, no blank screens).
+
+---
+
+## 1. Hero Image
+
+- Replace the current top/hero picture on the home page with the image I have uploaded in this Replit project along with this prompt.
+- Make sure it appears in the correct hero position and is responsive (looks good on desktop and mobile).
+
+---
+
+## 2. Strict Colour Palette (no other colours)
+
+On the home page, the ONLY colours that may be used for CTAs, buttons, text (except inside images), icons, borders and backgrounds are:
+
+- `#44062D` – deep plum (primary dark)
+- `#3C0920` – wine / berry (secondary dark)
+- `#EED1C4` – warm cream
+- `#F7F2EF` – soft off-white / background
+- `#C56B86` – muted rose accent
+
+**Requirements:**
+
+- Remove ALL old blues, purples, or any other colours from the home page UI (buttons, text, backgrounds, borders, icons, badges, etc.).
+- Map the existing design to this palette:
+  - **Backgrounds:** use `#F7F2EF` and `#EED1C4`.
+  - **Headings / important text:** `#44062D` or `#3C0920`.
+  - **Primary CTAs** (e.g. "Quick Quote", "Book Now"): `#C56B86` with proper hover state using a slightly lighter/darker variation of the same colour.
+- Images themselves can keep their original colours, but no other UI element should use colours outside this palette.
+
+---
+
+## 3. Service Cards / Placeholders Clean-up
+
+On all service cards or placeholders on the home page (e.g. House Cleaning, Outdoor, Specials, etc.):
+
+**Remove the following elements completely:**
+
+- "Same day"
+- "Rated" / rating badges
+- "Verified" labels
+- "20km" or distance labels
+- The discounts section (bulk day discounts etc.)
+
+**In general:** Everything between the hourly rate and the "Quick Quote" / "Book Now" button must be removed on all service cards on the home page.
+
+**Keep:**
+- The title
+- Short description (if present)
+- Hourly rate
+- The CTA button
+
+Ensure the visual design of the cards aligns with the new colour palette and spacing.
+
+---
+
+## 4. Spacing & Layout
+
+- Improve spacing between sections so the home page looks cleaner and more balanced:
+  - Add consistent vertical padding between sections.
+  - Ensure cards have consistent internal padding and are not cramped.
+  - Avoid large empty gaps / wasted space while still keeping the design airy.
+- The layout must remain responsive and work on different screen sizes.
+
+---
+
+## 5. Functionality
+
+- Do not change any JavaScript logic or break any existing links/behaviour.
+- All existing CTAs (Quick Quote, Book Now, etc.) must still work exactly as before and navigate to the correct pages/flows.
+
+---
+
+## 6. Verification Checklist (must be passed before finishing)
+
+After making the changes, run through this checklist and fix anything that fails:
+
+1. ✅ New hero image is visible, correctly placed, and responsive.
+2. ✅ Only these 5 colours appear in the home page UI: `#44062D`, `#3C0920`, `#EED1C4`, `#F7F2EF`, `#C56B86`.
+3. ✅ No old blue/purple colours remain on text, buttons, badges, or backgrounds.
+4. ✅ On every service card:
+   - "Same day", "Rated", "Verified", "20km", discount information, and all content between hourly rate and CTA button are removed.
+   - The CTA buttons still work.
+5. ✅ Section spacing looks balanced and there is no large wasted space or cramped content.
+6. ✅ The app builds and runs with no error codes in the console.
+7. ✅ The home page does not show a blank screen at any point.
+8. ✅ All previous functionality on the home page still works as expected.
+
+---
+
+## 🔴 CRITICAL IMPLEMENTATION INSTRUCTIONS
+
+**BEFORE YOU START:**
+1. Identify all files that control the home page (components, styles, CSS files).
+2. Create a mental map of what needs to change in each file.
+
+**WHILE IMPLEMENTING:**
+1. Make changes **incrementally** - update one section at a time.
+2. After each change, verify the app still runs without errors.
+3. If you encounter an error, **stop and fix it immediately** before proceeding.
+4. Test each colour change by searching the codebase for old colour values (blues, purples, etc.).
+5. Use browser DevTools or inspect element to verify colours match the exact hex codes.
+
+**SPECIFIC INSTRUCTIONS:**
+- Search for all instances of colour values in CSS/styling (look for `#`, `rgb`, `blue`, `purple`, etc.).
+- Replace ALL colour references on the home page with the approved palette.
+- For the hero image: locate the current image reference (likely in a `<img>` tag, CSS background, or component prop) and replace with the new filename exactly as uploaded.
+- For service cards: identify the component/section that renders them, then remove the specified elements from the JSX/HTML structure.
+
+**DO NOT:**
+- Skip the verification checklist.
+- Leave any placeholder comments like "// TODO: update colour" - make the actual change.
+- Assume a change worked without testing it.
+- Move to the next change if the current one breaks something.
+
+**AFTER COMPLETING ALL CHANGES:**
+1. Run the app and navigate to the home page.
+2. Go through the verification checklist point by point.
+3. Use browser DevTools to inspect elements and confirm colours.
+4. Click all buttons to ensure functionality is preserved.
+5. Test on mobile/responsive view.
+
+---
+
+Make all changes directly in this Replit project and keep the code clean and organized.
+
+**If you encounter any issues or are unsure about a change, STOP and ask for clarification rather than proceeding with assumptions.**

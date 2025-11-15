@@ -122,19 +122,19 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
         {/* Stats Bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {[
-            { icon: Users, value: "500+", label: "Verified Professionals", color: "accent" },
-            { icon: Star, value: "4.9/5", label: "Average Rating", color: "yellow" },
-            { icon: Shield, value: "100%", label: "Background Checked", color: "green" },
-            { icon: Award, value: "50+", label: "Berry Stars", color: "purple" },
+            { icon: Users, value: "500+", label: "Verified Professionals" },
+            { icon: Star, value: "4.9/5", label: "Average Rating" },
+            { icon: Shield, value: "100%", label: "Background Checked" },
+            { icon: Award, value: "50+", label: "Berry Stars" },
           ].map((stat, index) => (
             <div key={index} className="text-center">
-              <div className={`w-16 h-16 bg-${stat.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                <stat.icon className={`h-8 w-8 text-${stat.color}-600`} />
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                <stat.icon className="h-8 w-8" style={{ color: '#C56B86' }} />
               </div>
-              <div className="text-3xl font-bold text-gray-900 mb-2" data-testid={`stat-${stat.label.toLowerCase().replace(' ', '-')}`}>
+              <div className="text-3xl font-bold mb-2" style={{ color: '#44062D' }} data-testid={`stat-${stat.label.toLowerCase().replace(' ', '-')}`}>
                 {stat.value}
               </div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+              <div className="text-sm" style={{ color: '#3C0920' }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -148,117 +148,32 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
               data-testid={`provider-card-${provider.id}`}
             >
               <CardContent className="p-0 flex flex-col h-full">
-                {/* Header Image & Badge */}
+                {/* Header Image */}
                 <div className="relative aspect-square overflow-hidden">
                   <img 
                     src={provider.image} 
                     alt={provider.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                   />
-                  
-                  {/* Top Performer Badge */}
-                  {provider.topPerformer && (
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-yellow-500 text-white border-0 shadow-lg">
-                        <Star className="h-3 w-3 mr-1 fill-current" />
-                        Berry Star
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Availability Badge */}
-                  <div className="absolute top-3 right-3">
-                    <Badge className="bg-green-500 text-white border-0 shadow-lg">
-                      <Clock className="h-3 w-3 mr-1" />
-                      Available
-                    </Badge>
-                  </div>
-
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 flex-1 flex flex-col">
-                  {/* Name & Rating */}
-                  <div className="mb-3">
-                    <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight">
-                      {provider.name}
-                    </h3>
-                    <div className="flex items-center">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`h-3 w-3 ${
-                              i < Math.floor(provider.rating) 
-                                ? 'text-yellow-400 fill-current' 
-                                : 'text-gray-300'
-                            }`} 
-                          />
-                        ))}
-                      </div>
-                      <span className="ml-2 text-xs text-gray-600">
-                        {provider.rating} ({provider.totalReviews})
-                      </span>
-                    </div>
-                  </div>
+                  {/* Name */}
+                  <h3 className="text-lg font-bold mb-2 leading-tight" style={{ color: '#44062D' }}>
+                    {provider.name}
+                  </h3>
 
-                  {/* Specialties */}
-                  <div className="mb-3">
-                    <div className="flex flex-wrap gap-1">
-                      {provider.specialties.slice(0, 2).map((specialty, index) => (
-                        <Badge key={index} variant="outline" className="text-xs px-2 py-0.5">
-                          {specialty}
-                        </Badge>
-                      ))}
-                      {provider.specialties.length > 2 && (
-                        <Badge variant="outline" className="text-xs px-2 py-0.5">
-                          +{provider.specialties.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3 mb-3 text-xs text-gray-600">
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">{provider.completedJobs}</div>
-                      <div>Jobs Done</div>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">{provider.experience}</div>
-                      <div>Experience</div>
-                    </div>
-                  </div>
-
-                  {/* Location & Availability */}
-                  <div className="space-y-1 mb-3 text-xs text-gray-600">
-                    <div className="flex items-center">
-                      <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span className="truncate">{provider.location}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span className="text-green-600 font-medium">{provider.nextAvailable}</span>
-                    </div>
-                  </div>
-
-                  {/* Verification Badges */}
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {provider.verificationBadges.slice(0, 2).map((badge, index) => (
-                      <div key={index} className="flex items-center text-xs text-green-600 bg-green-50 rounded-full px-2 py-0.5">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        <span className="truncate">{badge}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Description */}
+                  <p className="text-sm mb-4 flex-1" style={{ color: '#3C0920' }}>
+                    {provider.specialties[0]}
+                  </p>
 
                   {/* Pricing & CTA */}
-                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t" style={{ borderColor: '#EED1C4' }}>
                     <div>
-                      <div className="text-lg font-bold text-primary">R{provider.hourlyRate}</div>
-                      <div className="text-xs text-muted-foreground">per hour</div>
+                      <div className="text-lg font-bold" style={{ color: '#44062D' }}>R{provider.hourlyRate}</div>
+                      <div className="text-xs" style={{ color: '#3C0920' }}>per hour</div>
                     </div>
                     <Button
                       onClick={() => onBookService(
@@ -267,7 +182,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                         provider.name
                       )}
                       size="sm"
-                      className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs"
+                      className="font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs text-white"
+                      style={{ backgroundColor: '#C56B86' }}
                       data-testid={`button-book-${provider.id}`}
                     >
                       Book Now
@@ -281,12 +197,12 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center bg-white rounded-3xl p-12 border border-gray-200 shadow-lg">
+        <div className="text-center bg-white rounded-3xl p-12 border shadow-lg" style={{ borderColor: '#EED1C4' }}>
           <div className="max-w-3xl mx-auto">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl font-bold mb-4" style={{ color: '#44062D' }}>
               Want to become a Berry Star?
             </h3>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg mb-8" style={{ color: '#3C0920' }}>
               Join our elite group of top-rated professionals. Earn more, get priority bookings, 
               and build a reputation that speaks for itself.
             </p>
@@ -298,18 +214,19 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                 { icon: Award, title: "Recognition", description: "Stand out with Berry Star badge" },
               ].map((benefit, index) => (
                 <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <benefit.icon className="h-8 w-8 text-white" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white" style={{ backgroundColor: '#C56B86' }}>
+                    <benefit.icon className="h-8 w-8" />
                   </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">{benefit.title}</h4>
-                  <p className="text-sm text-gray-600">{benefit.description}</p>
+                  <h4 className="font-semibold mb-2" style={{ color: '#44062D' }}>{benefit.title}</h4>
+                  <p className="text-sm" style={{ color: '#3C0920' }}>{benefit.description}</p>
                 </div>
               ))}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="bg-primary hover:bg-accent text-primary-foreground font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white"
+                style={{ backgroundColor: '#C56B86' }}
                 onClick={() => {
                   window.open('/provider-onboarding', '_blank');
                 }}
@@ -321,7 +238,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
               
               <Button 
                 variant="outline"
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold px-10 py-4 rounded-xl transition-all duration-300"
+                className="border-2 font-semibold px-10 py-4 rounded-xl transition-all duration-300"
+                style={{ borderColor: '#C56B86', color: '#C56B86' }}
                 onClick={() => {
                   const servicesSection = document.getElementById('services');
                   servicesSection?.scrollIntoView({ behavior: 'smooth' });

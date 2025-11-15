@@ -125,19 +125,9 @@ export default function TrustSafetySection() {
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#44062D' }}>
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                  <p className="text-sm leading-relaxed" style={{ color: '#3C0920' }}>
                     {feature.description}
                   </p>
-
-                  {/* Details */}
-                  <div className="space-y-2">
-                    {feature.details.map((detail, detailIndex) => (
-                      <div key={detailIndex} className="flex items-center justify-center text-xs text-gray-500">
-                        <CheckCircle2 className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
-                        {detail}
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -145,12 +135,12 @@ export default function TrustSafetySection() {
         </div>
 
         {/* Safety Stats */}
-        <div className="bg-white rounded-3xl p-8 lg:p-12 border border-gray-200 shadow-lg mb-16">
+        <div className="bg-white rounded-3xl p-8 lg:p-12 border shadow-lg mb-16" style={{ borderColor: '#EED1C4' }}>
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
+            <h3 className="text-3xl font-bold mb-4" style={{ color: '#44062D' }}>
               Safety by the Numbers
             </h3>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-lg max-w-2xl mx-auto" style={{ color: '#3C0920' }}>
               Our commitment to safety and quality is reflected in these key metrics
             </p>
           </div>
@@ -158,16 +148,16 @@ export default function TrustSafetySection() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {safetyStats.map((stat, index) => (
               <div key={index} className="text-center group">
-                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-50 transition-colors duration-300">
-                  <stat.icon className="h-8 w-8 text-blue-600" />
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                  <stat.icon className="h-8 w-8" style={{ color: '#C56B86' }} />
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2" data-testid={`stat-${stat.label.toLowerCase().replace(' ', '-')}`}>
+                <div className="text-3xl font-bold mb-2" style={{ color: '#44062D' }} data-testid={`stat-${stat.label.toLowerCase().replace(' ', '-')}`}>
                   {stat.value}
                 </div>
-                <div className="text-sm font-semibold text-gray-900 mb-1">
+                <div className="text-sm font-semibold mb-1" style={{ color: '#44062D' }}>
                   {stat.label}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs" style={{ color: '#3C0920' }}>
                   {stat.description}
                 </div>
               </div>
@@ -179,14 +169,14 @@ export default function TrustSafetySection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
           {/* Process Steps */}
           <div>
-            <Badge className="bg-blue-100 text-blue-700 px-4 py-2 text-sm font-semibold border-0 mb-4">
+            <Badge className="px-4 py-2 text-sm font-semibold border-0 mb-4 text-white" style={{ backgroundColor: '#C56B86' }}>
               <UserCheck className="h-4 w-4 mr-2" />
               Verification Process
             </Badge>
-            <h3 className="text-3xl font-bold text-gray-900 mb-6">
+            <h3 className="text-3xl font-bold mb-6" style={{ color: '#44062D' }}>
               How we verify every professional
             </h3>
-            <p className="text-gray-600 text-lg leading-relaxed mb-8">
+            <p className="text-lg leading-relaxed mb-8" style={{ color: '#3C0920' }}>
               Our multi-step verification process ensures only the most qualified and 
               trustworthy professionals join our platform.
             </p>
@@ -200,12 +190,12 @@ export default function TrustSafetySection() {
                 { step: 5, title: "Ongoing Monitoring", description: "Continuous performance and safety monitoring" }
               ].map((item, index) => (
                 <div key={index} className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0" style={{ backgroundColor: '#C56B86' }}>
                     {item.step}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                    <p className="text-gray-600 text-sm">{item.description}</p>
+                    <h4 className="font-semibold" style={{ color: '#44062D' }}>{item.title}</h4>
+                    <p className="text-sm" style={{ color: '#3C0920' }}>{item.description}</p>
                   </div>
                 </div>
               ))}
@@ -214,36 +204,36 @@ export default function TrustSafetySection() {
 
           {/* Visual */}
           <div className="relative">
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-8 border border-gray-200">
+            <div className="rounded-3xl p-8 border" style={{ backgroundColor: '#F7F2EF', borderColor: '#EED1C4' }}>
               {/* Provider Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-white rounded-2xl p-6 shadow-lg border" style={{ borderColor: '#EED1C4' }}>
                 <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center">
-                    <Users className="h-8 w-8 text-white" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: '#C56B86' }}>
+                    <Users className="h-8 w-8" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900">Nomsa Mthembu</h4>
-                    <p className="text-sm text-gray-600">House Cleaning Professional</p>
+                    <h4 className="font-bold" style={{ color: '#44062D' }}>Nomsa Mthembu</h4>
+                    <p className="text-sm" style={{ color: '#3C0920' }}>House Cleaning Professional</p>
                   </div>
                 </div>
 
                 {/* Verification Badges */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                  <div className="bg-green-50 rounded-lg p-3 text-center">
-                    <CheckCircle2 className="h-6 w-6 text-green-500 mx-auto mb-1" />
-                    <p className="text-xs font-semibold text-green-700">ID Verified</p>
+                  <div className="rounded-lg p-3 text-center" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                    <CheckCircle2 className="h-6 w-6 mx-auto mb-1" style={{ color: '#C56B86' }} />
+                    <p className="text-xs font-semibold" style={{ color: '#44062D' }}>ID Verified</p>
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-3 text-center">
-                    <Shield className="h-6 w-6 text-blue-500 mx-auto mb-1" />
-                    <p className="text-xs font-semibold text-blue-700">Background Checked</p>
+                  <div className="rounded-lg p-3 text-center" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                    <Shield className="h-6 w-6 mx-auto mb-1" style={{ color: '#C56B86' }} />
+                    <p className="text-xs font-semibold" style={{ color: '#44062D' }}>Background Checked</p>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-3 text-center">
-                    <Award className="h-6 w-6 text-purple-500 mx-auto mb-1" />
-                    <p className="text-xs font-semibold text-purple-700">Skills Certified</p>
+                  <div className="rounded-lg p-3 text-center" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                    <Award className="h-6 w-6 mx-auto mb-1" style={{ color: '#C56B86' }} />
+                    <p className="text-xs font-semibold" style={{ color: '#44062D' }}>Skills Certified</p>
                   </div>
-                  <div className="bg-orange-50 rounded-lg p-3 text-center">
-                    <Heart className="h-6 w-6 text-orange-500 mx-auto mb-1" />
-                    <p className="text-xs font-semibold text-orange-700">Insured</p>
+                  <div className="rounded-lg p-3 text-center" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                    <Heart className="h-6 w-6 mx-auto mb-1" style={{ color: '#C56B86' }} />
+                    <p className="text-xs font-semibold" style={{ color: '#44062D' }}>Insured</p>
                   </div>
                 </div>
 
@@ -251,18 +241,18 @@ export default function TrustSafetySection() {
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-2">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                      <Star key={i} className="h-4 w-4 fill-current" style={{ color: '#C56B86' }} />
                     ))}
                   </div>
-                  <p className="text-sm text-gray-600">4.9 out of 5 (127 reviews)</p>
+                  <p className="text-sm" style={{ color: '#3C0920' }}>4.9 out of 5 (127 reviews)</p>
                 </div>
               </div>
 
               {/* Floating Verification Icons */}
-              <div className="absolute -top-4 -right-4 bg-green-500 text-white rounded-full p-3 shadow-lg">
+              <div className="absolute -top-4 -right-4 text-white rounded-full p-3 shadow-lg" style={{ backgroundColor: '#C56B86' }}>
                 <CheckCircle2 className="h-6 w-6" />
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-blue-500 text-white rounded-full p-3 shadow-lg">
+              <div className="absolute -bottom-4 -left-4 text-white rounded-full p-3 shadow-lg" style={{ backgroundColor: '#C56B86' }}>
                 <Shield className="h-6 w-6" />
               </div>
             </div>
