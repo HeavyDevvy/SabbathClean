@@ -71,7 +71,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
       name: "Zinhle Ndlovu",
       rating: 4.9,
       totalReviews: 156,
-      image: "https://images.unsplash.com/photo-1494790108755-2616c96bb829?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
       specialties: ["Garden Care", "Landscaping", "Plant Expert"],
       experience: "6+ years",
       location: "Durban, KwaZulu-Natal",
