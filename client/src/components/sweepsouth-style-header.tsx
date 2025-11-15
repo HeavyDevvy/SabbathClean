@@ -74,7 +74,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 
                 <Button
                   onClick={onBookingClick}
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white"
+                  style={{ backgroundColor: '#C56B86' }}
                   data-testid="button-book-service"
                 >
                   Book Now
@@ -96,7 +97,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
               <>
                 <Button
                   onClick={onBookingClick}
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white"
+                  style={{ backgroundColor: '#C56B86' }}
                   data-testid="button-book-service"
                 >
                   Book Now

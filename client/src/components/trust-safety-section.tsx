@@ -98,14 +98,14 @@ const certifications = [
 
 export default function TrustSafetySection() {
   return (
-    <section className="py-20 lg:py-28 bg-muted/20">
+    <section className="py-20 lg:py-28" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#44062D' }}>
             Your safety is our priority
           </h2>
-          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+          <p className="text-xl max-w-2xl mx-auto" style={{ color: '#3C0920' }}>
             We connect you to trusted, vetted, and dependable professionals.
           </p>
         </div>
@@ -113,16 +113,16 @@ export default function TrustSafetySection() {
         {/* Trust Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {trustFeatures.map((feature, index) => (
-            <Card key={index} className="bg-card border border-border hover:border-accent/50 hover:shadow-lg transition-all duration-300 group">
+            <Card key={index} className="bg-white border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 group">
               <CardContent className="p-8">
                 {/* Icon */}
-                <div className="w-20 h-20 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:bg-accent/20 transition-colors duration-300">
-                  <feature.icon className="h-10 w-10 text-accent" />
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 mx-auto transition-colors duration-300" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
+                  <feature.icon className="h-10 w-10" style={{ color: '#C56B86' }} />
                 </div>
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-foreground mb-3">
+                  <h3 className="text-xl font-bold mb-3" style={{ color: '#44062D' }}>
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed mb-6">

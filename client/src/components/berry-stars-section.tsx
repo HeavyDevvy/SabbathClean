@@ -107,14 +107,14 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
   };
 
   return (
-    <section className="py-20 lg:py-28 bg-background">
+    <section className="py-20 lg:py-28" style={{ backgroundColor: '#EED1C4' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-5">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-5" style={{ color: '#44062D' }}>
             Meet Your Berry Stars
           </h2>
-          <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
+          <p className="text-xl max-w-2xl mx-auto" style={{ color: '#3C0920' }}>
             Experienced, vetted professionals ready to help.
           </p>
         </div>
