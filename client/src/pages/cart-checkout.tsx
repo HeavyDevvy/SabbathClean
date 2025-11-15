@@ -57,11 +57,13 @@ export default function CartCheckout() {
     );
   }
   
-  const subtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0);
-  // HOUSE CLEANING ONLY: Calculate total tips
+  // Calculate detailed breakdown
+  const baseServicesTotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0);
+  const totalAddOns = cart.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
+  const servicesSubtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0); // Base + Add-ons - Discounts
   const totalTips = cart.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
-  const platformFee = subtotal * 0.15; // Platform fee only on subtotal, NOT on tips
-  const total = subtotal + totalTips + platformFee;
+  const platformFee = servicesSubtotal * 0.15; // Platform fee only on services subtotal, NOT on tips
+  const total = servicesSubtotal + totalTips + platformFee;
   
   // Helper function to detect card brand
   const detectCardBrand = (number: string): string => {
@@ -391,23 +393,34 @@ export default function CartCheckout() {
               <h2 className="text-xl font-semibold mb-4">Payment Summary</h2>
               
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal ({cart.items.length} services)</span>
-                  <span className="font-medium" data-testid="summary-subtotal">{formatCurrency(subtotal)}</span>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Base Services ({cart.items.length} {cart.items.length === 1 ? 'service' : 'services'})</span>
+                  <span className="font-medium" data-testid="summary-base-services">{formatCurrency(baseServicesTotal)}</span>
                 </div>
+                {totalAddOns > 0 && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Add-ons & Extras</span>
+                    <span className="font-medium" data-testid="summary-add-ons">{formatCurrency(totalAddOns)}</span>
+                  </div>
+                )}
+                <Separator className="my-2" />
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Platform Fee (15%)</span>
+                  <span className="font-medium text-gray-900">Services Subtotal</span>
+                  <span className="font-medium text-gray-900" data-testid="summary-services-subtotal">{formatCurrency(servicesSubtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Platform Fee (15%)</span>
                   <span className="font-medium" data-testid="summary-platform-fee">{formatCurrency(platformFee)}</span>
                 </div>
                 {totalTips > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Provider Tips</span>
+                    <span className="text-success font-medium">Provider Tips</span>
                     <span className="font-medium text-success" data-testid="summary-tips">{formatCurrency(totalTips)}</span>
                   </div>
                 )}
-                <Separator />
+                <Separator className="my-2" />
                 <div className="flex justify-between text-lg font-semibold">
-                  <span>Total</span>
+                  <span>Total Amount</span>
                   <span className="text-primary" data-testid="summary-total">{formatCurrency(total)}</span>
                 </div>
               </div>
