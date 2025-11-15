@@ -35,17 +35,17 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
   };
 
   return (
-    <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
+    <header className="sticky top-0 z-50" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-transparent">
+            <div className="w-20 h-20 rounded-full overflow-hidden bg-transparent">
               <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-contain" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-2xl font-bold text-foreground">Berry Events</div>
-              <div className="text-xs text-foreground/60">All your Home Services In One</div>
+              <div className="text-2xl font-bold" style={{ color: '#44062D' }}>Berry Events</div>
+              <div className="text-xs" style={{ color: '#3C0920' }}>All your Home Services In One</div>
             </div>
           </Link>
 
@@ -53,7 +53,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               href="/pricing" 
-              className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium"
+              className="transition-colors duration-200 text-sm font-medium"
+              style={{ color: '#3C0920' }}
             >
               Pricing
             </Link>
@@ -66,7 +67,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                 <Button
                   onClick={() => setLocation("/auth")}
                   variant="ghost"
-                  className="text-foreground/70 hover:text-foreground font-medium"
+                  className="font-medium"
+                  style={{ color: '#3C0920' }}
                   data-testid="button-sign-in"
                 >
                   Sign In
@@ -81,12 +83,13 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                   Book Now
                 </Button>
 
-                <div className="border-l border-border pl-6 ml-4">
-                  <span className="text-sm text-foreground/70 mr-3">Are you a provider?</span>
+                <div className="pl-6 ml-4" style={{ borderLeft: '1px solid #EED1C4' }}>
+                  <span className="text-sm mr-3" style={{ color: '#3C0920' }}>Are you a provider?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-2 border-border text-foreground hover:bg-muted font-medium rounded-xl px-6 py-3 transition-all duration-300"
+                    className="border-2 font-medium rounded-xl px-6 py-3 transition-all duration-300"
+                    style={{ borderColor: '#C56B86', color: '#44062D' }}
                     data-testid="button-apply-now"
                   >
                     Apply Now
@@ -113,11 +116,11 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={user?.profileImage} alt={user?.firstName} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                        <AvatarFallback className="text-sm font-semibold text-white" style={{ backgroundColor: '#C56B86' }}>
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-sm font-medium" style={{ color: '#44062D' }}>
                         {user?.firstName || "Account"}
                       </span>
                     </Button>
@@ -158,31 +161,34 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100">
+          <div className="md:hidden" style={{ borderTop: '1px solid #EED1C4' }}>
             <div className="py-4 space-y-3">
               <Link 
                 href="/services" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
+                className="block px-4 py-2 font-medium"
+                style={{ color: '#3C0920' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Services
               </Link>
               <Link 
                 href="/pricing" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
+                className="block px-4 py-2 font-medium"
+                style={{ color: '#3C0920' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Pricing
               </Link>
               <Link 
                 href="/about" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
+                className="block px-4 py-2 font-medium"
+                style={{ color: '#3C0920' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
               </Link>
               
-              <div className="border-t border-gray-100 pt-3 px-4 space-y-3">
+              <div className="pt-3 px-4 space-y-3" style={{ borderTop: '1px solid #EED1C4' }}>
                 {!isAuthenticated ? (
                   <>
                     <Button
@@ -191,7 +197,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         setIsMobileMenuOpen(false);
                       }}
                       variant="ghost"
-                      className="w-full text-left justify-start text-gray-700"
+                      className="w-full text-left justify-start"
+                      style={{ color: '#3C0920' }}
                     >
                       Sign In
                     </Button>
@@ -201,20 +208,22 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl"
+                      className="w-full text-white rounded-xl"
+                      style={{ backgroundColor: '#C56B86' }}
                     >
                       Book Now
                     </Button>
                     
                     <div className="text-center pt-2">
-                      <span className="text-sm text-muted-foreground block mb-2">Are you a worker?</span>
+                      <span className="text-sm block mb-2" style={{ color: '#3C0920' }}>Are you a worker?</span>
                       <Button
                         onClick={() => {
                           setLocation("/provider-onboarding");
                           setIsMobileMenuOpen(false);
                         }}
                         variant="outline"
-                        className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-xl"
+                        className="w-full border-2 rounded-xl"
+                        style={{ borderColor: '#C56B86', color: '#44062D' }}
                       >
                         Apply Now
                       </Button>
@@ -222,11 +231,11 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                   </>
                 ) : (
                   <>
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">
+                    <div className="px-4 py-2" style={{ borderBottom: '1px solid #EED1C4' }}>
+                      <p className="text-sm font-medium" style={{ color: '#44062D' }}>
                         {user?.firstName} {user?.lastName}
                       </p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+                      <p className="text-xs" style={{ color: '#3C0920' }}>{user?.email}</p>
                     </div>
 
                     <Button
@@ -234,7 +243,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         onBookingClick();
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl"
+                      className="w-full text-white rounded-xl"
+                      style={{ backgroundColor: '#C56B86' }}
                     >
                       Book Now
                     </Button>
@@ -245,7 +255,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         setIsMobileMenuOpen(false);
                       }}
                       variant="ghost"
-                      className="w-full text-left justify-start text-gray-700"
+                      className="w-full text-left justify-start"
+                      style={{ color: '#3C0920' }}
                     >
                       <User className="mr-2 h-4 w-4" />
                       My Profile
@@ -257,7 +268,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         setIsMobileMenuOpen(false);
                       }}
                       variant="ghost"
-                      className="w-full text-left justify-start text-gray-700"
+                      className="w-full text-left justify-start"
+                      style={{ color: '#3C0920' }}
                     >
                       <ShoppingBag className="mr-2 h-4 w-4" />
                       My Bookings
@@ -269,7 +281,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                         setIsMobileMenuOpen(false);
                       }}
                       variant="ghost"
-                      className="w-full text-left justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="w-full text-left justify-start text-red-600 hover:text-red-700"
+                      style={{ backgroundColor: 'transparent' }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
