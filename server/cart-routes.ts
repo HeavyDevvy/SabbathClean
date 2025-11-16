@@ -152,7 +152,7 @@ export function registerCartRoutes(app: Express) {
   });
   
   // DELETE /api/cart - Clear entire cart
-  app.delete("/api/cart", async (req: Request, res: Response) => {
+  app.delete("/api/cart", optionalAuth, async (req: Request, res: Response) => {
     try {
       const { userId, sessionToken } = getCartIdentifier(req);
       
