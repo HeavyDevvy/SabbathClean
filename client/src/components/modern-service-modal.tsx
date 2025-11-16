@@ -2006,7 +2006,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "garden-care" && (
+        {(serviceId === "garden-care" || serviceId === "garden-maintenance") && (
           <>
             <div>
               <Label>Garden Size Range *</Label>
@@ -2019,7 +2019,7 @@ export default function ModernServiceModal({
                 <SelectContent>
                   {currentConfig.gardenSizes?.map((size: any) => (
                     <SelectItem key={size.value} value={size.value}>
-                      {size.label}
+                      {size.label} - {size.multiplier}x multiplier
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -3876,7 +3876,7 @@ export default function ModernServiceModal({
                       disabled={
                         (step === 1 && (!formData.propertyType || !formData.address || 
                           (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
-                          (serviceId === "garden-care" && (!formData.gardenSize || !formData.gardenCondition)) ||
+                          ((serviceId === "garden-care" || serviceId === "garden-maintenance") && (!formData.gardenSize || !formData.gardenCondition)) ||
                           (serviceId === "plumbing" && (!formData.plumbingIssue || !formData.urgency)) ||
                           (serviceId === "electrical" && (!formData.electricalIssue || !formData.urgency)) ||
                           (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
