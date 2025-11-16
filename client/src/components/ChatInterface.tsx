@@ -260,13 +260,19 @@ export function ChatInterface({
           <Button
             onClick={handleSendMessage}
             disabled={!messageText.trim() || sendMessageMutation.isPending}
-            className="bg-berry-primary hover:bg-berry-dark text-white"
+            className="bg-berry-primary hover:bg-berry-dark text-white px-4"
             data-testid="button-send-message"
           >
             {sendMessageMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Sending...
+              </>
             ) : (
-              <Send className="h-4 w-4" />
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Send
+              </>
             )}
           </Button>
         </div>
