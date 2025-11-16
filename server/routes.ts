@@ -469,10 +469,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update booking status to enroute
-      await storage.updateBooking(bookingId, { status: 'enroute' });
+      const booking = await storage.updateBooking(bookingId, { status: 'enroute' });
       
-      // TODO: Send push notification to customer
-      // This will be implemented when we integrate with push notification system
+      // Send real-time update to customer via WebSocket
+      try {
+        const trackingData = {
+          bookingId,
+          status: 'enroute',
+          providerId,
+          location: { latitude, longitude },
+          timestamp: new Date().toISOString(),
+          message: 'Your service provider is on the way!'
+        };
+        
+        console.log(`📱 Provider enroute for booking ${bookingId}, broadcasting update`);
+        
+        // Broadcast via WebSocket to all subscribed clients
+        // The broadcastTrackingUpdate function is attached to the app object
+        if (typeof (app as any).broadcastTrackingUpdate === 'function') {
+          (app as any).broadcastTrackingUpdate(bookingId, trackingData);
+        }
+      } catch (error) {
+        console.error('Error broadcasting enroute status:', error);
+        // Don't fail the request if broadcast fails
+      }
       
       res.json({ message: "Provider enroute status updated successfully" });
     } catch (error: any) {
@@ -1399,8 +1419,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ws.send(message);
         }
       });
+      
+      console.log(`📡 Broadcast tracking update for booking ${bookingId} to ${connections.size} client(s)`);
+    } else {
+      console.log(`ℹ️  No active WebSocket connections for booking ${bookingId}`);
     }
   };
+  
+  // Make broadcast function available to route handlers
+  (app as any).broadcastTrackingUpdate = broadcastTrackingUpdate;
 
   // Enhance location update endpoint to broadcast WebSocket updates
   const originalUpdateLocation = app._router.stack.find((layer: any) => 

@@ -166,7 +166,7 @@ export function registerSupportRoutes(app: Express) {
           subject,
           message,
           status: 'open',
-          priority: category === 'urgent' || category === 'safety' ? 'high' : 'normal'
+          priority: category === 'safety' ? 'high' : 'normal' // Safety issues are high priority
         });
         console.log('✅ Support ticket saved to database');
       } catch (dbError) {
