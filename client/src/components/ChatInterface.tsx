@@ -259,6 +259,7 @@ export function ChatInterface({
                           ? 'bg-berry-primary text-black rounded-br-sm'
                           : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm'
                       }`}
+                      style={{ fontFamily: 'Arial Unicode MS, Arial, sans-serif' }}
                     >
                       <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
                         {message.content}
