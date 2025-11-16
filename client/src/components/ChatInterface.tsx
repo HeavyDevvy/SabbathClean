@@ -33,7 +33,7 @@ export function ChatInterface({
   const wsRef = useRef<WebSocket | null>(null);
 
   // Get or create conversation (only once per booking)
-  const { data: conversationData } = useQuery<Conversation>({
+  const { data: conversationData } = useQuery({
     queryKey: ["/api/conversations", bookingId],
     queryFn: async () => {
       const response = await apiRequest("POST", "/api/conversations", {
@@ -41,10 +41,10 @@ export function ChatInterface({
         customerId,
         providerId
       });
-      return response;
+      return response as Conversation;
     },
     staleTime: Infinity, // Conversation won't change for this booking
-    cacheTime: Infinity,
+    gcTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false
@@ -52,7 +52,7 @@ export function ChatInterface({
 
   useEffect(() => {
     if (conversationData && !conversation) {
-      setConversation(conversationData);
+      setConversation(conversationData as Conversation);
     }
   }, [conversationData, conversation]);
 
