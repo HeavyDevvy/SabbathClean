@@ -162,6 +162,9 @@ export default function BookingsPage() {
       address: item.serviceDetails?.address || "Address not provided",
       totalPrice: item.subtotal,
       specialInstructions: item.comments || item.serviceDetails?.specialRequests || "",
+      // Provider information for chat feature
+      providerId: item.providerId,
+      providerName: item.providerName,
       // Additional fields from order
       paymentStatus: order.paymentStatus,
       createdAt: order.createdAt,

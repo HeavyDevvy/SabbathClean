@@ -70,7 +70,7 @@ import {
   type InsertWalletTransaction
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -1299,11 +1299,36 @@ export class DatabaseStorage implements IStorage {
     return order || undefined;
   }
 
-  async getOrderWithItems(orderId: string): Promise<{ order: Order; items: OrderItem[] } | undefined> {
+  async getOrderWithItems(orderId: string): Promise<{ order: Order; items: any[] } | undefined> {
     const order = await this.getOrder(orderId);
     if (!order) return undefined;
 
-    const items = await db.select().from(orderItems)
+    const items = await db.select({
+      id: orderItems.id,
+      orderId: orderItems.orderId,
+      serviceType: orderItems.serviceType,
+      serviceName: orderItems.serviceName,
+      providerId: orderItems.providerId,
+      providerName: sql<string>`CONCAT(${serviceProviders.firstName}, ' ', ${serviceProviders.lastName})`.as('provider_name'),
+      scheduledDate: orderItems.scheduledDate,
+      scheduledTime: orderItems.scheduledTime,
+      duration: orderItems.duration,
+      basePrice: orderItems.basePrice,
+      addOnsPrice: orderItems.addOnsPrice,
+      subtotal: orderItems.subtotal,
+      tipAmount: orderItems.tipAmount,
+      status: orderItems.status,
+      comments: orderItems.comments,
+      serviceDetails: orderItems.serviceDetails,
+      selectedAddOns: orderItems.selectedAddOns,
+      sourceCartItemId: orderItems.sourceCartItemId,
+      bookingId: orderItems.bookingId,
+      serviceId: orderItems.serviceId,
+      createdAt: orderItems.createdAt,
+      updatedAt: orderItems.updatedAt,
+    })
+      .from(orderItems)
+      .leftJoin(serviceProviders, eq(orderItems.providerId, serviceProviders.id))
       .where(eq(orderItems.orderId, orderId))
       .orderBy(desc(orderItems.createdAt));
 
