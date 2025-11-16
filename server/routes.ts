@@ -8,6 +8,7 @@ import { registerPushNotificationRoutes } from "./push-notification-routes";
 import { registerCustomerReviewRoutes } from "./customer-review-routes";
 import { registerSupportRoutes } from "./support-routes";
 import { registerCartRoutes } from "./cart-routes";
+import { registerChatRoutes } from "./chat-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -1195,6 +1196,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register shopping cart routes
   registerCartRoutes(app);
+  
+  // Register chat routes
+  registerChatRoutes(app, storage);
 
   // Wallet API Routes
   app.get("/api/wallet/balance", authenticateToken, async (req, res) => {
@@ -1372,8 +1376,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // WebSocket server for real-time tracking updates
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  // Store active WebSocket connections for tracking
+  // Store active WebSocket connections
   const trackingConnections = new Map<string, Set<WebSocket>>();
+  const chatConnections = new Map<string, Set<WebSocket>>();
 
   wss.on('connection', (ws: WebSocket, req) => {
     console.log('WebSocket connection established');
@@ -1390,14 +1395,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trackingConnections.get(data.bookingId)?.add(ws);
           console.log(`Client subscribed to tracking for booking: ${data.bookingId}`);
         }
+        
+        if (data.type === 'subscribe_chat' && data.conversationId) {
+          // Subscribe to chat updates for a specific conversation
+          if (!chatConnections.has(data.conversationId)) {
+            chatConnections.set(data.conversationId, new Set());
+          }
+          chatConnections.get(data.conversationId)?.add(ws);
+          console.log(`💬 Client subscribed to chat for conversation: ${data.conversationId}`);
+        }
       } catch (error) {
         console.error('WebSocket message parsing error:', error);
       }
     });
 
     ws.on('close', () => {
-      // Remove this connection from all tracking subscriptions
+      // Remove this connection from all subscriptions
       trackingConnections.forEach((connections) => {
+        connections.delete(ws);
+      });
+      chatConnections.forEach((connections) => {
         connections.delete(ws);
       });
       console.log('WebSocket connection closed');
@@ -1426,8 +1443,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
   
-  // Make broadcast function available to route handlers
+  // Function to broadcast chat messages
+  const broadcastChatMessage = (conversationId: string, message: any) => {
+    const connections = chatConnections.get(conversationId);
+    if (connections) {
+      const payload = JSON.stringify({
+        type: 'new_message',
+        conversationId,
+        message
+      });
+      
+      connections.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(payload);
+        }
+      });
+      
+      console.log(`💬 Broadcast message to ${connections.size} client(s) in conversation ${conversationId}`);
+    }
+  };
+  
+  // Make broadcast functions available to route handlers
   (app as any).broadcastTrackingUpdate = broadcastTrackingUpdate;
+  (app as any).broadcastChatMessage = broadcastChatMessage;
 
   // Enhance location update endpoint to broadcast WebSocket updates
   const originalUpdateLocation = app._router.stack.find((layer: any) => 
