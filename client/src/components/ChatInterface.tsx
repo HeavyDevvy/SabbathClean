@@ -260,21 +260,11 @@ export function ChatInterface({
           <Button
             onClick={handleSendMessage}
             disabled={!messageText.trim() || sendMessageMutation.isPending}
-            className="bg-berry-primary hover:bg-berry-dark text-white px-6 flex items-center gap-2 disabled:opacity-100 disabled:bg-berry-primary/50 disabled:text-white disabled:cursor-not-allowed [&_svg]:!fill-current [&_svg]:!stroke-current"
+            className="bg-berry-primary hover:bg-berry-dark text-white px-6 py-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
             size="default"
             data-testid="button-send-message"
           >
-            {sendMessageMutation.isPending ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin stroke-white" />
-                <span className="font-medium">Sending...</span>
-              </>
-            ) : (
-              <>
-                <SendHorizontal className="h-6 w-6 stroke-white stroke-[2]" strokeWidth={2.5} />
-                <span className="font-medium">Send</span>
-              </>
-            )}
+            {sendMessageMutation.isPending ? "Sending..." : "Send Message →"}
           </Button>
         </div>
       </div>
