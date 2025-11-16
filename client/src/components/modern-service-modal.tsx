@@ -469,16 +469,15 @@ export default function ModernServiceModal({
       basePrice: 320,
       steps: 4,
       propertyTypes: [
-        { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
         { value: "house", label: "House Garden", multiplier: 1.0 },
         { value: "townhouse", label: "Townhouse Garden", multiplier: 0.9 },
-        { value: "villa", label: "Villa Estate", multiplier: 1.4 }
+        { value: "estate-property", label: "Estate Property", multiplier: 1.4 }
       ],
       gardenSizes: [
         { value: "small", label: "Small (0-100m²)", multiplier: 1.0 },
-        { value: "medium", label: "Medium (100-300m²)", multiplier: 1.3 },
-        { value: "large", label: "Large (300-500m²)", multiplier: 1.6 },
-        { value: "estate", label: "Estate (500m²+)", multiplier: 2.0 }
+        { value: "medium", label: "Medium (100-300m²)", multiplier: 1.5 },
+        { value: "large", label: "Large (300-500m²)", multiplier: 2.0 },
+        { value: "estate", label: "Estate (500m²+)", multiplier: 3.0 }
       ],
       gardenConditions: [
         { value: "well-maintained", label: "Well Maintained", multiplier: 1.0 },
@@ -571,16 +570,15 @@ export default function ModernServiceModal({
       basePrice: 320,
       steps: 4,
       propertyTypes: [
-        { value: "apartment", label: "Apartment Balcony", multiplier: 0.7 },
         { value: "house", label: "House Garden", multiplier: 1.0 },
         { value: "townhouse", label: "Townhouse Garden", multiplier: 0.9 },
-        { value: "villa", label: "Villa Estate", multiplier: 1.4 }
+        { value: "estate-property", label: "Estate Property", multiplier: 1.4 }
       ],
       gardenSizes: [
         { value: "small", label: "Small (0-100m²)", multiplier: 1.0 },
-        { value: "medium", label: "Medium (100-300m²)", multiplier: 1.3 },
-        { value: "large", label: "Large (300-500m²)", multiplier: 1.6 },
-        { value: "estate", label: "Estate (500m²+)", multiplier: 2.0 }
+        { value: "medium", label: "Medium (100-300m²)", multiplier: 1.5 },
+        { value: "large", label: "Large (300-500m²)", multiplier: 2.0 },
+        { value: "estate", label: "Estate (500m²+)", multiplier: 3.0 }
       ],
       gardenConditions: [
         { value: "well-maintained", label: "Well Maintained", multiplier: 1.0 },
@@ -1358,7 +1356,7 @@ export default function ModernServiceModal({
       return;
     }
 
-    // Map frontend service IDs to database service IDs
+    // Map frontend service IDs to database service IDs (needed for validation)
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
@@ -1369,6 +1367,24 @@ export default function ModernServiceModal({
     };
     
     const dbServiceId = serviceIdMapping[serviceId] || serviceId;
+
+    // Chef & Catering: Validate 24-hour minimum booking window
+    if ((serviceId === "chef-catering" || dbServiceId === "chef-catering") && 
+        formData.preferredDate && formData.timePreference) {
+      const selectedDateTime = new Date(formData.preferredDate);
+      const [hours] = formData.timePreference.split(':').map(Number);
+      selectedDateTime.setHours(hours, 0, 0, 0);
+      const hoursFromNow = (selectedDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
+      
+      if (hoursFromNow < 24) {
+        toast({
+          variant: "destructive",
+          title: "24-Hour Notice Required",
+          description: "Chef & Catering services require at least 24 hours notice for menu planning and ingredient sourcing. Please select a later date or time."
+        });
+        return;
+      }
+    }
     
     // Map booking data to CartItem format
     const cartItem = {
@@ -1486,7 +1502,7 @@ export default function ModernServiceModal({
       return;
     }
 
-    // Map frontend service IDs to database service IDs
+    // Map frontend service IDs to database service IDs (needed for validation)
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
@@ -1497,6 +1513,24 @@ export default function ModernServiceModal({
     };
     
     const dbServiceId = serviceIdMapping[serviceId] || serviceId;
+
+    // Chef & Catering: Validate 24-hour minimum booking window
+    if ((serviceId === "chef-catering" || dbServiceId === "chef-catering") && 
+        formData.preferredDate && formData.timePreference) {
+      const selectedDateTime = new Date(formData.preferredDate);
+      const [hours] = formData.timePreference.split(':').map(Number);
+      selectedDateTime.setHours(hours, 0, 0, 0);
+      const hoursFromNow = (selectedDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
+      
+      if (hoursFromNow < 24) {
+        toast({
+          variant: "destructive",
+          title: "24-Hour Notice Required",
+          description: "Chef & Catering services require at least 24 hours notice for menu planning and ingredient sourcing. Please select a later date or time."
+        });
+        return;
+      }
+    }
     
     // Map booking data to CartItem format
     const cartItem = {
@@ -2517,7 +2551,14 @@ export default function ModernServiceModal({
             type="date"
             value={formData.preferredDate}
             onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
-            min={new Date().toISOString().split('T')[0]}
+            min={(() => {
+              const minDate = new Date();
+              // Chef & Catering requires 24 hours minimum notice
+              if (serviceId === "chef-catering" || mappedServiceId === "chef-catering") {
+                minDate.setDate(minDate.getDate() + 1);
+              }
+              return minDate.toISOString().split('T')[0];
+            })()}
             className="w-full h-12 text-base"
             readOnly={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || (isElectrical && formData.urgency === "next-day")}
             disabled={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || (isElectrical && formData.urgency === "next-day")}
@@ -2532,6 +2573,12 @@ export default function ModernServiceModal({
           {isElectrical && formData.urgency === "next-day" && (
             <p className="text-xs text-gray-600 mt-1">
               Next-day electrical service is scheduled for tomorrow
+            </p>
+          )}
+          {(serviceId === "chef-catering" || mappedServiceId === "chef-catering") && (
+            <p className="text-xs text-blue-600 mt-1 flex items-center">
+              <ChefHat className="h-3 w-3 mr-1" />
+              Chef services require 24 hours minimum notice for menu planning and ingredient sourcing
             </p>
           )}
         </div>
@@ -2553,11 +2600,11 @@ export default function ModernServiceModal({
                 <SelectItem value="ASAP">As Soon As Possible</SelectItem>
               )}
               {(() => {
-                // HOUSE CLEANING ONLY: Check if booking for today
                 const isToday = formData.preferredDate === new Date().toISOString().split('T')[0];
                 const now = new Date();
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
+                const isChef = serviceId === "chef-catering" || mappedServiceId === "chef-catering";
                 
                 const timeSlots = [
                   { value: "08:00", label: "08:00 - Morning", hour: 8 },
@@ -2568,18 +2615,36 @@ export default function ModernServiceModal({
                 ];
                 
                 return timeSlots.map((slot) => {
+                  let isDisabled = false;
+                  let disabledReason = "";
+                  
                   // For House Cleaning & Plumbing + today's date: disable past time slots
-                  const isPast = showEnhancedProviderDetails && isToday && 
-                    (slot.hour < currentHour || (slot.hour === currentHour && currentMinute > 0));
+                  if (showEnhancedProviderDetails && isToday && 
+                      (slot.hour < currentHour || (slot.hour === currentHour && currentMinute > 0))) {
+                    isDisabled = true;
+                    disabledReason = " (Past)";
+                  }
+                  
+                  // For Chef & Catering: Enforce 24-hour minimum booking window
+                  if (isChef && formData.preferredDate) {
+                    const selectedDateTime = new Date(formData.preferredDate);
+                    selectedDateTime.setHours(slot.hour, 0, 0, 0);
+                    const hoursFromNow = (selectedDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+                    
+                    if (hoursFromNow < 24) {
+                      isDisabled = true;
+                      disabledReason = " (< 24hrs notice)";
+                    }
+                  }
                   
                   return (
                     <SelectItem 
                       key={slot.value} 
                       value={slot.value}
-                      disabled={isPast}
+                      disabled={isDisabled}
                     >
                       {slot.label}
-                      {isPast && " (Past)"}
+                      {disabledReason}
                     </SelectItem>
                   );
                 });

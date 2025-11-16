@@ -109,28 +109,48 @@ export const mapBookingToReceiptData = (booking: Booking): BookingReceiptData =>
 export const generateBookingReceipt = (bookingData: BookingData, bookingRef: string) => {
   const doc = new jsPDF();
   
-  // Colors
-  const primaryColor = [139, 92, 246]; // Purple
-  const secondaryColor = [34, 197, 94]; // Green
+  // Berry Events Brand Colors (from design system)
+  const berryPrimary = [68, 6, 45]; // #44062D - Deep plum
+  const berryLight = [247, 242, 239]; // #F7F2EF - Light beige
+  const berryAccent = [197, 107, 134]; // #C56B86 - Berry pink
   const textColor = [31, 41, 55]; // Gray-800
   const lightGray = [243, 244, 246]; // Gray-100
   
   let yPosition = 20;
   
-  // Header - Berry Events Branding
-  doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.rect(0, 0, 210, 40, 'F');
+  // Header - Berry Events Branding with Logo Circle
+  doc.setFillColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
+  doc.rect(0, 0, 210, 45, 'F');
   
+  // Berry Logo Circle (left side)
+  doc.setFillColor(berryAccent[0], berryAccent[1], berryAccent[2]);
+  doc.circle(25, 22, 10, 'F');
+  
+  // Inner circle for logo effect
+  doc.setFillColor(berryLight[0], berryLight[1], berryLight[2]);
+  doc.circle(25, 22, 7, 'F');
+  
+  // Berry initial in circle
+  doc.setTextColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('B', 25, 25, { align: 'center' });
+  
+  // Company name
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text('BERRY EVENTS', 105, 20, { align: 'center' });
+  doc.text('BERRY EVENTS', 115, 20, { align: 'center' });
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text('All Your Home Services In One', 105, 28, { align: 'center' });
+  doc.text('All Your Home Services In One', 115, 28, { align: 'center' });
   
-  yPosition = 50;
+  // Premium Service Badge
+  doc.setFontSize(8);
+  doc.text('Premium Quality • Verified Providers • Secure Payments', 115, 36, { align: 'center' });
+  
+  yPosition = 55;
   
   // Receipt Title
   doc.setTextColor(textColor[0], textColor[1], textColor[2]);
@@ -140,8 +160,8 @@ export const generateBookingReceipt = (bookingData: BookingData, bookingRef: str
   
   yPosition += 10;
   
-  // Booking Reference
-  doc.setFillColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+  // Booking Reference with Berry Accent Color
+  doc.setFillColor(berryAccent[0], berryAccent[1], berryAccent[2]);
   doc.roundedRect(15, yPosition, 180, 12, 3, 3, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
@@ -306,7 +326,7 @@ export const generateBookingReceipt = (bookingData: BookingData, bookingRef: str
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('TOTAL PAID', 20, yPosition);
-  doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  doc.setTextColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
   doc.text(`R${bookingData.totalCost}`, 175, yPosition, { align: 'right' });
   doc.setTextColor(textColor[0], textColor[1], textColor[2]);
   
