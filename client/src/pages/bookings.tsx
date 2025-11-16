@@ -231,8 +231,9 @@ export default function BookingsPage() {
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex space-x-2">
-              {booking.status === "confirmed" && (
-                <>
+              {/* Show chat for all active bookings */}
+              {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
+                booking.providerId ? (
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -248,20 +249,33 @@ export default function BookingsPage() {
                     <MessageCircle className="h-4 w-4 mr-1" />
                     Chat
                   </Button>
+                ) : (
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => setRescheduleBooking({
-                      id: booking.id,
-                      service: booking.serviceType,
-                      date: scheduledDate,
-                      time: booking.scheduledTime
-                    })}
-                    data-testid={`button-reschedule-${booking.id}`}
+                    disabled
+                    title="Chat will be available once a provider is assigned to your booking"
+                    data-testid={`button-chat-disabled-${booking.id}`}
                   >
-                    Reschedule
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Chat (Provider Pending)
                   </Button>
-                </>
+                )
+              )}
+              {booking.status === "confirmed" && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setRescheduleBooking({
+                    id: booking.id,
+                    service: booking.serviceType,
+                    date: scheduledDate,
+                    time: booking.scheduledTime
+                  })}
+                  data-testid={`button-reschedule-${booking.id}`}
+                >
+                  Reschedule
+                </Button>
               )}
               {booking.status === "completed" && (
                 <>
