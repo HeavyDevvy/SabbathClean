@@ -41,7 +41,7 @@ export function ChatInterface({
         customerId,
         providerId
       });
-      return response as Conversation;
+      return response.json() as Promise<Conversation>;
     },
     staleTime: Infinity,
     gcTime: Infinity,
@@ -127,21 +127,38 @@ export function ChatInterface({
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (text: string) => {
-      if (!conversation?.id) throw new Error("No conversation");
+      if (!conversation?.id) {
+        console.error("❌ No conversation ID available");
+        throw new Error("No conversation");
+      }
       
-      return apiRequest("POST", "/api/messages", {
+      console.log("📤 Sending message:", { conversationId: conversation.id, senderId: currentUserId, content: text });
+      
+      const response = await apiRequest("POST", "/api/messages", {
         conversationId: conversation.id,
         senderId: currentUserId,
         content: text
       });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("❌ Send failed:", error);
+        throw new Error(error);
+      }
+      
+      const result = await response.json();
+      console.log("✅ Message sent:", result);
+      return result;
     },
     onSuccess: () => {
+      console.log("✅ Message success - clearing input");
       setMessageText("");
       queryClient.invalidateQueries({ 
         queryKey: ["/api/conversations", conversation?.id, "messages"] 
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("❌ Send error:", error);
       toast({
         title: "Send Failed",
         description: "Failed to send message. Please try again.",
@@ -151,7 +168,12 @@ export function ChatInterface({
   });
 
   const handleSendMessage = () => {
-    if (!messageText.trim()) return;
+    console.log("🔘 Send button clicked, message:", messageText);
+    if (!messageText.trim()) {
+      console.log("⚠️ Message is empty, not sending");
+      return;
+    }
+    console.log("✅ Triggering mutation");
     sendMessageMutation.mutate(messageText);
   };
 
