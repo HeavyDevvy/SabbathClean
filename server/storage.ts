@@ -62,6 +62,8 @@ import {
   orders,
   orderItems,
   bookingGateCodes,
+  conversations,
+  messages,
   type Wallet,
   type InsertWallet,
   type WalletTransaction,

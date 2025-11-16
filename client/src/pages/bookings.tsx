@@ -8,6 +8,7 @@ import EnhancedHeader from "@/components/enhanced-header";
 import { RescheduleDialog } from "@/components/reschedule-dialog";
 import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
 import { ShareBookingDialog } from "@/components/share-booking-dialog";
+import { ChatDialog } from "@/components/chat-dialog";
 import ModernServiceModal from "@/components/modern-service-modal";
 import WhatsAppShareButton from "@/components/whatsapp-share-button";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,7 +30,8 @@ import {
   MoreVertical,
   Loader2,
   Repeat,
-  Share2
+  Share2,
+  MessageCircle
 } from "lucide-react";
 
 // Mock booking data
@@ -114,6 +116,7 @@ export default function BookingsPage() {
   const [cancelBooking, setCancelBooking] = useState<any>(null);
   const [rebookData, setRebookData] = useState<any>(null);
   const [shareBooking, setShareBooking] = useState<any>(null);
+  const [chatBooking, setChatBooking] = useState<any>(null);
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -230,9 +233,20 @@ export default function BookingsPage() {
             <div className="flex space-x-2">
               {booking.status === "confirmed" && (
                 <>
-                  <Button variant="outline" size="sm">
-                    <Phone className="h-4 w-4 mr-1" />
-                    Contact
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setChatBooking({
+                      id: booking.id,
+                      customerId: user?.id,
+                      providerId: booking.providerId,
+                      providerName: booking.providerName || 'Provider',
+                      customerName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Customer'
+                    })}
+                    data-testid={`button-chat-${booking.id}`}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-1" />
+                    Chat
                   </Button>
                   <Button 
                     variant="outline" 
@@ -501,6 +515,20 @@ export default function BookingsPage() {
           isOpen={true}
           onClose={() => setShareBooking(null)}
           booking={shareBooking}
+        />
+      )}
+
+      {/* Chat Dialog */}
+      {chatBooking && user && (
+        <ChatDialog
+          open={true}
+          onOpenChange={(open) => !open && setChatBooking(null)}
+          bookingId={chatBooking.id}
+          customerId={chatBooking.customerId}
+          providerId={chatBooking.providerId}
+          customerName={chatBooking.customerName}
+          providerName={chatBooking.providerName}
+          currentUserId={user.id}
         />
       )}
     </div>
