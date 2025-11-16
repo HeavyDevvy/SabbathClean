@@ -24,11 +24,11 @@ export function ChatDialog({
 }: ChatDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] max-h-[900px] p-0 flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+      <DialogContent className="max-w-2xl h-[90vh] max-h-[800px] p-0 flex flex-col gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
           <DialogTitle>Chat with Provider</DialogTitle>
         </DialogHeader>
-        <div className="flex-1 overflow-hidden px-6 pb-6">
+        <div className="flex-1 flex flex-col min-h-0">
           <ChatInterface
             bookingId={bookingId}
             customerId={customerId}
