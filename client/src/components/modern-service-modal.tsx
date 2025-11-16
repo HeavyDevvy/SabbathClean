@@ -875,6 +875,15 @@ export default function ModernServiceModal({
     [isPlumbing, formData.urgency]
   );
   
+  // Check if electrical service has urgent priority requiring one-time booking
+  const isUrgentElectrical = useMemo(() => 
+    isElectrical && ['emergency', 'urgent', 'next-day'].includes(formData.urgency),
+    [isElectrical, formData.urgency]
+  );
+  
+  // Check if recurring schedule should be disabled
+  const shouldDisableRecurring = isUrgentPlumbing || isUrgentElectrical;
+  
   // Service-specific placeholder suggestions for Comments field
   const servicePlaceholders: Record<string, string> = {
     "cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
@@ -1004,12 +1013,25 @@ export default function ModernServiceModal({
     });
   }, [serviceId, prefillFromRecent, editBookingData, toast]);
   
-  // Lock recurring schedule to one-time for urgent plumbing services
+  // Lock recurring schedule to one-time for urgent plumbing/electrical services
   useEffect(() => {
-    if (isUrgentPlumbing && formData.recurringSchedule !== "one-time") {
+    if (shouldDisableRecurring && formData.recurringSchedule !== "one-time") {
       setFormData(prev => ({ ...prev, recurringSchedule: "one-time" }));
     }
-  }, [isUrgentPlumbing, formData.recurringSchedule]);
+  }, [shouldDisableRecurring, formData.recurringSchedule]);
+  
+  // Set default date to tomorrow and disable date picker for electrical next-day service
+  useEffect(() => {
+    if (isElectrical && formData.urgency === "next-day") {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      
+      if (formData.preferredDate !== tomorrowStr) {
+        setFormData(prev => ({ ...prev, preferredDate: tomorrowStr }));
+      }
+    }
+  }, [isElectrical, formData.urgency]);
 
   // Calculate pricing whenever form data changes
   // Auto-set date and time for Emergency/Urgent/Same Day services
@@ -2114,10 +2136,16 @@ export default function ModernServiceModal({
                       <span className="text-xs text-gray-500 mt-1">Fast response within hours for urgent repairs</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="next-day">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">Next Day</span>
+                      <span className="text-xs text-gray-500 mt-1">Service tomorrow at regular price</span>
+                    </div>
+                  </SelectItem>
                   <SelectItem value="standard">
                     <div className="flex flex-col items-start">
-                      <span className="font-medium">Standard (Next Day)</span>
-                      <span className="text-xs text-gray-500 mt-1">Scheduled next-day service at regular price</span>
+                      <span className="font-medium">Standard (Flexible)</span>
+                      <span className="text-xs text-gray-500 mt-1">Schedule at your convenience - Non-urgent repairs</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="scheduled">
@@ -2491,14 +2519,19 @@ export default function ModernServiceModal({
             onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
             min={new Date().toISOString().split('T')[0]}
             className="w-full h-12 text-base"
-            readOnly={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
-            disabled={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day"}
+            readOnly={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || (isElectrical && formData.urgency === "next-day")}
+            disabled={formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || (isElectrical && formData.urgency === "next-day")}
             data-testid="input-preferred-date"
             required
           />
           {(formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day") && (
             <p className="text-xs text-orange-600 mt-1">
               Date locked to today for {formData.urgency === "emergency" ? "emergency" : formData.urgency === "urgent" ? "urgent" : "same-day"} services
+            </p>
+          )}
+          {isElectrical && formData.urgency === "next-day" && (
+            <p className="text-xs text-gray-600 mt-1">
+              Next-day electrical service is scheduled for tomorrow
             </p>
           )}
         </div>
@@ -2567,7 +2600,7 @@ export default function ModernServiceModal({
           <Select 
             value={formData.recurringSchedule} 
             onValueChange={(value) => setFormData(prev => ({ ...prev, recurringSchedule: value }))}
-            disabled={isUrgentPlumbing}
+            disabled={shouldDisableRecurring}
           >
             <SelectTrigger className="h-12">
               <SelectValue placeholder="Choose booking frequency" />
@@ -2581,15 +2614,15 @@ export default function ModernServiceModal({
               <SelectItem value="custom">Custom Schedule (contact for pricing)</SelectItem>
             </SelectContent>
           </Select>
-          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && !isUrgentPlumbing && (
+          {formData.recurringSchedule !== "one-time" && formData.recurringSchedule && !shouldDisableRecurring && (
             <p className="text-sm text-green-600 mt-2 flex items-center">
               <CheckCircle className="h-4 w-4 mr-1" />
               Recurring discount applied to total pricing
             </p>
           )}
-          {isUrgentPlumbing && (
+          {shouldDisableRecurring && (
             <p className="text-xs text-red-600 mt-1">
-              Recurring schedule unavailable for {formData.urgency} plumbing services
+              Recurring schedule unavailable for {formData.urgency} services
             </p>
           )}
         </div>
