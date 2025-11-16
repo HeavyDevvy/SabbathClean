@@ -32,7 +32,7 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Get or create conversation
+  // Get or create conversation (only once per booking)
   const { data: conversationData } = useQuery<Conversation>({
     queryKey: ["/api/conversations", bookingId],
     queryFn: async () => {
@@ -42,14 +42,19 @@ export function ChatInterface({
         providerId
       });
       return response;
-    }
+    },
+    staleTime: Infinity, // Conversation won't change for this booking
+    cacheTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false
   });
 
   useEffect(() => {
-    if (conversationData) {
+    if (conversationData && !conversation) {
       setConversation(conversationData);
     }
-  }, [conversationData]);
+  }, [conversationData, conversation]);
 
   // Get messages for conversation
   const { data: messages = [], isLoading: messagesLoading } = useQuery<Message[]>({
@@ -103,21 +108,26 @@ export function ChatInterface({
     };
   }, [conversation?.id]);
 
-  // Mark messages as read when viewing
+  // Mark messages as read when viewing (only when new messages arrive)
+  const lastMessageCountRef = useRef(0);
   useEffect(() => {
-    if (!conversation?.id || !currentUserId) return;
+    if (!conversation?.id || !currentUserId || messages.length === 0) return;
+    
+    // Only mark as read if there are new messages
+    if (messages.length > lastMessageCountRef.current) {
+      const markAsRead = async () => {
+        try {
+          await apiRequest("POST", `/api/conversations/${conversation.id}/mark-read`, {
+            userId: currentUserId
+          });
+          lastMessageCountRef.current = messages.length;
+        } catch (error) {
+          console.error("Failed to mark messages as read:", error);
+        }
+      };
 
-    const markAsRead = async () => {
-      try {
-        await apiRequest("POST", `/api/conversations/${conversation.id}/mark-read`, {
-          userId: currentUserId
-        });
-      } catch (error) {
-        console.error("Failed to mark messages as read:", error);
-      }
-    };
-
-    markAsRead();
+      markAsRead();
+    }
   }, [conversation?.id, currentUserId, messages.length]);
 
   // Send message mutation
@@ -128,7 +138,7 @@ export function ChatInterface({
       return apiRequest("POST", "/api/messages", {
         conversationId: conversation.id,
         senderId: currentUserId,
-        text
+        content: text
       });
     },
     onSuccess: () => {
@@ -220,11 +230,11 @@ export function ChatInterface({
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap break-words">
-                        {message.text}
+                        {message.content}
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 px-1">
-                      {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                      {message.createdAt && formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
                     </p>
                   </div>
                 </div>

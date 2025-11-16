@@ -2,6 +2,16 @@
 
 Berry Events is a domestic services marketplace connecting customers with verified providers for home services like cleaning, plumbing, electrical, chef/catering, and garden care. It aims to be a premium platform in South Africa, focusing on quality, security, and specialized services (e.g., African cuisine). Key features include dynamic pricing, an advanced booking system with geolocation, provider matching, reviews, secure Stripe payments (with all funds routed through "Berry Events Bank"), an AI recommendation engine, interactive onboarding, and a comprehensive Progressive Web App (PWA) with mobile-native capabilities.
 
+# Recent Changes
+
+## November 16, 2025
+- Implemented complete real-time chat system for customer-provider communication:
+  - Backend: WebSocket handlers (server/routes.ts), REST API endpoints (server/chat-routes.ts), storage methods for conversations and messages
+  - Database: Conversations and messages tables with proper relationships
+  - Frontend: ChatInterface component with real-time messaging, auto-scroll, and typing indicators
+  - Integration: Added chat dialogs to customer bookings page and provider portal
+  - Features: Real-time message delivery via WebSocket, conversation persistence, message read tracking
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -45,6 +55,7 @@ The design features a minimalistic approach, inspired by platforms like SweepSou
 - **House Cleaning Enhancements**: Enhanced provider cards (bio, experience, qualifications), optional tipping functionality (not subject to commission), a 3-button CTA layout, estimated hours logic, and dedicated database columns for tips.
 - **Customizable User Profiles**: Users can select preferred services and save favorite providers for personalized recommendations and quick rebooking. The `users` table is extended with fields like `preferred_services` and `preferred_providers`.
 - **Dynamic Time Estimation**: Intelligent service duration calculation (`config/estimates.ts`) with base times, add-on logic, and specialized calculations for house cleaning based on cleaning type, room count, and add-ons. Estimated hours are displayed in real-time during booking.
+- **Real-Time Chat System**: WebSocket-based messaging between customers and service providers for each booking. Includes conversation management, message persistence, real-time delivery, auto-scroll, and read receipts. Accessible from both customer bookings page and provider dashboard.
 
 # External Dependencies
 

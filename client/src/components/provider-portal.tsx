@@ -68,7 +68,7 @@ export default function ProviderPortal({
     retry: false,
   });
 
-  const { data: bookings = [] } = useQuery({
+  const { data: bookings = [] } = useQuery<any[]>({
     queryKey: [`/api/providers/${providerId}/bookings`],
     retry: false,
   });
