@@ -176,9 +176,9 @@ export function ChatInterface({
   }
 
   return (
-    <Card className="flex flex-col h-[600px]">
+    <Card className="flex flex-col h-full border-0 shadow-none">
       {/* Chat Header */}
-      <div className="border-b p-4 bg-berry-light/30">
+      <div className="border-b p-4 bg-berry-light/30 flex-shrink-0">
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarFallback className="bg-berry-primary text-white">
@@ -197,7 +197,7 @@ export function ChatInterface({
       </div>
 
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 min-h-0 p-4">
         {messagesLoading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 className="h-6 w-6 animate-spin text-berry-primary" />
@@ -246,21 +246,21 @@ export function ChatInterface({
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="border-t p-4 bg-berry-light/20">
-        <div className="flex gap-2">
+      <div className="border-t p-4 bg-berry-light/20 flex-shrink-0">
+        <div className="flex gap-2 items-center">
           <Input
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1"
+            className="flex-1 h-10"
             disabled={sendMessageMutation.isPending}
             data-testid="input-message"
           />
           <Button
             onClick={handleSendMessage}
             disabled={!messageText.trim() || sendMessageMutation.isPending}
-            className="bg-berry-primary hover:bg-berry-dark text-white px-6 py-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+            className="bg-berry-primary hover:bg-berry-dark text-white px-6 py-2.5 font-semibold disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             size="default"
             data-testid="button-send-message"
           >
