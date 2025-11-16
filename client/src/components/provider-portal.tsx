@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import TrainingCenter from "@/components/training-center";
 import ProviderLiveTracking from "@/components/provider-live-tracking";
+import { ChatDialog } from "@/components/chat-dialog";
+import { format } from "date-fns";
 import { 
   User,
   Calendar,
@@ -20,7 +22,8 @@ import {
   BarChart3,
   MapPin,
   Clock,
-  Navigation
+  Navigation,
+  MessageCircle
 } from "lucide-react";
 
 interface ProviderPortalProps {
@@ -58,6 +61,7 @@ export default function ProviderPortal({
   isAdmin = false 
 }: ProviderPortalProps) {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [chatBooking, setChatBooking] = useState<any>(null);
 
   const { data: providerData, isLoading } = useQuery<ProviderData>({
     queryKey: [`/api/providers/${providerId}`],
@@ -333,14 +337,85 @@ export default function ProviderPortal({
           />
         </TabsContent>
 
-        {/* Other tabs would be implemented similarly */}
+        {/* Bookings Tab */}
         <TabsContent value="bookings">
           <Card>
             <CardHeader>
-              <CardTitle>Booking Management</CardTitle>
+              <CardTitle>Your Bookings</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Booking management interface will be implemented here.</p>
+              {bookings.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p>No bookings yet</p>
+                  <p className="text-sm mt-1">Your confirmed bookings will appear here</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {bookings.map((booking: any) => (
+                    <div key={booking.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-lg">{booking.serviceType}</h3>
+                          <p className="text-sm text-gray-600">Booking #{booking.id.slice(0, 8)}</p>
+                        </div>
+                        <Badge 
+                          className={
+                            booking.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            booking.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }
+                        >
+                          {booking.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                        <div className="flex items-center text-gray-600">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {format(new Date(booking.scheduledDate), "MMM d, yyyy")}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <Clock className="h-4 w-4 mr-2" />
+                          {booking.scheduledTime}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <MapPin className="h-4 w-4 mr-2" />
+                          {booking.address}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <User className="h-4 w-4 mr-2" />
+                          {booking.customerName || 'Customer'}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        <div className="text-lg font-semibold text-green-600">
+                          R{parseFloat(booking.totalPrice || '0').toFixed(2)}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setChatBooking({
+                            id: booking.id,
+                            customerId: booking.customerId,
+                            providerId: providerId,
+                            customerName: booking.customerName || 'Customer',
+                            providerName: providerData?.firstName && providerData?.lastName 
+                              ? `${providerData.firstName} ${providerData.lastName}`
+                              : 'Provider'
+                          })}
+                          data-testid={`button-chat-${booking.id}`}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Chat with Customer
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -378,6 +453,20 @@ export default function ProviderPortal({
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Chat Dialog */}
+      {chatBooking && (
+        <ChatDialog
+          open={true}
+          onOpenChange={(open) => !open && setChatBooking(null)}
+          bookingId={chatBooking.id}
+          customerId={chatBooking.customerId}
+          providerId={chatBooking.providerId}
+          customerName={chatBooking.customerName}
+          providerName={chatBooking.providerName}
+          currentUserId={providerId}
+        />
+      )}
     </div>
   );
 }
