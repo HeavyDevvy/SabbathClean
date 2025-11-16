@@ -861,10 +861,44 @@ export default function ModernServiceModal({
     [serviceId, mappedServiceId]
   );
   
-  // Show enhanced provider details for House Cleaning, Plumbing, and Electrical
+  // GARDEN SERVICES: Service-specific feature flags
+  const isGardenService = useMemo(() => 
+    serviceId === "garden-care" || serviceId === "garden-maintenance" || 
+    mappedServiceId === "garden-care" || mappedServiceId === "garden-maintenance", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // CHEF & CATERING SERVICE: Service-specific feature flag
+  const isChefCatering = useMemo(() => 
+    serviceId === "chef-catering" || mappedServiceId === "chef-catering", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // WAITERING/EVENT STAFF SERVICE: Service-specific feature flag
+  const isEventStaff = useMemo(() => 
+    serviceId === "waitering" || serviceId === "event-staff" || 
+    mappedServiceId === "event-staff", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // MOVING SERVICE: Service-specific feature flag
+  const isMoving = useMemo(() => 
+    serviceId === "moving" || mappedServiceId === "moving", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // AU PAIR SERVICE: Service-specific feature flag
+  const isAuPair = useMemo(() => 
+    serviceId === "au-pair" || mappedServiceId === "au-pair", 
+    [serviceId, mappedServiceId]
+  );
+  
+  // Show enhanced provider details with tip section and 2-button layout
   const showEnhancedProviderDetails = useMemo(() => 
-    isHouseCleaning || isPlumbing || isElectrical,
-    [isHouseCleaning, isPlumbing, isElectrical]
+    isHouseCleaning || isPlumbing || isElectrical || isGardenService || 
+    isChefCatering || isEventStaff || isMoving || isAuPair,
+    [isHouseCleaning, isPlumbing, isElectrical, isGardenService, 
+     isChefCatering, isEventStaff, isMoving, isAuPair]
   );
   
   // Check if plumbing service has urgent priority requiring one-time booking
@@ -3182,7 +3216,7 @@ export default function ModernServiceModal({
         ))}
       </div>
       
-      {/* HOUSE CLEANING & PLUMBING: Tip input section */}
+      {/* ENHANCED SERVICES: Tip input section for House Cleaning, Plumbing, Electrical, Garden, Chef, Waitering, Moving, Au Pair */}
       {showEnhancedProviderDetails && formData.selectedProvider && (
         <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
           <CardContent className="p-4">
@@ -3830,7 +3864,7 @@ export default function ModernServiceModal({
             </Button>
 
             <div className="flex gap-3">
-              {/* HOUSE CLEANING & PLUMBING: 3-button CTA layout */}
+              {/* ENHANCED SERVICES: 2-button CTA layout for House Cleaning, Plumbing, Electrical, Garden, Chef, Waitering, Moving, Au Pair */}
               {step === 4 && showEnhancedProviderDetails ? (
                 <>
                   <Button 
