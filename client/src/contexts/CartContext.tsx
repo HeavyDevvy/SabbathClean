@@ -146,10 +146,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Clear cart mutation
   const clearCartMutation = useMutation({
     mutationFn: async () => {
+      console.log("🗑️ Clearing cart via API...");
       const response = await apiRequest('DELETE', '/api/cart');
-      return response.json();
+      const data = await response.json();
+      console.log("✅ Cart cleared successfully:", data);
+      return data;
     },
     onSuccess: () => {
+      console.log("✅ Clear cart mutation successful, invalidating queries");
       queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       toast({
         title: "Cart cleared",
@@ -157,6 +161,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: any) => {
+      console.error("❌ Clear cart mutation failed:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to clear cart",

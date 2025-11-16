@@ -85,7 +85,7 @@ function CartItemCard({ item }: { item: CartItem }) {
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1.5">Add-ons:</p>
           <div className="flex flex-wrap gap-1.5">
-            {(item.selectedAddOns as string[]).map((addon, idx) => (
+            {(item.selectedAddOns as string[]).map((addon: string, idx: number) => (
               <Badge
                 key={idx}
                 variant="secondary"
@@ -117,9 +117,13 @@ export function CartDrawer() {
   const [isClearing, setIsClearing] = useState(false);
 
   const handleClearCart = async () => {
+    console.log("🗑️ Clear cart button clicked");
     setIsClearing(true);
     try {
       await clearCart();
+      console.log("✅ Clear cart completed");
+    } catch (error) {
+      console.error("❌ Clear cart error:", error);
     } finally {
       setIsClearing(false);
     }

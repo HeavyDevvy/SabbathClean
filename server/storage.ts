@@ -1120,7 +1120,7 @@ export class DatabaseStorage implements IStorage {
     const [existing] = await db.select().from(cartItems)
       .where(and(
         eq(cartItems.cartId, cartId),
-        eq(cartItems.serviceId, item.serviceId),
+        item.serviceId ? eq(cartItems.serviceId, item.serviceId) : undefined,
         eq(cartItems.scheduledDate, item.scheduledDate),
         eq(cartItems.scheduledTime, item.scheduledTime)
       ))
@@ -1152,7 +1152,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const key of mutableFields) {
       if (key in updates) {
-        allowedUpdates[key as keyof CartItem] = updates[key as keyof CartItem];
+        (allowedUpdates as any)[key] = (updates as any)[key];
       }
     }
 
