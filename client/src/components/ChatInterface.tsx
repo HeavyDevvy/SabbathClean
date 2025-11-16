@@ -132,11 +132,20 @@ export function ChatInterface({
         throw new Error("No conversation");
       }
       
-      console.log("📤 Sending message:", { conversationId: conversation.id, senderId: currentUserId, content: text });
+      // Determine if sender is customer or provider
+      const senderType = currentUserId === customerId ? "customer" : "provider";
+      
+      console.log("📤 Sending message:", { 
+        conversationId: conversation.id, 
+        senderId: currentUserId, 
+        senderType,
+        content: text 
+      });
       
       const response = await apiRequest("POST", "/api/messages", {
         conversationId: conversation.id,
         senderId: currentUserId,
+        senderType,
         content: text
       });
       

@@ -245,6 +245,7 @@ export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   conversationId: varchar("conversation_id").references(() => conversations.id).notNull(),
   senderId: varchar("sender_id").references(() => users.id).notNull(),
+  senderType: text("sender_type").notNull(), // "customer" or "provider"
   content: text("content").notNull(),
   messageType: text("message_type").default("text"), // text, image, document, system
   attachments: jsonb("attachments"), // file URLs and metadata
