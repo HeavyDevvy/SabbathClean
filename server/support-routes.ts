@@ -4,6 +4,12 @@ import { createInsertSchema } from "drizzle-zod";
 import { supportTickets } from "@shared/schema";
 import { z } from "zod";
 import { nanoid } from "nanoid";
+import sgMail from "@sendgrid/mail";
+
+// Initialize SendGrid if API key is available
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Contact form schema
 const contactFormSchema = z.object({
@@ -44,6 +50,82 @@ const feedbackFormSchema = z.object({
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
+// Email sending utility functions
+const sendContactConfirmationEmail = async (email: string, name: string, ticketNumber: string, subject: string) => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('SendGrid not configured, skipping contact confirmation email');
+    return;
+  }
+
+  const msg = {
+    to: email,
+    from: 'support@berryevents.co.za',
+    subject: `We received your message - Ticket ${ticketNumber}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #44062D;">Thank you for contacting Berry Events</h2>
+        <p>Hi ${name},</p>
+        <p>We've received your message regarding: <strong>${subject}</strong></p>
+        <div style="background-color: #F7F2EF; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Ticket Number:</strong> ${ticketNumber}</p>
+          <p style="margin: 5px 0 0 0;"><strong>Estimated Response:</strong> Within 24 hours</p>
+        </div>
+        <p>Our support team will review your message and respond as soon as possible.</p>
+        <p>If you need urgent assistance, please call us at: <strong>0800 237 779</strong></p>
+        <hr style="border: none; border-top: 1px solid #EED1C4; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">Berry Events - Your trusted home services platform</p>
+      </div>
+    `
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Contact confirmation email sent to:', email);
+  } catch (error) {
+    console.error('Error sending contact confirmation email:', error);
+  }
+};
+
+const sendSupportNotificationEmail = async (ticketNumber: string, name: string, email: string, category: string, subject: string, message: string, phone?: string) => {
+  if (!process.env.SENDGRID_API_KEY) {
+    console.log('SendGrid not configured, skipping support notification email');
+    return;
+  }
+
+  const msg = {
+    to: 'support@berryevents.co.za',
+    from: 'noreply@berryevents.co.za',
+    subject: `New Support Ticket ${ticketNumber} - ${category}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #44062D;">New Support Ticket Received</h2>
+        <div style="background-color: #F7F2EF; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Ticket Number:</strong> ${ticketNumber}</p>
+          <p><strong>Category:</strong> ${category}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+          <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+        <div style="background-color: #fff; padding: 15px; border-left: 4px solid #44062D; margin: 20px 0;">
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #EED1C4; margin: 30px 0;">
+        <p style="color: #666; font-size: 12px;">Berry Events Support System</p>
+      </div>
+    `
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Support notification email sent for ticket:', ticketNumber);
+  } catch (error) {
+    console.error('Error sending support notification email:', error);
+  }
+};
+
 export function registerSupportRoutes(app: Express) {
   
   // Contact form submission endpoint
@@ -72,13 +154,32 @@ export function registerSupportRoutes(app: Express) {
         timestamp: new Date().toISOString()
       });
 
-      // TODO: In a full implementation, you might:
-      // 1. Save to support_tickets table if user is authenticated
-      // 2. Send email notification to support team
-      // 3. Send confirmation email to user
-      // 4. Integrate with support ticketing system
+      // Save to support_tickets table
+      try {
+        await storage.createSupportTicket({
+          ticketNumber,
+          userId: (req as any).user?.id || null, // null for guest submissions
+          name,
+          email,
+          phone: phone || null,
+          category,
+          subject,
+          message,
+          status: 'open',
+          priority: category === 'urgent' || category === 'safety' ? 'high' : 'normal'
+        });
+        console.log('✅ Support ticket saved to database');
+      } catch (dbError) {
+        console.error('❌ Failed to save support ticket to database:', dbError);
+        // Continue anyway - we can still send emails
+      }
 
-      // For now, return success response
+      // Send confirmation email to user
+      await sendContactConfirmationEmail(email, name, ticketNumber, subject);
+
+      // Send notification email to support team
+      await sendSupportNotificationEmail(ticketNumber, name, email, category, subject, message, phone);
+
       res.status(201).json({ 
         message: 'Your message has been received successfully. We will contact you within 24 hours.',
         ticketNumber: ticketNumber,
@@ -93,17 +194,20 @@ export function registerSupportRoutes(app: Express) {
     }
   });
 
-  // Get support ticket (for authenticated users)
-  app.get('/api/support/tickets/:ticketId', async (req, res) => {
+  // Get support ticket by ticket number
+  app.get('/api/support/tickets/:ticketNumber', async (req, res) => {
     try {
-      const { ticketId } = req.params;
+      const { ticketNumber } = req.params;
       
-      // TODO: Implement ticket lookup
-      // For now, return placeholder
-      res.json({
-        message: 'Support ticket system coming soon',
-        ticketId: ticketId
-      });
+      const ticket = await storage.getSupportTicket(ticketNumber);
+      
+      if (!ticket) {
+        return res.status(404).json({ 
+          message: 'Support ticket not found' 
+        });
+      }
+
+      res.json({ ticket });
 
     } catch (error: any) {
       console.error('❌ Support ticket lookup error:', error);
@@ -111,19 +215,23 @@ export function registerSupportRoutes(app: Express) {
     }
   });
 
-  // Create support ticket (for authenticated users)
-  app.post('/api/support/tickets', async (req, res) => {
+  // Get user's support tickets (authenticated users)
+  app.get('/api/support/my-tickets', async (req, res) => {
     try {
-      // TODO: Implement full support ticket creation
-      // This would use the supportTickets table from the schema
+      const userId = (req as any).user?.id;
       
-      res.status(501).json({
-        message: 'Support ticket creation coming soon. Please use the contact form for now.'
-      });
+      if (!userId) {
+        return res.status(401).json({ 
+          message: 'Authentication required' 
+        });
+      }
+
+      const tickets = await storage.getUserSupportTickets(userId);
+      res.json({ tickets });
 
     } catch (error: any) {
-      console.error('❌ Support ticket creation error:', error);
-      res.status(500).json({ message: 'Failed to create support ticket' });
+      console.error('❌ User tickets lookup error:', error);
+      res.status(500).json({ message: 'Failed to retrieve your support tickets' });
     }
   });
 

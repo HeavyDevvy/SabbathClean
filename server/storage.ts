@@ -179,6 +179,12 @@ export interface IStorage {
   getUserOrders(userId: string): Promise<Order[]>;
   updateOrderStatus(orderId: string, status: string, paymentStatus?: string): Promise<Order>;
   updateOrder(orderId: string, updates: Partial<Order>): Promise<Order>;
+  
+  // Support ticket operations
+  createSupportTicket(ticket: any): Promise<any>;
+  getSupportTicket(ticketNumber: string): Promise<any>;
+  getUserSupportTickets(userId: string): Promise<any[]>;
+  updateSupportTicketStatus(ticketNumber: string, status: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1356,6 +1362,36 @@ export class DatabaseStorage implements IStorage {
         accessedBy: providerId
       })
       .where(eq(bookingGateCodes.id, gateCodeId));
+  }
+
+  // Support ticket operations
+  async createSupportTicket(ticket: any): Promise<any> {
+    const { supportTickets } = await import("@shared/schema");
+    const [newTicket] = await db.insert(supportTickets).values(ticket).returning();
+    return newTicket;
+  }
+
+  async getSupportTicket(ticketNumber: string): Promise<any> {
+    const { supportTickets } = await import("@shared/schema");
+    const [ticket] = await db.select().from(supportTickets)
+      .where(eq(supportTickets.ticketNumber, ticketNumber));
+    return ticket || undefined;
+  }
+
+  async getUserSupportTickets(userId: string): Promise<any[]> {
+    const { supportTickets } = await import("@shared/schema");
+    return await db.select().from(supportTickets)
+      .where(eq(supportTickets.userId, userId))
+      .orderBy(desc(supportTickets.createdAt));
+  }
+
+  async updateSupportTicketStatus(ticketNumber: string, status: string): Promise<any> {
+    const { supportTickets } = await import("@shared/schema");
+    const [ticket] = await db.update(supportTickets)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(supportTickets.ticketNumber, ticketNumber))
+      .returning();
+    return ticket;
   }
 }
 
