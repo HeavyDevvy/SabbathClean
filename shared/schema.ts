@@ -925,3 +925,20 @@ export const insertBookingGateCodeSchema = createInsertSchema(bookingGateCodes).
 
 export type BookingGateCode = typeof bookingGateCodes.$inferSelect;
 export type InsertBookingGateCode = z.infer<typeof insertBookingGateCodeSchema>;
+
+// Chat System Schemas
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
