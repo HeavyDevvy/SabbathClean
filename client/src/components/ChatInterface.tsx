@@ -256,14 +256,14 @@ export function ChatInterface({
                     <div
                       className={`rounded-2xl px-4 py-2 shadow-sm ${
                         isOwnMessage
-                          ? 'bg-berry-primary text-white rounded-br-sm'
+                          ? 'bg-berry-primary text-black rounded-br-sm'
                           : 'bg-white border border-gray-200 text-gray-900 rounded-bl-sm'
                       }`}
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
                         {message.content}
                       </p>
-                      <p className={`text-[10px] mt-1 ${isOwnMessage ? 'text-white/70' : 'text-gray-400'}`}>
+                      <p className={`text-[10px] mt-1 ${isOwnMessage ? 'text-black/60' : 'text-gray-400'}`}>
                         {message.createdAt && formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
                       </p>
                     </div>
