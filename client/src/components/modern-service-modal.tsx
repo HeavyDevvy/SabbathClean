@@ -2605,6 +2605,8 @@ export default function ModernServiceModal({
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
                 const isChef = serviceId === "chef-catering" || mappedServiceId === "chef-catering";
+                const isGarden = serviceId === "garden-care" || serviceId === "garden-maintenance" || 
+                                mappedServiceId === "garden-care" || mappedServiceId === "garden-maintenance";
                 
                 const timeSlots = [
                   { value: "08:00", label: "08:00 - Morning", hour: 8 },
@@ -2618,8 +2620,8 @@ export default function ModernServiceModal({
                   let isDisabled = false;
                   let disabledReason = "";
                   
-                  // For House Cleaning & Plumbing + today's date: disable past time slots
-                  if (showEnhancedProviderDetails && isToday && 
+                  // For House Cleaning, Plumbing & Garden Care + today's date: disable past time slots
+                  if ((showEnhancedProviderDetails || isGarden) && isToday && 
                       (slot.hour < currentHour || (slot.hour === currentHour && currentMinute > 0))) {
                     isDisabled = true;
                     disabledReason = " (Past)";
