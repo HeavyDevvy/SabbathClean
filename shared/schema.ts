@@ -231,7 +231,7 @@ export const paymentMethods = pgTable("payment_methods", {
 // Messages and Communication System
 export const conversations = pgTable("conversations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  bookingId: varchar("booking_id").references(() => bookings.id),
+  bookingId: varchar("booking_id"), // Stores order_item ID (cart-based system)
   customerId: varchar("customer_id").references(() => users.id).notNull(),
   providerId: varchar("provider_id").references(() => serviceProviders.id).notNull(),
   subject: text("subject"),
