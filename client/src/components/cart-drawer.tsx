@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingCart, X, Trash2, Calendar, Clock, MapPin, Plus } from 'lucide-react';
+import { ShoppingCart, X, Trash2, Calendar, Clock, MapPin, Plus, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -17,6 +17,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useLocation } from 'wouter';
 import { parseDecimal, formatCurrency } from '@/lib/currency';
 import type { CartItem } from '@shared/schema';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 function CartItemCard({ item }: { item: CartItem }) {
   const { removeFromCart } = useCart();
@@ -115,6 +117,8 @@ export function CartDrawer() {
   const { cart, itemCount, isLoading, clearCart } = useCart();
   const [, navigate] = useLocation();
   const [isClearing, setIsClearing] = useState(false);
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { toast } = useToast();
 
   const handleClearCart = async () => {
     console.log("🗑️ Clear cart button clicked");
@@ -130,6 +134,18 @@ export function CartDrawer() {
   };
 
   const handleCheckout = () => {
+    // SECURITY: Require authentication for checkout
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to complete your purchase",
+        variant: "destructive",
+      });
+      setOpen(false);
+      navigate('/auth?redirect=/cart-checkout');
+      return;
+    }
+    
     setOpen(false);
     navigate('/cart-checkout');
   };
