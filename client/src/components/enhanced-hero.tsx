@@ -44,7 +44,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
-    }, 3000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [heroImages.length]);
@@ -190,8 +190,8 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
                 </div>
               </div>
 
-              {/* Stats Card */}
-              <div className="absolute -bottom-6 left-6 right-6 bg-white rounded-xl p-6 shadow-2xl border">
+              {/* Stats Card - Static, stays on top while images rotate behind */}
+              <div className="absolute -bottom-6 left-6 right-6 bg-white rounded-xl p-6 shadow-2xl border z-40">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {stats.map((stat, index) => (
                     <div key={index} className="text-center">
