@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Award
 } from "lucide-react";
+import heroImage from "@assets/pensive-housewife-keeps-lips-folded-dreams-about-rest-leans-basket-with-laundry-detergents-holds-mop-going-wash-floor-wears-hoodie-rubber-gloves-focused-away-stands-against-pink-wall_1763407062587.jpg";
 
 interface EnhancedHeroProps {
   onBookingClick: () => void;
@@ -99,7 +100,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
               {/* Main Hero Image */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                  src={heroImage} 
                   alt="Professional home cleaning service" 
                   className="w-full h-[500px] object-cover" 
                 />
