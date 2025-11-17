@@ -18,6 +18,7 @@ import {
   Sparkles, 
   Scissors, 
   Droplets, 
+  Droplet,
   Star,
   CheckCircle,
   CreditCard,
