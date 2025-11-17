@@ -265,16 +265,16 @@ export default function CartCheckout() {
                           </div>
                         )}
                         
-                        {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+                        {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 ? (
                           <div className="ml-4 space-y-1">
-                            {(item.selectedAddOns as string[]).map((addon, addonIdx) => (
+                            {(item.selectedAddOns as string[]).map((addon: string, addonIdx: number) => (
                               <div key={addonIdx} className="flex items-center text-xs text-gray-600">
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
                                 {addon}
                               </div>
                             ))}
                           </div>
-                        )}
+                        ) : null}
                         
                         {/* HOUSE CLEANING ONLY: Show tip if present */}
                         {parseDecimal(item.tipAmount || "0") > 0 && (

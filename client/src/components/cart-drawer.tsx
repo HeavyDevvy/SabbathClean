@@ -83,7 +83,7 @@ function CartItemCard({ item }: { item: CartItem }) {
         </div>
       </div>
       
-      {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+      {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 ? (
         <div className="mt-3 pt-3 border-t border-gray-100">
           <p className="text-xs font-medium text-gray-500 mb-1.5">Add-ons:</p>
           <div className="flex flex-wrap gap-1.5">
@@ -99,7 +99,7 @@ function CartItemCard({ item }: { item: CartItem }) {
             ))}
           </div>
         </div>
-      )}
+      ) : null}
       
       {item.comments && (
         <div className="mt-2 pt-2 border-t border-gray-100">

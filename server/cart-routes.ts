@@ -85,7 +85,7 @@ export function registerCartRoutes(app: Express) {
       
       // If gate code provided, encrypt and store it (Phase 3.2)
       if (gateCode && gateCode.trim()) {
-        const { encryptedData, iv, authTag } = encryptGateCode(gateCode.trim());
+        const { encryptedGateCode: encryptedData, iv, authTag } = encryptGateCode(gateCode.trim());
         await storage.createGateCode(
           cartItem.id, // Using cart item ID as reference
           encryptedData,
