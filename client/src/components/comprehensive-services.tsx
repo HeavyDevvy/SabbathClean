@@ -156,6 +156,29 @@ const outdoorServices: Service[] = [
     icon: TreePine,
     gradient: "from-green-600 to-emerald-600",
     bookingSteps: 4
+  },
+
+  // POOL CLEANING & MAINTENANCE
+  {
+    id: "pool-cleaning",
+    category: "Outdoor Services",
+    title: "Pool Cleaning & Maintenance",
+    description: "Professional pool cleaning, chemical balancing, and maintenance services to keep your pool crystal clear and safe",
+    price: "From R100/hour",
+    duration: "1-4 hours",
+    serviceTypes: [
+      "Regular Pool Cleaning (Weekly/Bi-weekly)",
+      "Chemical Balancing & Testing",
+      "Filter Cleaning & Maintenance",
+      "Pool Vacuuming & Brushing",
+      "Green Pool Recovery",
+      "Equipment Repair & Replacement",
+      "Pool Opening & Closing Services"
+    ],
+    features: ["Certified technicians", "Chemical expertise", "Equipment maintenance", "Water testing"],
+    icon: Droplet,
+    gradient: "from-cyan-500 to-blue-600",
+    bookingSteps: 4
   }
 ];
 

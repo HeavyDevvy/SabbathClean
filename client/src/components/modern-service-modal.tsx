@@ -125,6 +125,8 @@ export default function ModernServiceModal({
     propertySize: editBookingData?.propertySize || "",
     gardenSize: editBookingData?.gardenSize || "",
     gardenCondition: editBookingData?.gardenCondition || "",
+    poolSize: editBookingData?.poolSize || "",
+    poolCondition: editBookingData?.poolCondition || "",
     urgency: editBookingData?.urgency || "standard",
     plumbingIssue: editBookingData?.plumbingIssue || "",
     electricalIssue: editBookingData?.electricalIssue || "",
