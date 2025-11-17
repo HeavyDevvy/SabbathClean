@@ -36,6 +36,9 @@ function transformAddons(jsonAddons: any[]): Record<string, AddOn[]> {
   if (result['garden-care']) {
     result['garden-maintenance'] = result['garden-care'];
   }
+  if (result['pool-cleaning']) {
+    result['pool-maintenance'] = result['pool-cleaning'];
+  }
   if (result['waitering']) {
     result['event-staff'] = result['waitering'];
   }

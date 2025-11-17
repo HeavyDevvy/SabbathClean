@@ -216,6 +216,60 @@
     ]
   },
   {
+    "serviceId": "pool-cleaning",
+    "serviceName": "Pool Cleaning & Maintenance",
+    "addons": [
+      {
+        "id": "chemical_balance",
+        "label": "Chemical balancing & testing",
+        "priceZAR": 300,
+        "keywords": ["chemical", "balance", "ph", "chlorine", "alkalinity", "testing"]
+      },
+      {
+        "id": "filter_deep_clean",
+        "label": "Filter deep clean & backwash",
+        "priceZAR": 400,
+        "keywords": ["filter", "backwash", "cartridge", "sand filter", "clean filter"]
+      },
+      {
+        "id": "green_pool_recovery",
+        "label": "Green pool recovery treatment",
+        "priceZAR": 800,
+        "keywords": ["green", "algae", "cloudy", "murky", "green pool", "algae treatment"]
+      },
+      {
+        "id": "pool_equipment_check",
+        "label": "Pool equipment inspection",
+        "priceZAR": 350,
+        "keywords": ["equipment", "pump", "inspection", "check", "motor"]
+      },
+      {
+        "id": "acid_wash",
+        "label": "Acid wash treatment",
+        "priceZAR": 1200,
+        "keywords": ["acid wash", "stain", "deep clean", "drain"]
+      },
+      {
+        "id": "tile_cleaning",
+        "label": "Tile & grout cleaning",
+        "priceZAR": 450,
+        "keywords": ["tile", "grout", "waterline", "calcium", "scale"]
+      },
+      {
+        "id": "pool_cover_install",
+        "label": "Pool cover installation/repair",
+        "priceZAR": 600,
+        "keywords": ["cover", "pool cover", "safety net", "installation"]
+      },
+      {
+        "id": "leak_detection_pool",
+        "label": "Pool leak detection",
+        "priceZAR": 900,
+        "keywords": ["leak", "leaking", "water loss", "leak detection"]
+      }
+    ]
+  },
+  {
     "serviceId": "chef-catering",
     "serviceName": "Chef & Catering",
     "addons": [
