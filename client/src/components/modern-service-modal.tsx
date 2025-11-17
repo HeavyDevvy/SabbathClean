@@ -595,6 +595,34 @@ export default function ModernServiceModal({
         { id: "seasonal-prep", name: "Seasonal Preparation", price: 100 }
       ]
     },
+    "pool-cleaning": {
+      title: "Pool Cleaning & Maintenance Service",
+      icon: Droplet,
+      basePrice: 350,
+      steps: 4,
+      propertyTypes: [
+        { value: "house", label: "House Pool", multiplier: 1.0 },
+        { value: "townhouse", label: "Townhouse Pool", multiplier: 0.9 },
+        { value: "estate-property", label: "Estate Property", multiplier: 1.4 }
+      ],
+      poolSizes: [
+        { value: "small", label: "Small Pool (Up to 20,000L)", multiplier: 1.0 },
+        { value: "medium", label: "Medium Pool (20,000-40,000L)", multiplier: 1.5 },
+        { value: "large", label: "Large Pool (40,000-60,000L)", multiplier: 2.0 },
+        { value: "olympic", label: "Olympic/Estate (60,000L+)", multiplier: 3.0 }
+      ],
+      poolConditions: [
+        { value: "well-maintained", label: "Well Maintained", multiplier: 1.0 },
+        { value: "needs-attention", label: "Needs Attention", multiplier: 1.2 },
+        { value: "neglected", label: "Neglected/Green", multiplier: 1.5 }
+      ],
+      addOns: [
+        { id: "chemical-balance", name: "Chemical Balancing", price: 180 },
+        { id: "filter-clean", name: "Filter Deep Clean", price: 250 },
+        { id: "vacuum-brush", name: "Vacuum & Brush Service", price: 150 },
+        { id: "green-recovery", name: "Green Pool Recovery", price: 400 }
+      ]
+    },
     "chef-catering": {
       title: "Chef & Catering Service",
       icon: ChefHat,
@@ -828,7 +856,8 @@ export default function ModernServiceModal({
     "cleaning": "cleaning",
     "house-cleaning": "cleaning", // Map house-cleaning to cleaning config
     "garden-care": "garden-care",
-    "garden-maintenance": "garden-maintenance", 
+    "garden-maintenance": "garden-maintenance",
+    "pool-cleaning": "pool-cleaning",
     "plumbing": "plumbing",
     "plumbing-services": "plumbing",
     "electrical": "electrical",
@@ -870,6 +899,12 @@ export default function ModernServiceModal({
     [serviceId, mappedServiceId]
   );
   
+  // POOL CLEANING SERVICE: Service-specific feature flag
+  const isPoolService = useMemo(() => 
+    serviceId === "pool-cleaning" || mappedServiceId === "pool-cleaning", 
+    [serviceId, mappedServiceId]
+  );
+  
   // CHEF & CATERING SERVICE: Service-specific feature flag
   const isChefCatering = useMemo(() => 
     serviceId === "chef-catering" || mappedServiceId === "chef-catering", 
@@ -897,9 +932,9 @@ export default function ModernServiceModal({
   
   // Show enhanced provider details with tip section and 2-button layout
   const showEnhancedProviderDetails = useMemo(() => 
-    isHouseCleaning || isPlumbing || isElectrical || isGardenService || 
+    isHouseCleaning || isPlumbing || isElectrical || isGardenService || isPoolService || 
     isChefCatering || isEventStaff || isMoving || isAuPair,
-    [isHouseCleaning, isPlumbing, isElectrical, isGardenService, 
+    [isHouseCleaning, isPlumbing, isElectrical, isGardenService, isPoolService,
      isChefCatering, isEventStaff, isMoving, isAuPair]
   );
   
@@ -924,6 +959,7 @@ export default function ModernServiceModal({
     "house-cleaning": "Example: Please focus on the kitchen and bathrooms. Use eco-friendly products. Deep clean the oven.",
     "garden-care": "Example: Trim overgrown hedges along the fence. Mow the lawn and edge the driveway. Remove weeds from flower beds.",
     "garden-maintenance": "Example: Trim overgrown hedges along the fence. Mow the lawn and edge the driveway. Remove weeds from flower beds.",
+    "pool-cleaning": "Example: Pool water is slightly green. Need chemical balancing and filter cleaning. Vacuum bottom and brush walls.",
     "plumbing": "Example: Leaking faucet in the kitchen sink. Low water pressure in upstairs bathroom. Fix running toilet.",
     "plumbing-services": "Example: Leaking faucet in the kitchen sink. Low water pressure in upstairs bathroom. Fix running toilet.",
     "electrical": "Example: Install dimmer switch in living room. Replace faulty outlet in bedroom. Check circuit breaker for kitchen.",
@@ -993,6 +1029,8 @@ export default function ModernServiceModal({
       propertySize: (isEditing || isPrefilling) ? (dataSource.propertySize || "") : "",
       gardenSize: (isEditing || isPrefilling) ? (dataSource.gardenSize || "") : "",
       gardenCondition: (isEditing || isPrefilling) ? (dataSource.gardenCondition || "") : "",
+      poolSize: (isEditing || isPrefilling) ? (dataSource.poolSize || "") : "",
+      poolCondition: (isEditing || isPrefilling) ? (dataSource.poolCondition || "") : "",
       urgency: (isEditing || isPrefilling) ? (dataSource.urgency || "standard") : "standard",
       plumbingIssue: (isEditing || isPrefilling) ? (dataSource.plumbingIssue || "") : "",
       electricalIssue: (isEditing || isPrefilling) ? (dataSource.electricalIssue || "") : "",
@@ -1117,7 +1155,7 @@ export default function ModernServiceModal({
       );
       setEstimatedHours(hours);
     }
-  }, [mappedServiceId, formData.cleaningType, formData.propertySize, formData.gardenSize, formData.selectedAddOns]);
+  }, [mappedServiceId, formData.cleaningType, formData.propertySize, formData.gardenSize, formData.poolSize, formData.selectedAddOns]);
 
   useEffect(() => {
     // FIX: Don't default to cleaning - wait for valid service selection
@@ -1156,6 +1194,14 @@ export default function ModernServiceModal({
       if (gardenSize) basePrice *= gardenSize.multiplier;
       
       const condition = config.gardenConditions?.find((c: any) => c.value === formData.gardenCondition);
+      if (condition) basePrice *= condition.multiplier;
+    }
+
+    if (mappedServiceId === "pool-cleaning") {
+      const poolSize = config.poolSizes?.find((s: any) => s.value === formData.poolSize);
+      if (poolSize) basePrice *= poolSize.multiplier;
+      
+      const condition = config.poolConditions?.find((c: any) => c.value === formData.poolCondition);
       if (condition) basePrice *= condition.multiplier;
     }
 
@@ -1340,6 +1386,8 @@ export default function ModernServiceModal({
       propertySize: formData.propertySize,
       gardenSize: formData.gardenSize,
       gardenCondition: formData.gardenCondition,
+      poolSize: formData.poolSize,
+      poolCondition: formData.poolCondition,
       urgency: formData.urgency,
       electricalIssue: formData.electricalIssue,
       cuisineType: formData.cuisineType,
@@ -1396,6 +1444,7 @@ export default function ModernServiceModal({
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
+      'pool-cleaning': 'pool-cleaning',
       'chef-catering': 'chef-catering',
       'plumbing': 'plumbing',
       'electrical': 'electrical',
@@ -1448,6 +1497,8 @@ export default function ModernServiceModal({
         propertySize: formData.propertySize,
         gardenSize: formData.gardenSize,
         gardenCondition: formData.gardenCondition,
+        poolSize: formData.poolSize,
+        poolCondition: formData.poolCondition,
         urgency: formData.urgency,
         electricalIssue: formData.electricalIssue,
         cuisineType: formData.cuisineType,
@@ -1485,6 +1536,8 @@ export default function ModernServiceModal({
         propertySize: "",
         gardenSize: "",
         gardenCondition: "",
+        poolSize: "",
+        poolCondition: "",
         urgency: "standard",
         plumbingIssue: "",
         electricalIssue: "",
@@ -1542,6 +1595,7 @@ export default function ModernServiceModal({
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
+      'pool-cleaning': 'pool-cleaning',
       'chef-catering': 'chef-catering',
       'plumbing': 'plumbing',
       'electrical': 'electrical',
@@ -1594,6 +1648,8 @@ export default function ModernServiceModal({
         propertySize: formData.propertySize,
         gardenSize: formData.gardenSize,
         gardenCondition: formData.gardenCondition,
+        poolSize: formData.poolSize,
+        poolCondition: formData.poolCondition,
         urgency: formData.urgency,
         electricalIssue: formData.electricalIssue,
         cuisineType: formData.cuisineType,
@@ -1738,6 +1794,7 @@ export default function ModernServiceModal({
       const serviceIdMapping: Record<string, string> = {
         'house-cleaning': 'cleaning',
         'gardening': 'garden-care',
+        'pool-cleaning': 'pool-cleaning',
         'plumbing': 'plumbing',
         'electrical': 'electrical',
         'chef-catering': 'chef-catering',
@@ -2072,6 +2129,46 @@ export default function ModernServiceModal({
                 </SelectTrigger>
                 <SelectContent>
                   {currentConfig.gardenConditions?.map((condition: any) => (
+                    <SelectItem key={condition.value} value={condition.value}>
+                      {condition.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
+        {serviceId === "pool-cleaning" && (
+          <>
+            <div>
+              <Label>Pool Size Range *</Label>
+              <Select value={formData.poolSize} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, poolSize: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pool size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.poolSizes?.map((size: any) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.label} - {size.multiplier}x multiplier
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Pool Condition *</Label>
+              <Select value={formData.poolCondition} onValueChange={(value) =>
+                setFormData(prev => ({ ...prev, poolCondition: value }))
+              }>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pool condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currentConfig.poolConditions?.map((condition: any) => (
                     <SelectItem key={condition.value} value={condition.value}>
                       {condition.label}
                     </SelectItem>
@@ -3913,6 +4010,7 @@ export default function ModernServiceModal({
                         (step === 1 && (!formData.propertyType || !formData.address || 
                           (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
                           ((serviceId === "garden-care" || serviceId === "garden-maintenance") && (!formData.gardenSize || !formData.gardenCondition)) ||
+                          (serviceId === "pool-cleaning" && (!formData.poolSize || !formData.poolCondition)) ||
                           (serviceId === "plumbing" && (!formData.plumbingIssue || !formData.urgency)) ||
                           (serviceId === "electrical" && (!formData.electricalIssue || !formData.urgency)) ||
                           (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
