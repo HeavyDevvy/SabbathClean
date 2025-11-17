@@ -102,7 +102,14 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
                 <img 
                   src={heroImage} 
                   alt="Professional home cleaning service" 
-                  className="w-full h-[500px] object-cover" 
+                  className="w-full h-[700px] object-cover" 
+                  style={{ 
+                    imageRendering: '-webkit-optimize-contrast',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
+                  loading="eager"
+                  decoding="async"
                 />
                 
                 {/* Overlay Gradient */}
