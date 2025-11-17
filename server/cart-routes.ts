@@ -167,13 +167,18 @@ export function registerCartRoutes(app: Express) {
     }
   });
   
-  // POST /api/cart/checkout - Convert cart to order
-  app.post("/api/cart/checkout", optionalAuth, async (req: Request, res: Response) => {
+  // POST /api/cart/checkout - Convert cart to order (REQUIRES AUTHENTICATION)
+  app.post("/api/cart/checkout", authenticateToken, async (req: Request, res: Response) => {
     try {
-      const { userId, sessionToken } = getCartIdentifier(req);
+      // Extract authenticated user ID
+      const userId = (req as any).user?.id;
       
-      // Get cart (works for both authenticated users and guests)
-      const cart = await storage.getOrCreateCart(userId, sessionToken);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required for checkout" });
+      }
+      
+      // Get cart for authenticated user only
+      const cart = await storage.getOrCreateCart(userId, undefined);
       const cartData = await storage.getCartWithItems(cart.id);
       
       if (!cartData || cartData.items.length === 0) {
@@ -205,7 +210,7 @@ export function registerCartRoutes(app: Express) {
       
       // Create order with items and payment metadata
       const orderData = {
-        userId: userId || null, // Support guest checkout
+        userId, // Authentication required - userId is always present
         cartId: cart.id,
         orderNumber,
         subtotal: subtotal.toString(),

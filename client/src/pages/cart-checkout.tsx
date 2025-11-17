@@ -1,22 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, CreditCard, Building, CheckCircle2, ArrowLeft, Shield } from "lucide-react";
+import { Calendar, Clock, MapPin, CreditCard, Building, CheckCircle2, ArrowLeft, Shield, LogIn } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { CartItem } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function CartCheckout() {
   const { cart, isLoading, checkout, isCheckingOut } = useCart();
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   
   const [paymentMethod, setPaymentMethod] = useState<"card" | "bank">("card");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -32,7 +34,21 @@ export default function CartCheckout() {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
   
-  if (isLoading) {
+  // SECURITY: Require authentication for checkout - redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to complete your purchase",
+        variant: "destructive",
+      });
+      // Redirect to auth page with return URL
+      navigate("/auth?redirect=/cart-checkout");
+    }
+  }, [isAuthLoading, isAuthenticated, navigate, toast]);
+  
+  // Show loading state while checking authentication
+  if (isAuthLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
