@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -12,7 +13,14 @@ import {
   TrendingUp,
   Award
 } from "lucide-react";
-import heroImage from "@assets/pensive-housewife-keeps-lips-folded-dreams-about-rest-leans-basket-with-laundry-detergents-holds-mop-going-wash-floor-wears-hoodie-rubber-gloves-focused-away-stands-against-pink-wall_1763407062587.jpg";
+import heroImage1 from "@assets/pensive-housewife-keeps-lips-folded-dreams-about-rest-leans-basket-with-laundry-detergents-holds-mop-going-wash-floor-wears-hoodie-rubber-gloves-focused-away-stands-against-pink-wall_1763407062587.jpg";
+import heroImage2 from "@assets/handyman-using-wrench-fix_1763409051041.jpg";
+import heroImage3 from "@assets/male-electrician-works-switchboard-with-electrical-connecting-cable (1)_1763409060358.jpg";
+import heroImage4 from "@assets/garden-seasonal-maintenance_1763409073401.jpg";
+import heroImage5 from "@assets/sushi-set-table_1763409085332.jpg";
+import heroImage6 from "@assets/waiter-waitress-holding-serving-tray-with-glass-cocktail_1763409096437.jpg";
+import heroImage7 from "@assets/delivery-service-personnel-transferring-package-from-truck_1763409112008.jpg";
+import heroImage8 from "@assets/mother-observes-daughter-coloring-notebook-home_1763409119215.jpg";
 
 interface EnhancedHeroProps {
   onBookingClick: () => void;
@@ -20,6 +28,26 @@ interface EnhancedHeroProps {
 }
 
 export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHeroProps) {
+  const heroImages = [
+    { src: heroImage1, alt: "Professional home cleaning service" },
+    { src: heroImage2, alt: "Handyman plumbing service" },
+    { src: heroImage3, alt: "Professional electrical service" },
+    { src: heroImage4, alt: "Garden maintenance and care" },
+    { src: heroImage5, alt: "Professional chef and catering service" },
+    { src: heroImage6, alt: "Professional waitering service" },
+    { src: heroImage7, alt: "Moving and delivery service" },
+    { src: heroImage8, alt: "Au pair and childcare service" },
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
   const trustIndicators = [
     { icon: Shield, text: "Fully Insured", color: "bg-green-100 text-green-600" },
     { icon: UserCheck, text: "Background Verified", color: "bg-blue-100 text-blue-600" },
@@ -97,26 +125,47 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
           {/* Visual Column */}
           <div className="mt-12 lg:mt-0 lg:col-span-6">
             <div className="relative">
-              {/* Main Hero Image */}
+              {/* Main Hero Image Carousel */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src={heroImage} 
-                  alt="Professional home cleaning service" 
-                  className="w-full h-[700px] object-cover" 
-                  style={{ 
-                    imageRendering: '-webkit-optimize-contrast',
-                    backfaceVisibility: 'hidden',
-                    transform: 'translateZ(0)'
-                  }}
-                  loading="eager"
-                  decoding="async"
-                />
+                {heroImages.map((image, index) => (
+                  <img 
+                    key={index}
+                    src={image.src} 
+                    alt={image.alt} 
+                    className={`w-full h-[700px] object-cover absolute inset-0 transition-opacity duration-1000 ${
+                      index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                    style={{ 
+                      imageRendering: '-webkit-optimize-contrast',
+                      backfaceVisibility: 'hidden',
+                      transform: 'translateZ(0)'
+                    }}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                  />
+                ))}
                 
                 {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-20"></div>
+
+                {/* Carousel Indicators */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
+                  {heroImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentImageIndex 
+                          ? 'bg-white w-8' 
+                          : 'bg-white/50 hover:bg-white/75'
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
 
                 {/* Floating Service Cards */}
-                <div className="absolute top-6 left-6 bg-white rounded-lg p-4 shadow-lg backdrop-blur-sm">
+                <div className="absolute top-6 left-6 bg-white rounded-lg p-4 shadow-lg backdrop-blur-sm z-30">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                       <CheckCircle2 className="h-6 w-6 text-blue-600" />
@@ -128,7 +177,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
                   </div>
                 </div>
 
-                <div className="absolute top-6 right-6 bg-white rounded-lg p-4 shadow-lg backdrop-blur-sm">
+                <div className="absolute top-6 right-6 bg-white rounded-lg p-4 shadow-lg backdrop-blur-sm z-30">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                       <Star className="h-6 w-6 text-green-600 fill-current" />
