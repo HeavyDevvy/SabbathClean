@@ -17,10 +17,11 @@ import heroImage1 from "@assets/pensive-housewife-keeps-lips-folded-dreams-about
 import heroImage2 from "@assets/handyman-using-wrench-fix_1763409051041.jpg";
 import heroImage3 from "@assets/male-electrician-works-switchboard-with-electrical-connecting-cable (1)_1763409060358.jpg";
 import heroImage4 from "@assets/garden-seasonal-maintenance_1763409073401.jpg";
-import heroImage5 from "@assets/sushi-set-table_1763409085332.jpg";
-import heroImage6 from "@assets/waiter-waitress-holding-serving-tray-with-glass-cocktail_1763409096437.jpg";
-import heroImage7 from "@assets/delivery-service-personnel-transferring-package-from-truck_1763409112008.jpg";
-import heroImage8 from "@assets/mother-observes-daughter-coloring-notebook-home_1763409119215.jpg";
+import heroImage5 from "@assets/pool-technician-using-tablet-by-pool-surrounded-by-chemical-containers-greenery-focused_1763410857450.jpg";
+import heroImage6 from "@assets/sushi-set-table_1763409085332.jpg";
+import heroImage7 from "@assets/waiter-waitress-holding-serving-tray-with-glass-cocktail_1763409096437.jpg";
+import heroImage8 from "@assets/delivery-service-personnel-transferring-package-from-truck_1763409112008.jpg";
+import heroImage9 from "@assets/mother-observes-daughter-coloring-notebook-home_1763409119215.jpg";
 
 interface EnhancedHeroProps {
   onBookingClick: () => void;
@@ -33,10 +34,11 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
     { src: heroImage2, alt: "Handyman plumbing service" },
     { src: heroImage3, alt: "Professional electrical service" },
     { src: heroImage4, alt: "Garden maintenance and care" },
-    { src: heroImage5, alt: "Professional chef and catering service" },
-    { src: heroImage6, alt: "Professional waitering service" },
-    { src: heroImage7, alt: "Moving and delivery service" },
-    { src: heroImage8, alt: "Au pair and childcare service" },
+    { src: heroImage5, alt: "Pool cleaning and maintenance service" },
+    { src: heroImage6, alt: "Professional chef and catering service" },
+    { src: heroImage7, alt: "Professional waitering service" },
+    { src: heroImage8, alt: "Moving and delivery service" },
+    { src: heroImage9, alt: "Au pair and childcare service" },
   ];
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
