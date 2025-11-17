@@ -126,13 +126,13 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
           <div className="mt-12 lg:mt-0 lg:col-span-6">
             <div className="relative">
               {/* Main Hero Image Carousel */}
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[700px]">
                 {heroImages.map((image, index) => (
                   <img 
                     key={index}
                     src={image.src} 
                     alt={image.alt} 
-                    className={`w-full h-[700px] object-cover absolute inset-0 transition-opacity duration-1000 ${
+                    className={`w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-1000 ${
                       index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                     style={{ 
