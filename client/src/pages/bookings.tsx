@@ -116,10 +116,15 @@ export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [rescheduleBooking, setRescheduleBooking] = useState<any>(null);
   const [cancelBooking, setCancelBooking] = useState<any>(null);
-  const [rebookData, setRebookData] = useState<any>(null);
   const [shareBooking, setShareBooking] = useState<any>(null);
   const [chatBooking, setChatBooking] = useState<any>(null);
   const [reviewBooking, setReviewBooking] = useState<any>(null);
+  
+  // EXACT same state management as Profile page for "Book Now"
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>("");
+  const [prefillData, setPrefillData] = useState<any>(null);
+  
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -283,10 +288,12 @@ export default function BookingsPage() {
                     variant="outline" 
                     size="sm"
                     className="text-purple-600 hover:text-purple-700"
-                    onClick={() => setRebookData({
-                      serviceId: booking.serviceType,
-                      bookingData: booking
-                    })}
+                    onClick={() => {
+                      // EXACT same flow as "Book Now" on Profile page
+                      setSelectedServiceId(booking.serviceType);
+                      setPrefillData(booking);
+                      setIsBookingOpen(true);
+                    }}
                     data-testid={`button-rebook-${booking.id}`}
                   >
                     <Repeat className="h-4 w-4 mr-1" />
@@ -534,72 +541,29 @@ export default function BookingsPage() {
         />
       )}
 
-      {/* Re-book Modal */}
-      {rebookData && (
-        <ModernServiceModal
-          isOpen={true}
-          onClose={() => setRebookData(null)}
-          serviceId={rebookData.serviceId}
-          onBookingComplete={(bookingData) => {
-            queryClient.invalidateQueries({ queryKey: ['/api/orders', user?.id] });
-            setRebookData(null);
-          }}
-          editBookingData={{
-            // Basic booking details
-            propertyType: rebookData.bookingData.serviceDetails?.propertyType || rebookData.bookingData.propertyType,
-            address: rebookData.bookingData.address || rebookData.bookingData.serviceDetails?.address,
-            gateCode: "", // Never prefill gate code for security
-            preferredDate: rebookData.bookingData.scheduledDate,
-            timePreference: rebookData.bookingData.scheduledTime,
-            recurringSchedule: rebookData.bookingData.serviceDetails?.recurringSchedule || "one-time",
-            specialRequests: rebookData.bookingData.specialInstructions || rebookData.bookingData.serviceDetails?.specialRequests,
-            
-            // House Cleaning specific
-            cleaningType: rebookData.bookingData.serviceDetails?.cleaningType,
-            propertySize: rebookData.bookingData.serviceDetails?.propertySize,
-            numRooms: rebookData.bookingData.serviceDetails?.numRooms,
-            numBathrooms: rebookData.bookingData.serviceDetails?.numBathrooms,
-            frequency: rebookData.bookingData.serviceDetails?.frequency,
-            servicePackage: rebookData.bookingData.serviceDetails?.servicePackage,
-            
-            // Garden Care specific
-            gardenSize: rebookData.bookingData.serviceDetails?.gardenSize,
-            gardenCondition: rebookData.bookingData.serviceDetails?.gardenCondition,
-            
-            // Pool Cleaning specific
-            poolSize: rebookData.bookingData.serviceDetails?.poolSize,
-            poolCondition: rebookData.bookingData.serviceDetails?.poolCondition,
-            
-            // Plumbing/Electrical specific
-            urgency: rebookData.bookingData.serviceDetails?.urgency,
-            materials: rebookData.bookingData.serviceDetails?.materials || "supply",
-            insurance: rebookData.bookingData.serviceDetails?.insurance || false,
-            
-            // Chef/Catering specific
-            numGuests: rebookData.bookingData.serviceDetails?.numGuests,
-            cuisineType: rebookData.bookingData.serviceDetails?.cuisineType,
-            flavorPreference: rebookData.bookingData.serviceDetails?.flavorPreference,
-            menuOption: rebookData.bookingData.serviceDetails?.menuOption,
-            dietaryRestrictions: rebookData.bookingData.serviceDetails?.dietaryRestrictions,
-            allergies: rebookData.bookingData.serviceDetails?.allergies,
-            
-            // Waitering specific
-            eventType: rebookData.bookingData.serviceDetails?.eventType,
-            numWaiters: rebookData.bookingData.serviceDetails?.numWaiters,
-            formalityLevel: rebookData.bookingData.serviceDetails?.formalityLevel,
-            
-            // Moving specific
-            moveType: rebookData.bookingData.serviceDetails?.moveType,
-            floors: rebookData.bookingData.serviceDetails?.floors,
-            elevator: rebookData.bookingData.serviceDetails?.elevator,
-            
-            // Au Pair specific
-            numChildren: rebookData.bookingData.serviceDetails?.numChildren,
-            childrenAges: rebookData.bookingData.serviceDetails?.childrenAges,
-            specialNeeds: rebookData.bookingData.serviceDetails?.specialNeeds,
-          }}
-        />
-      )}
+      {/* Re-book Modal - EXACT same pattern as Profile page "Book Now" */}
+      <ModernServiceModal 
+        isOpen={isBookingOpen}
+        onClose={() => {
+          setIsBookingOpen(false);
+          setSelectedServiceId("");
+          setPrefillData(null);
+        }}
+        serviceId={selectedServiceId}
+        onServiceSelect={(serviceId: string, prefillData?: any) => {
+          setSelectedServiceId(serviceId);
+          setPrefillData(prefillData || null);
+        }}
+        onBookingComplete={(bookingData: any) => {
+          console.log("Booking completed:", bookingData);
+          setIsBookingOpen(false);
+          setSelectedServiceId("");
+          setPrefillData(null);
+          queryClient.invalidateQueries({ queryKey: ['/api/orders', user?.id] });
+        }}
+        recentOrders={orders}
+        prefillFromRecent={prefillData}
+      />
 
       {/* Share Booking Dialog - Phase 4.3d */}
       {shareBooking && (

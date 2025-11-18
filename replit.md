@@ -5,15 +5,18 @@ Berry Events is a domestic services marketplace connecting customers with verifi
 # Recent Changes
 
 ## November 18, 2025
-- Enhanced My Bookings page with three new features:
+- Enhanced My Bookings page with complete booking management features:
   - **Auto-move logic**: Bookings automatically move from "Upcoming" to "Past" based on scheduledDate/scheduledTime comparison using isBookingInPast() helper function
+  - **Button Cleanup**: Past bookings now show ONLY "Review your berry" and "Re-book" buttons. Removed Chat, Reschedule, Share, WhatsApp Share, and Cancel buttons from past bookings for cleaner UI.
   - **Review Modal**: Added "Review your berry" button for past/completed bookings with ReviewBerryModal component featuring:
     - 0-5 star rating system with hover effects
     - Service provider details and booking summary
     - Optional comments text area for written feedback
     - Placeholder submission handler (logs to console until backend API is implemented)
-  - **Re-book Enhancement**: Updated "Re-book" button (renamed from "Book Again") with comprehensive form prefill:
-    - All service-specific fields pre-populated (cleaning type, property size, garden size, pool size, chef preferences, etc.)
+  - **Re-book Flow**: Fixed "Re-book" button to use EXACT same flow as Profile page "Book Now":
+    - Uses identical state management (isBookingOpen, selectedServiceId, prefillData)
+    - Opens ModernServiceModal with prefillFromRecent prop for data pre-population
+    - Navigates to complete booking steps flow with all service-specific fields
     - Gate code deliberately excluded for security
     - Date and time fields left blank for user to select new appointment
     - Supports all 9 service types with their unique configuration fields
