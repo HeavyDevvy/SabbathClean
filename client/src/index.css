@@ -11,6 +11,16 @@ img {
   backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  /* Native lazy loading for all images by default */
+  loading: lazy;
+  /* Prevent layout shift with aspect-ratio */
+  height: auto;
+}
+
+/* Critical images that should load immediately */
+img[loading="eager"],
+img[data-critical="true"] {
+  loading: eager;
 }
 
 /* Ensure smooth image rendering on high-DPI displays */
@@ -19,6 +29,22 @@ img {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: auto;
   }
+}
+
+/* Skeleton loading animation for better perceived performance */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite;
 }
 
 /* Custom animations for tutorial and recommendations */
