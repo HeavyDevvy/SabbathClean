@@ -3,6 +3,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global image optimization - prevent pixelation and improve rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Ensure smooth image rendering on high-DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
+  }
+}
+
 /* Custom animations for tutorial and recommendations */
 @keyframes glow {
   0%, 100% { box-shadow: 0 0 5px rgba(60, 11, 44, 0.5); }
