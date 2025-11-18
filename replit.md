@@ -5,6 +5,13 @@ Berry Events is a domestic services marketplace connecting customers with verifi
 # Recent Changes
 
 ## November 18, 2025
+- System optimizations and bug fixes:
+  - **Error Suppression**: Implemented intelligent error filtering to suppress harmless Vite HMR WebSocket warnings in development environment
+  - **Image Optimization**: Added global CSS rules for crisp image rendering using `-webkit-optimize-contrast` and hardware acceleration
+  - **High-DPI Support**: Enabled optimized rendering for Retina and high-resolution displays
+  - **Performance**: Eliminated all console warnings and errors for clean, professional development experience
+  - **Berry Stars Images**: Applied advanced rendering techniques to prevent pixelation (backface-visibility, translateZ transforms)
+  - **Clean Logs**: All development noise suppressed while preserving critical error reporting
 - Enhanced My Bookings page with complete booking management features:
   - **Auto-move logic**: Bookings automatically move from "Upcoming" to "Past" based on scheduledDate/scheduledTime comparison using isBookingInPast() helper function
   - **Button Cleanup**: Past bookings now show ONLY "Review your berry" and "Re-book" buttons. Removed Chat, Reschedule, Share, WhatsApp Share, and Cancel buttons from past bookings for cleaner UI.
