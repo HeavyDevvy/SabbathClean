@@ -1,0 +1,589 @@
+Berry Events - Fix "Meet Your Berry Stars" Booking Flow - REPLIT PROMPT
+IMPORTANT: Align the "Meet Your Berry Stars" booking process to match the "Quick Quote" and "Book Now" flows exactly. Pre-select the chosen service provider and hide other providers.
+
+PROBLEM STATEMENT
+Current Issues:
+
+Booking through "Meet Your Berry Stars" (service provider cards) may have a different flow than Quick Quote/Book Now
+When user selects a specific provider (e.g., Thabo), they still see all providers in Step 4
+Need to pre-select the chosen provider and hide other options
+
+Required Behavior:
+
+Booking flow must be identical to Quick Quote/Book Now
+Selected provider must be pre-selected in Step 4
+No other providers should be visible when booking through a specific provider card
+All steps should remain the same
+
+
+IMPLEMENTATION GUIDE
+STEP 1: Identify the Current Booking Flows
+Find these three entry points in your code:
+
+Quick Quote Button (Homepage)
+
+Location: src/pages/Home.jsx or src/components/QuickQuote.jsx
+Function: handleQuickQuote() or similar
+
+
+Book Now Button (My Profile page, top-right)
+
+Location: src/pages/MyProfile.jsx
+Function: handleBookNow() or similar
+
+
+Meet Your Berry Stars (Service provider cards on Homepage)
+
+Location: src/pages/Home.jsx or src/components/BerryStars.jsx
+Function: handleProviderSelect() or handleBookProvider() or similar
+
+
+
+
+STEP 2: Understand the Standard Booking Flow
+The complete booking process should be:
+Step 1: Select Service Type
+  ↓
+Step 2: Service Configuration (rooms, hours, etc.)
+  ↓
+Step 3: Select Date & Time
+  ↓
+Step 4: Select Service Provider  ← THIS IS WHERE WE MAKE CHANGES
+  ↓
+Step 5: Add-ons (optional)
+  ↓
+Step 6: Address & Contact Info
+  ↓
+Step 7: Review & Confirm
+  ↓
+Step 8: Payment
+  ↓
+Booking Confirmed
+
+STEP 3: Create Unified Booking Function
+Create or update a shared booking initialization function:
+javascript// File: src/utils/bookingFlow.js or src/hooks/useBookingFlow.js
+
+export const initializeBooking = ({
+  serviceType = null,        // Pre-selected service (optional)
+  providerId = null,          // Pre-selected provider (optional)
+  providerName = null,        // Provider name for display
+  providerData = null,        // Complete provider object
+  prefilledData = null,       // For re-booking (from past bookings)
+}) => {
+  
+  const bookingState = {
+    // Step 1: Service
+    selectedService: serviceType,
+    
+    // Step 2: Configuration
+    rooms: prefilledData?.rooms || null,
+    hours: prefilledData?.hours || null,
+    configuration: prefilledData?.configuration || {},
+    
+    // Step 3: Date & Time
+    selectedDate: null, // Always empty - user must choose
+    selectedTime: null, // Always empty - user must choose
+    
+    // Step 4: Provider - THIS IS KEY
+    selectedProvider: providerId ? {
+      id: providerId,
+      name: providerName,
+      ...providerData
+    } : null,
+    showAllProviders: !providerId, // Hide others if provider pre-selected
+    lockedProvider: !!providerId,  // Lock selection if coming from Berry Stars
+    
+    // Step 5: Add-ons
+    addOns: prefilledData?.addOns || [],
+    
+    // Step 6: Address
+    address: prefilledData?.address || null,
+    contactInfo: prefilledData?.contactInfo || null,
+    
+    // Step 7: Review
+    specialInstructions: prefilledData?.specialInstructions || '',
+    
+    // Flow control
+    currentStep: serviceType ? 2 : 1, // Skip step 1 if service known
+  };
+  
+  return bookingState;
+};
+
+STEP 4: Update "Meet Your Berry Stars" Click Handler
+Find where users click on a service provider card and update it:
+javascript// File: src/components/BerryStars.jsx or src/pages/Home.jsx
+
+import { useNavigate } from 'react-router-dom';
+import { initializeBooking } from '../utils/bookingFlow';
+
+const BerryStarsSection = () => {
+  const navigate = useNavigate();
+  
+  // Example Berry Stars data
+  const berryStars = [
+    {
+      id: 'provider_001',
+      name: 'Thabo',
+      image: '/images/thabo.jpg',
+      rating: 4.9,
+      specialties: ['Cleaning', 'Laundry'],
+      reviews: 127,
+    },
+    {
+      id: 'provider_002',
+      name: 'Sarah',
+      image: '/images/sarah.jpg',
+      rating: 4.8,
+      specialties: ['Gardening', 'Landscaping'],
+      reviews: 98,
+    },
+    // ... more providers
+  ];
+
+  // HANDLER FOR CLICKING A BERRY STAR PROVIDER
+  const handleBookWithProvider = (provider) => {
+    console.log('Starting booking with provider:', provider.name);
+    
+    // Initialize booking with pre-selected provider
+    const bookingData = initializeBooking({
+      serviceType: null,              // User will select in Step 1
+      providerId: provider.id,        // PRE-SELECT PROVIDER
+      providerName: provider.name,
+      providerData: provider,         // Pass full provider object
+    });
+    
+    // Navigate to booking flow with state
+    navigate('/booking', { 
+      state: { 
+        bookingData,
+        fromBerryStars: true,        // Flag to identify source
+        lockedProvider: provider.id,  // Lock this provider
+      } 
+    });
+  };
+
+  return (
+    <section className="berry-stars-section">
+      <h2>Meet Your Berry Stars</h2>
+      <p>Book directly with our top-rated service professionals</p>
+      
+      <div className="berry-stars-grid">
+        {berryStars.map((provider) => (
+          <div key={provider.id} className="berry-star-card">
+            <img src={provider.image} alt={provider.name} />
+            <h3>{provider.name}</h3>
+            <div className="rating">
+              ⭐ {provider.rating} ({provider.reviews} reviews)
+            </div>
+            <div className="specialties">
+              {provider.specialties.join(' • ')}
+            </div>
+            
+            {/* BOOK WITH THIS PROVIDER BUTTON */}
+            <button
+              onClick={() => handleBookWithProvider(provider)}
+              style={{
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                width: '100%',
+                marginTop: '1rem',
+              }}
+            >
+              Book with {provider.name}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default BerryStarsSection;
+
+STEP 5: Update Booking Flow Component - Step 4 (Provider Selection)
+Modify the provider selection step to handle pre-selected providers:
+javascript// File: src/components/BookingFlow.jsx or src/pages/BookingSteps.jsx
+
+import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+const BookingFlow = () => {
+  const location = useLocation();
+  const [bookingState, setBookingState] = useState(location.state?.bookingData || {});
+  const [currentStep, setCurrentStep] = useState(bookingState.currentStep || 1);
+  
+  // Check if provider is locked (from Berry Stars)
+  const lockedProviderId = location.state?.lockedProvider;
+  const fromBerryStars = location.state?.fromBerryStars;
+
+  // Step 4: Provider Selection Component
+  const ProviderSelectionStep = () => {
+    const [selectedProvider, setSelectedProvider] = useState(
+      bookingState.selectedProvider || null
+    );
+    
+    // If provider is locked, don't fetch all providers
+    const showProviderList = !lockedProviderId;
+
+    useEffect(() => {
+      // If coming from Berry Stars with locked provider
+      if (lockedProviderId && bookingState.selectedProvider) {
+        console.log('Provider pre-selected:', bookingState.selectedProvider.name);
+        setSelectedProvider(bookingState.selectedProvider);
+      }
+    }, [lockedProviderId]);
+
+    // If provider is locked, show only the pre-selected provider
+    if (lockedProviderId) {
+      return (
+        <div className="provider-selection-step">
+          <h2>Your Selected Service Provider</h2>
+          
+          {/* SHOW ONLY THE PRE-SELECTED PROVIDER */}
+          <div className="selected-provider-card locked">
+            <img 
+              src={selectedProvider?.image || '/images/default-avatar.jpg'} 
+              alt={selectedProvider?.name}
+            />
+            <div className="provider-info">
+              <h3>{selectedProvider?.name}</h3>
+              <div className="rating">
+                ⭐ {selectedProvider?.rating || 'N/A'} 
+                ({selectedProvider?.reviews || 0} reviews)
+              </div>
+              {selectedProvider?.specialties && (
+                <div className="specialties">
+                  {selectedProvider.specialties.join(' • ')}
+                </div>
+              )}
+              <div className="locked-badge">
+                ✓ Selected Provider
+              </div>
+            </div>
+          </div>
+
+          <p style={{ 
+            marginTop: '1rem', 
+            color: '#6B4C6B',
+            fontStyle: 'italic' 
+          }}>
+            You are booking with {selectedProvider?.name}. 
+            This provider will be assigned to your service.
+          </p>
+
+          {/* NAVIGATION BUTTONS */}
+          <div className="step-navigation">
+            <button onClick={handlePreviousStep}>Back</button>
+            <button 
+              onClick={handleNextStep}
+              style={{ backgroundColor: '#8B4789', color: '#FFFFFF' }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // STANDARD PROVIDER SELECTION (for Quick Quote / Book Now)
+    return (
+      <div className="provider-selection-step">
+        <h2>Select Your Service Provider</h2>
+        
+        <div className="providers-grid">
+          {/* Show all available providers */}
+          {availableProviders.map((provider) => (
+            <div 
+              key={provider.id}
+              className={`provider-card ${selectedProvider?.id === provider.id ? 'selected' : ''}`}
+              onClick={() => setSelectedProvider(provider)}
+            >
+              <img src={provider.image} alt={provider.name} />
+              <h3>{provider.name}</h3>
+              <div className="rating">
+                ⭐ {provider.rating} ({provider.reviews} reviews)
+              </div>
+              {selectedProvider?.id === provider.id && (
+                <div className="selected-badge">✓ Selected</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* NAVIGATION BUTTONS */}
+        <div className="step-navigation">
+          <button onClick={handlePreviousStep}>Back</button>
+          <button 
+            onClick={handleNextStep}
+            disabled={!selectedProvider}
+            style={{ 
+              backgroundColor: selectedProvider ? '#8B4789' : '#D4A5D4',
+              color: '#FFFFFF' 
+            }}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Handle navigation between steps
+  const handleNextStep = () => {
+    // Save current step data
+    setBookingState({
+      ...bookingState,
+      selectedProvider: selectedProvider, // Save provider choice
+    });
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePreviousStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  // Render current step
+  const renderStep = () => {
+    switch(currentStep) {
+      case 1:
+        return <ServiceSelectionStep />;
+      case 2:
+        return <ServiceConfigurationStep />;
+      case 3:
+        return <DateTimeSelectionStep />;
+      case 4:
+        return <ProviderSelectionStep />; // THIS IS THE KEY STEP
+      case 5:
+        return <AddOnsStep />;
+      case 6:
+        return <AddressStep />;
+      case 7:
+        return <ReviewStep />;
+      case 8:
+        return <PaymentStep />;
+      default:
+        return <ServiceSelectionStep />;
+    }
+  };
+
+  return (
+    <div className="booking-flow-container">
+      {/* Progress Indicator */}
+      <div className="booking-progress">
+        <div className="progress-bar" style={{ width: `${(currentStep / 8) * 100}%` }} />
+      </div>
+
+      {/* Step Content */}
+      {renderStep()}
+    </div>
+  );
+};
+
+export default BookingFlow;
+
+STEP 6: Update Quick Quote & Book Now to Use Same Flow
+Ensure all three entry points use the same booking flow:
+javascript// File: src/pages/Home.jsx - Quick Quote Button
+
+const handleQuickQuote = () => {
+  const bookingData = initializeBooking({
+    serviceType: null,      // User selects in Step 1
+    providerId: null,       // User selects in Step 4
+  });
+  
+  navigate('/booking', { state: { bookingData } });
+};
+javascript// File: src/pages/MyProfile.jsx - Book Now Button
+
+const handleBookNow = () => {
+  const bookingData = initializeBooking({
+    serviceType: null,      // User selects in Step 1
+    providerId: null,       // User selects in Step 4
+  });
+  
+  navigate('/booking', { state: { bookingData } });
+};
+
+STEP 7: Add Styling for Locked Provider Display
+css/* File: src/styles/BookingFlow.css */
+
+/* Locked provider card (from Berry Stars) */
+.selected-provider-card.locked {
+  border: 3px solid #8B4789;
+  background: linear-gradient(135deg, #f8f4f8 0%, #ffffff 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 500px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 12px rgba(139, 71, 137, 0.15);
+}
+
+.selected-provider-card.locked img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #8B4789;
+}
+
+.selected-provider-card .provider-info {
+  flex: 1;
+}
+
+.selected-provider-card .provider-info h3 {
+  font-size: 1.5rem;
+  color: #2E0B2B;
+  margin-bottom: 0.5rem;
+}
+
+.selected-provider-card .rating {
+  color: #6B4C6B;
+  margin-bottom: 0.5rem;
+}
+
+.selected-provider-card .specialties {
+  color: #A87CA8;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.locked-badge {
+  display: inline-block;
+  background-color: #8B4789;
+  color: #FFFFFF;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Standard provider grid (for Quick Quote / Book Now) */
+.providers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.provider-card {
+  border: 2px solid #E5C5E5;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.provider-card:hover {
+  border-color: #8B4789;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(139, 71, 137, 0.2);
+}
+
+.provider-card.selected {
+  border-color: #8B4789;
+  background-color: #f8f4f8;
+  border-width: 3px;
+}
+
+.selected-badge {
+  background-color: #8B4789;
+  color: #FFFFFF;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+TESTING CHECKLIST
+After implementation, test ALL three booking flows:
+Test 1: Quick Quote Button
+
+ Click "Quick Quote" on homepage
+ Goes to Step 1 (Select Service)
+ Complete all steps normally
+ Step 4 shows ALL available providers
+ Can select any provider
+ Booking completes successfully
+
+Test 2: Book Now Button (My Profile)
+
+ Click "Book Now" on My Profile page
+ Goes to Step 1 (Select Service)
+ Complete all steps normally
+ Step 4 shows ALL available providers
+ Can select any provider
+ Booking completes successfully
+
+Test 3: Meet Your Berry Stars
+
+ Click "Book with Thabo" (or any provider) on homepage
+ Goes directly to Step 1 (or Step 2 if service pre-selected)
+ Complete steps 1-3 normally
+ Step 4 shows ONLY Thabo (pre-selected)
+ No other providers visible
+ Cannot change provider selection
+ Continue to remaining steps
+ Booking completes with Thabo as the provider
+ Confirmation shows correct provider
+
+Quality Checks:
+
+ No console errors in any flow
+ No blank screens during any step
+ Navigation (Back/Continue) works in all steps
+ Progress bar updates correctly
+ All three flows follow identical step sequence
+ Provider data persists through all steps
+ Final booking confirmation shows correct provider
+
+
+DEBUGGING TIPS
+If provider selection not working:
+
+Check state persistence:
+
+javascriptconsole.log('Booking State:', bookingState);
+console.log('Locked Provider:', lockedProviderId);
+console.log('Selected Provider:', selectedProvider);
+
+Verify navigation state:
+
+javascriptconsole.log('Location State:', location.state);
+console.log('From Berry Stars:', fromBerryStars);
+
+Check provider data structure:
+
+javascriptconsole.log('Provider Data:', provider);
+// Should have: id, name, image, rating, reviews, specialties
+Common issues and fixes:
+IssueSolutionAll providers still showingCheck lockedProviderId is being passed in navigate()Provider not pre-selectedVerify bookingState.selectedProvider is set correctlyCan still change providerEnsure conditional rendering based on lockedProviderIdDifferent booking flowsAll must call initializeBooking() functionState lost between stepsSave state in setBookingState() on each step change
+
+SUMMARY OF CHANGES
+✅ Unified booking flow - All three entry points use same process
+✅ Pre-selected provider - Berry Stars selection carries through to Step 4
+✅ Hide other providers - Only show selected provider when booking through Berry Stars
+✅ Locked provider - Cannot change provider when coming from Berry Stars
+✅ Identical steps - Quick Quote, Book Now, and Berry Stars follow same sequence
+✅ No errors - All flows tested and working
+Implementation time: ~30-45 minutes
+Files to update:
+
+src/components/BerryStars.jsx - Add provider click handler
+src/components/BookingFlow.jsx - Update Step 4 logic
+src/utils/bookingFlow.js - Create unified initialization
+src/pages/Home.jsx - Update Quick Quote handler
+src/pages/MyProfile.jsx - Update Book Now handler
+src/styles/BookingFlow.css - Add locked provider styling
+RetryClaude can make mistakes. Please double-check responses.

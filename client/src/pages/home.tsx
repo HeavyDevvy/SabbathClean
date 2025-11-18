@@ -12,12 +12,14 @@ import { useState } from "react";
 export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string>("");
+  const [selectedProviderId, setSelectedProviderId] = useState<string | undefined>(undefined);
+  const [selectedProviderName, setSelectedProviderName] = useState<string | undefined>(undefined);
   const [isProviderOnboardingOpen, setIsProviderOnboardingOpen] = useState(false);
   const [bookedServices, setBookedServices] = useState<string[]>([]);
   const [pendingDrafts, setPendingDrafts] = useState<any[]>([]); // Store service drafts before payment
   const [confirmedDrafts, setConfirmedDrafts] = useState<any[]>([]); // Store confirmed bookings after payment
 
-  const openBooking = (service?: string) => {
+  const openBooking = (service?: string, providerId?: string, providerName?: string) => {
     if (service && service !== 'all-services') {
       // Check if service is already booked
       if (bookedServices.includes(service)) {
@@ -29,6 +31,11 @@ export default function Home() {
       // No service pre-selected - let user choose
       setSelectedService('');
     }
+    
+    // Set provider info if provided (from Berry Stars)
+    setSelectedProviderId(providerId);
+    setSelectedProviderName(providerName);
+    
     setIsBookingOpen(true);
   };
 
@@ -50,8 +57,12 @@ export default function Home() {
         onClose={() => {
           setIsBookingOpen(false);
           setSelectedService("");
+          setSelectedProviderId(undefined);
+          setSelectedProviderName(undefined);
         }}
         serviceId={selectedService}
+        preSelectedProviderId={selectedProviderId}
+        preSelectedProviderName={selectedProviderName}
         onServiceSelect={(serviceId) => setSelectedService(serviceId)}
         onBookingComplete={(bookingData) => {
           console.log("Payment completed for all services:", bookingData);
@@ -66,6 +77,8 @@ export default function Home() {
           
           setIsBookingOpen(false);
           setSelectedService("");
+          setSelectedProviderId(undefined);
+          setSelectedProviderName(undefined);
         }}
         bookedServices={bookedServices}
         pendingDrafts={pendingDrafts}
@@ -83,6 +96,8 @@ export default function Home() {
           // Close modal to return to home page for next service
           setIsBookingOpen(false);
           setSelectedService("");
+          setSelectedProviderId(undefined);
+          setSelectedProviderName(undefined);
         }}
       />
       
