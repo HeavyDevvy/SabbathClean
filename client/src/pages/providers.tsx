@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, CheckCircle, Shield } from "lucide-react";
 import { ServiceProvider } from "@shared/schema";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 export default function Providers() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -50,10 +51,11 @@ export default function Providers() {
           {providers?.map((provider) => (
             <Card key={provider.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300" data-testid={`card-provider-${provider.id}`}>
               <div className="aspect-w-16 aspect-h-9">
-                <img 
+                <OptimizedImage
                   src={provider.profileImage || "https://images.unsplash.com/photo-1494790108755-2616b612b588?w=300"} 
                   alt={`Professional service provider`}
                   className="w-full h-48 object-cover"
+                  containerClassName="w-full h-48"
                 />
               </div>
               <CardContent className="p-6">

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { 
   Star,
   MapPin,
@@ -159,17 +160,11 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
               <CardContent className="p-0 flex flex-col h-full">
                 {/* Header Image */}
                 <div className="relative aspect-square overflow-hidden">
-                  <img 
+                  <OptimizedImage
                     src={provider.image} 
                     alt={provider.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                    style={{
-                      imageRendering: '-webkit-optimize-contrast',
-                      WebkitBackfaceVisibility: 'hidden',
-                      backfaceVisibility: 'hidden',
-                      transform: 'translateZ(0)',
-                    }}
-                    loading="lazy"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    containerClassName="w-full h-full"
                   />
                 </div>
 

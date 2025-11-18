@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Star, MapPin, CheckCircle } from "lucide-react";
 import { Link } from "wouter";
 import { ServiceProvider } from "@shared/schema";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 export default function FeaturedProviders() {
   const { data: providers, isLoading } = useQuery<ServiceProvider[]>({
@@ -36,11 +37,11 @@ export default function FeaturedProviders() {
         <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {featuredProviders.map((provider) => (
             <Card key={provider.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300" data-testid={`card-featured-provider-${provider.id}`}>
-              <img 
+              <OptimizedImage
                 src={provider.profileImage || "https://images.unsplash.com/photo-1494790108755-2616b612b588?w=300"} 
                 alt="Professional service provider"
                 className="w-full h-48 object-cover"
-                loading="lazy"
+                containerClassName="w-full h-48"
               />
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">

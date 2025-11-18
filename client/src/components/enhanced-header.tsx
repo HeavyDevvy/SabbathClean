@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useNotifications } from "@/hooks/useNotifications";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -214,10 +215,12 @@ const EnhancedHeader = memo(function EnhancedHeader({
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full" data-testid="button-user-menu">
                       {user?.profileImage ? (
-                        <img
+                        <OptimizedImage
                           src={user.profileImage}
                           alt={`${user.firstName} ${user.lastName}`}
                           className="h-8 w-8 rounded-full object-cover"
+                          containerClassName="h-8 w-8 rounded-full"
+                          skeletonClassName="rounded-full"
                         />
                       ) : (
                         <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#C56B86' }}>
