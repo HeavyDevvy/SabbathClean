@@ -24,7 +24,7 @@ Berry Events is a domestic services marketplace connecting customers with verifi
 - Updated header and navigation design:
   - **Header Background**: Changed to dark plum (#44062D) for premium brand aesthetic
   - **Admin Portal**: Moved from top header navigation to Footer Support section for better organization
-  - **Navigation Icons**: Home and Services use distinct icons (Home vs Briefcase) for clear differentiation
+  - **Navigation Icons**: Home uses Home icon, Services uses LayoutGrid icon (universal catalog icon) for clear differentiation
   - **User Initials Avatar**: Updated background color to brand color (#C56B86) for consistency
   - **Text Colors**: All header text updated to white with light beige (#EED1C4) hover states for optimal visibility on dark background
   - **Search Bar**: Styled with semi-transparent background and white text for cohesive dark theme integration

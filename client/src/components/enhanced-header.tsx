@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Bell, User, Calendar, Settings, Home, Briefcase, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
+import { Menu, X, Search, Bell, User, Calendar, Settings, Home, LayoutGrid, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
@@ -139,7 +139,7 @@ export default function EnhancedHeader({
               className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-services"
             >
-              <Briefcase className="h-4 w-4 mr-1" />
+              <LayoutGrid className="h-4 w-4 mr-1" />
               Services
             </Link>
             {!isAuthenticated && (
