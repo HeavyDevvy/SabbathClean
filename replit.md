@@ -1,85 +1,6 @@
 # Overview
 
-Berry Events is a domestic services marketplace connecting customers with verified providers for home services like cleaning, plumbing, electrical, chef/catering, and garden care. It aims to be a premium platform in South Africa, focusing on quality, security, and specialized services (e.g., African cuisine). Key features include dynamic pricing, an advanced booking system with geolocation, provider matching, reviews, secure Stripe payments (with all funds routed through "Berry Events Bank"), an AI recommendation engine, interactive onboarding, and a comprehensive Progressive Web App (PWA) with mobile-native capabilities.
-
-# Recent Changes
-
-## November 18, 2025
-- Berry Stars booking normalization:
-  - **Service ID Normalization**: Refactored all service-specific conditionals in modern-service-modal.tsx to use normalized flags (isHouseCleaning, isPlumbing, isElectrical, isGardenService, isPoolService, isChefCatering, isEventStaff, isMoving, isAuPair) instead of raw serviceId comparisons
-  - **Berry Stars Consistency**: When booking from Berry Stars (e.g., Nomsa for house-cleaning with serviceId="house-cleaning"), step 1 now correctly shows all cleaning-specific fields (cleaningType, propertySize) matching the main service catalog
-  - **Validation Updates**: Updated Next button validation logic to use normalized service flags for consistent field validation across all booking entry points
-  - **Step 2 & Step 3 Updates**: Updated date/time selection and insurance checkbox conditionals to use normalized flags
-  - **Files Modified**: client/src/components/modern-service-modal.tsx (lines 2066-2900, 4015-4023)
-  - **Architect Confirmation**: All service-specific conditionals now use normalized identifiers to prevent Berry Stars booking flow mismatches
-- Button color standardization across entire platform:
-  - **Reference Color**: #C56B86 (pink from "Watch How It Works" button)
-  - **Updated Buttons**: All "Quick Quote or Book Now", "Book Now", and CTA buttons now use consistent #C56B86 color
-  - **Files Modified**: animated-service-card.tsx, berry-stars-section.tsx, services.tsx, pages/services.tsx, hero.tsx
-  - **Hover States**: All buttons maintain consistent hover:opacity-90 for uniform UX
-  - **Testing**: Zero console errors, all pages loading successfully (HTTP 200), no blank screens
-- Header and button UI refinements:
-  - **Logo Resizing**: Reduced logo from 180px to 90px (50% reduction) while maintaining aspect ratio and vertical centering
-  - **Header Height**: Optimized header padding from py-1 to py-2 for balanced spacing with smaller logo
-  - **Proportional Scaling**: Reduced header text and icons by ~25% (text-base to text-sm/xs, icons h-4/w-4 to h-3.5/w-3.5) for visual harmony
-  - **Mobile Optimization**: Scaled mobile menu icons and "Join as Provider" button proportionally
-  - **Clean Implementation**: Zero console errors, all pages loading successfully, responsive design preserved
-- System optimizations and bug fixes:
-  - **Error Suppression**: Implemented intelligent error filtering to suppress harmless Vite HMR WebSocket warnings in development environment
-  - **Image Optimization**: Added global CSS rules for crisp image rendering using `-webkit-optimize-contrast` and hardware acceleration
-  - **High-DPI Support**: Enabled optimized rendering for Retina and high-resolution displays
-  - **Performance**: Eliminated all console warnings and errors for clean, professional development experience
-  - **Berry Stars Images**: Applied advanced rendering techniques to prevent pixelation (backface-visibility, translateZ transforms)
-  - **Clean Logs**: All development noise suppressed while preserving critical error reporting
-- Enhanced My Bookings page with complete booking management features:
-  - **Auto-move logic**: Bookings automatically move from "Upcoming" to "Past" based on scheduledDate/scheduledTime comparison using isBookingInPast() helper function
-  - **Button Cleanup**: Past bookings now show ONLY "Review your berry" and "Re-book" buttons. Removed Chat, Reschedule, Share, WhatsApp Share, and Cancel buttons from past bookings for cleaner UI.
-  - **Review Modal**: Added "Review your berry" button for past/completed bookings with ReviewBerryModal component featuring:
-    - 0-5 star rating system with hover effects
-    - **Service provider details** (name, not service type) prominently displayed
-    - Complete booking summary
-    - Optional comments text area for written feedback
-    - Placeholder submission handler (logs to console until backend API is implemented)
-  - **Re-book Flow**: Fixed "Re-book" button to use EXACT same flow as Profile page "Book Now":
-    - Uses identical state management (isBookingOpen, selectedServiceId, prefillData)
-    - Opens ModernServiceModal with prefillFromRecent prop for data pre-population
-    - Navigates to complete booking steps flow with all service-specific fields
-    - Gate code deliberately excluded for security
-    - Date and time fields left blank for user to select new appointment
-    - Supports all 9 service types with their unique configuration fields
-- Updated header and navigation design:
-  - **Header Background**: Changed to dark plum (#44062D) for premium brand aesthetic
-  - **Admin Portal**: Moved from top header navigation to Footer Support section for better organization
-  - **Navigation Icons**: Home uses Home icon, Services uses LayoutGrid icon (universal catalog icon) for clear differentiation
-  - **User Initials Avatar**: Updated background color to brand color (#C56B86) for consistency
-  - **Text Colors**: All header text updated to white with light beige (#EED1C4) hover states for optimal visibility on dark background
-  - **Search Bar**: Styled with semi-transparent background and white text for cohesive dark theme integration
-- Logo and icon updates:
-  - **New Logo**: Updated to modern "B" Berry Events logo (berry-logo.png) throughout the platform
-  - **Header Logo**: Large size (180px) for prominent brand visibility with auto-adjusting header height
-  - **Footer Logo**: Medium size (120px) in footer brand section
-  - **Cart Icon**: Updated to white (#FFFFFF) to match navigation text color
-  - **Notification Icon**: Updated to white (#FFFFFF) for consistency with header theme
-  - **All Icons**: Maintain white color with light beige (#EED1C4) hover states on dark plum background
-- Header and button refinements:
-  - **Header Height**: Reduced vertical padding to py-1 (~4px) for compact, professional appearance
-  - **Button Colors**: Unified all primary action buttons ("Book Now", "Quick Quote") to use plum color (#8B4789) from brand palette
-  - **Button Hover States**: Consistent opacity-based hover effect (90%) for smooth user feedback
-  - **Brand Consistency**: All CTA buttons across homepage, service cards, and booking flows now match brand color scheme
-- Berry Stars booking alignment:
-  - **Unified Booking Flow**: "Book with [Provider]" buttons in Berry Stars section now use EXACT same booking logic as "Quick Quote or Book Now" buttons
-  - **Provider Pre-selection**: When booking from Berry Stars, the selected provider is automatically pre-selected in the booking modal
-  - **State Management**: Added `preSelectedProviderId` and `preSelectedProviderName` props to pass provider information through the booking flow
-  - **Seamless Experience**: Users can book directly with featured Berry Star providers while maintaining the standard 4-step booking process
-  - **Real Provider Photos**: Integrated authentic professional photos for all 4 Berry Star providers (Nomsa Mthembu - Cleaning, Thabo Mokoena - Plumbing, Zinhle Ndlovu - Gardening, Mandla Sithole - Chef/Catering)
-
-## November 16, 2025
-- Implemented complete real-time chat system for customer-provider communication:
-  - Backend: WebSocket handlers (server/routes.ts), REST API endpoints (server/chat-routes.ts), storage methods for conversations and messages
-  - Database: Conversations and messages tables with proper relationships
-  - Frontend: ChatInterface component with real-time messaging, auto-scroll, and typing indicators
-  - Integration: Added chat dialogs to customer bookings page and provider portal
-  - Features: Real-time message delivery via WebSocket, conversation persistence, message read tracking
+Berry Events is a premium domestic services marketplace in South Africa, connecting customers with verified providers for home services like cleaning, plumbing, electrical, chef/catering, and garden care. It emphasizes quality, security, and specialized offerings (e.g., African cuisine). The platform features dynamic pricing, an advanced geolocation-based booking system, AI-driven provider matching and recommendations, interactive onboarding, and secure Stripe payments routed through "Berry Events Bank." It operates as a comprehensive Progressive Web App (PWA) with mobile-native capabilities.
 
 # User Preferences
 
@@ -105,26 +26,26 @@ Includes basic user management and is designed for secure session handling. Prov
 
 ## UI/UX Decisions
 
-The design features a minimalistic approach, inspired by platforms like SweepSouth, with clean layouts, simplified user flows, and reduced visual clutter. The platform incorporates a complete Berry Events brand color system (deep plum, light beige, etc.) using semantic Tailwind classes for consistent styling across all components.
+The design adopts a minimalistic approach, inspired by platforms like SweepSouth, featuring clean layouts, simplified user flows, and reduced visual clutter. It incorporates a complete Berry Events brand color system (deep plum, light beige, etc.) using semantic Tailwind classes for consistent styling. Header elements are designed for visual harmony and mobile optimization, with consistent button styling.
 
 ## Feature Specifications
 
-- **Services**: Supports 8 service categories with a streamlined 4-step booking workflow, including location-based booking. A cart-based booking system allows users to add multiple services (max 3) and checkout together.
-- **Chef & Catering**: Specializes in African cuisine with flavor preferences, dual menu options (pre-made/custom), and real-time pricing.
-- **Provider Onboarding**: A 4-step application process with document capture, ID verification, and banking details.
-- **Training & Certification**: Multi-level training modules, progress tracking, and skill assessments for providers.
+- **Services**: Supports 8 service categories with a streamlined 4-step, location-based booking workflow. A cart-based system allows users to book multiple services (max 3) simultaneously.
+- **Chef & Catering**: Specializes in African cuisine with flavor preferences, dual menu options, and real-time pricing.
+- **Provider Management**: Includes a 4-step onboarding process with document/ID verification, banking details capture, multi-level training modules, progress tracking, and skill assessments.
 - **Recommendation Engine**: AI-powered service matching based on user preferences, location, ratings, and history.
 - **Dynamic Pricing**: Market-comparable pricing with service-specific surcharges and customizations.
-- **Mobile App Companion**: A PWA with push notifications, offline functionality, and an installable mobile experience.
+- **Mobile App Companion**: A PWA offering push notifications, offline functionality, and an installable mobile experience.
 - **Payment Validation**: Client-side validation for card numbers (Luhn algorithm, auto-formatting, brand detection), expiry dates, CVV, and bank accounts, with real-time error feedback.
-- **PDF Receipt Generation**: Professional, branded PDF receipts generated with jsPDF for booking confirmations, including detailed pricing, masked payment info, and platform commission.
-- **Currency Handling**: Centralized utilities (`parseDecimal`, `formatCurrency`) for safe handling of PostgreSQL decimal strings and consistent formatting (R{amount.toFixed(2)}).
-- **Booking Management Suite**: Features to reschedule, cancel, re-book, share, and view receipts for bookings.
-- **Gate Code Security**: Secure transfer of gate codes from cart to order items via `sourceCartItemId` to prevent data loss.
-- **House Cleaning Enhancements**: Enhanced provider cards (bio, experience, qualifications), optional tipping functionality (not subject to commission), a 3-button CTA layout, estimated hours logic, and dedicated database columns for tips.
-- **Customizable User Profiles**: Users can select preferred services and save favorite providers for personalized recommendations and quick rebooking. The `users` table is extended with fields like `preferred_services` and `preferred_providers`.
-- **Dynamic Time Estimation**: Intelligent service duration calculation (`config/estimates.ts`) with base times, add-on logic, and specialized calculations for house cleaning based on cleaning type, room count, and add-ons. Estimated hours are displayed in real-time during booking.
-- **Real-Time Chat System**: WebSocket-based messaging between customers and service providers for each booking. Includes conversation management, message persistence, real-time delivery, auto-scroll, and read receipts. Accessible from both customer bookings page and provider dashboard.
+- **PDF Receipt Generation**: Professional, branded PDF receipts generated with jsPDF for booking confirmations, including detailed pricing and masked payment info.
+- **Currency Handling**: Centralized utilities (`parseDecimal`, `formatCurrency`) for safe handling of PostgreSQL decimal strings and consistent formatting.
+- **Booking Management Suite**: Features for users to reschedule, cancel, re-book, share, and view receipts for their bookings. Past bookings automatically move to a "Past" section and offer options to "Review your berry" or "Re-book".
+- **Gate Code Security**: Secure transfer of gate codes from cart to order items via `sourceCartItemId`.
+- **House Cleaning Enhancements**: Enhanced provider cards (bio, experience, qualifications), optional tipping functionality, estimated hours logic, and dedicated database columns for tips.
+- **Customizable User Profiles**: Users can select preferred services and save favorite providers for personalized recommendations and quick rebooking.
+- **Dynamic Time Estimation**: Intelligent service duration calculation (`config/estimates.ts`) with base times, add-on logic, and specialized calculations for house cleaning. Estimated hours are displayed in real-time.
+- **Real-Time Chat System**: WebSocket-based messaging between customers and service providers for each booking, including conversation management, message persistence, real-time delivery, auto-scroll, and read receipts.
+- **Berry Stars Integration**: Direct booking from featured "Berry Stars" providers pre-selects the provider in the booking flow, maintaining the standard 4-step process.
 
 # External Dependencies
 
