@@ -1,11 +1,12 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "./storage";
 import { insertNotificationSchema } from "@shared/schema";
+import { authenticateToken } from "./auth-routes";
 
 export function registerNotificationRoutes(app: Express, storage: IStorage) {
   
   // Get notifications for a user
-  app.get("/api/notifications", async (req: Request, res: Response) => {
+  app.get("/api/notifications", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user?.id;
       
@@ -23,7 +24,7 @@ export function registerNotificationRoutes(app: Express, storage: IStorage) {
   });
   
   // Get unread notifications count
-  app.get("/api/notifications/unread-count", async (req: Request, res: Response) => {
+  app.get("/api/notifications/unread-count", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user?.id;
       
@@ -40,9 +41,15 @@ export function registerNotificationRoutes(app: Express, storage: IStorage) {
   });
   
   // Mark a notification as read
-  app.patch("/api/notifications/:id/read", async (req: Request, res: Response) => {
+  app.patch("/api/notifications/:id/read", authenticateToken, async (req: Request, res: Response) => {
     try {
-      await storage.markNotificationAsRead(req.params.id);
+      const userId = (req as any).user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      await storage.markNotificationAsRead(req.params.id, userId);
       res.json({ message: "Notification marked as read" });
     } catch (error: any) {
       console.error("Error marking notification as read:", error);
@@ -51,7 +58,7 @@ export function registerNotificationRoutes(app: Express, storage: IStorage) {
   });
   
   // Mark all notifications as read
-  app.post("/api/notifications/mark-all-read", async (req: Request, res: Response) => {
+  app.post("/api/notifications/mark-all-read", authenticateToken, async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user?.id;
       
@@ -64,18 +71,6 @@ export function registerNotificationRoutes(app: Express, storage: IStorage) {
     } catch (error: any) {
       console.error("Error marking all notifications as read:", error);
       res.status(500).json({ message: error.message });
-    }
-  });
-  
-  // Create a notification (internal use)
-  app.post("/api/notifications", async (req: Request, res: Response) => {
-    try {
-      const notificationData = insertNotificationSchema.parse(req.body);
-      const notification = await storage.createNotification(notificationData);
-      res.json(notification);
-    } catch (error: any) {
-      console.error("Error creating notification:", error);
-      res.status(400).json({ message: error.message });
     }
   });
 }

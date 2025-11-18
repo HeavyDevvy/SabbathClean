@@ -46,6 +46,7 @@ The design adopts a minimalistic approach, inspired by platforms like SweepSouth
 - **Dynamic Time Estimation**: Intelligent service duration calculation (`config/estimates.ts`) with base times, add-on logic, and specialized calculations for house cleaning. Estimated hours are displayed in real-time.
 - **Real-Time Chat System**: WebSocket-based messaging between customers and service providers for each booking, including conversation management, message persistence, real-time delivery, auto-scroll, and read receipts.
 - **Berry Stars Integration**: Direct booking from featured "Berry Stars" providers pre-selects the provider in the booking flow, maintaining the standard 4-step process.
+- **Real-Time Notifications System**: Secure, authentication-protected notification system with unread count display in header, mark-as-read functionality, and automatic expiry support. Notifications are created internally via NotificationHelper for booking updates, payment confirmations, new messages, and reviews. Features database indexes for performance and enforces user ownership for all operations.
 
 # External Dependencies
 
