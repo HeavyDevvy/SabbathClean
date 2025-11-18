@@ -39,7 +39,8 @@ export default function FeaturedProviders() {
               <img 
                 src={provider.profileImage || "https://images.unsplash.com/photo-1494790108755-2616b612b588?w=300"} 
                 alt="Professional service provider"
-                className="w-full h-48 object-cover" 
+                className="w-full h-48 object-cover"
+                loading="lazy"
               />
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">

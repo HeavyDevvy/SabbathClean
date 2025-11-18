@@ -11,16 +11,8 @@ img {
   backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
-  /* Native lazy loading for all images by default */
-  loading: lazy;
   /* Prevent layout shift with aspect-ratio */
   height: auto;
-}
-
-/* Critical images that should load immediately */
-img[loading="eager"],
-img[data-critical="true"] {
-  loading: eager;
 }
 
 /* Ensure smooth image rendering on high-DPI displays */
