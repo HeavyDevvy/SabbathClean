@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search, Bell, User, Calendar, Settings, Home, LayoutGrid, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -34,7 +34,7 @@ interface EnhancedHeaderProps {
   messageCount?: number;
 }
 
-export default function EnhancedHeader({ 
+const EnhancedHeader = memo(function EnhancedHeader({ 
   onBookingClick, 
   onServiceSelect,
   isAuthenticated = false, 
@@ -103,7 +103,7 @@ export default function EnhancedHeader({
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <img src={logo} alt="Berry Events logo" className="h-[90px] w-[90px] object-contain" />
+              <img src={logo} alt="Berry Events logo" className="h-[90px] w-[90px] object-contain" loading="eager" data-critical="true" />
               <div className="hidden sm:block">
                 <span className="text-base font-bold text-white">Berry Events</span>
                 <p className="text-[10px] text-[#EED1C4] -mt-1">All your home services</p>
@@ -450,4 +450,6 @@ export default function EnhancedHeader({
       )}
     </header>
   );
-}
+});
+
+export default EnhancedHeader;
