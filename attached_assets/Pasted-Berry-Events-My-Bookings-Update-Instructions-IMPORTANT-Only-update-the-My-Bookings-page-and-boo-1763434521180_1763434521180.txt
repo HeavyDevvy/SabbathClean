@@ -1,0 +1,192 @@
+Berry Events - My Bookings Update Instructions
+IMPORTANT: Only update the "My Bookings" page and booking flow. Do not modify UI colors, layout, fonts, or any unrelated components.
+
+1. Auto-Move Past Bookings
+Location: My Bookings page
+Implementation:
+
+Create a function that runs on component mount and whenever bookings are fetched
+Compare each booking's date/time against new Date()
+If bookingDateTime < currentDateTime, move booking from "Upcoming" to "Past"
+Maintain existing sorting, filters, and pagination
+
+javascript// Example logic
+const categorizebookings = (bookings) => {
+  const now = new Date();
+  const upcoming = [];
+  const past = [];
+  
+  bookings.forEach(booking => {
+    const bookingDate = new Date(booking.date + ' ' + booking.time);
+    if (bookingDate < now) {
+      past.push(booking);
+    } else {
+      upcoming.push(booking);
+    }
+  });
+  
+  return { upcoming, past };
+};
+
+2. Past Bookings Button Cleanup
+Remove these buttons from ALL past bookings:
+
+Chat
+Reschedule
+Share
+Share via WhatsApp
+Cancel booking
+
+Keep only these TWO buttons:
+
+Review your berry
+Re-book
+
+Note: Do NOT change button visibility for Upcoming Bookings - leave those unchanged.
+
+3. "Review your berry" Button
+Button Text: "Review your berry"
+On Click - Open Modal/Popup showing:
+
+Service Provider Details:
+
+Provider name
+Profile image (if available)
+Current rating (if available)
+
+
+Booking Summary:
+
+Service type
+Date and time
+Duration/estimated hours
+Address/location
+Add-ons (if any)
+Total price/amount
+
+
+Rating Selector:
+
+Star rating: 0-5 stars (clickable)
+Default: 0 stars (unrated)
+
+
+Comments Field:
+
+Label: "Comments (optional)"
+Multi-line text area
+Not required
+
+
+
+On Submit:
+javascript// If review API exists, call it:
+submitReview({
+  bookingId: booking.id,
+  providerId: booking.providerId,
+  starRating: selectedStars, // 0-5
+  comments: commentsText || null
+});
+
+// If no API yet, placeholder:
+console.log('TODO: send review to backend', {
+  bookingId,
+  providerId,
+  starRating,
+  comments
+});
+// Save to local state temporarily
+Requirements:
+
+Modal closes without errors
+No console errors on open/submit/close
+Returns to My Bookings cleanly
+
+
+4. "Re-book" Button
+Button Text: "Re-book"
+CRITICAL: Reuse "Book Now" Logic
+Implementation Steps:
+
+Find the "Book Now" button handler from the My Profile page top-right
+Call the EXACT SAME function/route when "Re-book" is clicked
+Pre-populate with past booking data:
+
+Service type (auto-select the same service)
+Address
+Rooms/spaces configuration
+Add-ons
+Special instructions/notes
+Any other booking parameters
+
+
+Do NOT pre-populate:
+
+Date (leave empty/default)
+Time (leave empty/default)
+
+
+Flow should:
+
+Skip "select service" step if possible (service already selected)
+Go directly to the booking configuration steps
+Allow user to edit ALL pre-filled fields
+Let user choose new date & time
+Complete booking using normal "Book Now" process
+
+
+
+Example Implementation:
+javascriptconst handleRebook = (pastBooking) => {
+  // Get the same function used by "Book Now" on My Profile
+  const bookNowHandler = getBookNowHandler(); // Your existing function
+  
+  // Prepare pre-filled data
+  const prebookedData = {
+    serviceType: pastBooking.serviceType,
+    address: pastBooking.address,
+    rooms: pastBooking.rooms,
+    addOns: pastBooking.addOns,
+    notes: pastBooking.notes,
+    // DO NOT include: date, time
+  };
+  
+  // Call the same booking flow with pre-filled data
+  bookNowHandler(prebookedData);
+};
+Result:
+
+New booking appears in "Upcoming Bookings"
+When date/time passes, auto-moves to "Past Bookings" (via logic from #1)
+
+
+5. Quality Requirements
+Do NOT Change:
+
+Colors, fonts, global styles
+My Profile "Book Now" button behavior
+Any other pages/components
+Upcoming bookings button visibility
+
+Ensure:
+
+✅ No error codes
+✅ No blank screens
+✅ No broken routing
+✅ Clean build (no TypeScript/JavaScript errors)
+✅ No console errors
+
+
+Final Verification Checklist
+Before submitting, verify:
+
+ Past bookings auto-move from Upcoming to Past based on date/time
+ Past bookings show ONLY "Review your berry" and "Re-book" buttons
+ Past bookings DO NOT show: Chat, Reschedule, Share, WhatsApp Share, Cancel
+ "Review your berry" opens modal with provider details, summary, 0-5 stars, optional comments
+ Review modal submits cleanly with no errors
+ "Re-book" uses identical logic to My Profile "Book Now"
+ "Re-book" pre-fills all fields EXCEPT date/time
+ "Re-book" allows editing all fields
+ New bookings from "Re-book" appear in Upcoming
+ App runs with no console errors or blank screens

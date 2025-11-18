@@ -267,52 +267,7 @@ export default function BookingsPage() {
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex space-x-2">
-              {/* Show chat for all active bookings */}
-              {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
-                booking.providerId ? (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setChatBooking({
-                      id: booking.id,
-                      customerId: user?.id,
-                      providerId: booking.providerId,
-                      providerName: booking.providerName || 'Provider',
-                      customerName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Customer'
-                    })}
-                    data-testid={`button-chat-${booking.id}`}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    Chat
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    disabled
-                    title="Chat will be available once a provider is assigned to your booking"
-                    data-testid={`button-chat-disabled-${booking.id}`}
-                  >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    Chat (Provider Pending)
-                  </Button>
-                )
-              )}
-              {booking.status === "confirmed" && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setRescheduleBooking({
-                    id: booking.id,
-                    service: booking.serviceType,
-                    date: scheduledDate,
-                    time: booking.scheduledTime
-                  })}
-                  data-testid={`button-reschedule-${booking.id}`}
-                >
-                  Reschedule
-                </Button>
-              )}
+              {/* For PAST bookings: Show ONLY "Review your berry" and "Re-book" */}
               {(booking.status === "completed" || isBookingInPast(booking)) && (
                 <>
                   <Button 
@@ -339,59 +294,96 @@ export default function BookingsPage() {
                   </Button>
                 </>
               )}
+
+              {/* For UPCOMING bookings: Show all action buttons */}
+              {!(booking.status === "completed" || isBookingInPast(booking)) && (
+                <>
+                  {/* Show chat for all active bookings */}
+                  {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
+                    booking.providerId ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setChatBooking({
+                          id: booking.id,
+                          customerId: user?.id,
+                          providerId: booking.providerId,
+                          providerName: booking.providerName || 'Provider',
+                          customerName: `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Customer'
+                        })}
+                        data-testid={`button-chat-${booking.id}`}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        Chat
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        disabled
+                        title="Chat will be available once a provider is assigned to your booking"
+                        data-testid={`button-chat-disabled-${booking.id}`}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        Chat (Provider Pending)
+                      </Button>
+                    )
+                  )}
+                  {booking.status === "confirmed" && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setRescheduleBooking({
+                        id: booking.id,
+                        service: booking.serviceType,
+                        date: scheduledDate,
+                        time: booking.scheduledTime
+                      })}
+                      data-testid={`button-reschedule-${booking.id}`}
+                    >
+                      Reschedule
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShareBooking({
+                      id: booking.id,
+                      bookingNumber: booking.bookingNumber,
+                      service: booking.serviceType,
+                      date: scheduledDate,
+                      time: booking.scheduledTime,
+                      address: booking.address,
+                      price: `R${parseFloat(booking.totalPrice).toFixed(2)}`
+                    })}
+                    data-testid={`button-share-${booking.id}`}
+                  >
+                    <Share2 className="h-4 w-4 mr-1" />
+                    Share
+                  </Button>
+                  <WhatsAppShareButton
+                    bookingDetails={{
+                      serviceName: booking.serviceType,
+                      date: format(new Date(booking.scheduledDate), "MMMM d, yyyy"),
+                      time: booking.scheduledTime,
+                      providerName: booking.providerName,
+                      bookingReference: booking.bookingNumber,
+                      totalAmount: parseFloat(booking.totalPrice)
+                    }}
+                    variant="outline"
+                    size="sm"
+                  />
+                </>
+              )}
+            </div>
+            
+            {/* Cancel/Receipt button - only show for upcoming bookings */}
+            {!(booking.status === "completed" || isBookingInPast(booking)) && (
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setShareBooking({
-                  id: booking.id,
-                  bookingNumber: booking.bookingNumber,
-                  service: booking.serviceType,
-                  date: scheduledDate,
-                  time: booking.scheduledTime,
-                  address: booking.address,
-                  price: `R${parseFloat(booking.totalPrice).toFixed(2)}`
-                })}
-                data-testid={`button-share-${booking.id}`}
-              >
-                <Share2 className="h-4 w-4 mr-1" />
-                Share
-              </Button>
-              <WhatsAppShareButton
-                bookingDetails={{
-                  serviceName: booking.serviceType,
-                  date: format(new Date(booking.scheduledDate), "MMMM d, yyyy"),
-                  time: booking.scheduledTime,
-                  providerName: booking.providerName,
-                  bookingReference: booking.bookingNumber,
-                  totalAmount: parseFloat(booking.totalPrice)
-                }}
-                variant="outline"
-                size="sm"
-              />
-            </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-red-600 hover:text-red-700"
-              onClick={() => {
-                if (booking.status === "completed") {
-                  try {
-                    const receiptData = mapBookingToReceiptData(booking);
-                    generateCompletedBookingReceipt(receiptData);
-                    toast({
-                      title: "Receipt Downloaded",
-                      description: "Your booking receipt has been downloaded successfully.",
-                    });
-                  } catch (error) {
-                    console.error("Error generating receipt:", error);
-                    toast({
-                      title: "Error",
-                      description: "Failed to generate receipt. Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                } else {
+                className="text-red-600 hover:text-red-700"
+                onClick={() => {
                   setCancelBooking({
                     id: booking.id,
                     service: booking.serviceType,
@@ -399,12 +391,12 @@ export default function BookingsPage() {
                     time: booking.scheduledTime,
                     price: `R${parseFloat(booking.totalPrice).toFixed(2)}`
                   });
-                }
-              }}
-              data-testid={`button-cancel-${booking.id}`}
-            >
-              {booking.status === "completed" ? "View Receipt" : "Cancel Booking"}
-            </Button>
+                }}
+                data-testid={`button-cancel-${booking.id}`}
+              >
+                Cancel Booking
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
