@@ -3104,9 +3104,27 @@ export default function ModernServiceModal({
   };
 
   const renderStep4 = () => {
-    // Phase 5.2: Show locked Berry Star provider if pre-selected
-    if (hasPreselectedProvider && formData.selectedProvider) {
-      const provider = formData.selectedProvider;
+    // Phase 5.2: Show ONLY locked Berry Star provider if pre-selected (no other providers shown)
+    if (preSelectedProviderId && preSelectedProviderName) {
+      // Create provider object from pre-selected data
+      const provider = formData.selectedProvider || { 
+        id: preSelectedProviderId, 
+        name: preSelectedProviderName,
+        rating: 4.9,
+        reviews: 150,
+        distance: "2.5 km",
+        specializations: ["Berry Star", "Top Rated"],
+        verified: true,
+        verifiedBadges: ["Berry Star", "Verified", "Top Rated"],
+        responseTime: "< 1 hour",
+        hourlyRate: 350
+      };
+      
+      // Ensure provider is selected in form data
+      if (!formData.selectedProvider) {
+        setFormData(prev => ({ ...prev, selectedProvider: provider }));
+      }
+      
       return (
         <div className="space-y-6">
           <div className="text-center mb-6">

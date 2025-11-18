@@ -34,13 +34,18 @@ export const serviceEstimates: Record<string, ServiceEstimate> = {
     description: "Chef services including prep and cooking",
   },
   
+  "pool-cleaning": {
+    baseHours: 3,
+    description: "Pool cleaning and maintenance",
+  },
+  
   "event-staff": {
-    baseHours: 5,
+    baseHours: 3,
     description: "Event staffing services",
   },
   
   "moving": {
-    baseHours: 5,
+    baseHours: 3,
     description: "Moving and relocation services",
   },
   
@@ -50,7 +55,7 @@ export const serviceEstimates: Record<string, ServiceEstimate> = {
   },
   
   "waitering": {
-    baseHours: 5,
+    baseHours: 3,
     description: "Waitering and event staff services",
   },
 };
