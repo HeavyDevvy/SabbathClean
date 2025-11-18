@@ -656,6 +656,7 @@ interface ReviewBerryModalProps {
 function ReviewBerryModal({ isOpen, onClose, booking, user }: ReviewBerryModalProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [comments, setComments] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -674,10 +675,11 @@ function ReviewBerryModal({ isOpen, onClose, booking, user }: ReviewBerryModalPr
     try {
       // TODO: send review to backend when API exists
       // For now, log to console and show success message
-      console.log("TODO: send review to backend", {
+      console.log("TODO: send review and comments to backend", {
         bookingId: booking.id,
         providerId: booking.providerId,
         rating: rating,
+        comments: comments || null,
         serviceType: booking.serviceType,
       });
 
@@ -798,6 +800,21 @@ function ReviewBerryModal({ isOpen, onClose, booking, user }: ReviewBerryModalPr
             <p className="text-center text-sm text-gray-600">
               {rating === 0 ? 'Select a rating' : rating === 1 ? '1 star' : `${rating} stars`}
             </p>
+          </div>
+
+          {/* Comments Field */}
+          <div className="space-y-2">
+            <label htmlFor="review-comments" className="block text-sm font-medium text-gray-900">
+              Comments (optional)
+            </label>
+            <textarea
+              id="review-comments"
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              placeholder="Share your experience with this service provider..."
+              className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              data-testid="textarea-review-comments"
+            />
           </div>
 
           {/* Action Buttons */}

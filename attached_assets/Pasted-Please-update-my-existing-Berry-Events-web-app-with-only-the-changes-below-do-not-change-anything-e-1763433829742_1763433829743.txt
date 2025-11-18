@@ -1,0 +1,131 @@
+Please update my existing Berry Events web app with only the changes below (do not change anything else in the project: UI, colors, layout, or unrelated logic).
+
+All changes apply to the “My Bookings” page, where bookings are split into Upcoming Bookings and Past Bookings.
+
+⸻
+
+1. Auto-move past bookings from “Upcoming” to “Past”
+	•	On the My Bookings page, ensure that any booking whose date and time are in the past (compared to the current date and time) is:
+	•	Removed from “Upcoming Bookings”, and
+	•	Displayed under “Past Bookings”.
+	•	This logic must work:
+	•	On initial page load.
+	•	Whenever bookings are refreshed or re-fetched from the backend.
+	•	Use the existing booking object’s date/time fields to determine whether a booking is in the past.
+	•	Do not break any existing filters, sorting, or pagination (if they exist).
+
+⸻
+
+2. “Review your berry” button for each past booking
+
+For each booking in the Past Bookings section, ensure there is an action button:
+	•	Button text: “Review your berry”.
+
+On click behaviour:
+
+When the user clicks “Review your berry” for a past booking:
+	1.	Open a popup/modal (reuse the existing modal/popup pattern used in the app; do not introduce a completely different style).
+	2.	The popup must display:
+	•	Service provider details for the provider used in that booking, including at least:
+	•	Provider name (and any other info already stored, like profile picture, rating, etc., if available in the booking/provider object).
+	•	A booking summary, including:
+	•	Service type
+	•	Date and time
+	•	Duration / estimated hours
+	•	Address / location
+	•	Any add-ons, if they exist in the model
+	•	Price or total amount, if this is already part of the booking data
+	•	A star rating system:
+	•	Maximum of 5 stars.
+	•	User can select from 0 to 5 stars.
+	•	“Worst” = no stars selected, “best” = 5 stars selected.
+	•	An optional comments text area:
+	•	Label: “Comments (optional)” or similar.
+	•	Free-text input where the user can leave written feedback about their Berry / service.
+	3.	When the user submits the review:
+	•	If there’s already an API or function in the codebase for saving a review/rating, use it and send:
+	•	The booking ID
+	•	The service provider ID
+	•	The selected star rating
+	•	The optional comments text (can be empty or null if the user doesn’t type anything).
+	•	If no such API exists yet, create a placeholder handler that:
+	•	Stores the rating and comments in local state,
+	•	Logs a clear message to the console (e.g. "TODO: send review and comments to backend"),
+	•	Does not break anything else.
+
+Make sure:
+	•	Closing the popup returns the user cleanly to the My Bookings page.
+	•	There are no console errors when opening, using, submitting, or closing the popup.
+
+⸻
+
+3. “Re-book” button for each past booking (CORRECTED LOGIC)
+
+For each past booking, ensure there is an action button:
+	•	Button text: “Re-book”.
+
+Required behaviour:
+
+When the user clicks “Re-book” on a past booking:
+	1.	Identify the service type of that past booking (for example, House Cleaning, Catering, etc.).
+	2.	The user must be taken directly into the booking steps for that specific service:
+	•	Example:
+If the past booking is for a cleaning service, then:
+	•	The Re-book button for that booking must navigate to the cleaning service booking flow,
+i.e. the same multi-step flow that would normally be used when booking that cleaning service from scratch.
+	3.	Pre-populate fields from the past booking:
+	•	All relevant booking fields should be pre-filled from the selected past booking, including (as applicable to your existing model):
+	•	Service configuration (service type, package, etc.)
+	•	Address / location
+	•	Number of rooms / bathrooms
+	•	Estimated hours / duration
+	•	Any selected add-ons
+	•	Special instructions / notes
+	•	Any other configuration fields that were set on the original booking.
+	•	Do NOT pre-populate the date and time.
+	•	The date and time must be blank or reset so the user has to choose a new date and time.
+	4.	The user must still be able to edit all pre-filled fields:
+	•	Users can change any of the fields that were preloaded (address, add-ons, hours, notes, etc.).
+	•	Date and time must be chosen again by the user in the flow.
+	5.	Skip the “Select Service” step:
+	•	The flow must skip any initial “select service” page.
+	•	The service should be automatically set to the same service that was originally booked in that past booking.
+	•	All other booking steps should behave exactly as they do for a normal booking of that service.
+	6.	The technical implementation:
+	•	You may reuse the existing navigation and state-handling logic used in the normal booking flow for each service, but:
+	•	For Re-book, initialise the booking state using the past booking’s data (excluding date/time).
+	•	After the user completes and confirms the re-booking:
+	•	The new booking should behave exactly like a normal booking of that service.
+	•	It should appear under Upcoming Bookings, assuming the new date/time is in the future.
+	•	It must follow the same logic for later moving to Past Bookings once the new date/time has passed.
+
+⸻
+
+4. Quality and constraints
+	•	Do not change:
+	•	Any colors, fonts, or global styles.
+	•	The layout or structure of pages other than what is strictly required for:
+	•	The Review your berry popup comments field.
+	•	The Re-book navigation and pre-population.
+	•	Any unrelated components or pages.
+	•	Ensure:
+	•	No error codes, no uncaught exceptions, no blank screens.
+	•	TypeScript/JavaScript compiles cleanly.
+	•	Routing still works as before.
+
+Quick checklist before you finish:
+	1.	Past bookings are no longer visible under “Upcoming Bookings”.
+	2.	All bookings in the past show up correctly under “Past Bookings”.
+	3.	Each past booking has a working “Review your berry” button that opens a popup with:
+	•	Correct service provider details.
+	•	Correct booking summary.
+	•	Working 0–5 star rating selector.
+	•	An optional comments field that is included when saving or logged as TODO.
+	4.	Each past booking has a working “Re-book” button that:
+	•	Navigates to the correct service’s booking flow (e.g. cleaning service flow for a cleaning booking).
+	•	Pre-populates all booking fields from the past booking except date and time.
+	•	Allows the user to edit any pre-filled fields.
+	•	Skips the service selection step.
+	5.	The app runs with no console errors and no blank screens.
+
+Please implement all of the above and only make changes necessary for this functionality.
