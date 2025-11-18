@@ -97,7 +97,7 @@ export default function EnhancedHeader({
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <header className="sticky top-0 z-50 shadow-sm" style={{ backgroundColor: '#44062D' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -105,8 +105,8 @@ export default function EnhancedHeader({
             <div className="flex items-center space-x-3">
               <img src={logo} alt="Berry Events logo" className="h-14 w-14 rounded-full object-cover" />
               <div className="hidden sm:block">
-                <span className="text-xl font-bold text-gray-900">Berry Events</span>
-                <p className="text-xs text-gray-500 -mt-1">All your home services</p>
+                <span className="text-xl font-bold text-white">Berry Events</span>
+                <p className="text-xs text-[#EED1C4] -mt-1">All your home services</p>
               </div>
             </div>
           </Link>
@@ -118,7 +118,7 @@ export default function EnhancedHeader({
               <input
                 type="text"
                 placeholder="Search services, providers, or help..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#C56B86] focus:border-transparent bg-white/10 text-white placeholder-white/60"
                 data-testid="search-input"
               />
             </div>
@@ -128,7 +128,7 @@ export default function EnhancedHeader({
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
               href="/" 
-              className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium flex items-center"
+              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-home"
             >
               <Home className="h-4 w-4 mr-1" />
@@ -136,25 +136,16 @@ export default function EnhancedHeader({
             </Link>
             <Link 
               href="/services" 
-              className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium flex items-center"
+              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center"
               data-testid="nav-services"
             >
               <Briefcase className="h-4 w-4 mr-1" />
               Services
             </Link>
-            {/* Admin Portal - Always visible */}
-            <Link 
-              href="/admin" 
-              className="text-primary hover:text-accent transition-colors duration-200 font-medium flex items-center"
-              data-testid="nav-admin-portal"
-            >
-              <Shield className="h-4 w-4 mr-1" />
-              Admin Portal
-            </Link>
             {!isAuthenticated && (
               <Link 
                 href="/auth"
-                className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium"
+                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium"
                 data-testid="nav-sign-in"
               >
                 Sign In
@@ -163,7 +154,7 @@ export default function EnhancedHeader({
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
-                className="text-gray-700 hover:text-accent transition-colors duration-200 font-medium"
+                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium"
                 data-testid="nav-provider-dashboard"
               >
                 Provider Hub
@@ -227,7 +218,7 @@ export default function EnhancedHeader({
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#C56B86' }}>
                           <span className="text-white font-semibold text-sm">
                             {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                           </span>
@@ -275,12 +266,12 @@ export default function EnhancedHeader({
               </>
             ) : (
               <>
-                <div className="border-l border-gray-200 pl-4 ml-4">
-                  <span className="text-sm text-gray-600 mr-2">Service provider?</span>
+                <div className="border-l border-white/20 pl-4 ml-4">
+                  <span className="text-sm text-white/80 mr-2">Service provider?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-medium"
+                    className="border-[#C56B86] text-[#C56B86] hover:bg-[#C56B86] hover:text-white font-medium"
                     data-testid="button-join-as-provider"
                   >
                     Join as Provider

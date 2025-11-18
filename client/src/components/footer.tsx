@@ -59,6 +59,7 @@ export default function Footer() {
         { name: "Safety Resources", href: "/safety" },
         { name: "Report Issue", href: "/support" },
         { name: "Feedback", href: "/feedback" },
+        { name: "Admin Portal", href: "/admin" },
       ]
     }
   ];

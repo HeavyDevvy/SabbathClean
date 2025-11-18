@@ -10,7 +10,8 @@ Berry Events is a domestic services marketplace connecting customers with verifi
   - **Button Cleanup**: Past bookings now show ONLY "Review your berry" and "Re-book" buttons. Removed Chat, Reschedule, Share, WhatsApp Share, and Cancel buttons from past bookings for cleaner UI.
   - **Review Modal**: Added "Review your berry" button for past/completed bookings with ReviewBerryModal component featuring:
     - 0-5 star rating system with hover effects
-    - Service provider details and booking summary
+    - **Service provider details** (name, not service type) prominently displayed
+    - Complete booking summary
     - Optional comments text area for written feedback
     - Placeholder submission handler (logs to console until backend API is implemented)
   - **Re-book Flow**: Fixed "Re-book" button to use EXACT same flow as Profile page "Book Now":
@@ -20,6 +21,13 @@ Berry Events is a domestic services marketplace connecting customers with verifi
     - Gate code deliberately excluded for security
     - Date and time fields left blank for user to select new appointment
     - Supports all 9 service types with their unique configuration fields
+- Updated header and navigation design:
+  - **Header Background**: Changed to dark plum (#44062D) for premium brand aesthetic
+  - **Admin Portal**: Moved from top header navigation to Footer Support section for better organization
+  - **Navigation Icons**: Home and Services use distinct icons (Home vs Briefcase) for clear differentiation
+  - **User Initials Avatar**: Updated background color to brand color (#C56B86) for consistency
+  - **Text Colors**: All header text updated to white with light beige (#EED1C4) hover states for optimal visibility on dark background
+  - **Search Bar**: Styled with semi-transparent background and white text for cohesive dark theme integration
 
 ## November 16, 2025
 - Implemented complete real-time chat system for customer-provider communication:
