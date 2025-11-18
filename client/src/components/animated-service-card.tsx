@@ -110,7 +110,8 @@ export default function AnimatedServiceCard({
               e.stopPropagation();
               onModalOpen(service.id);
             }}
-            className="w-full bg-gradient-to-r from-primary via-purple-600 to-primary hover:from-primary/90 hover:via-purple-600/90 hover:to-primary/90 text-white font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl group relative overflow-hidden"
+            className="w-full hover:opacity-90 text-white font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl group relative overflow-hidden"
+            style={{ backgroundColor: '#8B4789' }}
             data-testid={`book-${service.id}`}
           >
             <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>

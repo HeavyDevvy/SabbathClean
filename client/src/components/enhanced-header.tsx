@@ -99,7 +99,7 @@ export default function EnhancedHeader({
   return (
     <header className="sticky top-0 z-50 shadow-sm" style={{ backgroundColor: '#44062D' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-auto py-4">
+        <div className="flex justify-between items-center h-auto py-1">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
@@ -418,7 +418,8 @@ export default function EnhancedHeader({
                     onBookingClick();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                  className="w-full text-white font-semibold hover:opacity-90"
+                  style={{ backgroundColor: '#8B4789' }}
                   data-testid="button-book-service-mobile"
                 >
                   Book a Service

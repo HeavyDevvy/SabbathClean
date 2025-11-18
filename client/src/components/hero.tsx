@@ -46,8 +46,8 @@ export default function Hero({ onBookingClick }: HeroProps) {
               <Button 
                 onClick={onBookingClick}
                 size="lg"
-                className="px-10 py-7 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl text-white"
-                style={{ backgroundColor: '#C56B86' }}
+                className="px-10 py-7 text-lg font-semibold rounded-xl shadow-lg transition-all hover:shadow-xl text-white hover:opacity-90"
+                style={{ backgroundColor: '#8B4789' }}
                 data-testid="button-book-service-hero"
               >
                 Quick Quote

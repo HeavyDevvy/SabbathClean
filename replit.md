@@ -35,6 +35,11 @@ Berry Events is a domestic services marketplace connecting customers with verifi
   - **Cart Icon**: Updated to white (#FFFFFF) to match navigation text color
   - **Notification Icon**: Updated to white (#FFFFFF) for consistency with header theme
   - **All Icons**: Maintain white color with light beige (#EED1C4) hover states on dark plum background
+- Header and button refinements:
+  - **Header Height**: Reduced vertical padding to py-1 (~4px) for compact, professional appearance
+  - **Button Colors**: Unified all primary action buttons ("Book Now", "Quick Quote") to use plum color (#8B4789) from brand palette
+  - **Button Hover States**: Consistent opacity-based hover effect (90%) for smooth user feedback
+  - **Brand Consistency**: All CTA buttons across homepage, service cards, and booking flows now match brand color scheme
 
 ## November 16, 2025
 - Implemented complete real-time chat system for customer-provider communication:

@@ -276,7 +276,8 @@ export default function PaymentPage() {
             {/* Action Buttons */}
             <div className="space-y-3">
               <Button 
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 text-white"
+                className="w-full hover:opacity-90 text-white"
+                style={{ backgroundColor: '#8B4789' }}
                 onClick={() => setLocation('/bookings')}
               >
                 <Calendar className="h-4 w-4 mr-2" />

@@ -120,7 +120,8 @@ export default function Header({ onBookingClick }: HeaderProps) {
             
             <Button 
               onClick={onBookingClick}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-xl shadow-sm"
+              className="hover:opacity-90 text-white rounded-xl shadow-sm"
+              style={{ backgroundColor: '#8B4789' }}
               data-testid="button-book-now"
             >
               <span className="hidden sm:inline">Book Now</span>
