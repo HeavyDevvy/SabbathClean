@@ -99,14 +99,14 @@ export default function EnhancedHeader({
   return (
     <header className="sticky top-0 z-50 shadow-sm" style={{ backgroundColor: '#44062D' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-auto py-1">
+        <div className="flex justify-between items-center h-auto py-2">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <img src={logo} alt="Berry Events logo" className="h-[180px] w-[180px] object-contain" />
+              <img src={logo} alt="Berry Events logo" className="h-[90px] w-[90px] object-contain" />
               <div className="hidden sm:block">
-                <span className="text-xl font-bold text-white">Berry Events</span>
-                <p className="text-xs text-[#EED1C4] -mt-1">All your home services</p>
+                <span className="text-base font-bold text-white">Berry Events</span>
+                <p className="text-[10px] text-[#EED1C4] -mt-1">All your home services</p>
               </div>
             </div>
           </Link>
@@ -114,11 +114,11 @@ export default function EnhancedHeader({
           {/* Search Bar - Desktop */}
           <div className="hidden lg:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5" />
               <input
                 type="text"
                 placeholder="Search services, providers, or help..."
-                className="w-full pl-10 pr-4 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#C56B86] focus:border-transparent bg-white/10 text-white placeholder-white/60"
+                className="w-full pl-9 pr-4 py-1.5 text-sm border border-white/20 rounded-lg focus:ring-2 focus:ring-[#C56B86] focus:border-transparent bg-white/10 text-white placeholder-white/60"
                 data-testid="search-input"
               />
             </div>
@@ -128,24 +128,24 @@ export default function EnhancedHeader({
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
               href="/" 
-              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center"
+              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center text-sm"
               data-testid="nav-home"
             >
-              <Home className="h-4 w-4 mr-1" />
+              <Home className="h-3.5 w-3.5 mr-1" />
               Home
             </Link>
             <Link 
               href="/services" 
-              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center"
+              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium flex items-center text-sm"
               data-testid="nav-services"
             >
-              <LayoutGrid className="h-4 w-4 mr-1" />
+              <LayoutGrid className="h-3.5 w-3.5 mr-1" />
               Services
             </Link>
             {!isAuthenticated && (
               <Link 
                 href="/auth"
-                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium"
+                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium text-sm"
                 data-testid="nav-sign-in"
               >
                 Sign In
@@ -154,7 +154,7 @@ export default function EnhancedHeader({
             {isAuthenticated && user?.isProvider && (
               <Link 
                 href="/provider-dashboard" 
-                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium"
+                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium text-sm"
                 data-testid="nav-provider-dashboard"
               >
                 Provider Hub
@@ -172,7 +172,7 @@ export default function EnhancedHeader({
               onClick={() => setIsSearchVisible(!isSearchVisible)}
               data-testid="button-search-toggle"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-4 w-4" />
             </Button>
 
             {/* Shopping Cart - Always visible with notification badge */}
@@ -197,9 +197,9 @@ export default function EnhancedHeader({
                   onClick={() => setLocation("/notifications")}
                   data-testid="button-notifications"
                 >
-                  <Bell className="h-5 w-5 text-white" />
+                  <Bell className="h-4 w-4 text-white" />
                   {notificationCount > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs p-0 flex items-center justify-center">
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] p-0 flex items-center justify-center">
                       {notificationCount > 9 ? '9+' : notificationCount}
                     </Badge>
                   )}
@@ -210,16 +210,16 @@ export default function EnhancedHeader({
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
+                    <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full" data-testid="button-user-menu">
                       {user?.profileImage ? (
                         <img
                           src={user.profileImage}
                           alt={`${user.firstName} ${user.lastName}`}
-                          className="h-10 w-10 rounded-full object-cover"
+                          className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#C56B86' }}>
-                          <span className="text-white font-semibold text-sm">
+                        <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#C56B86' }}>
+                          <span className="text-white font-semibold text-xs">
                             {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                           </span>
                         </div>

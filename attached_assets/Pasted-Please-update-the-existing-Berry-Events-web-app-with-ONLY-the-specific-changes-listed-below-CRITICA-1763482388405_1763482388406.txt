@@ -1,0 +1,124 @@
+Please update the existing Berry Events web app with ONLY the specific changes listed below.
+CRITICAL: Do not modify any other aspects of the project. Test thoroughly to ensure zero error codes and no blank screens after implementation.
+
+1. Reduce Logo and Header Height
+Logo Resizing:
+
+Reduce the logo size to 50% of its current dimensions (both width and height)
+Maintain aspect ratio to prevent distortion
+
+Header Height Adjustment:
+
+After resizing the logo, reduce the header height to be just tall enough to accommodate the new logo size
+Add minimal padding (e.g., 8-12px top and bottom) to prevent a cramped appearance
+Remove any excess vertical space
+
+Requirements:
+
+Logo must remain vertically centered within the new header
+All header elements must remain properly aligned
+Header should feel balanced, not cramped or stretched
+
+
+2. Proportionally Scale Header Text and Icons
+Objective: Create visual harmony between the smaller logo and all other header elements.
+Elements to Adjust:
+
+Navigation menu text
+All header icons (menu icon, profile icon, etc.)
+Any other text in the header
+
+Guidelines:
+
+Scale these elements so they visually complement the new logo size
+Maintain readability - text should not be too small
+Ensure vertical alignment is preserved
+All elements should appear balanced and proportional
+
+Suggested approach: If logo is reduced by 50%, consider reducing text/icons by approximately 20-30% (adjust based on visual balance)
+
+3. Update "Quick Quote or Book Now" Button Styling
+Important: This is a SINGLE button with the text "Quick quote or Book Now" (or similar wording).
+Changes Required:
+
+Apply the exact same styling currently used by the "Watch how it works" button:
+
+Background color
+Text color
+Border style
+Border radius
+Padding
+Font size/weight
+Hover effects
+Active/focus states
+
+
+
+Implementation:
+
+Reuse the same CSS class or styled-component used by "Watch how it works"
+OR copy all CSS properties from that button to this button
+DO NOT change the button text - only update the visual styling
+
+Locations to update:
+
+Homepage
+Any other pages where this button appears
+
+
+4. Pre-Deployment Quality Checklist
+Before marking this task complete, verify ALL of the following:
+Visual Checks:
+
+ Logo is exactly 50% of its original size
+ Header height is reduced and looks clean (not cramped or excessive)
+ Logo is vertically centered in the new header
+ Header text size is proportional to the new logo
+ Header icons size is proportional to the new logo
+ All header elements are properly aligned
+ "Quick quote or Book Now" button matches "Watch how it works" button styling exactly
+
+Technical Checks:
+
+ No console errors in browser DevTools
+ No blank/white screens on any page
+ All pages load successfully
+ No broken layouts or overlapping elements
+ No missing images or assets
+ Responsive design still works (test mobile/tablet views)
+ All navigation links still function
+ Button hover effects work correctly
+
+Cross-Browser Check (if possible):
+
+ Test in Chrome/Edge
+ Test in Firefox
+ Test in Safari (if available)
+
+
+Implementation Notes
+Approach:
+
+Start with the logo resize and header height adjustment
+Test and ensure no layout breaks
+Adjust header text and icon sizes proportionally
+Test again
+Update button styling
+Run final comprehensive tests
+
+If errors occur:
+
+Check for hard-coded pixel values that may need updating
+Verify CSS specificity isn't causing style conflicts
+Ensure no JavaScript depends on previous header dimensions
+Check for any z-index or positioning issues
+
+Preserve:
+
+All existing functionality
+All existing content
+All other styling
+All other components
+
+
+Remember: Only make the changes specified above. Do not refactor, optimize, or "improve" other parts of the codebase.
