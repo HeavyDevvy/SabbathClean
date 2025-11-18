@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
+import { useNotifications } from "@/hooks/useNotifications";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,6 +51,7 @@ const EnhancedHeader = memo(function EnhancedHeader({
   const [currentUser, setCurrentUser] = useState(user);
   const { toast } = useToast();
   const { itemCount } = useCart();
+  const { unreadCount } = useNotifications(isAuthenticated);
 
   // Logout mutation
   const logoutMutation = useMutation({
@@ -198,9 +200,9 @@ const EnhancedHeader = memo(function EnhancedHeader({
                   data-testid="button-notifications"
                 >
                   <Bell className="h-4 w-4 text-white" />
-                  {notificationCount > 0 && (
+                  {unreadCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] p-0 flex items-center justify-center">
-                      {notificationCount > 9 ? '9+' : notificationCount}
+                      {unreadCount > 9 ? '9+' : unreadCount}
                     </Badge>
                   )}
                 </Button>
