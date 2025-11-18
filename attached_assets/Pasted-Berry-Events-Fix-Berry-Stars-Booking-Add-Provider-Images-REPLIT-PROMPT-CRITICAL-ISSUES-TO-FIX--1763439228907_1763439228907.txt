@@ -1,0 +1,671 @@
+Berry Events - Fix Berry Stars Booking & Add Provider Images - REPLIT PROMPT
+CRITICAL ISSUES TO FIX:
+
+Berry Stars "Book Now" button does NOT follow same booking process as "Quick Quote or Book Now" button
+Upload and assign provider images to Berry Stars profiles
+
+
+PART 1: Fix Berry Stars Booking Process
+STEP 1: Locate the "Quick Quote or Book Now" Button Handler
+Find the EXACT function that runs when "Quick Quote or Book Now" is clicked:
+bash# Search in Replit (Ctrl+Shift+F or Cmd+Shift+F):
+Search for: "Quick Quote or Book Now"
+
+# Then find the onClick handler function
+Copy the ENTIRE function - Example:
+javascript// File: src/pages/Home.jsx (or wherever you find it)
+
+// THIS IS THE FUNCTION YOU NEED TO FIND AND COPY
+const handleQuickQuoteOrBookNow = () => {
+  // Copy EVERYTHING inside this function
+  // Example structure:
+  setBookingState({...});
+  navigate('/booking');
+};
+
+STEP 2: Find Berry Stars Section and Replace Handler
+Locate the Berry Stars component:
+bash# Search for:
+"Meet Your Berry Stars" OR "berry-stars" OR "Book with"
+CURRENT CODE (BROKEN - Delete this):
+javascript// ❌ WRONG - Different logic than Quick Quote button
+
+const handleBookProvider = (provider) => {
+  // Some different logic
+  setProvider(provider);
+  navigate('/some-different-route'); // ← WRONG
+};
+NEW CODE (Copy from Quick Quote button):
+javascript// ✅ CORRECT - Uses EXACT same function as Quick Quote button
+
+// File: src/pages/Home.jsx or src/components/BerryStars.jsx
+
+// Import the EXACT SAME things as the Quick Quote button uses
+import { useNavigate } from 'react-router-dom';
+// Add any other imports that Quick Quote button uses
+
+const BerryStarsSection = () => {
+  const navigate = useNavigate();
+  // Add any other hooks that Quick Quote button uses
+  
+  // ============================================================
+  // COPY THIS FUNCTION FROM "Quick Quote or Book Now" BUTTON
+  // ONLY ADD: provider parameter
+  // ============================================================
+  const handleBookWithProvider = (provider) => {
+    // Paste EVERYTHING from handleQuickQuoteOrBookNow here
+    // Then add provider to the state
+    
+    // Example (adjust to match YOUR actual Quick Quote function):
+    setBookingState({
+      step: 1,
+      service: null,
+      provider: provider, // ← ONLY ADDITION
+      // ... everything else same as Quick Quote
+    });
+    
+    navigate('/booking', { // ← SAME route as Quick Quote
+      state: {
+        preSelectedProvider: provider,
+      }
+    });
+  };
+
+  const berryStars = [
+    {
+      id: 'thabo_001',
+      name: 'Thabo',
+      image: '/assets/providers/Thabo.jpg', // ← Will add image in Part 2
+      rating: 4.9,
+      specialties: ['Cleaning', 'Laundry'],
+      reviews: 127,
+    },
+    {
+      id: 'sarah_001',
+      name: 'Sarah',
+      image: '/assets/providers/Sarah.jpg',
+      rating: 4.8,
+      specialties: ['Gardening', 'Landscaping'],
+      reviews: 98,
+    },
+    // Add all other providers...
+  ];
+
+  return (
+    <section className="berry-stars-section" style={{ padding: '3rem 2rem' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '1rem', color: '#2E0B2B' }}>
+        Meet Your Berry Stars
+      </h2>
+      <p style={{ textAlign: 'center', color: '#6B4C6B', marginBottom: '2rem' }}>
+        Book directly with our top-rated service professionals
+      </p>
+      
+      <div className="berry-stars-grid" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '2rem',
+        maxWidth: '1200px',
+        margin: '0 auto',
+      }}>
+        {berryStars.map((provider) => (
+          <div 
+            key={provider.id} 
+            className="berry-star-card"
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              textAlign: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'transform 0.3s ease',
+            }}
+          >
+            <img 
+              src={provider.image} 
+              alt={provider.name}
+              style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '4px solid #8B4789',
+                marginBottom: '1rem',
+              }}
+              onError={(e) => {
+                e.target.src = '/assets/providers/default-avatar.jpg';
+              }}
+            />
+            
+            <h3 style={{ color: '#2E0B2B', marginBottom: '0.5rem' }}>
+              {provider.name}
+            </h3>
+            
+            <div className="rating" style={{ color: '#6B4C6B', marginBottom: '0.5rem' }}>
+              ⭐ {provider.rating} ({provider.reviews} reviews)
+            </div>
+            
+            <div className="specialties" style={{ 
+              color: '#A87CA8', 
+              fontSize: '0.9rem',
+              marginBottom: '1rem' 
+            }}>
+              {provider.specialties.join(' • ')}
+            </div>
+            
+            {/* BOOK NOW BUTTON - Uses EXACT same handler as Quick Quote */}
+            <button
+              onClick={() => handleBookWithProvider(provider)}
+              style={{
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                width: '100%',
+                fontSize: '16px',
+                transition: 'background-color 0.3s ease',
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#6B4C6B'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#8B4789'}
+            >
+              Book with {provider.name}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default BerryStarsSection;
+```
+
+---
+
+## PART 2: Upload and Assign Provider Images
+
+### STEP 1: Create Folder Structure
+
+**In your Replit project, create this folder:**
+```
+public/
+  └── assets/
+      └── providers/
+          ├── Thabo.jpg
+          ├── Sarah.jpg
+          ├── [Provider Name].jpg
+          └── default-avatar.jpg
+How to create folders in Replit:
+
+Click on the "Files" icon in left sidebar
+Right-click on public folder
+Select "New folder"
+Name it assets
+Right-click on assets folder
+Select "New folder"
+Name it providers
+
+
+STEP 2: Upload Provider Images
+Upload each image to the public/assets/providers/ folder:
+
+Click on the providers folder
+Click the "Upload file" button (or drag and drop)
+Upload each provider image
+IMPORTANT: Name each file EXACTLY as the provider's name (case-sensitive)
+
+Example file names:
+
+Thabo.jpg (if provider name is "Thabo")
+Sarah.jpg (if provider name is "Sarah")
+John.jpg (if provider name is "John")
+Maria.jpg (if provider name is "Maria")
+
+Also upload a default avatar:
+
+default-avatar.jpg (used as fallback if image fails to load)
+
+
+STEP 3: Update Berry Stars Data with Image Paths
+Map each provider to their uploaded image:
+javascript// File: src/pages/Home.jsx or src/components/BerryStars.jsx
+
+const berryStars = [
+  {
+    id: 'provider_001',
+    name: 'Thabo',
+    image: '/assets/providers/Thabo.jpg', // ← Image path
+    rating: 4.9,
+    specialties: ['Cleaning', 'Laundry'],
+    reviews: 127,
+    bio: 'Expert in residential cleaning with 5+ years experience',
+  },
+  {
+    id: 'provider_002',
+    name: 'Sarah',
+    image: '/assets/providers/Sarah.jpg', // ← Image path
+    rating: 4.8,
+    specialties: ['Gardening', 'Landscaping'],
+    reviews: 98,
+    bio: 'Professional gardener specializing in sustainable landscaping',
+  },
+  {
+    id: 'provider_003',
+    name: 'John',
+    image: '/assets/providers/John.jpg', // ← Image path
+    rating: 4.7,
+    specialties: ['Plumbing', 'Repairs'],
+    reviews: 85,
+    bio: 'Licensed plumber with expertise in residential repairs',
+  },
+  {
+    id: 'provider_004',
+    name: 'Maria',
+    image: '/assets/providers/Maria.jpg', // ← Image path
+    rating: 4.9,
+    specialties: ['Cooking', 'Catering'],
+    reviews: 112,
+    bio: 'Professional chef offering catering and meal prep services',
+  },
+  {
+    id: 'provider_005',
+    name: 'David',
+    image: '/assets/providers/David.jpg', // ← Image path
+    rating: 4.6,
+    specialties: ['Electrical', 'Maintenance'],
+    reviews: 76,
+    bio: 'Certified electrician with 8+ years of experience',
+  },
+  // Add more providers as needed...
+];
+
+STEP 4: Add Image Error Handling
+Ensure images display correctly with fallback:
+javascript// In your Berry Star card render:
+
+<img 
+  src={provider.image} 
+  alt={provider.name}
+  style={{
+    width: '120px',
+    height: '120px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '4px solid #8B4789',
+    marginBottom: '1rem',
+  }}
+  onError={(e) => {
+    // Fallback to default avatar if image fails to load
+    console.error(`Failed to load image for ${provider.name}`);
+    e.target.src = '/assets/providers/default-avatar.jpg';
+  }}
+/>
+
+PART 3: Update Booking Flow Step 4 (Provider Selection)
+Ensure Step 4 handles pre-selected provider from Berry Stars:
+javascript// File: src/pages/BookingSteps.jsx or src/components/BookingFlow.jsx
+
+import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+const BookingSteps = () => {
+  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [bookingData, setBookingData] = useState({});
+  
+  // Get pre-selected provider from navigation state
+  const preSelectedProvider = location.state?.preSelectedProvider;
+
+  useEffect(() => {
+    if (preSelectedProvider) {
+      console.log('Provider pre-selected from Berry Stars:', preSelectedProvider.name);
+      setBookingData(prev => ({
+        ...prev,
+        selectedProvider: preSelectedProvider,
+        providerLocked: true,
+      }));
+    }
+  }, [preSelectedProvider]);
+
+  // Step 4: Provider Selection
+  const ProviderSelectionStep = () => {
+    // If provider is locked (from Berry Stars)
+    if (bookingData.providerLocked && bookingData.selectedProvider) {
+      return (
+        <div className="provider-selection-locked" style={{
+          textAlign: 'center',
+          padding: '2rem',
+        }}>
+          <h2 style={{ color: '#2E0B2B', marginBottom: '2rem' }}>
+            Your Selected Service Provider
+          </h2>
+          
+          <div className="provider-card-locked" style={{
+            maxWidth: '400px',
+            margin: '0 auto',
+            backgroundColor: '#FFFFFF',
+            border: '3px solid #8B4789',
+            borderRadius: '16px',
+            padding: '2rem',
+            boxShadow: '0 6px 20px rgba(139, 71, 137, 0.2)',
+          }}>
+            <img 
+              src={bookingData.selectedProvider.image} 
+              alt={bookingData.selectedProvider.name}
+              style={{
+                width: '140px',
+                height: '140px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '5px solid #8B4789',
+                marginBottom: '1rem',
+              }}
+            />
+            
+            <h3 style={{ color: '#2E0B2B', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+              {bookingData.selectedProvider.name}
+            </h3>
+            
+            <div className="rating" style={{ color: '#6B4C6B', marginBottom: '1rem' }}>
+              ⭐ {bookingData.selectedProvider.rating} 
+              ({bookingData.selectedProvider.reviews} reviews)
+            </div>
+            
+            <div className="specialties" style={{ 
+              color: '#A87CA8',
+              marginBottom: '1rem',
+            }}>
+              {bookingData.selectedProvider.specialties.join(' • ')}
+            </div>
+            
+            <div 
+              className="locked-badge"
+              style={{
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                padding: '0.5rem 1.25rem',
+                borderRadius: '25px',
+                display: 'inline-block',
+                fontWeight: '600',
+                marginBottom: '1rem',
+              }}
+            >
+              ✓ Confirmed Provider
+            </div>
+            
+            <p style={{
+              color: '#6B4C6B',
+              fontStyle: 'italic',
+              fontSize: '0.95rem',
+            }}>
+              {bookingData.selectedProvider.name} will handle your service
+            </p>
+          </div>
+
+          <div className="step-navigation" style={{ marginTop: '2rem' }}>
+            <button 
+              onClick={() => setCurrentStep(currentStep - 1)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #8B4789',
+                color: '#8B4789',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                marginRight: '1rem',
+              }}
+            >
+              ← Back
+            </button>
+            <button 
+              onClick={() => setCurrentStep(currentStep + 1)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+              }}
+            >
+              Continue →
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Standard provider selection (from Quick Quote button)
+    return (
+      <div className="provider-selection-standard" style={{ padding: '2rem' }}>
+        <h2 style={{ textAlign: 'center', color: '#2E0B2B', marginBottom: '2rem' }}>
+          Select Your Service Provider
+        </h2>
+        
+        <div className="providers-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1.5rem',
+          maxWidth: '1000px',
+          margin: '0 auto 2rem',
+        }}>
+          {availableProviders.map((provider) => (
+            <div 
+              key={provider.id}
+              className={`provider-card ${bookingData.selectedProvider?.id === provider.id ? 'selected' : ''}`}
+              onClick={() => setBookingData({ ...bookingData, selectedProvider: provider })}
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: bookingData.selectedProvider?.id === provider.id 
+                  ? '3px solid #8B4789' 
+                  : '2px solid #E5C5E5',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <img 
+                src={provider.image} 
+                alt={provider.name}
+                style={{
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  marginBottom: '0.75rem',
+                  border: bookingData.selectedProvider?.id === provider.id 
+                    ? '3px solid #8B4789' 
+                    : '2px solid #E5C5E5',
+                }}
+              />
+              <h4 style={{ color: '#2E0B2B', marginBottom: '0.5rem' }}>
+                {provider.name}
+              </h4>
+              <div className="rating" style={{ color: '#6B4C6B', fontSize: '0.9rem' }}>
+                ⭐ {provider.rating}
+              </div>
+              
+              {bookingData.selectedProvider?.id === provider.id && (
+                <div style={{
+                  backgroundColor: '#8B4789',
+                  color: '#FFFFFF',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '20px',
+                  fontSize: '0.85rem',
+                  marginTop: '0.75rem',
+                  display: 'inline-block',
+                  fontWeight: '600',
+                }}>
+                  ✓ Selected
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="step-navigation" style={{ textAlign: 'center' }}>
+          <button 
+            onClick={() => setCurrentStep(currentStep - 1)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #8B4789',
+              color: '#8B4789',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              marginRight: '1rem',
+            }}
+          >
+            ← Back
+          </button>
+          <button 
+            onClick={() => setCurrentStep(currentStep + 1)}
+            disabled={!bookingData.selectedProvider}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: bookingData.selectedProvider ? '#8B4789' : '#D4A5D4',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: bookingData.selectedProvider ? 'pointer' : 'not-allowed',
+              fontWeight: '600',
+              opacity: bookingData.selectedProvider ? 1 : 0.6,
+            }}
+          >
+            Continue →
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Rest of booking flow...
+  const renderCurrentStep = () => {
+    switch(currentStep) {
+      case 1: return <ServiceSelectionStep />;
+      case 2: return <ConfigurationStep />;
+      case 3: return <DateTimeStep />;
+      case 4: return <ProviderSelectionStep />;
+      case 5: return <AddOnsStep />;
+      case 6: return <AddressStep />;
+      case 7: return <ReviewStep />;
+      case 8: return <PaymentStep />;
+      default: return <ServiceSelectionStep />;
+    }
+  };
+
+  return (
+    <div className="booking-flow">
+      <div className="progress-bar" style={{
+        width: '100%',
+        height: '6px',
+        backgroundColor: '#E5C5E5',
+        marginBottom: '2rem',
+      }}>
+        <div style={{
+          width: `${(currentStep / 8) * 100}%`,
+          height: '100%',
+          backgroundColor: '#8B4789',
+          transition: 'width 0.4s ease',
+        }} />
+      </div>
+      
+      {renderCurrentStep()}
+    </div>
+  );
+};
+
+export default BookingSteps;
+
+TESTING CHECKLIST
+Part 1: Test Booking Flow Alignment
+Test "Quick Quote or Book Now" button:
+
+ Click "Quick Quote or Book Now"
+ Note which page opens
+ Go through steps 1-8
+ Note Step 4 shows all providers
+ Complete booking successfully
+ No errors or blank screens
+
+Test "Book with [Provider]" in Berry Stars:
+
+ Click "Book with Thabo"
+ Should open SAME page as Quick Quote
+ Steps 1-3 should be IDENTICAL
+ Step 4 shows ONLY Thabo (locked)
+ Steps 5-8 should be IDENTICAL
+ Complete booking with Thabo
+ No errors or blank screens
+
+Verify Identical Flows:
+
+ Both navigate to same route
+ Same components used
+ Same step sequence
+ Same styling
+ Only difference: Step 4 provider lock
+
+
+Part 2: Test Provider Images
+Image Display:
+
+ All provider images load correctly
+ Images are circular with border
+ Images are properly sized (120px × 120px)
+ No broken image icons
+ Default avatar loads if image fails
+
+Image Paths:
+
+ Check each provider's image path matches filename
+ Verify images are in /public/assets/providers/ folder
+ Test on different browsers (Chrome, Firefox, Safari)
+ Check mobile responsiveness
+
+
+Part 3: Quality Checks
+
+ No console errors anywhere
+ No blank screens at any step
+ Images load on first render
+ Booking completes end-to-end
+ Provider selection works correctly
+ Navigation buttons functional
+ Progress bar updates correctly
+ Mobile responsive (if applicable)
+
+
+PROVIDER IMAGE MAPPING REFERENCE
+Use this as a checklist for uploading images:
+Provider NameImage FilenamePathThaboThabo.jpg/assets/providers/Thabo.jpgSarahSarah.jpg/assets/providers/Sarah.jpgJohnJohn.jpg/assets/providers/John.jpgMariaMaria.jpg/assets/providers/Maria.jpgDavidDavid.jpg/assets/providers/David.jpg[Add more][Name].jpg/assets/providers/[Name].jpgDefaultdefault-avatar.jpg/assets/providers/default-avatar.jpg
+
+TROUBLESHOOTING
+Images not showing:
+
+Check file path is correct: /assets/providers/ProviderName.jpg
+Verify filename matches provider name exactly (case-sensitive)
+Check file is in public/assets/providers/ folder
+Clear browser cache and refresh
+Check browser console for 404 errors
+
+Berry Stars booking not working:
+
+Verify you copied ENTIRE handler from Quick Quote button
+Check both navigate to SAME route
+Console.log to verify provider is passed correctly
+Check Step 4 receives preSelectedProvider
+
+Blank screens:
+
+Check browser console for errors
+Verify all imports are correct
+Check navigation routes match
+Ensure all components are properly exported

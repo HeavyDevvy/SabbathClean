@@ -45,6 +45,7 @@ Berry Events is a domestic services marketplace connecting customers with verifi
   - **Provider Pre-selection**: When booking from Berry Stars, the selected provider is automatically pre-selected in the booking modal
   - **State Management**: Added `preSelectedProviderId` and `preSelectedProviderName` props to pass provider information through the booking flow
   - **Seamless Experience**: Users can book directly with featured Berry Star providers while maintaining the standard 4-step booking process
+  - **Real Provider Photos**: Integrated authentic professional photos for all 4 Berry Star providers (Nomsa Mthembu - Cleaning, Thabo Mokoena - Plumbing, Zinhle Ndlovu - Gardening, Mandla Sithole - Chef/Catering)
 
 ## November 16, 2025
 - Implemented complete real-time chat system for customer-provider communication:

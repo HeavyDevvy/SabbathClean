@@ -15,6 +15,12 @@ import {
   ArrowRight
 } from "lucide-react";
 
+// Import provider images
+import nomsaImage from "@assets/Nomsa Mthembu_1763439240584.jpg";
+import thaboImage from "@assets/Thabo Mokoena_1763439240584.jpg";
+import zinhleImage from "@assets/Zinhle Ndlovu_1763439240584.jpg";
+import mandlaImage from "@assets/Mandla Sithole_1763439240583.jpg";
+
 interface Provider {
   id: string;
   name: string;
@@ -44,7 +50,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
       name: "Nomsa Mthembu",
       rating: 4.9,
       totalReviews: 247,
-      image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
+      image: nomsaImage,
       specialties: ["House Cleaning", "Deep Clean", "Eco-Friendly"],
       experience: "5+ years",
       location: "Cape Town, Western Cape",
@@ -59,7 +65,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
       name: "Thabo Mokoena", 
       rating: 4.8,
       totalReviews: 189,
-      image: "https://images.unsplash.com/photo-1600486913747-55e5470d6f40?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
+      image: thaboImage,
       specialties: ["Plumbing", "Emergency Repairs", "Licensed"],
       experience: "8+ years",
       location: "Johannesburg, Gauteng",
@@ -74,7 +80,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
       name: "Zinhle Ndlovu",
       rating: 4.9,
       totalReviews: 156,
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
+      image: zinhleImage,
       specialties: ["Garden Care", "Landscaping", "Plant Expert"],
       experience: "6+ years",
       location: "Durban, KwaZulu-Natal",
@@ -89,7 +95,7 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
       name: "Mandla Sithole",
       rating: 4.7,
       totalReviews: 203,
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200",
+      image: mandlaImage,
       specialties: ["African Cuisine", "Event Catering", "Traditional"],
       experience: "10+ years", 
       location: "Pretoria, Gauteng",
