@@ -41,6 +41,8 @@ import {
   type InsertConversation,
   type Message,
   type InsertMessage,
+  type Notification,
+  type InsertNotification,
   users,
   serviceProviders,
   services,
@@ -64,6 +66,7 @@ import {
   bookingGateCodes,
   conversations,
   messages,
+  notifications,
   type Wallet,
   type InsertWallet,
   type WalletTransaction,
@@ -200,6 +203,14 @@ export interface IStorage {
   sendMessage(message: InsertMessage): Promise<Message>;
   getConversationMessages(conversationId: string): Promise<Message[]>;
   markMessagesAsRead(conversationId: string, userId: string): Promise<void>;
+  
+  // Notification operations
+  getNotificationsByUser(userId: string, limit?: number): Promise<Notification[]>;
+  getUnreadNotificationsCount(userId: string): Promise<number>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(notificationId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  deleteExpiredNotifications(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1522,6 +1533,62 @@ export class DatabaseStorage implements IStorage {
         sql`${messages.senderId} != ${userId}`,
         eq(messages.isRead, false)
       ));
+  }
+
+  // Notification operations
+  async getNotificationsByUser(userId: string, limit: number = 50): Promise<Notification[]> {
+    const result = await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt))
+      .limit(limit);
+    return result;
+  }
+
+  async getUnreadNotificationsCount(userId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.userId, userId),
+          eq(notifications.isRead, false)
+        )
+      );
+    return Number(result[0]?.count || 0);
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db.insert(notifications)
+      .values(notification)
+      .returning();
+    return result;
+  }
+
+  async markNotificationAsRead(notificationId: string): Promise<void> {
+    await db.update(notifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(eq(notifications.id, notificationId));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db.update(notifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(
+        and(
+          eq(notifications.userId, userId),
+          eq(notifications.isRead, false)
+        )
+      );
+  }
+
+  async deleteExpiredNotifications(): Promise<void> {
+    await db.delete(notifications)
+      .where(
+        and(
+          sql`${notifications.expiresAt} IS NOT NULL`,
+          sql`${notifications.expiresAt} < NOW()`
+        )
+      );
   }
 }
 
