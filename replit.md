@@ -40,11 +40,6 @@ Berry Events is a domestic services marketplace connecting customers with verifi
   - **Button Colors**: Unified all primary action buttons ("Book Now", "Quick Quote") to use plum color (#8B4789) from brand palette
   - **Button Hover States**: Consistent opacity-based hover effect (90%) for smooth user feedback
   - **Brand Consistency**: All CTA buttons across homepage, service cards, and booking flows now match brand color scheme
-- Berry Stars booking flow alignment:
-  - **Pre-selected Provider**: When booking through "Meet Your Berry Stars" section, the selected provider is automatically pre-selected and locked in the booking flow
-  - **Locked Provider Display**: Step 4 (provider selection) shows only the chosen Berry Star provider with a special locked UI, preventing selection of other providers
-  - **Flow Consistency**: Berry Stars booking flow now matches Quick Quote and Book Now flows exactly, with the provider pre-selection being the only difference
-  - **State Management**: Provider information (ID and name) is properly passed from BerryStarsSection through home.tsx to ModernServiceModal
 
 ## November 16, 2025
 - Implemented complete real-time chat system for customer-provider communication:

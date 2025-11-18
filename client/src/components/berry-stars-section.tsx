@@ -185,8 +185,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                         provider.name
                       )}
                       size="sm"
-                      className="font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs text-white hover:opacity-90"
-                      style={{ backgroundColor: '#8B4789' }}
+                      className="font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs text-white"
+                      style={{ backgroundColor: '#C56B86' }}
                       data-testid={`button-book-${provider.id}`}
                     >
                       Book Now
@@ -228,8 +228,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                className="font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white hover:opacity-90"
-                style={{ backgroundColor: '#8B4789' }}
+                className="font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-white"
+                style={{ backgroundColor: '#C56B86' }}
                 onClick={() => {
                   window.open('/provider-onboarding', '_blank');
                 }}
@@ -241,8 +241,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
               
               <Button 
                 variant="outline"
-                className="border-2 font-semibold px-10 py-4 rounded-xl transition-all duration-300 hover:opacity-90"
-                style={{ borderColor: '#8B4789', color: '#8B4789' }}
+                className="border-2 font-semibold px-10 py-4 rounded-xl transition-all duration-300"
+                style={{ borderColor: '#C56B86', color: '#C56B86' }}
                 onClick={() => setLocation('/services')}
                 data-testid="button-browse-services"
               >
