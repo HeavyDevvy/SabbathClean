@@ -9,6 +9,7 @@ import { registerCustomerReviewRoutes } from "./customer-review-routes";
 import { registerSupportRoutes } from "./support-routes";
 import { registerCartRoutes } from "./cart-routes";
 import { registerChatRoutes } from "./chat-routes";
+import { registerNotificationRoutes } from "./notification-routes";
 import { storage } from "./storage";
 import { LocationService } from "./location-service";
 import { 
@@ -1199,6 +1200,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register chat routes
   registerChatRoutes(app, storage);
+  
+  // Register notification routes
+  registerNotificationRoutes(app, storage);
 
   // Wallet API Routes
   app.get("/api/wallet/balance", authenticateToken, async (req, res) => {
