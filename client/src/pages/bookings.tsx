@@ -201,15 +201,17 @@ export default function BookingsPage() {
 
   // Filter bookings based on date/time and status
   const upcomingBookings = bookings.filter((b: any) => {
-    // Upcoming = not completed/cancelled AND date/time is in the future
-    const isNotCompleted = b.status !== "completed" && b.status !== "cancelled";
-    return isNotCompleted && !isBookingInPast(b);
+    // Check status first - completed/cancelled/in-progress always go to past
+    const isPastStatus = b.status === "completed" || b.status === "cancelled" || b.status === "in-progress";
+    
+    // Upcoming = NOT past status AND NOT past date
+    return !isPastStatus && !isBookingInPast(b);
   });
   
   const pastBookings = bookings.filter((b: any) => {
-    // Past = completed/cancelled OR date/time is in the past
-    const isCompleted = b.status === "completed" || b.status === "cancelled";
-    return isCompleted || isBookingInPast(b);
+    // Past = completed/cancelled/in-progress status OR date/time is in the past
+    const isPastStatus = b.status === "completed" || b.status === "cancelled" || b.status === "in-progress";
+    return isPastStatus || isBookingInPast(b);
   });
 
   const renderBookingCard = (booking: any) => {
@@ -565,6 +567,8 @@ export default function BookingsPage() {
             propertySize: rebookData.bookingData.serviceDetails?.propertySize,
             numRooms: rebookData.bookingData.serviceDetails?.numRooms,
             numBathrooms: rebookData.bookingData.serviceDetails?.numBathrooms,
+            frequency: rebookData.bookingData.serviceDetails?.frequency,
+            servicePackage: rebookData.bookingData.serviceDetails?.servicePackage,
             
             // Garden Care specific
             gardenSize: rebookData.bookingData.serviceDetails?.gardenSize,
@@ -584,6 +588,8 @@ export default function BookingsPage() {
             cuisineType: rebookData.bookingData.serviceDetails?.cuisineType,
             flavorPreference: rebookData.bookingData.serviceDetails?.flavorPreference,
             menuOption: rebookData.bookingData.serviceDetails?.menuOption,
+            dietaryRestrictions: rebookData.bookingData.serviceDetails?.dietaryRestrictions,
+            allergies: rebookData.bookingData.serviceDetails?.allergies,
             
             // Waitering specific
             eventType: rebookData.bookingData.serviceDetails?.eventType,
@@ -592,7 +598,6 @@ export default function BookingsPage() {
             
             // Moving specific
             moveType: rebookData.bookingData.serviceDetails?.moveType,
-            propertyType: rebookData.bookingData.serviceDetails?.propertyType,
             floors: rebookData.bookingData.serviceDetails?.floors,
             elevator: rebookData.bookingData.serviceDetails?.elevator,
             
