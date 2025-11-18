@@ -5,6 +5,13 @@ Berry Events is a domestic services marketplace connecting customers with verifi
 # Recent Changes
 
 ## November 18, 2025
+- Berry Stars booking normalization:
+  - **Service ID Normalization**: Refactored all service-specific conditionals in modern-service-modal.tsx to use normalized flags (isHouseCleaning, isPlumbing, isElectrical, isGardenService, isPoolService, isChefCatering, isEventStaff, isMoving, isAuPair) instead of raw serviceId comparisons
+  - **Berry Stars Consistency**: When booking from Berry Stars (e.g., Nomsa for house-cleaning with serviceId="house-cleaning"), step 1 now correctly shows all cleaning-specific fields (cleaningType, propertySize) matching the main service catalog
+  - **Validation Updates**: Updated Next button validation logic to use normalized service flags for consistent field validation across all booking entry points
+  - **Step 2 & Step 3 Updates**: Updated date/time selection and insurance checkbox conditionals to use normalized flags
+  - **Files Modified**: client/src/components/modern-service-modal.tsx (lines 2066-2900, 4015-4023)
+  - **Architect Confirmation**: All service-specific conditionals now use normalized identifiers to prevent Berry Stars booking flow mismatches
 - Button color standardization across entire platform:
   - **Reference Color**: #C56B86 (pink from "Watch How It Works" button)
   - **Updated Buttons**: All "Quick Quote or Book Now", "Book Now", and CTA buttons now use consistent #C56B86 color
