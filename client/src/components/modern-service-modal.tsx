@@ -2060,7 +2060,7 @@ export default function ModernServiceModal({
           </div>
         )}
 
-        {serviceId === "cleaning" && (
+        {isHouseCleaning && (
           <>
             <div>
               <Label htmlFor="cleaning-type">Cleaning Type *</Label>
@@ -4009,15 +4009,15 @@ export default function ModernServiceModal({
                       className="bg-primary hover:bg-accent text-primary-foreground rounded-lg px-8 shadow-sm"
                       disabled={
                         (step === 1 && (!formData.propertyType || !formData.address || 
-                          (serviceId === "cleaning" && (!formData.cleaningType || !formData.propertySize)) ||
-                          ((serviceId === "garden-care" || serviceId === "garden-maintenance") && (!formData.gardenSize || !formData.gardenCondition)) ||
-                          (serviceId === "pool-cleaning" && (!formData.poolSize || !formData.poolCondition)) ||
-                          (serviceId === "plumbing" && (!formData.plumbingIssue || !formData.urgency)) ||
-                          (serviceId === "electrical" && (!formData.electricalIssue || !formData.urgency)) ||
-                          (serviceId === "chef-catering" && (!formData.cuisineType || !formData.eventSize)) ||
-                          (serviceId === "event-staff" && (!formData.cleaningType || !formData.propertySize)) ||
-                          (serviceId === "moving" && (!formData.cleaningType || !formData.propertySize)) ||
-                          (serviceId === "au-pair" && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
+                          (isHouseCleaning && (!formData.cleaningType || !formData.propertySize)) ||
+                          (isGardenService && (!formData.gardenSize || !formData.gardenCondition)) ||
+                          (isPoolService && (!formData.poolSize || !formData.poolCondition)) ||
+                          (isPlumbing && (!formData.plumbingIssue || !formData.urgency)) ||
+                          (isElectrical && (!formData.electricalIssue || !formData.urgency)) ||
+                          (isChefCatering && (!formData.cuisineType || !formData.eventSize)) ||
+                          (isEventStaff && (!formData.cleaningType || !formData.propertySize)) ||
+                          (isMoving && (!formData.cleaningType || !formData.propertySize)) ||
+                          (isAuPair && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
                         )) ||
                         (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
                         (step === 4 && !formData.selectedProvider)
