@@ -1,0 +1,405 @@
+Berry Events - Logo Update & Icon Color Change - REPLIT PROMPT
+IMPORTANT: Only update the logo and icon colors as specified below. Do not change any other functionality, layout, or features.
+
+STEP 1: Upload and Save the Logo Image
+
+Locate the uploaded logo image in your Replit project files
+Create a folder (if it doesn't exist): public/assets/ or src/assets/
+Save the logo with a clear name: berry-logo.png (or .jpg, .svg depending on format)
+Verify the file path - it should be accessible as:
+
+/assets/berry-logo.png (if in public folder)
+Or ../assets/berry-logo.png (if in src folder)
+
+
+
+
+STEP 2: Create or Update Logo Component
+Create a reusable BerryLogo component:
+javascript// File: src/components/BerryLogo.jsx (or add to your components folder)
+
+import React from 'react';
+
+export const BerryLogo = ({ size = 'medium', className = '' }) => {
+  // Define logo sizes
+  const sizes = {
+    small: { width: '80px', height: '80px' },     // For footer or small spaces
+    medium: { width: '120px', height: '120px' },   // For standard use
+    large: { width: '180px', height: '180px' },    // For HEADER - large & noticeable
+  };
+
+  return (
+    <img
+      src="/assets/berry-logo.png"  // UPDATE THIS PATH to match where you saved the logo
+      alt="Berry Events"
+      className={`berry-logo ${className}`}
+      style={{
+        width: sizes[size].width,
+        height: sizes[size].height,
+        objectFit: 'contain',
+      }}
+      onError={(e) => {
+        console.error('Logo failed to load. Check the file path.');
+        e.target.style.display = 'none'; // Hide if image fails to load
+      }}
+    />
+  );
+};
+
+STEP 3: Update Header Component
+Replace existing logo and update icon colors in your Header:
+javascript// File: src/components/Header.jsx (or wherever your header is located)
+
+import React from 'react';
+import { ShoppingCart, Bell, Home, Briefcase } from 'lucide-react';
+import { BerryLogo } from './BerryLogo'; // Import the logo component
+
+const Header = () => {
+  // ICON COLOR: Same as Home text (white)
+  const iconColor = '#FFFFFF';
+
+  return (
+    <header style={{
+      backgroundColor: '#4A1945', // Dark plum
+      padding: '1rem 2rem',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      color: '#FFFFFF',
+    }}>
+      
+      {/* LEFT SECTION: LOGO - LARGE SIZE */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <BerryLogo size="large" /> {/* 180px - large and noticeable */}
+      </div>
+
+      {/* CENTER SECTION: NAVIGATION */}
+      <nav style={{
+        display: 'flex',
+        gap: '2rem',
+        alignItems: 'center',
+      }}>
+        <a href="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          color: iconColor,
+          textDecoration: 'none',
+        }}>
+          <Home size={24} color={iconColor} />
+          <span>Home</span>
+        </a>
+        
+        <a href="/services" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          color: iconColor,
+          textDecoration: 'none',
+        }}>
+          <Briefcase size={24} color={iconColor} />
+          <span>Services</span>
+        </a>
+      </nav>
+
+      {/* RIGHT SECTION: ICONS & USER */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1.5rem',
+      }}>
+        
+        {/* CART ICON - UPDATED COLOR TO WHITE */}
+        <button 
+          onClick={() => window.location.href = '/cart'}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            position: 'relative',
+            padding: '0.5rem',
+          }}
+        >
+          <ShoppingCart size={24} color={iconColor} strokeWidth={2} />
+          {/* Cart badge (optional) */}
+          <span style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            backgroundColor: '#FF4444',
+            color: '#FFFFFF',
+            borderRadius: '50%',
+            width: '18px',
+            height: '18px',
+            fontSize: '11px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+          }}>3</span>
+        </button>
+
+        {/* NOTIFICATION ICON - UPDATED COLOR TO WHITE */}
+        <button 
+          onClick={() => window.location.href = '/notifications'}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            position: 'relative',
+            padding: '0.5rem',
+          }}
+        >
+          <Bell size={24} color={iconColor} strokeWidth={2} />
+          {/* Notification badge (optional) */}
+          <span style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            backgroundColor: '#FF4444',
+            color: '#FFFFFF',
+            borderRadius: '50%',
+            width: '18px',
+            height: '18px',
+            fontSize: '11px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+          }}>5</span>
+        </button>
+
+        {/* USER INITIALS */}
+        <div style={{
+          backgroundColor: '#8B4789', // Brand color
+          color: '#FFFFFF',
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 'bold',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}>
+          JD
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
+
+STEP 4: Update Footer Component
+Add logo to footer:
+javascript// File: src/components/Footer.jsx
+
+import React from 'react';
+import { BerryLogo } from './BerryLogo';
+
+const Footer = () => {
+  return (
+    <footer style={{
+      backgroundColor: '#2E0B2B', // Dark plum
+      color: '#FFFFFF',
+      padding: '3rem 2rem 2rem',
+      marginTop: 'auto',
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '2rem',
+      }}>
+        
+        {/* LOGO & TAGLINE SECTION */}
+        <div>
+          <BerryLogo size="medium" /> {/* 120px for footer */}
+          <p style={{ 
+            marginTop: '1rem', 
+            color: '#D4A5D4',
+            fontSize: '14px',
+          }}>
+            Your trusted platform for home services
+          </p>
+        </div>
+
+        {/* QUICK LINKS */}
+        <div>
+          <h4 style={{ marginBottom: '1rem', fontSize: '16px' }}>Quick Links</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/about" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                About Us
+              </a>
+            </li>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/services" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                Services
+              </a>
+            </li>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/how-it-works" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                How It Works
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {/* SUPPORT SECTION */}
+        <div>
+          <h4 style={{ marginBottom: '1rem', fontSize: '16px' }}>Support</h4>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/help" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                Help Center
+              </a>
+            </li>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/contact" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                Contact Us
+              </a>
+            </li>
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/faq" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                FAQs
+              </a>
+            </li>
+            {/* ADMIN PORTAL (MOVED FROM TOP) */}
+            <li style={{ marginBottom: '0.5rem' }}>
+              <a href="/admin" style={{ color: '#D4A5D4', textDecoration: 'none' }}>
+                Admin Portal
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {/* CONTACT INFO */}
+        <div>
+          <h4 style={{ marginBottom: '1rem', fontSize: '16px' }}>Contact</h4>
+          <p style={{ color: '#D4A5D4', fontSize: '14px', marginBottom: '0.5rem' }}>
+            Email: support@berryevents.com
+          </p>
+          <p style={{ color: '#D4A5D4', fontSize: '14px' }}>
+            Phone: +27 123 456 7890
+          </p>
+        </div>
+      </div>
+
+      {/* COPYRIGHT */}
+      <div style={{
+        textAlign: 'center',
+        marginTop: '2rem',
+        paddingTop: '1rem',
+        borderTop: '1px solid #4A1945',
+        color: '#D4A5D4',
+        fontSize: '14px',
+      }}>
+        © {new Date().getFullYear()} Berry Events. All rights reserved.
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
+
+STEP 5: Find and Replace All Other Logo Instances
+Search your entire project for any other logo references and replace them:
+Common places to check:
+
+Login Page - Replace with <BerryLogo size="large" />
+Splash Screen - Replace with <BerryLogo size="large" />
+Mobile Menu - Replace with <BerryLogo size="small" />
+Email Templates - Update logo path
+Any hardcoded <img> tags - Replace with BerryLogo component
+
+Quick search command in Replit:
+
+Press Ctrl + Shift + F (or Cmd + Shift + F on Mac)
+Search for: logo, Logo, brand, or your old logo filename
+Replace each instance with <BerryLogo size="appropriate-size" />
+
+
+STEP 6: Update Icon Colors in CSS (if using stylesheets)
+If your cart and notification icons are styled via CSS:
+css/* File: src/styles/Header.css or similar */
+
+/* Cart Icon */
+.cart-icon,
+.header-cart-icon {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Notification Icon */
+.notification-icon,
+.header-notification-icon {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Ensure they match nav text color */
+.header nav a,
+.header-nav-link {
+  color: #FFFFFF;
+}
+
+TESTING CHECKLIST
+After implementation, test the following:
+Logo Tests:
+
+ Header logo displays correctly at 180px (large size)
+ Footer logo displays correctly at 120px (medium size)
+ Logo appears on all pages (Home, Services, My Bookings, etc.)
+ Logo loads without errors (check browser console)
+ Logo is clickable and returns to homepage
+ Logo is responsive on mobile devices
+
+Icon Color Tests:
+
+ Cart icon is white (#FFFFFF) matching Home text
+ Notification bell icon is white (#FFFFFF) matching Home text
+ Icons are visible on dark plum header background
+ Icons maintain color on hover
+ Badge numbers (cart count, notification count) still visible
+
+General Tests:
+
+ No console errors when page loads
+ No blank screens on any page
+ All navigation links still work
+ Header layout not broken by larger logo
+ Footer layout displays properly
+ Mobile responsiveness maintained
+
+
+TROUBLESHOOTING
+If logo doesn't appear:
+
+Check file path is correct: /assets/berry-logo.png
+Verify file exists in the correct folder
+Check console for 404 errors
+Try absolute path: https://your-replit-url.com/assets/berry-logo.png
+
+If icons still wrong color:
+
+Check for CSS overrides using browser inspector
+Add !important to color styles if needed
+Verify you're using correct icon components (lucide-react)
+
+If header layout breaks:
+
+Reduce logo size slightly: change 180px to 150px
+Adjust header padding
+Check flex layout properties
+
+
+SUMMARY OF CHANGES
+✅ Logo updated everywhere - Header (180px large), Footer (120px), all pages
+✅ Cart icon color - Changed to white (#FFFFFF) to match Home text
+✅ Notification icon color - Changed to white (#FFFFFF) to match Home text
+✅ Admin Portal - Moved to footer support section (from previous instructions)
+✅ No errors - All changes maintain existing functionality

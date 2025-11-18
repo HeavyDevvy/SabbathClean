@@ -28,6 +28,13 @@ Berry Events is a domestic services marketplace connecting customers with verifi
   - **User Initials Avatar**: Updated background color to brand color (#C56B86) for consistency
   - **Text Colors**: All header text updated to white with light beige (#EED1C4) hover states for optimal visibility on dark background
   - **Search Bar**: Styled with semi-transparent background and white text for cohesive dark theme integration
+- Logo and icon updates:
+  - **New Logo**: Updated to modern "B" Berry Events logo (berry-logo.png) throughout the platform
+  - **Header Logo**: Large size (180px) for prominent brand visibility with auto-adjusting header height
+  - **Footer Logo**: Medium size (120px) in footer brand section
+  - **Cart Icon**: Updated to white (#FFFFFF) to match navigation text color
+  - **Notification Icon**: Updated to white (#FFFFFF) for consistency with header theme
+  - **All Icons**: Maintain white color with light beige (#EED1C4) hover states on dark plum background
 
 ## November 16, 2025
 - Implemented complete real-time chat system for customer-provider communication:

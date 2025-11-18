@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
 import { CartDrawer } from "./cart-drawer";
-import logo from "@assets/berry-events-new-logo.jpg";
+import logo from "@assets/berry-logo.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
@@ -99,11 +99,11 @@ export default function EnhancedHeader({
   return (
     <header className="sticky top-0 z-50 shadow-sm" style={{ backgroundColor: '#44062D' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-auto py-4">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <div className="flex items-center space-x-3">
-              <img src={logo} alt="Berry Events logo" className="h-14 w-14 rounded-full object-cover" />
+              <img src={logo} alt="Berry Events logo" className="h-[180px] w-[180px] object-contain" />
               <div className="hidden sm:block">
                 <span className="text-xl font-bold text-white">Berry Events</span>
                 <p className="text-xs text-[#EED1C4] -mt-1">All your home services</p>
@@ -193,11 +193,11 @@ export default function EnhancedHeader({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative"
+                  className="relative text-white hover:text-[#EED1C4]"
                   onClick={() => setLocation("/notifications")}
                   data-testid="button-notifications"
                 >
-                  <Bell className="h-5 w-5" />
+                  <Bell className="h-5 w-5 text-white" />
                   {notificationCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs p-0 flex items-center justify-center">
                       {notificationCount > 9 ? '9+' : notificationCount}

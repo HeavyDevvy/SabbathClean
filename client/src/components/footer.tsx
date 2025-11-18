@@ -12,6 +12,7 @@ import {
   Shield,
   Star
 } from "lucide-react";
+import logo from "@assets/berry-logo.png";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -111,9 +112,7 @@ export default function Footer() {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg text-white" style={{ backgroundColor: '#C56B86' }}>
-                  <span className="font-bold text-xl">B</span>
-                </div>
+                <img src={logo} alt="Berry Events logo" className="h-[120px] w-[120px] object-contain" />
                 <div className="ml-3">
                   <div className="text-2xl font-bold">Berry Events</div>
                   <div className="text-gray-400 text-sm">All your home services</div>

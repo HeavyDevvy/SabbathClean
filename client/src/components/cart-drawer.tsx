@@ -164,10 +164,10 @@ export function CartDrawer() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative text-white hover:text-[#EED1C4]"
           data-testid="button-open-cart"
         >
-          <ShoppingCart className="h-5 w-5" />
+          <ShoppingCart className="h-5 w-5 text-white" />
           {itemCount > 0 && (
             <Badge
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground"
