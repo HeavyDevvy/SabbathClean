@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import EnhancedHeader from "@/components/enhanced-header";
 import { RescheduleDialog } from "@/components/reschedule-dialog";
 import { CancelBookingDialog } from "@/components/cancel-booking-dialog";
@@ -31,7 +32,8 @@ import {
   Loader2,
   Repeat,
   Share2,
-  MessageCircle
+  MessageCircle,
+  X
 } from "lucide-react";
 
 // Mock booking data
@@ -117,6 +119,7 @@ export default function BookingsPage() {
   const [rebookData, setRebookData] = useState<any>(null);
   const [shareBooking, setShareBooking] = useState<any>(null);
   const [chatBooking, setChatBooking] = useState<any>(null);
+  const [reviewBooking, setReviewBooking] = useState<any>(null);
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
@@ -170,16 +173,44 @@ export default function BookingsPage() {
       createdAt: order.createdAt,
       // Store order reference for actions
       orderId: order.id,
+      // Store full service details for rebooking
+      serviceDetails: item.serviceDetails,
+      selectedAddOns: item.selectedAddOns || [],
     }));
   });
 
-  const upcomingBookings = bookings.filter((b: any) => 
-    b.status === "confirmed" || b.status === "pending"
-  );
+  // Helper function to check if a booking is in the past
+  const isBookingInPast = (booking: any): boolean => {
+    if (!booking.scheduledDate || !booking.scheduledTime) {
+      return false;
+    }
+    
+    try {
+      // Combine date and time to create a datetime
+      const [hours, minutes] = booking.scheduledTime.split(':');
+      const bookingDateTime = new Date(booking.scheduledDate);
+      bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      // Compare with current time
+      return bookingDateTime < new Date();
+    } catch (error) {
+      console.error('Error parsing booking date/time:', error);
+      return false;
+    }
+  };
+
+  // Filter bookings based on date/time and status
+  const upcomingBookings = bookings.filter((b: any) => {
+    // Upcoming = not completed/cancelled AND date/time is in the future
+    const isNotCompleted = b.status !== "completed" && b.status !== "cancelled";
+    return isNotCompleted && !isBookingInPast(b);
+  });
   
-  const pastBookings = bookings.filter((b: any) => 
-    b.status === "completed" || b.status === "cancelled"
-  );
+  const pastBookings = bookings.filter((b: any) => {
+    // Past = completed/cancelled OR date/time is in the past
+    const isCompleted = b.status === "completed" || b.status === "cancelled";
+    return isCompleted || isBookingInPast(b);
+  });
 
   const renderBookingCard = (booking: any) => {
     const scheduledDate = format(new Date(booking.scheduledDate), "yyyy-MM-dd");
@@ -280,11 +311,16 @@ export default function BookingsPage() {
                   Reschedule
                 </Button>
               )}
-              {booking.status === "completed" && (
+              {(booking.status === "completed" || isBookingInPast(booking)) && (
                 <>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setReviewBooking(booking)}
+                    data-testid={`button-review-${booking.id}`}
+                  >
                     <Star className="h-4 w-4 mr-1" />
-                    Rate Service
+                    Review your berry
                   </Button>
                   <Button 
                     variant="outline" 
@@ -294,10 +330,10 @@ export default function BookingsPage() {
                       serviceId: booking.serviceType,
                       bookingData: booking
                     })}
-                    data-testid={`button-book-again-${booking.id}`}
+                    data-testid={`button-rebook-${booking.id}`}
                   >
                     <Repeat className="h-4 w-4 mr-1" />
-                    Book Again
+                    Re-book
                   </Button>
                 </>
               )}
@@ -548,6 +584,204 @@ export default function BookingsPage() {
           currentUserId={user.id}
         />
       )}
+
+      {/* Review Modal */}
+      {reviewBooking && (
+        <ReviewBerryModal
+          isOpen={true}
+          onClose={() => setReviewBooking(null)}
+          booking={reviewBooking}
+          user={user}
+        />
+      )}
     </div>
+  );
+}
+
+// Review Modal Component
+interface ReviewBerryModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  booking: any;
+  user: any;
+}
+
+function ReviewBerryModal({ isOpen, onClose, booking, user }: ReviewBerryModalProps) {
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      toast({
+        title: "Please select a rating",
+        description: "Select at least 1 star to submit your review",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // TODO: send review to backend when API exists
+      // For now, log to console and show success message
+      console.log("TODO: send review to backend", {
+        bookingId: booking.id,
+        providerId: booking.providerId,
+        rating: rating,
+        serviceType: booking.serviceType,
+      });
+
+      toast({
+        title: "Review Submitted",
+        description: `Thank you for rating ${booking.providerName || 'your provider'} ${rating} star${rating > 1 ? 's' : ''}!`,
+      });
+
+      // Close modal after successful submission
+      setTimeout(() => {
+        onClose();
+      }, 500);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">Review your berry</DialogTitle>
+          <DialogDescription>
+            How was your experience with {booking.providerName || 'your service provider'}?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* Provider Details */}
+          <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900">
+                {booking.providerName || 'Service Provider'}
+              </h3>
+              <p className="text-sm text-gray-600">{booking.serviceType}</p>
+            </div>
+          </div>
+
+          {/* Booking Summary */}
+          <div className="space-y-3 border-t border-b py-4">
+            <h4 className="font-semibold text-gray-900">Booking Summary</h4>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>{format(new Date(booking.scheduledDate), "MMMM d, yyyy")} at {booking.scheduledTime}</span>
+              </div>
+              
+              <div className="flex items-center text-gray-600">
+                <Clock className="h-4 w-4 mr-2" />
+                <span>{booking.duration} hour{booking.duration > 1 ? 's' : ''}</span>
+              </div>
+              
+              <div className="flex items-center text-gray-600">
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>{booking.address}</span>
+              </div>
+
+              {booking.selectedAddOns && booking.selectedAddOns.length > 0 && (
+                <div className="flex items-start text-gray-600">
+                  <CheckCircle2 className="h-4 w-4 mr-2 mt-0.5" />
+                  <div>
+                    <span className="font-medium">Add-ons:</span>
+                    <div className="mt-1">
+                      {booking.selectedAddOns.map((addon: string, idx: number) => (
+                        <span key={idx} className="inline-block bg-gray-100 px-2 py-1 rounded text-xs mr-1 mb-1">
+                          {addon}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center text-gray-600">
+                <CreditCard className="h-4 w-4 mr-2" />
+                <span className="font-semibold text-green-600">
+                  R{parseFloat(booking.totalPrice).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Star Rating */}
+          <div className="space-y-3">
+            <h4 className="font-semibold text-gray-900 text-center">Rate Your Experience</h4>
+            <div className="flex justify-center space-x-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="transition-transform hover:scale-110 focus:outline-none"
+                  data-testid={`star-${star}`}
+                >
+                  <Star
+                    className={`h-10 w-10 ${
+                      star <= (hoveredRating || rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm text-gray-600">
+              {rating === 0 ? 'Select a rating' : rating === 1 ? '1 star' : `${rating} stars`}
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 pt-4">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+              disabled={isSubmitting}
+              data-testid="button-cancel-review"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              className="flex-1 bg-primary hover:bg-primary/90"
+              disabled={isSubmitting || rating === 0}
+              data-testid="button-submit-review"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Review'
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
