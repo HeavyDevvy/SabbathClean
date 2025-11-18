@@ -540,24 +540,66 @@ export default function BookingsPage() {
         />
       )}
 
-      {/* Re-book Modal - Phase 4.3c */}
+      {/* Re-book Modal */}
       {rebookData && (
         <ModernServiceModal
           isOpen={true}
           onClose={() => setRebookData(null)}
           serviceId={rebookData.serviceId}
           onBookingComplete={(bookingData) => {
-            queryClient.invalidateQueries({ queryKey: ['/api/bookings/customer'] });
+            queryClient.invalidateQueries({ queryKey: ['/api/orders', user?.id] });
             setRebookData(null);
           }}
           editBookingData={{
-            propertyType: rebookData.bookingData.propertyType,
-            address: rebookData.bookingData.address,
-            gateCode: rebookData.bookingData.gateCode,
+            // Basic booking details
+            propertyType: rebookData.bookingData.serviceDetails?.propertyType || rebookData.bookingData.propertyType,
+            address: rebookData.bookingData.address || rebookData.bookingData.serviceDetails?.address,
+            gateCode: "", // Never prefill gate code for security
             preferredDate: rebookData.bookingData.scheduledDate,
             timePreference: rebookData.bookingData.scheduledTime,
-            recurringSchedule: rebookData.bookingData.recurringSchedule || "one-time",
-            specialRequests: rebookData.bookingData.specialInstructions,
+            recurringSchedule: rebookData.bookingData.serviceDetails?.recurringSchedule || "one-time",
+            specialRequests: rebookData.bookingData.specialInstructions || rebookData.bookingData.serviceDetails?.specialRequests,
+            
+            // House Cleaning specific
+            cleaningType: rebookData.bookingData.serviceDetails?.cleaningType,
+            propertySize: rebookData.bookingData.serviceDetails?.propertySize,
+            numRooms: rebookData.bookingData.serviceDetails?.numRooms,
+            numBathrooms: rebookData.bookingData.serviceDetails?.numBathrooms,
+            
+            // Garden Care specific
+            gardenSize: rebookData.bookingData.serviceDetails?.gardenSize,
+            gardenCondition: rebookData.bookingData.serviceDetails?.gardenCondition,
+            
+            // Pool Cleaning specific
+            poolSize: rebookData.bookingData.serviceDetails?.poolSize,
+            poolCondition: rebookData.bookingData.serviceDetails?.poolCondition,
+            
+            // Plumbing/Electrical specific
+            urgency: rebookData.bookingData.serviceDetails?.urgency,
+            materials: rebookData.bookingData.serviceDetails?.materials || "supply",
+            insurance: rebookData.bookingData.serviceDetails?.insurance || false,
+            
+            // Chef/Catering specific
+            numGuests: rebookData.bookingData.serviceDetails?.numGuests,
+            cuisineType: rebookData.bookingData.serviceDetails?.cuisineType,
+            flavorPreference: rebookData.bookingData.serviceDetails?.flavorPreference,
+            menuOption: rebookData.bookingData.serviceDetails?.menuOption,
+            
+            // Waitering specific
+            eventType: rebookData.bookingData.serviceDetails?.eventType,
+            numWaiters: rebookData.bookingData.serviceDetails?.numWaiters,
+            formalityLevel: rebookData.bookingData.serviceDetails?.formalityLevel,
+            
+            // Moving specific
+            moveType: rebookData.bookingData.serviceDetails?.moveType,
+            propertyType: rebookData.bookingData.serviceDetails?.propertyType,
+            floors: rebookData.bookingData.serviceDetails?.floors,
+            elevator: rebookData.bookingData.serviceDetails?.elevator,
+            
+            // Au Pair specific
+            numChildren: rebookData.bookingData.serviceDetails?.numChildren,
+            childrenAges: rebookData.bookingData.serviceDetails?.childrenAges,
+            specialNeeds: rebookData.bookingData.serviceDetails?.specialNeeds,
           }}
         />
       )}
