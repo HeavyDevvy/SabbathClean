@@ -163,6 +163,13 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                     src={provider.image} 
                     alt={provider.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                    style={{
+                      imageRendering: '-webkit-optimize-contrast',
+                      WebkitBackfaceVisibility: 'hidden',
+                      backfaceVisibility: 'hidden',
+                      transform: 'translateZ(0)',
+                    }}
+                    loading="lazy"
                   />
                 </div>
 
