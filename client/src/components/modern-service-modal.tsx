@@ -2100,7 +2100,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {(serviceId === "garden-care" || serviceId === "garden-maintenance") && (
+        {isGardenService && (
           <>
             <div>
               <Label>Garden Size Range *</Label>
@@ -2140,7 +2140,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "pool-cleaning" && (
+        {isPoolService && (
           <>
             <div>
               <Label>Pool Size Range *</Label>
@@ -2180,7 +2180,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "plumbing" && (
+        {isPlumbing && (
           <>
             <div>
               <Label>What needs to be fixed? *</Label>
@@ -2260,7 +2260,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "electrical" && (
+        {isElectrical && (
           <>
             <div>
               <Label htmlFor="electrical-issue">What needs to be fixed? *</Label>
@@ -2493,7 +2493,7 @@ export default function ModernServiceModal({
           </>
         )}
 
-        {serviceId === "chef-catering" && (
+        {isChefCatering && (
           <>
             <div>
               <Label>Cuisine Type *</Label>
@@ -2688,7 +2688,7 @@ export default function ModernServiceModal({
             min={(() => {
               const minDate = new Date();
               // Chef & Catering requires 24 hours minimum notice
-              if (serviceId === "chef-catering" || mappedServiceId === "chef-catering") {
+              if (isChefCatering) {
                 minDate.setDate(minDate.getDate() + 1);
               }
               return minDate.toISOString().split('T')[0];
@@ -2709,7 +2709,7 @@ export default function ModernServiceModal({
               Next-day electrical service is scheduled for tomorrow
             </p>
           )}
-          {(serviceId === "chef-catering" || mappedServiceId === "chef-catering") && (
+          {isChefCatering && (
             <p className="text-xs text-blue-600 mt-1 flex items-center">
               <ChefHat className="h-3 w-3 mr-1" />
               Chef services require 24 hours minimum notice for menu planning and ingredient sourcing
@@ -2738,9 +2738,8 @@ export default function ModernServiceModal({
                 const now = new Date();
                 const currentHour = now.getHours();
                 const currentMinute = now.getMinutes();
-                const isChef = serviceId === "chef-catering" || mappedServiceId === "chef-catering";
-                const isGarden = serviceId === "garden-care" || serviceId === "garden-maintenance" || 
-                                mappedServiceId === "garden-care" || mappedServiceId === "garden-maintenance";
+                const isChef = isChefCatering;
+                const isGarden = isGardenService;
                 
                 const timeSlots = [
                   { value: "08:00", label: "08:00 - Morning", hour: 8 },
@@ -2861,7 +2860,7 @@ export default function ModernServiceModal({
           )}
         </div>
 
-        {serviceId === "plumbing" && (
+        {isPlumbing && (
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -2879,7 +2878,7 @@ export default function ModernServiceModal({
           </div>
         )}
 
-        {serviceId === "electrical" && (
+        {isElectrical && (
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <Checkbox
