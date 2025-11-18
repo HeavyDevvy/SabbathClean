@@ -16,8 +16,10 @@ export default function Home() {
   const [bookedServices, setBookedServices] = useState<string[]>([]);
   const [pendingDrafts, setPendingDrafts] = useState<any[]>([]); // Store service drafts before payment
   const [confirmedDrafts, setConfirmedDrafts] = useState<any[]>([]); // Store confirmed bookings after payment
+  const [preSelectedProviderId, setPreSelectedProviderId] = useState<string>("");
+  const [preSelectedProviderName, setPreSelectedProviderName] = useState<string>("");
 
-  const openBooking = (service?: string) => {
+  const openBooking = (service?: string, providerId?: string, providerName?: string) => {
     if (service && service !== 'all-services') {
       // Check if service is already booked
       if (bookedServices.includes(service)) {
@@ -29,6 +31,16 @@ export default function Home() {
       // No service pre-selected - let user choose
       setSelectedService('');
     }
+    
+    // Handle pre-selected provider (from Berry Stars)
+    if (providerId && providerName) {
+      setPreSelectedProviderId(providerId);
+      setPreSelectedProviderName(providerName);
+    } else {
+      setPreSelectedProviderId('');
+      setPreSelectedProviderName('');
+    }
+    
     setIsBookingOpen(true);
   };
 
@@ -50,6 +62,8 @@ export default function Home() {
         onClose={() => {
           setIsBookingOpen(false);
           setSelectedService("");
+          setPreSelectedProviderId("");
+          setPreSelectedProviderName("");
         }}
         serviceId={selectedService}
         onServiceSelect={(serviceId) => setSelectedService(serviceId)}
@@ -63,6 +77,8 @@ export default function Home() {
           // Clear session state after successful payment
           setPendingDrafts([]);
           setBookedServices([]);
+          setPreSelectedProviderId("");
+          setPreSelectedProviderName("");
           
           setIsBookingOpen(false);
           setSelectedService("");
@@ -84,6 +100,8 @@ export default function Home() {
           setIsBookingOpen(false);
           setSelectedService("");
         }}
+        preSelectedProviderId={preSelectedProviderId}
+        preSelectedProviderName={preSelectedProviderName}
       />
       
       {isProviderOnboardingOpen && (

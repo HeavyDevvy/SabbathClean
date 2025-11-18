@@ -1,0 +1,678 @@
+Berry Events - Align "Meet Your Berry Stars" Booking Process - REPLIT PROMPT
+CRITICAL INSTRUCTION: Copy the EXACT booking process and logic from the "Quick Quote or Book Now" button and apply it to the "Book with [Provider Name]" buttons in the "Meet Your Berry Stars" section. Do not create new logic - reuse the existing code exactly.
+CLARIFICATION: "Quick Quote or Book Now" is ONE button, not two separate buttons.
+
+OBJECTIVE
+Make the "Book with [Provider Name]" buttons in "Meet Your Berry Stars" use the identical booking flow as the existing "Quick Quote or Book Now" button.
+The only difference: Pre-select the chosen service provider in Step 4.
+
+STEP 1: Locate the Existing "Quick Quote or Book Now" Button
+Find the button in your codebase
+Search for the button:
+bash# In Replit, use Ctrl+Shift+F (or Cmd+Shift+F on Mac):
+
+Search for: "Quick Quote or Book Now" OR "QuickQuote" OR "quick-quote-button"
+Common locations:
+
+src/pages/Home.jsx - Most likely here
+src/components/Header.jsx - Could be in header
+src/components/HeroSection.jsx - Could be in hero/banner
+src/pages/MyProfile.jsx - Check if it's here too
+
+What the button might look like:
+javascript// Example 1: Direct button
+<button 
+  onClick={handleQuickQuote}
+  className="quick-quote-button"
+>
+  Quick Quote or Book Now
+</button>
+
+// Example 2: With icon
+<button onClick={handleQuickQuoteOrBookNow}>
+  <Icon /> Quick Quote or Book Now
+</button>
+
+STEP 2: Find and Copy the Click Handler Function
+Once you find the button, locate its click handler:
+javascript// Look for the function name in the onClick
+// Example: onClick={handleQuickQuote}
+
+// Then find that function in the same file:
+
+const handleQuickQuote = () => {
+  // THIS IS THE CODE YOU NEED TO COPY
+  // Copy everything inside this function
+};
+
+// OR it might be called:
+const handleQuickQuoteOrBookNow = () => { ... };
+const handleBookNow = () => { ... };
+const startBooking = () => { ... };
+
+STEP 3: Document the Complete Booking Flow
+Copy the ENTIRE handler function and note what it does:
+Example Pattern 1: Using Navigation
+javascript// EXAMPLE of what you might find:
+
+const handleQuickQuote = () => {
+  // Initialize booking state
+  setBookingState({
+    currentStep: 1,
+    selectedService: null,
+    serviceConfig: null,
+    selectedDateTime: null,
+    selectedProvider: null,
+    addOns: [],
+    customerAddress: null,
+    specialInstructions: '',
+    totalPrice: 0,
+  });
+  
+  // Navigate to booking flow
+  navigate('/booking-steps');
+  
+  // OR
+  navigate('/book', { 
+    state: { 
+      mode: 'new-booking',
+      from: 'quick-quote' 
+    } 
+  });
+};
+Example Pattern 2: Using Modal/Popup
+javascript// EXAMPLE of what you might find:
+
+const handleQuickQuote = () => {
+  // Reset booking data
+  dispatch({ 
+    type: 'RESET_BOOKING' 
+  });
+  
+  // Open booking modal
+  setShowBookingModal(true);
+  setBookingStep(1);
+};
+Example Pattern 3: Using Context/State Management
+javascript// EXAMPLE of what you might find:
+
+const { startNewBooking } = useBooking(); // Context hook
+
+const handleQuickQuote = () => {
+  startNewBooking();
+};
+
+STEP 4: Copy the Function to Berry Stars Section
+Locate the "Meet Your Berry Stars" section
+Find where the provider cards are:
+bash# Search for:
+"Meet Your Berry Stars" OR "berry-stars" OR "BerryStars"
+Common locations:
+
+src/pages/Home.jsx - Most likely same file
+src/components/BerryStars.jsx
+src/components/FeaturedProviders.jsx
+
+
+Add the EXACT Same Handler (with provider parameter)
+STEP-BY-STEP Instructions:
+
+Copy the entire handleQuickQuote function
+Rename it to handleBookWithProvider
+Add a provider parameter
+Add the provider to the booking state
+Everything else stays IDENTICAL
+
+BEFORE (your current Berry Stars code):
+javascript// ❌ WRONG - May have different/incomplete logic
+
+const BerryStarsSection = () => {
+  const handleProviderClick = (provider) => {
+    // Some incomplete or different logic
+    setProvider(provider);
+    history.push('/booking');
+  };
+
+  return (
+    <div className="berry-stars">
+      {providers.map(provider => (
+        <button onClick={() => handleProviderClick(provider)}>
+          Book with {provider.name}
+        </button>
+      ))}
+    </div>
+  );
+};
+AFTER (copying the Quick Quote logic exactly):
+javascript// ✅ CORRECT - Uses EXACT same logic as "Quick Quote or Book Now"
+
+import { useNavigate } from 'react-router-dom';
+// Import EXACTLY the same hooks/contexts as Quick Quote button uses
+import { useBooking } from '../contexts/BookingContext'; // if applicable
+import { useState } from 'react';
+
+const BerryStarsSection = () => {
+  const navigate = useNavigate();
+  const { setBookingState, dispatch } = useBooking(); // Use same hooks as Quick Quote
+  
+  // COPIED EXACTLY from the Quick Quote button handler
+  // ONLY CHANGE: Added 'provider' parameter and pre-select provider
+  const handleBookWithProvider = (provider) => {
+    // ========================================
+    // THIS BLOCK IS COPIED EXACTLY FROM handleQuickQuote
+    // ========================================
+    
+    // Initialize booking state (EXACT SAME as Quick Quote)
+    setBookingState({
+      currentStep: 1,
+      selectedService: null,
+      serviceConfig: null,
+      selectedDateTime: null,
+      selectedProvider: provider, // ← ONLY ADDITION: Pre-select provider
+      addOns: [],
+      customerAddress: null,
+      specialInstructions: '',
+      totalPrice: 0,
+    });
+    
+    // Navigate to booking flow (EXACT SAME as Quick Quote)
+    navigate('/booking-steps', {
+      state: {
+        preSelectedProvider: provider, // ← ONLY ADDITION: Pass provider
+      }
+    });
+    
+    // ========================================
+    // END OF COPIED CODE
+    // ========================================
+  };
+
+  const berryStars = [
+    {
+      id: 'provider_001',
+      name: 'Thabo',
+      image: '/assets/thabo.jpg',
+      rating: 4.9,
+      specialties: ['Cleaning', 'Laundry'],
+      reviews: 127,
+    },
+    {
+      id: 'provider_002',
+      name: 'Sarah',
+      image: '/assets/sarah.jpg',
+      rating: 4.8,
+      specialties: ['Gardening', 'Landscaping'],
+      reviews: 98,
+    },
+    // ... more providers
+  ];
+
+  return (
+    <section className="berry-stars-section">
+      <h2>Meet Your Berry Stars</h2>
+      <p>Book directly with our top-rated professionals</p>
+      
+      <div className="berry-stars-grid">
+        {berryStars.map((provider) => (
+          <div key={provider.id} className="berry-star-card">
+            <img 
+              src={provider.image} 
+              alt={provider.name}
+              className="provider-avatar"
+            />
+            <h3>{provider.name}</h3>
+            <div className="rating">
+              ⭐ {provider.rating} ({provider.reviews} reviews)
+            </div>
+            <div className="specialties">
+              {provider.specialties.join(' • ')}
+            </div>
+            
+            {/* Button uses EXACT same handler as "Quick Quote or Book Now" */}
+            <button
+              onClick={() => handleBookWithProvider(provider)}
+              className="book-provider-button"
+              style={{
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                border: 'none',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                width: '100%',
+                marginTop: '1rem',
+              }}
+            >
+              Book with {provider.name}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default BerryStarsSection;
+
+STEP 5: Update Booking Flow to Handle Pre-selected Provider
+In your booking steps/flow component, handle the pre-selected provider:
+javascript// File: src/pages/BookingSteps.jsx OR src/components/BookingFlow.jsx
+// (Wherever the "Quick Quote or Book Now" button navigates to)
+
+import { useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+const BookingSteps = () => {
+  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [bookingData, setBookingData] = useState({});
+  
+  // Get the pre-selected provider (if coming from Berry Stars)
+  const preSelectedProvider = location.state?.preSelectedProvider;
+
+  useEffect(() => {
+    // If provider was pre-selected from Berry Stars
+    if (preSelectedProvider) {
+      console.log('Pre-selected provider:', preSelectedProvider.name);
+      setBookingData(prev => ({
+        ...prev,
+        selectedProvider: preSelectedProvider,
+        providerLocked: true, // Lock so user can't change
+      }));
+    }
+  }, [preSelectedProvider]);
+
+  // ==========================================
+  // STEP 4: Provider Selection
+  // ==========================================
+  const ProviderSelectionStep = () => {
+    // IF provider is pre-selected (from Berry Stars)
+    if (bookingData.providerLocked && bookingData.selectedProvider) {
+      return (
+        <div className="provider-selection-step">
+          <h2>Your Selected Service Provider</h2>
+          
+          {/* Show ONLY the pre-selected provider */}
+          <div className="selected-provider-card">
+            <img 
+              src={bookingData.selectedProvider.image} 
+              alt={bookingData.selectedProvider.name}
+              style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '4px solid #8B4789',
+              }}
+            />
+            <h3 style={{ marginTop: '1rem', fontSize: '1.5rem' }}>
+              {bookingData.selectedProvider.name}
+            </h3>
+            <div className="rating" style={{ color: '#6B4C6B' }}>
+              ⭐ {bookingData.selectedProvider.rating} 
+              ({bookingData.selectedProvider.reviews} reviews)
+            </div>
+            <div className="specialties" style={{ color: '#A87CA8', marginTop: '0.5rem' }}>
+              {bookingData.selectedProvider.specialties.join(' • ')}
+            </div>
+            
+            <div 
+              className="locked-badge" 
+              style={{
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                marginTop: '1rem',
+                display: 'inline-block',
+              }}
+            >
+              ✓ Selected Provider
+            </div>
+            
+            <p style={{ 
+              marginTop: '1rem', 
+              color: '#6B4C6B',
+              fontStyle: 'italic',
+              maxWidth: '400px',
+              textAlign: 'center',
+            }}>
+              You are booking with {bookingData.selectedProvider.name}. 
+              This professional will handle your service.
+            </p>
+          </div>
+
+          {/* Navigation buttons */}
+          <div className="step-navigation" style={{ marginTop: '2rem' }}>
+            <button 
+              onClick={() => setCurrentStep(currentStep - 1)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #8B4789',
+                color: '#8B4789',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                marginRight: '1rem',
+              }}
+            >
+              Back
+            </button>
+            <button 
+              onClick={() => setCurrentStep(currentStep + 1)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#8B4789',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '600',
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // STANDARD provider selection (when coming from "Quick Quote or Book Now")
+    return (
+      <div className="provider-selection-step">
+        <h2>Select Your Service Provider</h2>
+        <p>Choose from our available professionals</p>
+        
+        {/* Show ALL available providers */}
+        <div className="providers-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '1.5rem',
+          marginTop: '2rem',
+        }}>
+          {availableProviders.map((provider) => (
+            <div 
+              key={provider.id}
+              className={`provider-card ${bookingData.selectedProvider?.id === provider.id ? 'selected' : ''}`}
+              onClick={() => setBookingData({ ...bookingData, selectedProvider: provider })}
+              style={{
+                border: bookingData.selectedProvider?.id === provider.id 
+                  ? '3px solid #8B4789' 
+                  : '2px solid #E5C5E5',
+                borderRadius: '12px',
+                padding: '1rem',
+                cursor: 'pointer',
+                textAlign: 'center',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <img 
+                src={provider.image} 
+                alt={provider.name}
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  marginBottom: '0.5rem',
+                }}
+              />
+              <h4>{provider.name}</h4>
+              <div className="rating">⭐ {provider.rating}</div>
+              {bookingData.selectedProvider?.id === provider.id && (
+                <div style={{
+                  backgroundColor: '#8B4789',
+                  color: '#FFFFFF',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '15px',
+                  fontSize: '0.85rem',
+                  marginTop: '0.5rem',
+                  display: 'inline-block',
+                }}>
+                  ✓ Selected
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="step-navigation" style={{ marginTop: '2rem' }}>
+          <button 
+            onClick={() => setCurrentStep(currentStep - 1)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #8B4789',
+              color: '#8B4789',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              marginRight: '1rem',
+            }}
+          >
+            Back
+          </button>
+          <button 
+            onClick={() => setCurrentStep(currentStep + 1)}
+            disabled={!bookingData.selectedProvider}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: bookingData.selectedProvider ? '#8B4789' : '#D4A5D4',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: bookingData.selectedProvider ? 'pointer' : 'not-allowed',
+              fontWeight: '600',
+              opacity: bookingData.selectedProvider ? 1 : 0.6,
+            }}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Render the appropriate step
+  const renderCurrentStep = () => {
+    switch(currentStep) {
+      case 1:
+        return <ServiceSelectionStep />;
+      case 2:
+        return <ServiceConfigurationStep />;
+      case 3:
+        return <DateTimeSelectionStep />;
+      case 4:
+        return <ProviderSelectionStep />; // ← This step handles both cases
+      case 5:
+        return <AddOnsStep />;
+      case 6:
+        return <AddressContactStep />;
+      case 7:
+        return <ReviewConfirmStep />;
+      case 8:
+        return <PaymentStep />;
+      default:
+        return <ServiceSelectionStep />;
+    }
+  };
+
+  return (
+    <div className="booking-flow-container">
+      {/* Progress indicator */}
+      <div className="booking-progress" style={{
+        width: '100%',
+        height: '4px',
+        backgroundColor: '#E5C5E5',
+        marginBottom: '2rem',
+      }}>
+        <div 
+          className="progress-bar" 
+          style={{
+            width: `${(currentStep / 8) * 100}%`,
+            height: '100%',
+            backgroundColor: '#8B4789',
+            transition: 'width 0.3s ease',
+          }}
+        />
+      </div>
+
+      {/* Current step content */}
+      {renderCurrentStep()}
+    </div>
+  );
+};
+
+export default BookingSteps;
+
+IMPLEMENTATION CHECKLIST
+Follow these steps in order:
+✅ Step 1: Find "Quick Quote or Book Now" Button
+
+ Search codebase for "Quick Quote or Book Now"
+ Note the file location (e.g., src/pages/Home.jsx)
+ Find the button's onClick handler function name
+
+✅ Step 2: Copy the Handler Function
+
+ Copy the ENTIRE handler function
+ Note all imports it uses (navigate, hooks, contexts)
+ Note what route/page it navigates to
+
+✅ Step 3: Update Berry Stars Section
+
+ Find the "Meet Your Berry Stars" component
+ Add the SAME imports as the Quick Quote button
+ Create handleBookWithProvider function
+ Copy ALL logic from Quick Quote handler
+ Add ONLY the provider parameter and pre-selection
+ Update each "Book with [Name]" button to use this handler
+
+✅ Step 4: Update Booking Flow Step 4
+
+ Find the provider selection step component
+ Add logic to detect pre-selected provider
+ Show ONLY pre-selected provider when locked
+ Show ALL providers when not locked (standard flow)
+ Test both paths work correctly
+
+
+TESTING CHECKLIST
+Test BOTH booking flows to ensure they're identical:
+Test 1: "Quick Quote or Book Now" Button
+
+ Click the "Quick Quote or Book Now" button
+ Note which page/modal opens (this is your reference)
+ Go through ALL steps (1-8)
+ Step 4 should show ALL providers to choose from
+ Complete the booking
+ Verify it works without errors
+ This is your baseline - Berry Stars must match this exactly
+
+Test 2: "Book with [Provider]" in Berry Stars
+
+ Click "Book with Thabo" (or any provider)
+ Should open the EXACT same page/modal as Test 1
+ Steps 1-3 should be IDENTICAL to Test 1
+ Step 4 should show ONLY Thabo (pre-selected, locked)
+ Steps 5-8 should be IDENTICAL to Test 1
+ Complete the booking
+ Verify Thabo is the confirmed provider
+ No errors or blank screens
+
+Test 3: Verify Identical Flows
+
+ Both flows navigate to same route/page
+ Both use same components for each step
+ Same navigation buttons (Back/Continue)
+ Same styling and layout
+ Same validation rules
+ Same data collection
+ Same final confirmation
+
+Quality Checks
+
+ No console errors in either flow
+ No blank screens at any step
+ Back button works in all steps
+ Progress bar updates correctly
+ Can complete booking in both flows
+ Mobile responsive (if applicable)
+
+
+TROUBLESHOOTING
+Problem: Berry Stars flow goes to different page than Quick Quote
+Solution:
+javascript// Make sure both navigate to EXACT same route:
+
+// Quick Quote button should have:
+navigate('/booking-steps'); // or '/book' or whatever
+
+// Berry Stars button MUST have EXACT same route:
+navigate('/booking-steps'); // SAME route
+
+Problem: Different components/steps appear
+Solution:
+
+Berry Stars is not using the same booking flow component
+Check that both navigate to the same component
+Verify imports are identical
+
+
+Problem: Provider not pre-selected in Step 4
+Solution:
+javascript// Check that you're passing provider in navigation state:
+navigate('/booking-steps', {
+  state: {
+    preSelectedProvider: provider, // Make sure this is included
+  }
+});
+
+// And that Step 4 is reading it:
+const preSelectedProvider = location.state?.preSelectedProvider;
+
+Problem: Can still change provider when it should be locked
+Solution:
+javascript// Make sure you're setting providerLocked flag:
+setBookingData({
+  ...bookingData,
+  selectedProvider: provider,
+  providerLocked: true, // Add this
+});
+
+// And Step 4 checks for it:
+if (bookingData.providerLocked && bookingData.selectedProvider) {
+  // Show locked provider only
+}
+
+SUMMARY
+What You're Doing:
+
+Find the "Quick Quote or Book Now" button handler
+Copy that EXACT handler to Berry Stars section
+Add provider parameter to pre-select provider
+Update Step 4 to show only pre-selected provider when applicable
+Everything else stays IDENTICAL
+
+Key Principle:
+
+DON'T create new booking logic for Berry Stars
+DO copy existing Quick Quote logic exactly
+ONLY difference: pre-select provider in Step 4
+
+Result:
+
+Both flows use identical code paths
+Same steps, same components, same logic
+Only difference: Berry Stars pre-selects the provider
+
+Implementation time: 20-30 minutes
+Files to modify:
+
+Berry Stars component (add handler)
+Booking Steps component (update Step 4)
+No other files should need changes
+RetryClaude can make mistakes. Please double-check responses.

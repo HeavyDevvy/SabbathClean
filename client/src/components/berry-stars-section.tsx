@@ -185,8 +185,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
                         provider.name
                       )}
                       size="sm"
-                      className="font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs text-white"
-                      style={{ backgroundColor: '#C56B86' }}
+                      className="font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-xs text-white hover:opacity-90"
+                      style={{ backgroundColor: '#8B4789' }}
                       data-testid={`button-book-${provider.id}`}
                     >
                       Book Now
