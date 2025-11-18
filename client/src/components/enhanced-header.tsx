@@ -267,11 +267,12 @@ export default function EnhancedHeader({
             ) : (
               <>
                 <div className="border-l border-white/20 pl-4 ml-4">
-                  <span className="text-sm text-white/80 mr-2">Service provider?</span>
+                  <span className="text-xs text-white/80 mr-2">Service provider?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"
-                    className="border-[#C56B86] text-[#C56B86] hover:bg-[#C56B86] hover:text-white font-medium"
+                    size="sm"
+                    className="border-[#C56B86] text-[#C56B86] hover:bg-[#C56B86] hover:text-white font-medium text-xs"
                     data-testid="button-join-as-provider"
                   >
                     Join as Provider
@@ -289,7 +290,7 @@ export default function EnhancedHeader({
             className="md:hidden"
             data-testid="button-mobile-menu"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
 
