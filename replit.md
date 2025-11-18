@@ -5,11 +5,16 @@ Berry Events is a domestic services marketplace connecting customers with verifi
 # Recent Changes
 
 ## November 18, 2025
+- Button color standardization across entire platform:
+  - **Reference Color**: #C56B86 (pink from "Watch How It Works" button)
+  - **Updated Buttons**: All "Quick Quote or Book Now", "Book Now", and CTA buttons now use consistent #C56B86 color
+  - **Files Modified**: animated-service-card.tsx, berry-stars-section.tsx, services.tsx, pages/services.tsx, hero.tsx
+  - **Hover States**: All buttons maintain consistent hover:opacity-90 for uniform UX
+  - **Testing**: Zero console errors, all pages loading successfully (HTTP 200), no blank screens
 - Header and button UI refinements:
   - **Logo Resizing**: Reduced logo from 180px to 90px (50% reduction) while maintaining aspect ratio and vertical centering
   - **Header Height**: Optimized header padding from py-1 to py-2 for balanced spacing with smaller logo
   - **Proportional Scaling**: Reduced header text and icons by ~25% (text-base to text-sm/xs, icons h-4/w-4 to h-3.5/w-3.5) for visual harmony
-  - **Button Styling Unification**: Updated "Quick Quote" button to match "Watch How It Works" styling (backgroundColor: #C56B86, transform hover:scale-105, shadow-lg hover:shadow-xl)
   - **Mobile Optimization**: Scaled mobile menu icons and "Join as Provider" button proportionally
   - **Clean Implementation**: Zero console errors, all pages loading successfully, responsive design preserved
 - System optimizations and bug fixes:
