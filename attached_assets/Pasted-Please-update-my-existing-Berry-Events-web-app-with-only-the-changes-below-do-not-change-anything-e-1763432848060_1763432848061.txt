@@ -1,0 +1,114 @@
+Please update my existing Berry Events web app with only the changes below (do not change anything else in the project: UI, colors, layout, or unrelated logic).
+
+Context
+
+These changes all apply to the “My Bookings” page, where bookings are split into Upcoming Bookings and Past Bookings.
+
+⸻
+
+1. Auto-move past bookings from “Upcoming” to “Past”
+	•	On the My Bookings page, ensure that any booking whose date and time are in the past (compared to the current date and time) is:
+	•	Removed from “Upcoming Bookings”, and
+	•	Displayed under “Past Bookings”.
+	•	This logic should work:
+	•	On initial page load.
+	•	Whenever bookings are refreshed or re-fetched from the backend.
+	•	Use the existing booking object’s date/time fields to determine whether a booking is in the past.
+	•	Do not break any existing filters, sorting, or pagination (if they exist).
+
+⸻
+
+2. “Review your berry” button for each past booking
+
+For each booking in the Past Bookings section, add an action button:
+	•	Button text: “Review your berry”.
+
+On click behaviour:
+
+When the user clicks “Review your berry” for a past booking:
+	1.	Open a popup/modal (use the existing modal/popup pattern used in the app if one already exists — do not invent a completely new style).
+	2.	The popup must display:
+	•	Service provider details for the provider used in that booking, including at least:
+	•	Provider name (and any other info already stored, like profile picture, rating, etc., if available in the booking/provider object).
+	•	A booking summary, including:
+	•	Service type
+	•	Date and time
+	•	Duration / estimated hours
+	•	Address / location
+	•	Any add-ons, if they exist in the model
+	•	Price or total amount if this is already part of the booking data
+	•	A star rating system:
+	•	Maximum of 5 stars.
+	•	User can select from 0 to 5 stars.
+	•	“Worst” should effectively be no stars selected, and “best” is 5 stars selected.
+	3.	When the user selects a rating and confirms:
+	•	If there’s already an API or function in the codebase for saving a review/rating, use it and send:
+	•	The booking ID
+	•	The service provider ID
+	•	The selected star rating
+	•	If no such API exists yet, create a placeholder handler that:
+	•	Stores the rating in local state,
+	•	Logs a clear message to the console (e.g. "TODO: send review to backend"),
+	•	Does not break anything else.
+
+Make sure:
+	•	Closing the popup returns the user cleanly to the My Bookings page.
+	•	There are no console errors when opening, using, or closing the popup.
+
+⸻
+
+3. “Re-book” button for each past booking
+
+For each past booking, add another action button:
+	•	Button text: “Re-book”.
+
+Logic:
+
+When the user clicks “Re-book” on a past booking:
+	1.	Reuse the same navigation and state-prefill logic currently used by the “Book Now” button on the My Profile page:
+	•	Find the existing function/handler used by “Book Now” on My Profile.
+	•	Create a similar flow, but for re-booking from the My Bookings page.
+	2.	For the selected past booking:
+	•	Preload all booking details into the booking flow:
+	•	Service type
+	•	Address/location
+	•	Number of rooms / hours / add-ons / special notes (or any other fields you use in the booking model)
+	•	Any other configuration fields used when the original booking was created.
+	•	The user must be able to edit all pre-filled fields before confirming the new booking.
+	3.	Skip the “Select Service” step:
+	•	The booking flow should default the service to the exact same service that was originally booked for that past booking.
+	•	Do not show the “select service” page/step again for this rebooking flow.
+	•	The rest of the booking steps should work exactly as they do in the current “Book Now” flow.
+	4.	After rebooking:
+	•	The new booking must behave exactly like any normal booking created via “Book Now”.
+	•	It should appear correctly in Upcoming Bookings (assuming the new date/time is in the future) and follow the same logic for moving to Past Bookings once its date/time has passed.
+
+⸻
+
+4. Quality and constraints
+	•	Do not change:
+	•	Any colors, fonts, or global styles.
+	•	The layout or structure of pages other than what is strictly required for the buttons and popup.
+	•	Any unrelated components or pages.
+	•	Ensure:
+	•	No error codes, no uncaught exceptions, no blank screens.
+	•	TypeScript/JavaScript compiles cleanly.
+	•	Routing still works as before.
+
+Quick checklist before you finish:
+	1.	Past bookings are no longer visible under “Upcoming Bookings”.
+	2.	All bookings in the past show up correctly under “Past Bookings”.
+	3.	Each past booking has:
+	•	A working “Review your berry” button that opens a popup with:
+	•	Correct service provider details.
+	•	Correct booking summary.
+	•	Working 0–5 star rating selector.
+	4.	Each past booking has:
+	•	A working “Re-book” button that:
+	•	Opens the booking flow.
+	•	Preloads the selected booking’s details.
+	•	Skips the service selection step.
+	•	Uses the same behaviour as “Book Now” on the My Profile page.
+	5.	The app runs with no console errors and no blank screens.
+
+Please implement all of the above and only make changes necessary for this functionality.
