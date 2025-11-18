@@ -111,7 +111,7 @@ export default function AnimatedServiceCard({
               onModalOpen(service.id);
             }}
             className="w-full hover:opacity-90 text-white font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl group relative overflow-hidden"
-            style={{ backgroundColor: '#8B4789' }}
+            style={{ backgroundColor: '#C56B86' }}
             data-testid={`book-${service.id}`}
           >
             <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>

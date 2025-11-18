@@ -250,7 +250,7 @@ export default function Services({ onServiceSelect }: ServicesProps) {
                   <div className="space-y-2">
                     <button 
                       className="w-full hover:opacity-90 text-white font-bold text-lg py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                      style={{ backgroundColor: '#8B4789' }}
+                      style={{ backgroundColor: '#C56B86' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedServiceId(service.id);
