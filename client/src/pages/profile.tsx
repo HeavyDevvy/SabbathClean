@@ -313,19 +313,53 @@ export default function Profile() {
       return false;
     }
     
-    // Get the earliest scheduled date from all items
+    // Get the current date/time
     const now = new Date();
+    
+    // Check each item to see if any are still upcoming
     for (const item of order.items) {
       if (item.scheduledDate) {
         const scheduledDate = new Date(item.scheduledDate);
-        // If any item's scheduled date hasn't passed, order is upcoming
-        if (scheduledDate >= now) {
+        
+        // For same-day bookings, check if the time has also passed
+        // Normalize to start of day for comparison
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const scheduledDateStart = new Date(scheduledDate.getFullYear(), scheduledDate.getMonth(), scheduledDate.getDate());
+        
+        // If scheduled date is in the future (not today), order is upcoming
+        if (scheduledDateStart > todayStart) {
           return false;
+        }
+        
+        // If scheduled for today, check the time
+        if (scheduledDateStart.getTime() === todayStart.getTime()) {
+          // If no specific time or it's "ASAP", consider it upcoming for today
+          if (!item.scheduledTime || item.scheduledTime === "ASAP") {
+            return false;
+          }
+          
+          // Parse time (format: "HH:MM" or "morning"/"afternoon"/"evening")
+          const timeStr = item.scheduledTime.toLowerCase();
+          if (timeStr.includes('morning') || timeStr.includes('afternoon') || timeStr.includes('evening')) {
+            // Generic time slots - treat as upcoming for today
+            return false;
+          }
+          
+          // For specific times (HH:MM format), compare to current time
+          const [hours, minutes] = item.scheduledTime.split(':').map(Number);
+          if (!isNaN(hours) && !isNaN(minutes)) {
+            const scheduledDateTime = new Date(scheduledDate);
+            scheduledDateTime.setHours(hours, minutes, 0, 0);
+            
+            if (scheduledDateTime > now) {
+              return false; // Still upcoming
+            }
+          }
         }
       }
     }
     
-    // All items have passed their scheduled dates
+    // All items have passed their scheduled dates/times
     return true;
   };
 
