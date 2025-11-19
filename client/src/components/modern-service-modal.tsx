@@ -1473,6 +1473,45 @@ export default function ModernServiceModal({
         return;
       }
     }
+
+    // Garden Services: Validate 24-hour minimum booking window
+    if ((isGardenService || dbServiceId === "gardening") && 
+        formData.preferredDate && formData.timePreference) {
+      // Block emergency/urgent bookings for garden services
+      if (formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || formData.timePreference === "ASAP") {
+        toast({
+          variant: "destructive",
+          title: "Garden Services Not Available for Emergency Booking",
+          description: "Garden services require at least 24 hours notice to ensure our professionals arrive prepared with the right equipment. Please select a standard booking."
+        });
+        return;
+      }
+      
+      const selectedDateTime = new Date(formData.preferredDate);
+      const [hours] = formData.timePreference.split(':').map(Number);
+      
+      // Guard against non-time values (e.g., "ASAP")
+      if (isNaN(hours)) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Time Selection",
+          description: "Please select a valid time slot for your garden service booking."
+        });
+        return;
+      }
+      
+      selectedDateTime.setHours(hours, 0, 0, 0);
+      const hoursFromNow = (selectedDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
+      
+      if (hoursFromNow < 24) {
+        toast({
+          variant: "destructive",
+          title: "24-Hour Notice Required",
+          description: "Garden services require at least 24 hours notice to ensure our professionals arrive prepared with the right equipment. Please select a later date or time."
+        });
+        return;
+      }
+    }
     
     // Map booking data to CartItem format
     const cartItem = {
@@ -1621,6 +1660,45 @@ export default function ModernServiceModal({
           variant: "destructive",
           title: "24-Hour Notice Required",
           description: "Chef & Catering services require at least 24 hours notice for menu planning and ingredient sourcing. Please select a later date or time."
+        });
+        return;
+      }
+    }
+
+    // Garden Services: Validate 24-hour minimum booking window
+    if ((isGardenService || dbServiceId === "gardening") && 
+        formData.preferredDate && formData.timePreference) {
+      // Block emergency/urgent bookings for garden services
+      if (formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day" || formData.timePreference === "ASAP") {
+        toast({
+          variant: "destructive",
+          title: "Garden Services Not Available for Emergency Booking",
+          description: "Garden services require at least 24 hours notice to ensure our professionals arrive prepared with the right equipment. Please select a standard booking."
+        });
+        return;
+      }
+      
+      const selectedDateTime = new Date(formData.preferredDate);
+      const [hours] = formData.timePreference.split(':').map(Number);
+      
+      // Guard against non-time values (e.g., "ASAP")
+      if (isNaN(hours)) {
+        toast({
+          variant: "destructive",
+          title: "Invalid Time Selection",
+          description: "Please select a valid time slot for your garden service booking."
+        });
+        return;
+      }
+      
+      selectedDateTime.setHours(hours, 0, 0, 0);
+      const hoursFromNow = (selectedDateTime.getTime() - Date.now()) / (1000 * 60 * 60);
+      
+      if (hoursFromNow < 24) {
+        toast({
+          variant: "destructive",
+          title: "24-Hour Notice Required",
+          description: "Garden services require at least 24 hours notice to ensure our professionals arrive prepared with the right equipment. Please select a later date or time."
         });
         return;
       }
@@ -2692,8 +2770,8 @@ export default function ModernServiceModal({
             onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
             min={(() => {
               const minDate = new Date();
-              // Chef & Catering requires 24 hours minimum notice
-              if (isChefCatering) {
+              // Chef & Catering and Garden Services require 24 hours minimum notice
+              if (isChefCatering || isGardenService) {
                 minDate.setDate(minDate.getDate() + 1);
               }
               return minDate.toISOString().split('T')[0];
@@ -2718,6 +2796,12 @@ export default function ModernServiceModal({
             <p className="text-xs text-blue-600 mt-1 flex items-center">
               <ChefHat className="h-3 w-3 mr-1" />
               Chef services require 24 hours minimum notice for menu planning and ingredient sourcing
+            </p>
+          )}
+          {isGardenService && (
+            <p className="text-xs text-green-600 mt-1 flex items-center">
+              <Scissors className="h-3 w-3 mr-1" />
+              Garden services require 24 hours minimum notice to ensure our professionals arrive prepared with the right equipment
             </p>
           )}
         </div>
@@ -2767,6 +2851,18 @@ export default function ModernServiceModal({
                   
                   // For Chef & Catering: Enforce 24-hour minimum booking window
                   if (isChef && formData.preferredDate) {
+                    const selectedDateTime = new Date(formData.preferredDate);
+                    selectedDateTime.setHours(slot.hour, 0, 0, 0);
+                    const hoursFromNow = (selectedDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+                    
+                    if (hoursFromNow < 24) {
+                      isDisabled = true;
+                      disabledReason = " (< 24hrs notice)";
+                    }
+                  }
+                  
+                  // For Garden Services: Enforce 24-hour minimum booking window
+                  if (isGarden && formData.preferredDate) {
                     const selectedDateTime = new Date(formData.preferredDate);
                     selectedDateTime.setHours(slot.hour, 0, 0, 0);
                     const hoursFromNow = (selectedDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
