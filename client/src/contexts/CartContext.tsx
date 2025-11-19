@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { Cart, CartItem, Order } from '@shared/schema';
@@ -41,17 +41,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
   };
 
-  // Fetch cart from API
+  // Fetch cart from API with optimized cache settings
   const { data: rawCart, isLoading } = useQuery<CartWithItems>({
     queryKey: ['/api/cart'],
     retry: 1,
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 1 minute - cart data doesn't change frequently
+    gcTime: 300000, // 5 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on every window focus
   });
   
-  const cart = normalizeCartData(rawCart || null);
+  // Memoize normalized cart data to prevent unnecessary recalculations
+  const cart = useMemo(() => normalizeCartData(rawCart || null), [rawCart]);
 
-  // Calculate item count
-  const itemCount = cart?.items?.length || 0;
+  // Memoize item count calculation - watch cart reference to catch all changes
+  const itemCount = useMemo(() => cart?.items?.length || 0, [cart]);
   
   // Debug: Log cart state changes
   useEffect(() => {

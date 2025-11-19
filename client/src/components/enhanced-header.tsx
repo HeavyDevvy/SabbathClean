@@ -344,9 +344,6 @@ const EnhancedHeader = memo(function EnhancedHeader({
                   >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Messages
-                    {messageCount > 0 && (
-                      <Badge className="ml-auto bg-green-500">{messageCount}</Badge>
-                    )}
                   </Link>
                   <Link 
                     href="/profile" 
@@ -416,17 +413,17 @@ const EnhancedHeader = memo(function EnhancedHeader({
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(user) => {
-          setCurrentUser(user);
+        onSuccess={() => {
+          setIsAuthModalOpen(false);
         }}
       />
 
       {/* User Profile Modal */}
-      {currentUser && (
+      {user && (
         <UserProfileModal 
           isOpen={isProfileModalOpen}
           onClose={() => setIsProfileModalOpen(false)}
-          user={currentUser}
+          user={user}
         />
       )}
     </header>

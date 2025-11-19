@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Fetch current user on mount
+  // Fetch current user on mount with optimized cache
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ['auth', 'user'],
     queryFn: async () => {
@@ -27,7 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return currentUser;
     },
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes - user data changes less frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false, // Don't refetch on every window focus
   });
 
   const loginMutation = useMutation({
@@ -55,8 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await authClient.logout();
     },
     onSuccess: () => {
+      // Targeted cache invalidation - only clear user-specific data
       queryClient.invalidateQueries({ queryKey: ['auth'] });
-      queryClient.clear(); // Clear all cached data on logout
+      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/wallet'] });
       refetch();
     },
   });
