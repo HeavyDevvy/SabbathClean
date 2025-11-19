@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/hooks/use-toast";
-import berryLogo from "@assets/berry-events-new-logo.jpg";
+import berryLogo from "@assets/Untitled (Logo) (1)_1763528354914.png";
 
 interface HeaderProps {
   onBookingClick?: () => void;

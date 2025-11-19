@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
 import { CartDrawer } from "./cart-drawer";
-import logo from "@assets/berry-logo.png";
+import logo from "@assets/Untitled (Logo) (1)_1763528354914.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
@@ -272,7 +272,6 @@ const EnhancedHeader = memo(function EnhancedHeader({
             ) : (
               <>
                 <div className="border-l border-white/20 pl-4 ml-4">
-                  <span className="text-xs text-white/80 mr-2">Service provider?</span>
                   <Button
                     onClick={() => setLocation("/provider-onboarding")}
                     variant="outline"

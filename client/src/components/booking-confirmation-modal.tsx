@@ -18,7 +18,7 @@ import {
   MessageCircle,
   CalendarPlus
 } from "lucide-react";
-import berryLogoPath from "@assets/berry-events-new-logo.jpg";
+import berryLogoPath from "@assets/Untitled (Logo) (1)_1763528354914.png";
 import { generateBookingReceipt } from "@/lib/pdfGenerator";
 import { downloadCalendarInvite } from "@/lib/calendarGenerator";
 import { useToast } from "@/hooks/use-toast";
@@ -67,9 +67,9 @@ export default function BookingConfirmationModal({
     sum + (booking.pricing?.materialsDiscount || 0) + (booking.pricing?.recurringDiscount || 0), 0
   );
 
-  const handleDownloadReceipt = () => {
+  const handleDownloadReceipt = async () => {
     try {
-      generateBookingReceipt(bookingData, bookingRef);
+      await generateBookingReceipt(bookingData, bookingRef);
       toast({
         title: "Receipt downloaded",
         description: "Your booking receipt has been downloaded successfully."

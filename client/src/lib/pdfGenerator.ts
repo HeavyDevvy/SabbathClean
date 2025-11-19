@@ -1,5 +1,28 @@
 import { jsPDF } from "jspdf";
 import type { Booking } from "@shared/schema";
+import berryLogoPath from "@assets/Untitled (Logo) (1)_1763528354914.png";
+
+// Helper function to convert image to DataURL for jsPDF
+const loadImageAsDataURL = (src: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        reject(new Error('Could not get canvas context'));
+      }
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = src;
+  });
+};
 
 interface BookingData {
   serviceName: string;
@@ -106,7 +129,7 @@ export const mapBookingToReceiptData = (booking: Booking): BookingReceiptData =>
   };
 };
 
-export const generateBookingReceipt = (bookingData: BookingData, bookingRef: string) => {
+export const generateBookingReceipt = async (bookingData: BookingData, bookingRef: string) => {
   const doc = new jsPDF();
   
   // Berry Events Brand Colors (from design system)
@@ -118,23 +141,23 @@ export const generateBookingReceipt = (bookingData: BookingData, bookingRef: str
   
   let yPosition = 20;
   
-  // Header - Berry Events Branding with Logo Circle
+  // Header - Berry Events Branding with Logo
   doc.setFillColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
   doc.rect(0, 0, 210, 45, 'F');
   
-  // Berry Logo Circle (left side)
-  doc.setFillColor(berryAccent[0], berryAccent[1], berryAccent[2]);
-  doc.circle(25, 22, 10, 'F');
-  
-  // Inner circle for logo effect
-  doc.setFillColor(berryLight[0], berryLight[1], berryLight[2]);
-  doc.circle(25, 22, 7, 'F');
-  
-  // Berry initial in circle
-  doc.setTextColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('B', 25, 25, { align: 'center' });
+  // Add Berry Events Logo (left side)
+  try {
+    // Convert logo to DataURL for jsPDF
+    const logoDataURL = await loadImageAsDataURL(berryLogoPath);
+    doc.addImage(logoDataURL, 'PNG', 15, 12, 20, 20);
+  } catch (error) {
+    // Fallback to text-based logo if image fails
+    console.warn('Failed to load logo for PDF, using fallback:', error);
+    doc.setTextColor(berryAccent[0], berryAccent[1], berryAccent[2]);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BE', 25, 25, { align: 'center' });
+  }
   
   // Company name
   doc.setTextColor(255, 255, 255);
