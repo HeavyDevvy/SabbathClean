@@ -208,35 +208,20 @@ export function registerCartRoutes(app: Express) {
         return res.status(400).json({ message: "Payment method required" });
       }
       
-      // Process wallet payment if selected
+      // PRE-VALIDATE wallet payment (non-destructive check only)
       if (paymentMethod === "wallet") {
-        try {
-          // Verify wallet has sufficient funds
-          const currentBalance = await storage.getWalletBalance(userId);
-          
-          if (currentBalance < totalAmount) {
-            return res.status(400).json({ 
-              message: `Insufficient wallet balance. You have ${currentBalance.toFixed(2)}, but need ${totalAmount.toFixed(2)}.` 
-            });
-          }
-          
-          // Deduct funds from wallet and create transaction
-          await storage.processWalletPayment(
-            userId,
-            totalAmount,
-            undefined, // bookingId - will be set to orderId later if needed
-            undefined, // serviceId
-            `Payment for order ${orderNumber} (${cartData.items.length} service${cartData.items.length > 1 ? 's' : ''})`
-          );
-          
-          console.log(`💰 Wallet payment processed: User ${userId}, Amount: ${totalAmount}, Order: ${orderNumber}`);
-        } catch (walletError: any) {
-          console.error('Wallet payment error:', walletError);
-          return res.status(400).json({ message: walletError.message || 'Wallet payment failed' });
+        // Verify wallet has sufficient funds BEFORE order creation
+        const currentBalance = await storage.getWalletBalance(userId);
+        
+        if (currentBalance < totalAmount) {
+          return res.status(400).json({ 
+            message: `Insufficient wallet balance. You have ${currentBalance.toFixed(2)}, but need ${totalAmount.toFixed(2)}.` 
+          });
         }
       }
       
       // Create order with items and payment metadata
+      // WALLET PAYMENT: Start with pending status, update to paid/confirmed AFTER successful deduction
       const orderData = {
         userId, // Authentication required - userId is always present
         cartId: cart.id,
@@ -245,8 +230,8 @@ export function registerCartRoutes(app: Express) {
         platformFee: platformFee.toString(),
         totalAmount: totalAmount.toString(),
         paymentMethod,
-        paymentStatus: "paid", // Mark as paid for frontend flow
-        status: "confirmed",
+        paymentStatus: paymentMethod === "wallet" ? "pending" : "paid", // Wallet: pending until funds deducted
+        status: paymentMethod === "wallet" ? "pending_payment" : "confirmed", // Wallet: wait for payment
         // Add payment metadata (masked data only)
         ...(paymentMethod === "card" ? {
           cardLast4,
@@ -257,7 +242,7 @@ export function registerCartRoutes(app: Express) {
           bankName,
           accountHolder
         } : paymentMethod === "wallet" ? {
-          walletBalance: totalAmount.toFixed(2), // Amount deducted from wallet
+          walletBalance: totalAmount.toFixed(2), // Amount to be deducted from wallet
         } : {})
       } as any;
       
@@ -281,9 +266,56 @@ export function registerCartRoutes(app: Express) {
         status: "pending"
       }));
       
-      // Create order (transaction-wrapped, clears cart automatically)
+      // Create order (transaction-wrapped)
       // Gate code transfer happens automatically within the createOrder transaction
-      const order = await storage.createOrder(orderData, orderItemsData);
+      // For wallet payments, defer cart clearing until after successful payment
+      const order = await storage.createOrder(orderData, orderItemsData, {
+        clearCart: paymentMethod !== "wallet" // Don't clear cart for wallet payments yet
+      });
+      
+      // TRANSACTION INTEGRITY: Process wallet payment AFTER order creation
+      // Order is created with pending status; update to paid/confirmed only after successful deduction
+      if (paymentMethod === "wallet") {
+        try {
+          // Deduct funds from wallet and create transaction (atomic balance check inside)
+          await storage.processWalletPayment(
+            userId,
+            totalAmount,
+            order.id, // bookingId/orderId for transaction reference
+            undefined, // serviceId
+            `Payment for order ${orderNumber} (${cartData.items.length} service${cartData.items.length > 1 ? 's' : ''})`
+          );
+          
+          // SUCCESS: Update order to paid and confirmed status
+          await storage.updateOrderStatus(order.id, 'confirmed', 'paid');
+          
+          // Clear cart only after successful wallet deduction
+          if (orderData.cartId) {
+            await storage.clearCart(orderData.cartId);
+            console.log(`✅ Cart ${orderData.cartId} cleared after successful wallet payment`);
+          }
+          
+          console.log(`💰 Wallet payment processed: User ${userId}, Amount: ${totalAmount}, Order: ${orderNumber}`);
+        } catch (walletError: any) {
+          console.error('❌ Wallet payment failed after order creation:', walletError);
+          
+          // TRANSACTION RECOVERY: Mark order as cancelled, preserve cart for retry
+          // Cart was NOT cleared since payment failed - user can retry with same items
+          try {
+            await storage.updateOrderStatus(order.id, 'cancelled', 'failed');
+            console.log(`⚠️ Order ${order.id} cancelled due to wallet payment failure - cart preserved for retry`);
+          } catch (updateError) {
+            console.error('Failed to cancel order after wallet error:', updateError);
+          }
+          
+          // Return clear error to user - cart intact, they can retry immediately
+          return res.status(400).json({ 
+            message: walletError.message || 'Insufficient wallet balance. Your cart has been preserved - please top up your wallet or select a different payment method.',
+            error: 'wallet_payment_failed',
+            canRetry: true
+          });
+        }
+      }
       
       const completeOrder = await storage.getOrderWithItems(order.id);
       

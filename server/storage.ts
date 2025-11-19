@@ -182,7 +182,7 @@ export interface IStorage {
   logGateCodeAccess(gateCodeId: string, providerId: string): Promise<void>;
   
   // Order operations
-  createOrder(order: InsertOrder, orderItems: InsertOrderItem[]): Promise<Order>;
+  createOrder(order: InsertOrder, orderItems: InsertOrderItem[], options?: { clearCart?: boolean }): Promise<Order>;
   getOrder(orderId: string): Promise<Order | undefined>;
   getOrderWithItems(orderId: string): Promise<{ order: Order; items: OrderItem[] } | undefined>;
   getUserOrders(userId: string): Promise<Order[]>;
@@ -617,19 +617,36 @@ export class DatabaseStorage implements IStorage {
     const wallet = await this.getOrCreateWallet(userId);
     const currentBalance = parseFloat(wallet.balance);
     
+    // Pre-check for better error messages (non-authoritative, UX only)
     if (currentBalance < amount) {
       throw new Error('Insufficient wallet balance');
     }
 
-    const newBalance = currentBalance - amount;
-
-    // Update wallet balance
-    await db.update(wallets)
+    // ATOMIC UPDATE: Decrement balance and check in SINGLE SQL statement
+    // This prevents race conditions by using database-level atomic operations
+    const [updatedWallet] = await db.update(wallets)
       .set({ 
-        balance: newBalance.toFixed(2),
+        // CRITICAL: Use SQL decrement, not precomputed value
+        balance: sql`CAST(balance AS DECIMAL) - ${amount}`,
         updatedAt: new Date()
       })
-      .where(eq(wallets.id, wallet.id));
+      .where(
+        and(
+          eq(wallets.id, wallet.id),
+          // Atomic check: only update if balance is STILL >= amount at execution time
+          sql`CAST(balance AS DECIMAL) >= ${amount}`
+        )
+      )
+      .returning();
+    
+    // If no rows updated, balance was insufficient at the moment of execution
+    // This catches race conditions where concurrent transactions depleted funds
+    if (!updatedWallet) {
+      throw new Error('Insufficient wallet balance (concurrent transaction detected)');
+    }
+    
+    // Use the ACTUAL balance from the database for transaction record
+    const newBalance = parseFloat(updatedWallet.balance);
 
     // Record transaction
     const [transaction] = await db.insert(walletTransactions)
@@ -1217,8 +1234,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Order operations
-  async createOrder(order: InsertOrder, orderItemsData: InsertOrderItem[]): Promise<Order> {
+  async createOrder(order: InsertOrder, orderItemsData: InsertOrderItem[], options?: { clearCart?: boolean }): Promise<Order> {
     // Wrap entire order creation in transaction
+    const shouldClearCart = options?.clearCart ?? true; // Default to true for backwards compatibility
     return await db.transaction(async (tx) => {
       // Phase 3.2: Fetch cart items first for stable 1:1 mapping
       const cartItemById = new Map<string, CartItem>();
@@ -1290,8 +1308,8 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Clear and mark cart as checked_out
-      if (order.cartId) {
+      // Clear and mark cart as checked_out (conditional for wallet payments)
+      if (order.cartId && shouldClearCart) {
         await tx.delete(cartItems).where(eq(cartItems.cartId, order.cartId));
         await tx.update(carts)
           .set({ 
