@@ -11,6 +11,29 @@ import { useToast } from "@/hooks/use-toast";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
 import WhatsAppShareButton from "@/components/whatsapp-share-button";
+import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
+
+// Helper to convert logo to DataURL for jsPDF
+const loadImageAsDataURL = (src: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        reject(new Error('Could not get canvas context'));
+      }
+    };
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = src;
+  });
+};
 
 interface OrderWithItems extends Order {
   items: OrderItem[];
@@ -32,7 +55,7 @@ export default function OrderConfirmation() {
     return order.orderNumber || `BE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
   }, [order]);
   
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!order) return;
     
     try {
@@ -41,13 +64,30 @@ export default function OrderConfirmation() {
       const pageHeight = doc.internal.pageSize.getHeight();
       let yPos = 20;
       
-      doc.setFillColor(123, 44, 191);
-      doc.rect(0, 0, pageWidth, 30, 'F');
+      // Header - Berry Events Branding (matching app header exactly)
+      // Background color: #44062D (deep plum - same as app header)
+      doc.setFillColor(68, 6, 45);
+      doc.rect(0, 0, pageWidth, 40, 'F');
       
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(24);
+      // Add Berry Events Logo (left side, matching app header position)
+      try {
+        const logoDataURL = await loadImageAsDataURL(berryLogoPath);
+        doc.addImage(logoDataURL, 'PNG', 15, 10, 20, 20);
+      } catch (error) {
+        console.warn('Failed to load logo for PDF, using text fallback:', error);
+      }
+      
+      // "Berry Events" text next to logo (matching app header style)
+      doc.setTextColor(255, 255, 255); // White text
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text('Berry Events', 20, 20);
+      doc.text('Berry Events', 38, 18);
+      
+      // Tagline below "Berry Events" in light beige (#EED1C4)
+      doc.setTextColor(238, 209, 196);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('All your home services', 38, 24);
       
       doc.setTextColor(0, 0, 0);
       yPos = 50;
@@ -143,7 +183,7 @@ export default function OrderConfirmation() {
         yPos += 5;
         
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(123, 44, 191);
+        doc.setTextColor(197, 107, 134); // Berry Events accent color #C56B86
         doc.text('Service Subtotal:', 25, yPos);
         doc.text(`R${itemSubtotal.toFixed(2)}`, pageWidth - 40, yPos, { align: 'right' });
         yPos += 10;
@@ -198,7 +238,7 @@ export default function OrderConfirmation() {
       
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(123, 44, 191);
+      doc.setTextColor(197, 107, 134); // Berry Events accent color #C56B86
       doc.text('Berry Events Bank Protection', 25, yPos);
       yPos += 5;
       
