@@ -567,9 +567,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { reason } = req.body;
       
+      // Validate that reason is provided
+      if (!reason || !reason.trim()) {
+        return res.status(400).json({ message: "Cancellation reason is required" });
+      }
+      
       const booking = await storage.cancelBooking(
         req.params.id,
-        reason
+        reason.trim()
       );
       
       res.json(booking);

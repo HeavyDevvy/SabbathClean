@@ -55,7 +55,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-card shadow-sm sticky top-0 z-50 border-b border-border">
+    <header className="shadow-sm sticky top-0 z-50" style={{ backgroundColor: '#44062D' }}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex items-center gap-3">
@@ -63,14 +63,14 @@ export default function Header({ onBookingClick }: HeaderProps) {
               <img src={berryLogo} alt="Berry Events Logo" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-2xl font-bold text-foreground">Berry Events</div>
-              <div className="text-xs text-foreground/60">All your Home Services In One</div>
+              <div className="text-2xl font-bold text-white">Berry Events</div>
+              <div className="text-xs text-[#EED1C4]">All your Home Services In One</div>
             </div>
           </Link>
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link href="/providers" className="text-foreground/70 hover:text-foreground transition-colors duration-200 text-sm font-medium" data-testid="link-providers">
+              <Link href="/providers" className="text-white/80 hover:text-[#EED1C4] transition-colors duration-200 text-sm font-medium" data-testid="link-providers">
                 Our Experts
               </Link>
             </div>
@@ -83,7 +83,7 @@ export default function Header({ onBookingClick }: HeaderProps) {
               user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-foreground/70 hover:text-foreground" data-testid="button-user-menu">
+                    <Button variant="ghost" className="text-white/80 hover:text-[#EED1C4]" data-testid="button-user-menu">
                       <span className="hidden sm:inline mr-2">
                         Hello, {user.firstName || 'User'}
                       </span>
