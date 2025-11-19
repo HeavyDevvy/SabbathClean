@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { User, Plus, Sparkles, LogOut, Shield, Settings } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import berryLogo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
@@ -14,44 +13,23 @@ interface HeaderProps {
 export default function Header({ onBookingClick }: HeaderProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
-  // Check authentication status
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/auth/user'],
-    queryFn: async () => {
-      try {
-        return await authClient.getCurrentUser();
-      } catch (error) {
-        return null;
-      }
-    },
-    retry: false
-  });
+  const { user, isLoading, logout } = useAuth();
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await authClient.logout();
-    },
-    onSuccess: () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
       toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
       });
       setLocation("/");
-      window.location.reload();
-    },
-    onError: () => {
+    } catch (error) {
       toast({
         title: "Logout Error",
         description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });
     }
-  });
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
   };
 
   return (

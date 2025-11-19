@@ -1,9 +1,8 @@
-import { useState, memo } from "react";
+import { useState, memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search, Bell, User, Calendar, Settings, Home, LayoutGrid, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -25,59 +24,37 @@ import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
   onServiceSelect?: (serviceId: string) => void;
-  isAuthenticated?: boolean;
-  user?: {
-    firstName: string;
-    lastName: string;
-    profileImage?: string;
-    isProvider?: boolean;
-  };
-  notificationCount?: number;
-  messageCount?: number;
 }
 
 const EnhancedHeader = memo(function EnhancedHeader({ 
   onBookingClick, 
   onServiceSelect,
-  isAuthenticated = false, 
-  user,
-  notificationCount = 0,
-  messageCount = 0 
 }: EnhancedHeaderProps) {
   const [, setLocation] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(user);
   const { toast } = useToast();
+  const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const { unreadCount } = useNotifications(isAuthenticated);
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await authClient.logout();
-    },
-    onSuccess: () => {
+  const handleLogout = async () => {
+    try {
+      await logout();
       toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
       });
       setLocation("/");
-      window.location.reload();
-    },
-    onError: () => {
+    } catch (error) {
       toast({
         title: "Logout Error",
         description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });
     }
-  });
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
   };
 
   const services = [
