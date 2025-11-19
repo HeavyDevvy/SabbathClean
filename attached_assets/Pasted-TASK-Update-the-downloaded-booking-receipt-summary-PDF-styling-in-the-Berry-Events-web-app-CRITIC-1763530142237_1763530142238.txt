@@ -1,0 +1,145 @@
+TASK: Update the downloaded booking receipt/summary PDF styling in the Berry Events web app.
+
+CRITICAL FIRST STEP - LOCATE THE RECEIPT CODE:
+Before making any changes, you MUST:
+1. Search the entire codebase for receipt/PDF generation code
+2. Look for these common patterns:
+   - Files named: receipt.js, invoice.js, pdf.js, generateReceipt, downloadReceipt, etc.
+   - Libraries: jsPDF, pdfmake, react-pdf, pdfkit, html2pdf, etc.
+   - Functions named: generatePDF, createReceipt, downloadReceipt, printReceipt, etc.
+   - API endpoints: /api/receipt, /api/booking/receipt, /download-receipt, etc.
+3. Search for these strings in the code: "download", "receipt", "PDF", "jsPDF", "pdfmake"
+4. Check these common locations:
+   - /src/components/ (React components)
+   - /src/utils/ (utility functions)
+   - /src/services/ (API services)
+   - /api/ or /server/ (backend routes)
+   - Any booking or checkout related files
+
+RESPOND FIRST: Tell me where you found the receipt generation code (file path and line numbers) before making any changes.
+
+---
+
+ONCE YOU'VE LOCATED THE CODE, MAKE THESE CHANGES:
+
+1. UPDATE THE HEADER SECTION OF THE PDF:
+
+   a) Background color:
+      - Find where the PDF header/top section is created
+      - Set its background color to match the app header color
+      - The app header color is likely defined in your CSS/theme files
+      - Common locations: styles.css, theme.js, or CSS variables like --header-bg
+
+   b) Add the logo:
+      - Import/reference the logo image file used in the app header
+      - If using jsPDF: Use .addImage() method
+      - If using pdfmake: Add the image to the content array
+      - If using html2pdf: Add an <img> tag in the HTML template
+      - Position: Top-left or centered
+      - Ensure the image path is correct and accessible
+      - Size appropriately (e.g., 50x50px or similar to header logo size)
+
+   c) Add "Berry Events" text:
+      - Place next to or below the logo
+      - Use the same font, size, and color as the app header
+      - If custom fonts are needed, ensure they're loaded in the PDF library
+
+2. PRESERVE ALL DATA:
+   - Do NOT change any booking details, prices, dates, customer info, etc.
+   - Only update visual styling (colors, fonts, spacing, logo placement)
+
+3. TEST THE DOWNLOAD:
+   - After making changes, trigger a test booking download
+   - Verify the PDF generates without errors
+   - Check that the new styling appears correctly
+   - Ensure all data is still present and accurate
+
+---
+
+DEBUGGING TIPS IF CHANGES DON'T APPEAR:
+
+If the receipt still looks the same after your changes:
+
+1. Check browser cache:
+   - The old PDF might be cached
+   - Clear browser cache or open in incognito/private mode
+   - Add a cache-busting parameter to the PDF filename
+
+2. Verify the correct file was modified:
+   - There might be multiple receipt generation functions
+   - Search for all instances of receipt/PDF generation
+   - Make sure you modified the one that's actually being called
+
+3. Check for build/compilation:
+   - If using a build process, ensure the app was rebuilt after changes
+   - Restart the development server if needed
+
+4. Add console.logs:
+   - Add console.log statements in the receipt generation function
+   - Verify the function is being called when downloading
+   - Log the styling values to confirm they're being applied
+
+5. Check for errors:
+   - Open browser console (F12) when downloading the receipt
+   - Look for any JavaScript errors or warnings
+   - Check network tab for failed image/resource loads
+
+---
+
+SPECIFIC CODE EXAMPLES:
+
+If using jsPDF:
+```javascript
+// Add this to your receipt generation code
+const doc = new jsPDF();
+
+// Add logo (update path to your logo)
+doc.addImage('/path/to/logo.png', 'PNG', 10, 10, 50, 50);
+
+// Add colored header background
+doc.setFillColor(YOUR_HEADER_COLOR); // e.g., (66, 135, 245) for blue
+doc.rect(0, 0, 210, 40, 'F'); // Full-width colored rectangle
+
+// Add "Berry Events" text
+doc.setFontSize(24);
+doc.setTextColor(255, 255, 255); // White text
+doc.text('Berry Events', 70, 30);
+```
+
+If using pdfmake:
+```javascript
+const docDefinition = {
+  content: [
+    {
+      columns: [
+        { image: 'data:image/png;base64,...', width: 50 }, // Your logo
+        { text: 'Berry Events', fontSize: 24, color: '#ffffff' }
+      ],
+      margin: [0, 0, 0, 20]
+    },
+    // ... rest of your receipt content
+  ],
+  background: {
+    canvas: [
+      {
+        type: 'rect',
+        x: 0, y: 0,
+        w: 595, h: 60,
+        color: 'YOUR_HEADER_COLOR'
+      }
+    ]
+  }
+};
+```
+
+---
+
+MANDATORY RESPONSE FORMAT:
+
+Please respond with:
+1. "I found the receipt generation code at: [FILE PATH]"
+2. "The method being used is: [jsPDF/pdfmake/other]"
+3. Then make the changes and confirm: "Changes applied. Please test by downloading a receipt."
+
+If you cannot find the receipt generation code, respond:
+"I cannot locate the receipt generation code. I searched in [list locations]. Please provide the file path manually."
