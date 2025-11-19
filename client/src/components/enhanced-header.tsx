@@ -269,22 +269,7 @@ const EnhancedHeader = memo(function EnhancedHeader({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            ) : (
-              <>
-                <div className="border-l border-white/20 pl-4 ml-4">
-                  <span className="text-xs text-white/80 mr-2">Service provider?</span>
-                  <Button
-                    onClick={() => setLocation("/provider-onboarding")}
-                    variant="outline"
-                    size="sm"
-                    className="border-[#C56B86] text-[#C56B86] hover:bg-[#C56B86] hover:text-white font-medium text-xs"
-                    data-testid="button-join-as-provider"
-                  >
-                    Join as Provider
-                  </Button>
-                </div>
-              </>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
