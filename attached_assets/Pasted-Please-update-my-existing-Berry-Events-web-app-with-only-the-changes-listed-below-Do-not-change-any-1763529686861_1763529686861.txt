@@ -1,0 +1,63 @@
+Please update my existing Berry Events web app with only the changes listed below.
+Do not change anything else in the project.
+Make sure there are no error codes and no blank screens once the changes are made.
+
+⸻
+
+1. Update the look & feel of the downloaded booking receipt (booking summary)
+
+Locate the downloaded receipt / booking summary (the file the user downloads after a booking is completed).
+
+Keep all data the same
+	•	Do not change:
+	•	Any of the information shown on the receipt (booking details, customer details, pricing, totals, etc.).
+	•	Any of the underlying data fields or values.
+	•	Only update the visual design / styling.
+
+⸻
+
+2. Match the top of the receipt to the app header
+
+Update the top section of the receipt so that it visually matches the main header of the web app.
+
+Specifically:
+	1.	Background colour:
+	•	Set the background colour of the top section of the receipt to be the same colour as the app header background.
+	2.	Logo:
+	•	Add the same new logo that is used in the app header.
+	•	Place the logo at the top of the receipt (for example, left-aligned or centred).
+	•	Ensure:
+	•	The logo is sized appropriately (clear and not pixelated).
+	•	There is no visible box or different background around the logo — it should blend seamlessly with the receipt’s top background colour (same as the header).
+	3.	Berry Events text:
+	•	Add the “Berry Events” text next to or below the logo, using:
+	•	The same or very similar font, size, weight, and colour as in the app header.
+	•	The logo + “Berry Events” text should look like a branded header bar on the receipt, consistent with the website header.
+
+⸻
+
+3. General layout & readability
+	•	Keep the rest of the receipt content (booking summary, line items, totals, dates, etc.) in the same structure as before.
+	•	You may adjust:
+	•	Minor spacing,
+	•	Font sizes,
+	•	Alignment
+only as needed to keep the receipt clean and readable with the new top section.
+
+⸻
+
+4. Quality checks
+
+Before completing, please confirm:
+	1.	The top of the downloaded receipt:
+	•	Uses the same background colour as the web app header.
+	•	Shows the new logo used in the app header.
+	•	Includes the “Berry Events” text in a style consistent with the header.
+	2.	All receipt data is unchanged and still correct.
+	3.	The receipt still downloads and opens correctly (PDF or file format unchanged).
+	4.	The app runs with:
+	•	No error codes in the console.
+	•	No blank screens.
+	•	No broken layouts introduced by these changes.
+
+Please implement only the changes described above and keep everything else exactly as it is.

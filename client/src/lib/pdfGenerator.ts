@@ -141,39 +141,39 @@ export const generateBookingReceipt = async (bookingData: BookingData, bookingRe
   
   let yPosition = 20;
   
-  // Header - Berry Events Branding with Logo
+  // Header - Berry Events Branding (matching app header exactly)
+  // Background color: #44062D (same as app header)
   doc.setFillColor(berryPrimary[0], berryPrimary[1], berryPrimary[2]);
-  doc.rect(0, 0, 210, 45, 'F');
+  doc.rect(0, 0, 210, 40, 'F');
   
-  // Add Berry Events Logo (left side)
+  // Add Berry Events Logo (left side, matching app header position)
   try {
     // Convert logo to DataURL for jsPDF
     const logoDataURL = await loadImageAsDataURL(berryLogoPath);
-    doc.addImage(logoDataURL, 'PNG', 15, 12, 20, 20);
+    // Logo size similar to header (20x20mm in PDF)
+    doc.addImage(logoDataURL, 'PNG', 15, 10, 20, 20);
   } catch (error) {
     // Fallback to text-based logo if image fails
     console.warn('Failed to load logo for PDF, using fallback:', error);
     doc.setTextColor(berryAccent[0], berryAccent[1], berryAccent[2]);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('BE', 25, 25, { align: 'center' });
+    doc.text('BE', 25, 22, { align: 'center' });
   }
   
-  // Company name
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
+  // "Berry Events" text next to logo (matching app header style)
+  doc.setTextColor(255, 255, 255); // White text
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('BERRY EVENTS', 115, 20, { align: 'center' });
+  doc.text('Berry Events', 38, 18);
   
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('All Your Home Services In One', 115, 28, { align: 'center' });
-  
-  // Premium Service Badge
+  // Tagline below "Berry Events" in light beige (#EED1C4 = RGB 238, 209, 196)
+  doc.setTextColor(238, 209, 196);
   doc.setFontSize(8);
-  doc.text('Premium Quality • Verified Providers • Secure Payments', 115, 36, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.text('All your home services', 38, 24);
   
-  yPosition = 55;
+  yPosition = 50;
   
   // Receipt Title
   doc.setTextColor(textColor[0], textColor[1], textColor[2]);
