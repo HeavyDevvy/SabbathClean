@@ -38,7 +38,7 @@ export default function BookingConfirmation({
   const getServiceIcon = (serviceId: string) => {
     switch (serviceId) {
       case 'house-cleaning': return <Sparkles className="h-5 w-5" />;
-      case 'garden-services': return <div className="h-5 w-5">🌿</div>;
+      case 'gardening': return <div className="h-5 w-5">🌿</div>;
       case 'chef-catering': return <ChefHat className="h-5 w-5" />;
       case 'plumbing': return <div className="h-5 w-5">🔧</div>;
       case 'electrical': return <div className="h-5 w-5">⚡</div>;
@@ -52,7 +52,7 @@ export default function BookingConfirmation({
   const getServiceName = (serviceId: string) => {
     const services: { [key: string]: string } = {
       'house-cleaning': 'House Cleaning',
-      'garden-services': 'Garden Services',
+      'gardening': 'Garden Services',
       'chef-catering': 'Chef & Catering',
       'plumbing': 'Plumbing',
       'electrical': 'Electrical',

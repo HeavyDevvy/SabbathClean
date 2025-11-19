@@ -101,7 +101,7 @@ export default function ComprehensiveBookingModal({
       description: "Professional deep cleaning for your entire home"
     },
     {
-      id: "garden-maintenance", 
+      id: "gardening", 
       name: "Garden Maintenance",
       category: "Outdoor Services",
       basePrice: 350,
@@ -109,7 +109,7 @@ export default function ComprehensiveBookingModal({
       description: "Complete garden care and landscaping services"
     },
     {
-      id: "plumbing-services",
+      id: "plumbing",
       name: "Plumbing Services", 
       category: "Maintenance",
       basePrice: 400,

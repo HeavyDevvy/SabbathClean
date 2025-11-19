@@ -77,7 +77,7 @@ export default function EnhancedServices({ onServiceSelect }: EnhancedServicesPr
       color: "green",
       services: [
         {
-          id: "garden-maintenance",
+          id: "gardening",
           name: "Garden Maintenance",
           description: "Complete garden care and landscaping services",
           category: "outdoor-services",
@@ -107,7 +107,7 @@ export default function EnhancedServices({ onServiceSelect }: EnhancedServicesPr
       color: "orange",
       services: [
         {
-          id: "plumbing-services",
+          id: "plumbing",
           name: "Plumbing Services",
           description: "Emergency and general plumbing repairs",
           category: "maintenance",

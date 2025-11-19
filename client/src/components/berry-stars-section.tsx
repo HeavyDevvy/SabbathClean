@@ -110,8 +110,8 @@ export default function BerryStarsSection({ onBookService }: BerryStarsSectionPr
 
   const getServiceForProvider = (specialties: string[]): string => {
     if (specialties.some(s => s.toLowerCase().includes('clean'))) return 'house-cleaning';
-    if (specialties.some(s => s.toLowerCase().includes('plumb'))) return 'plumbing-services';
-    if (specialties.some(s => s.toLowerCase().includes('garden'))) return 'garden-maintenance';
+    if (specialties.some(s => s.toLowerCase().includes('plumb'))) return 'plumbing';
+    if (specialties.some(s => s.toLowerCase().includes('garden'))) return 'gardening';
     if (specialties.some(s => s.toLowerCase().includes('chef') || s.toLowerCase().includes('cuisine'))) return 'chef-catering';
     return 'house-cleaning';
   };
