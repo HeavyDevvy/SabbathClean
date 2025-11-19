@@ -276,8 +276,8 @@ export default function Profile() {
     enabled: !!userId,
   });
 
-  // Fetch user's orders
-  const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
+  // Fetch user's orders with items
+  const { data: orders = [], isLoading: isLoadingOrders} = useQuery<OrderWithItems[]>({
     queryKey: ['/api/orders', userId],
     queryFn: async () => {
       const accessToken = localStorage.getItem('accessToken');
@@ -300,6 +300,34 @@ export default function Profile() {
     },
     enabled: !!userId && isAuthenticated,
   });
+  
+  // Helper function to check if an order's scheduled date has passed
+  const isOrderPast = (order: OrderWithItems): boolean => {
+    // If order is completed or cancelled, it's definitely past
+    if (order.status === "completed" || order.status === "cancelled") {
+      return true;
+    }
+    
+    // Check if order has items
+    if (!order.items || order.items.length === 0) {
+      return false;
+    }
+    
+    // Get the earliest scheduled date from all items
+    const now = new Date();
+    for (const item of order.items) {
+      if (item.scheduledDate) {
+        const scheduledDate = new Date(item.scheduledDate);
+        // If any item's scheduled date hasn't passed, order is upcoming
+        if (scheduledDate >= now) {
+          return false;
+        }
+      }
+    }
+    
+    // All items have passed their scheduled dates
+    return true;
+  };
 
   // Update form when user data loads
   useEffect(() => {
@@ -412,10 +440,10 @@ export default function Profile() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {orders.filter(o => o.status === "confirmed" || o.status === "pending").length > 0 ? (
+                    {orders.filter(o => !isOrderPast(o) && (o.status === "confirmed" || o.status === "pending")).length > 0 ? (
                       <div className="space-y-4">
                         {orders
-                          .filter(o => o.status === "confirmed" || o.status === "pending")
+                          .filter(o => !isOrderPast(o) && (o.status === "confirmed" || o.status === "pending"))
                           .map((order) => (
                             <div
                               key={order.id}
@@ -476,10 +504,10 @@ export default function Profile() {
                     <CardTitle>Booking History</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {orders.filter(o => o.status === "completed" || o.status === "cancelled").length > 0 ? (
+                    {orders.filter(o => isOrderPast(o)).length > 0 ? (
                       <div className="space-y-4">
                         {orders
-                          .filter(o => o.status === "completed" || o.status === "cancelled")
+                          .filter(o => isOrderPast(o))
                           .map((order) => (
                             <div
                               key={order.id}
