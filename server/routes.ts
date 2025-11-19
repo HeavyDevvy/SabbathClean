@@ -1380,6 +1380,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe Webhook Handler - CRITICAL: Must use express.raw() middleware
+  // Note: This endpoint should be configured in your Stripe dashboard webhook settings
+  app.post("/api/webhooks/stripe", async (req, res) => {
+    try {
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2023-10-16'
+      });
+
+      const sig = req.headers['stripe-signature'] as string;
+      
+      if (!sig) {
+        return res.status(400).json({ message: "Missing stripe signature" });
+      }
+
+      // Verify webhook signature using raw body
+      const rawBody = JSON.stringify(req.body);
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          rawBody,
+          sig,
+          process.env.STRIPE_WEBHOOK_SECRET || ''
+        );
+      } catch (err: any) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).json({ message: `Webhook Error: ${err.message}` });
+      }
+
+      // Handle payment_intent.succeeded event
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+
+        // Check if this is a wallet funding payment
+        if (paymentIntent.metadata?.purpose === 'wallet_funding' && paymentIntent.metadata?.userId) {
+          const userId = paymentIntent.metadata.userId;
+          const amount = paymentIntent.amount / 100; // Convert from cents to dollars
+          const paymentIntentId = paymentIntent.id;
+
+          // Use idempotency key to prevent duplicate processing
+          const idempotencyKey = `webhook_${paymentIntentId}`;
+
+          try {
+            // Add funds to wallet with idempotency protection
+            await storage.addWalletFunds(
+              userId,
+              amount,
+              paymentIntentId,
+              `Wallet top-up via ${paymentIntent.payment_method_types[0] || 'card'}`
+            );
+            
+            console.log(`✅ Wallet funded: User ${userId}, Amount: ${amount}, PaymentIntent: ${paymentIntentId}`);
+          } catch (error: any) {
+            // Log error but return 200 to Stripe to prevent retries
+            console.error('Error processing wallet funding:', error.message);
+          }
+        }
+      }
+
+      // Respond to Stripe with 200 to acknowledge receipt
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error('Webhook handler error:', error);
+      res.status(500).json({ message: "Webhook processing error" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time tracking updates
