@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, CreditCard, Building, CheckCircle2, ArrowLeft, Shield, LogIn } from "lucide-react";
+import { Calendar, Clock, MapPin, CreditCard, Building, CheckCircle2, ArrowLeft, Shield, LogIn, Wallet } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,8 +21,17 @@ export default function CartCheckout() {
   const { toast } = useToast();
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "bank" | "wallet">("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Fetch wallet balance
+  const { data: walletData, isLoading: isWalletLoading } = useQuery<{ balance: number; currency: string }>({
+    queryKey: ["/api/wallet/balance"],
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+  
+  const walletBalance = walletData?.balance || 0;
   
   // Card payment state
   const [cardNumber, setCardNumber] = useState("");
@@ -119,7 +129,7 @@ export default function CartCheckout() {
         });
         return;
       }
-    } else {
+    } else if (paymentMethod === "bank") {
       if (!bankName || !accountNumber || !accountHolder) {
         toast({
           title: "Missing information",
@@ -138,6 +148,16 @@ export default function CartCheckout() {
         });
         return;
       }
+    } else if (paymentMethod === "wallet") {
+      // Validate wallet balance
+      if (walletBalance < total) {
+        toast({
+          title: "Insufficient funds",
+          description: `Your wallet balance (${formatCurrency(walletBalance)}) is less than the order total (${formatCurrency(total)}). Please top up your wallet or use a different payment method.`,
+          variant: "destructive",
+        });
+        return;
+      }
     }
     
     setIsProcessing(true);
@@ -151,11 +171,14 @@ export default function CartCheckout() {
           cardBrand: detectCardBrand(cardNumber),
           cardholderName: cardName
           // NEVER include: cardNumber, cardExpiry, cardCVV
-        } : {
+        } : paymentMethod === "bank" ? {
           bankName,
           accountLast4: accountNumber.slice(-4), // Only last 4 digits
           accountHolder
           // NEVER include: full accountNumber
+        } : {
+          // Wallet payment - no sensitive info needed
+          walletBalance: walletBalance,
         })
       };
       
@@ -303,6 +326,25 @@ export default function CartCheckout() {
               
               <RadioGroup value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
                 <div className="space-y-4">
+                  <label className="flex items-center justify-between cursor-pointer" data-testid="radio-wallet-payment">
+                    <div className="flex items-center space-x-3">
+                      <RadioGroupItem value="wallet" />
+                      <div className="flex items-center">
+                        <Wallet className="w-5 h-5 mr-2 text-primary" />
+                        <span className="font-medium">Berry Wallet</span>
+                      </div>
+                    </div>
+                    <div className="text-sm">
+                      {isWalletLoading ? (
+                        <span className="text-gray-500">Loading...</span>
+                      ) : (
+                        <span className={walletBalance >= total ? "text-green-600 font-medium" : "text-orange-600 font-medium"}>
+                          Balance: {formatCurrency(walletBalance)}
+                        </span>
+                      )}
+                    </div>
+                  </label>
+                  
                   <label className="flex items-center space-x-3 cursor-pointer" data-testid="radio-card-payment">
                     <RadioGroupItem value="card" />
                     <div className="flex items-center">
@@ -320,6 +362,36 @@ export default function CartCheckout() {
                   </label>
                 </div>
               </RadioGroup>
+              
+              {paymentMethod === "wallet" && (
+                <div className="mt-6 space-y-4">
+                  {walletBalance < total ? (
+                    <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                      <p className="text-sm text-orange-800 mb-2">
+                        <strong>Insufficient funds:</strong> Your wallet balance ({formatCurrency(walletBalance)}) 
+                        is less than the order total ({formatCurrency(total)}).
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate("/wallet")}
+                        className="w-full"
+                        data-testid="button-top-up-wallet"
+                      >
+                        <Wallet className="w-4 h-4 mr-2" />
+                        Top Up Wallet
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <CheckCircle2 className="w-4 h-4 inline mr-2" />
+                        Your wallet has sufficient funds for this purchase. Amount to be deducted: {formatCurrency(total)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
               
               {paymentMethod === "card" && (
                 <div className="mt-6 space-y-4">

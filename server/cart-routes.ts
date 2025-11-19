@@ -202,10 +202,38 @@ export function registerCartRoutes(app: Express) {
       const orderNumber = `BE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
       
       // Validate payment data from request body
-      const { paymentMethod, cardLast4, cardBrand, cardholderName, accountLast4, bankName, accountHolder } = req.body;
+      const { paymentMethod, cardLast4, cardBrand, cardholderName, accountLast4, bankName, accountHolder, walletBalance } = req.body;
       
       if (!paymentMethod) {
         return res.status(400).json({ message: "Payment method required" });
+      }
+      
+      // Process wallet payment if selected
+      if (paymentMethod === "wallet") {
+        try {
+          // Verify wallet has sufficient funds
+          const currentBalance = await storage.getWalletBalance(userId);
+          
+          if (currentBalance < totalAmount) {
+            return res.status(400).json({ 
+              message: `Insufficient wallet balance. You have ${currentBalance.toFixed(2)}, but need ${totalAmount.toFixed(2)}.` 
+            });
+          }
+          
+          // Deduct funds from wallet and create transaction
+          await storage.processWalletPayment(
+            userId,
+            totalAmount,
+            undefined, // bookingId - will be set to orderId later if needed
+            undefined, // serviceId
+            `Payment for order ${orderNumber} (${cartData.items.length} service${cartData.items.length > 1 ? 's' : ''})`
+          );
+          
+          console.log(`💰 Wallet payment processed: User ${userId}, Amount: ${totalAmount}, Order: ${orderNumber}`);
+        } catch (walletError: any) {
+          console.error('Wallet payment error:', walletError);
+          return res.status(400).json({ message: walletError.message || 'Wallet payment failed' });
+        }
       }
       
       // Create order with items and payment metadata
@@ -224,11 +252,13 @@ export function registerCartRoutes(app: Express) {
           cardLast4,
           cardBrand,
           cardholderName
-        } : {
+        } : paymentMethod === "bank" ? {
           accountLast4,
           bankName,
           accountHolder
-        })
+        } : paymentMethod === "wallet" ? {
+          walletBalance: totalAmount.toFixed(2), // Amount deducted from wallet
+        } : {})
       } as any;
       
       // Convert cart items to order items
