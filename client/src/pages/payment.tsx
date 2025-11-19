@@ -20,7 +20,7 @@ import {
   Download,
   Share2
 } from "lucide-react";
-import berryLogoPath from "@assets/Untitled (Logo) (1)_1763528354914.png";
+import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 interface BookingDetails {
   id: string;

@@ -1,0 +1,86 @@
+Please update my existing Berry Events web app with only the changes listed below.
+Do not change anything else in the project.
+Make sure there are no error codes and no blank screens once the changes are made.
+
+⸻
+
+1. Header: keep “Join as Provider” button, remove “Service provider?” text
+	•	In the header/navigation bar:
+	•	Keep the existing “Join as Provider” button exactly as it is (same position, style, and behaviour).
+	•	Remove only the text that appears next to it and says “Service provider?”.
+	•	After removing the text:
+	•	Adjust the spacing so there is no awkward gap where the text used to be.
+	•	Ensure all header items (logo, nav links, “Join as Provider” button, etc.) remain neatly aligned and evenly spaced.
+
+⸻
+
+2. Replace logo with the uploaded image
+	•	Replace the current logo in the header with the uploaded logo image (the image provided with this prompt).
+	•	The logo must appear:
+	•	In the header.
+	•	Anywhere else in the app where the main logo is displayed (for example: homepage, footer, other pages with the same header component), using the same new image.
+
+Background & borders:
+	•	The logo should not appear inside a visible box or with a different background colour.
+	•	Ensure the logo’s background:
+	•	Matches the background of the section it appears in.
+	•	For example:
+	•	In the header, the logo background must blend with the header background colour (no white box or border around it).
+	•	If needed, remove any CSS that adds:
+	•	Background colour behind the logo image.
+	•	Borders or box-shadows around the logo container.
+	•	The logo should look naturally integrated into the header and other sections.
+
+⸻
+
+3. Consistent header styling across all pages
+	•	Make sure the header colour, logo size, text size, and text style are consistent across all pages in the web app where a header appears.
+	•	Same:
+	•	Header background colour
+	•	Logo size and placement
+	•	Font family, font size, font weight, and text colour for navigation/header text
+	•	“Join as Provider” button style
+	•	If multiple header components or layouts exist, update them so they all match the main header style (the one on the main/home/My Profile pages).
+	•	The goal: the user should see one consistent header design everywhere.
+
+⸻
+
+4. Update the downloaded receipt design
+	•	Find the downloaded receipt (PDF or file) that users can download after a booking/payment.
+
+Update it as follows:
+	1.	Colour scheme:
+	•	Change the receipt’s colours to match the app’s colour scheme (use the same primary/secondary colours already used in the app’s UI).
+	•	Remove any default or mismatched colours so the receipt looks like part of the Berry Events brand.
+	2.	Add the logo:
+	•	Add the same new logo image (uploaded logo) to the downloaded receipt.
+	•	Place it appropriately at the top (e.g. top-left or centred), in a way that looks professional.
+	•	Ensure the logo:
+	•	Is sized correctly (not pixelated, not too large or too small).
+	•	Has no visible box or different background colour around it (blend with the receipt background similar to other sections).
+	3.	Typography:
+	•	Use the same or similar font style and sizing as used in the app for headings/body text where practical.
+	•	Ensure the receipt remains easy to read and clearly structured.
+
+⸻
+
+5. Quality checks
+
+Before completing, please verify:
+	1.	The “Join as Provider” button is still in the header and works as before.
+	2.	The “Service provider?” text has been removed, and header spacing still looks clean.
+	3.	The new logo:
+	•	Appears everywhere the logo is used.
+	•	Has no visible border/box.
+	•	Has a background that matches the section it appears in (especially in the header).
+	4.	The header:
+	•	Has a consistent background colour, logo size, and text styling across all pages.
+	5.	The downloaded receipt:
+	•	Uses the same colour scheme as the app.
+	•	Includes the new logo, sized correctly and visually clean.
+	6.	The app runs with:
+	•	No error codes in the console
+	•	No blank screens
+	•	No broken layouts or navigation
+
+Please implement only the changes described above and keep everything else exactly as it is.

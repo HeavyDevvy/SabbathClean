@@ -12,7 +12,7 @@ import {
   Shield,
   Star
 } from "lucide-react";
-import logo from "@assets/Untitled (Logo) (1)_1763528354914.png";
+import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

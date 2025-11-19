@@ -18,7 +18,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { useLocation } from "wouter";
-import berryLogoPath from "@assets/Untitled (Logo) (1)_1763528354914.png";
+import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 interface QuoteDetails {
   quoteId: string;

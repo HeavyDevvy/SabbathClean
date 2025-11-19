@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import berryLogo from "@assets/Untitled (Logo) (1)_1763528354914.png";
+import berryLogo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 interface SweepSouthStyleHeaderProps {
   onBookingClick: () => void;

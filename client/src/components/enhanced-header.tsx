@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "./auth-modal";
 import UserProfileModal from "./user-profile-modal";
 import { CartDrawer } from "./cart-drawer";
-import logo from "@assets/Untitled (Logo) (1)_1763528354914.png";
+import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
