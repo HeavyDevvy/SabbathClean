@@ -856,8 +856,9 @@ export default function ModernServiceModal({
   const serviceIdMapping: Record<string, string> = {
     "cleaning": "cleaning",
     "house-cleaning": "cleaning", // Map house-cleaning to cleaning config
+    "gardening": "garden-care", // Database ID → config (all garden services use garden-care config)
     "garden-care": "garden-care",
-    "garden-maintenance": "garden-maintenance",
+    "garden-maintenance": "garden-care", // Consolidate to single garden config
     "pool-cleaning": "pool-cleaning",
     "plumbing": "plumbing",
     "plumbing-services": "plumbing",
@@ -895,8 +896,8 @@ export default function ModernServiceModal({
   
   // GARDEN SERVICES: Service-specific feature flags
   const isGardenService = useMemo(() => 
-    serviceId === "garden-care" || serviceId === "garden-maintenance" || 
-    mappedServiceId === "garden-care" || mappedServiceId === "garden-maintenance", 
+    serviceId === "gardening" || serviceId === "garden-care" || serviceId === "garden-maintenance" || 
+    mappedServiceId === "garden-care", 
     [serviceId, mappedServiceId]
   );
   
@@ -1445,6 +1446,7 @@ export default function ModernServiceModal({
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
+      'garden-maintenance': 'gardening',
       'pool-cleaning': 'pool-cleaning',
       'chef-catering': 'chef-catering',
       'plumbing': 'plumbing',
@@ -1596,6 +1598,7 @@ export default function ModernServiceModal({
     const serviceIdMapping: Record<string, string> = {
       'cleaning': 'house-cleaning',
       'garden-care': 'gardening',
+      'garden-maintenance': 'gardening',
       'pool-cleaning': 'pool-cleaning',
       'chef-catering': 'chef-catering',
       'plumbing': 'plumbing',
@@ -1795,6 +1798,8 @@ export default function ModernServiceModal({
       const serviceIdMapping: Record<string, string> = {
         'house-cleaning': 'cleaning',
         'gardening': 'garden-care',
+        'garden-care': 'garden-care',
+        'garden-maintenance': 'garden-care',
         'pool-cleaning': 'pool-cleaning',
         'plumbing': 'plumbing',
         'electrical': 'electrical',
