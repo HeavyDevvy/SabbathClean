@@ -17,10 +17,10 @@ import {
 } from "lucide-react";
 
 // Import provider images
-import nomsaImage from "@assets/Nomsa Mthembu_1763439240584.jpg";
-import thaboImage from "@assets/Thabo Mokoena_1763439240584.jpg";
-import zinhleImage from "@assets/Zinhle Ndlovu_1763439240584.jpg";
-import mandlaImage from "@assets/Mandla Sithole_1763439240583.jpg";
+import nomsaImage from "@assets/Nomsa Mthembu_1763439240584.webp";
+import thaboImage from "@assets/Thabo Mokoena_1763439240584.webp";
+import zinhleImage from "@assets/Zinhle Ndlovu_1763439240584.webp";
+import mandlaImage from "@assets/Mandla Sithole_1763439240583.webp";
 
 interface Provider {
   id: string;

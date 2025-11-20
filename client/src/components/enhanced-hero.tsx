@@ -13,15 +13,15 @@ import {
   TrendingUp,
   Award
 } from "lucide-react";
-import heroImage1 from "@assets/pensive-housewife-keeps-lips-folded-dreams-about-rest-leans-basket-with-laundry-detergents-holds-mop-going-wash-floor-wears-hoodie-rubber-gloves-focused-away-stands-against-pink-wall_1763407062587.jpg";
-import heroImage2 from "@assets/handyman-using-wrench-fix_1763409051041.jpg";
-import heroImage3 from "@assets/male-electrician-works-switchboard-with-electrical-connecting-cable (1)_1763409060358.jpg";
-import heroImage4 from "@assets/garden-seasonal-maintenance_1763409073401.jpg";
-import heroImage5 from "@assets/pool-technician-using-tablet-by-pool-surrounded-by-chemical-containers-greenery-focused_1763410857450.jpg";
-import heroImage6 from "@assets/sushi-set-table_1763409085332.jpg";
-import heroImage7 from "@assets/waiter-waitress-holding-serving-tray-with-glass-cocktail_1763409096437.jpg";
-import heroImage8 from "@assets/delivery-service-personnel-transferring-package-from-truck_1763409112008.jpg";
-import heroImage9 from "@assets/mother-observes-daughter-coloring-notebook-home_1763409119215.jpg";
+import heroImage1 from "@assets/pensive-housewife-keeps-lips-folded-dreams-about-rest-leans-basket-with-laundry-detergents-holds-mop-going-wash-floor-wears-hoodie-rubber-gloves-focused-away-stands-against-pink-wall_1763407062587.webp";
+import heroImage2 from "@assets/handyman-using-wrench-fix_1763409051041.webp";
+import heroImage3 from "@assets/male-electrician-works-switchboard-with-electrical-connecting-cable (1)_1763409060358.webp";
+import heroImage4 from "@assets/garden-seasonal-maintenance_1763409073401.webp";
+import heroImage5 from "@assets/pool-technician-using-tablet-by-pool-surrounded-by-chemical-containers-greenery-focused_1763410857450.webp";
+import heroImage6 from "@assets/sushi-set-table_1763409085332.webp";
+import heroImage7 from "@assets/waiter-waitress-holding-serving-tray-with-glass-cocktail_1763409096437.webp";
+import heroImage8 from "@assets/delivery-service-personnel-transferring-package-from-truck_1763409112008.webp";
+import heroImage9 from "@assets/mother-observes-daughter-coloring-notebook-home_1763409119215.webp";
 
 interface EnhancedHeroProps {
   onBookingClick: () => void;

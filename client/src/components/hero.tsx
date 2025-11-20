@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Shield, UserCheck, Clock } from "lucide-react";
-import heroImage from "@assets/homepage-hero-new.png";
+import heroImage from "@assets/homepage-hero-new.webp";
 
 interface HeroProps {
   onBookingClick: () => void;
