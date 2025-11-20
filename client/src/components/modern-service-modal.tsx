@@ -44,6 +44,7 @@ import GardenServiceForm from "./booking-forms/GardenServiceForm";
 import PoolServiceForm from "./booking-forms/PoolServiceForm";
 import PlumbingServiceForm from "./booking-forms/PlumbingServiceForm";
 import ElectricalServiceForm from "./booking-forms/ElectricalServiceForm";
+import { LocationStep } from "./booking-steps/LocationStep";
 import ScheduleStep from "./booking-steps/ScheduleStep";
 import AddOnsStep from "./booking-steps/AddOnsStep";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
@@ -2089,66 +2090,12 @@ export default function ModernServiceModal({
       </div>
 
       <div className="space-y-5">
-        <div>
-          <Label htmlFor="property-type">Property Type *</Label>
-          <Select value={formData.propertyType} onValueChange={(value) => 
-            setFormData(prev => ({ ...prev, propertyType: value }))
-          }>
-            <SelectTrigger data-testid="select-property-type">
-              <SelectValue placeholder="Select property type" />
-            </SelectTrigger>
-            <SelectContent>
-              {currentConfig.propertyTypes?.map((type: any) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="address">Service Address *</Label>
-          <div className="space-y-3">
-            <Input
-              id="address"
-              placeholder="Enter your service address"
-              value={formData.address}
-              onChange={(e) => handleAddressChange(e.target.value)}
-              className="w-full"
-              data-testid="input-address"
-            />
-            {formData.address && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <p className="text-xs text-green-700 flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Address confirmed - Provider matching within 20km radius
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Conditional Gate Code Field (Phase 3.2 - Secure) */}
-        {(formData.propertyType === "apartment" || formData.propertyType === "townhouse" || formData.propertyType === "villa") && (
-          <div>
-            <Label htmlFor="gate-code">Gate/Access Code (Optional)</Label>
-            <Input
-              id="gate-code"
-              type="password"
-              placeholder="Enter gate or access code"
-              value={formData.gateCode}
-              onChange={(e) => setFormData(prev => ({ ...prev, gateCode: e.target.value }))}
-              className="w-full"
-              data-testid="input-gate-code"
-              autoComplete="off"
-            />
-            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-              <LockIcon className="h-3 w-3" />
-              Encrypted and only shared with your assigned provider
-            </p>
-          </div>
-        )}
+        <LocationStep
+          formData={formData}
+          setFormData={setFormData}
+          currentConfig={currentConfig}
+          handleAddressChange={handleAddressChange}
+        />
 
         {isHouseCleaning && (
           <CleaningServiceForm
