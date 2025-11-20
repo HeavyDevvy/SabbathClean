@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,25 @@ export function ReviewStep({
   bookedServices,
   setProviderDetailsModal
 }: ReviewStepProps) {
+  // Phase 5.2: Initialize Berry Star provider in formData (useEffect to avoid render mutation)
+  useEffect(() => {
+    if (preSelectedProviderId && preSelectedProviderName && !formData.selectedProvider) {
+      const provider = { 
+        id: preSelectedProviderId, 
+        name: preSelectedProviderName,
+        rating: 4.9,
+        reviews: 150,
+        distance: "2.5 km",
+        specializations: ["Berry Star", "Top Rated"],
+        verified: true,
+        verifiedBadges: ["Berry Star", "Verified", "Top Rated"],
+        responseTime: "< 1 hour",
+        hourlyRate: 350
+      };
+      setFormData(prev => ({ ...prev, selectedProvider: provider }));
+    }
+  }, [preSelectedProviderId, preSelectedProviderName, formData.selectedProvider, setFormData]);
+  
   // Phase 5.2: Show ONLY locked Berry Star provider if pre-selected
   if (preSelectedProviderId && preSelectedProviderName) {
     const provider = formData.selectedProvider || { 
@@ -52,11 +72,6 @@ export function ReviewStep({
       verifiedBadges: ["Berry Star", "Verified", "Top Rated"],
       responseTime: "< 1 hour",
       hourlyRate: 350
-    };
-    
-    // Ensure provider is selected in form data
-    if (!formData.selectedProvider) {
-      setFormData(prev => ({ ...prev, selectedProvider: provider }));
     }
     
     return (
