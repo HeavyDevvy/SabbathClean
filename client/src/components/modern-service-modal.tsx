@@ -39,6 +39,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useCart } from "@/contexts/CartContext";
 import BookingConfirmationModal from "./booking-confirmation-modal";
 import CustomServiceContact from "./custom-service-contact";
+import CleaningServiceForm from "./booking-forms/CleaningServiceForm";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
 import { southAfricanBanks, validateAccountNumber } from "../../../config/banks";
@@ -2144,43 +2145,11 @@ export default function ModernServiceModal({
         )}
 
         {isHouseCleaning && (
-          <>
-            <div>
-              <Label htmlFor="cleaning-type">Cleaning Type *</Label>
-              <Select value={formData.cleaningType} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, cleaningType: value }))
-              }>
-                <SelectTrigger data-testid="select-cleaning-type">
-                  <SelectValue placeholder="Select cleaning type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.cleaningTypes?.map((type: any) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label} - R{type.price}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="property-size">Property Size *</Label>
-              <Select value={formData.propertySize} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, propertySize: value }))
-              }>
-                <SelectTrigger data-testid="select-property-size">
-                  <SelectValue placeholder="Select property size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.propertySizes?.map((size: any) => (
-                    <SelectItem key={size.value} value={size.value}>
-                      {size.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </>
+          <CleaningServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
         )}
 
         {isGardenService && (
