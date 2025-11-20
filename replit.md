@@ -65,6 +65,50 @@ The design adopts a minimalistic approach with clean layouts, simplified user fl
 
 # Recent Architecture Improvements
 
+## Phase 4: Location & Review Step Extraction (November 2025)
+
+### Objective
+Extract common location fields (Step 1) and complete provider review workflow (Step 4) to further reduce modal complexity and improve code organization.
+
+### Completed Work
+
+#### 1. LocationStep Component (Step 1 Common Fields)
+- **File**: `client/src/components/booking-steps/LocationStep.tsx` (93 lines)
+- **Extracted logic**:
+  - Property Type selection (all services)
+  - Service Address input with 20km radius confirmation
+  - Gate/Access Code input (conditional on property type: apartment, townhouse, villa)
+  - Encrypted gate code security messaging
+- **Props interface**: formData, setFormData, currentConfig, handleAddressChange
+
+#### 2. ReviewStep Component (Step 4 Complete)
+- **File**: `client/src/components/booking-steps/ReviewStep.tsx` (355 lines)
+- **Extracted logic**:
+  - **Berry Star pre-selected provider flow**: Locked provider card with star branding, pre-selection notice
+  - **Normal provider selection**: Card-based provider list with enhanced details (profile image, bio, jobs completed, experience, qualifications, specializations, availability)
+  - **Tip selection**: Preset amounts (R0, R20, R50, R100) + custom input with validation
+  - **Booked services counter**: Display already-booked services in multi-service cart
+- **Props interface**: formData, setFormData, providers, preSelectedProviderId/Name, showEnhancedProviderDetails, isHouseCleaning, bookedServices, setProviderDetailsModal
+- **Critical fix**: Moved Berry Star provider initialization to useEffect to prevent React state mutation during render
+
+### Integration
+- LocationStep integrated into renderStep1()
+- ReviewStep integrated into renderStep4()
+- All data flows preserved through explicit props
+- All data-testids maintained for testing
+- React best practices enforced (no render-time state mutations)
+
+### Impact
+- **Modal size**: 3,558 → 3,268 lines (-290 lines, 8.2% reduction in Phase 4)
+- **Step components created**: 2 files, 448 total lines (93 + 355)
+- **Cumulative modal reduction (Phases 2-4)**: 4,270 → 3,268 lines (-1,002 lines, 23.5%)
+
+### Quality
+- ✅ Architect-reviewed and approved
+- ✅ React render bug fixed (useEffect for Berry Star initialization)
+- ✅ Application running without errors
+- ✅ All functionality preserved (normal + Berry Star flows)
+
 ## Phase 3: Shared Step Component Extraction (November 2025)
 
 ### Objective
@@ -147,7 +191,12 @@ Extract shared booking workflow steps (Schedule, AddOns) from the monolithic `mo
 - Zero production functionality impact
 
 ## Overall Architecture Progress
-- **Total modal reduction**: 4,270 → 3,611 lines (-659 lines, 15.4%)
-- **Components created**: 7 service forms + 2 step components (947 lines)
+- **Total modal reduction**: 4,270 → 3,268 lines (-1,002 lines, 23.5%)
+- **Components created**: 7 service forms + 4 step components (1,395 lines)
 - **Images optimized**: 97.8% size reduction (140MB → 3MB)
 - **Code quality**: Modular, maintainable, architect-approved
+
+# Known Issues
+
+## Development Environment
+- **Vite HMR WebSocket Error**: Browser console shows `Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=...' is invalid.` This is a development-only Vite HMR configuration issue that does not affect application functionality. Hot module replacement still works correctly, and the app loads and runs without any functional impact.
