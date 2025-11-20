@@ -859,7 +859,7 @@ export default function ModernServiceModal({
     // Create enhanced booking data WITHOUT sensitive payment fields
     const bookingData = {
       serviceId,
-      serviceName: currentConfig.title,
+      serviceName: currentConfig?.title ?? '',
       // Include all form fields EXCEPT sensitive payment data
       propertyType: formData.propertyType,
       address: formData.address,
@@ -1000,7 +1000,7 @@ export default function ModernServiceModal({
     // Map booking data to CartItem format
     const cartItem = {
       serviceId: dbServiceId, // Use database-compatible service ID
-      serviceName: currentConfig.title,
+      serviceName: currentConfig?.title ?? '',
       providerId: null, // Set to null - will be assigned after checkout
       providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
@@ -1191,7 +1191,7 @@ export default function ModernServiceModal({
     // Map booking data to CartItem format
     const cartItem = {
       serviceId: dbServiceId,
-      serviceName: currentConfig.title,
+      serviceName: currentConfig?.title ?? '',
       providerId: null,
       providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
@@ -1235,7 +1235,7 @@ export default function ModernServiceModal({
       
       toast({
         title: "Service added to cart!",
-        description: `${currentConfig.title} added successfully. Redirecting to cart...`
+        description: `${currentConfig?.title ?? 'Service'} added successfully. Redirecting to cart...`
       });
       
       // Close modal and navigate to cart
@@ -1315,6 +1315,8 @@ export default function ModernServiceModal({
       propertySize: "",
       gardenSize: "",
       gardenCondition: "",
+      poolSize: "",
+      poolCondition: "",
       urgency: "standard",
       plumbingIssue: "",
       electricalIssue: "",
@@ -1569,7 +1571,7 @@ export default function ModernServiceModal({
         <LocationStep
           formData={formData}
           setFormData={setFormData}
-          currentConfig={currentConfig}
+          currentConfig={currentConfig ?? {}}
           handleAddressChange={handleAddressChange}
         />
 
@@ -1632,7 +1634,7 @@ export default function ModernServiceModal({
                   <SelectValue placeholder="Select moving type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentConfig.movingTypes?.map((type: any) => (
+                  {currentConfig?.movingTypes?.map((type: any) => (
                     <SelectItem key={type.value} value={type.value}>
                       <div className="flex flex-col items-start">
                         <span className="font-medium">{type.label} - R{type.price}</span>
@@ -1653,7 +1655,7 @@ export default function ModernServiceModal({
                   <SelectValue placeholder="Select moving distance" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentConfig.movingDistance?.map((distance: any) => (
+                  {currentConfig?.movingDistance?.map((distance: any) => (
                     <SelectItem key={distance.value} value={distance.value}>
                       {distance.label}
                     </SelectItem>
@@ -1675,7 +1677,7 @@ export default function ModernServiceModal({
                   <SelectValue placeholder="Select care type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentConfig.careTypes?.map((type: any) => (
+                  {currentConfig?.careTypes?.map((type: any) => (
                     <SelectItem key={type.value} value={type.value}>
                       <div className="flex flex-col items-start">
                         <span className="font-medium">{type.label} - R{type.price}</span>
@@ -1696,7 +1698,7 @@ export default function ModernServiceModal({
                   <SelectValue placeholder="Select number of children" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentConfig.childrenCount?.map((count: any) => (
+                  {currentConfig?.childrenCount?.map((count: any) => (
                     <SelectItem key={count.value} value={count.value}>
                       {count.label}
                     </SelectItem>
@@ -1714,7 +1716,7 @@ export default function ModernServiceModal({
                   <SelectValue placeholder="Select age range" />
                 </SelectTrigger>
                 <SelectContent>
-                  {currentConfig.childrenAges?.map((age: any) => (
+                  {currentConfig?.childrenAges?.map((age: any) => (
                     <SelectItem key={age.value} value={age.value}>
                       {age.label}
                     </SelectItem>
@@ -1790,7 +1792,7 @@ export default function ModernServiceModal({
     // Create current draft from form data (plain variables, not hooks)
     const currentDraft = {
       serviceId,
-      serviceName: currentConfig.title,
+      serviceName: currentConfig?.title ?? '',
       ...formData,
       pricing,
       estimatedHours,
@@ -2264,7 +2266,7 @@ export default function ModernServiceModal({
         <CardContent className="space-y-3">
           <div className="flex justify-between">
             <span>Service</span>
-            <span className="font-medium">{currentConfig.title}</span>
+            <span className="font-medium">{currentConfig?.title ?? 'Service'}</span>
           </div>
           <div className="flex justify-between">
             <span>Provider</span>

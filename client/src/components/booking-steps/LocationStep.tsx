@@ -10,7 +10,7 @@ interface LocationStepProps {
     gateCode: string;
   };
   setFormData: (updater: (prev: any) => any) => void;
-  currentConfig: {
+  currentConfig?: {
     propertyTypes?: Array<{ value: string; label: string }>;
   };
   handleAddressChange: (address: string) => void;
@@ -38,7 +38,7 @@ export function LocationStep({
             <SelectValue placeholder="Select property type" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.propertyTypes?.map((type: any) => (
+            {currentConfig?.propertyTypes?.map((type: any) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
               </SelectItem>
