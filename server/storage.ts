@@ -76,6 +76,12 @@ import { db } from "./db";
 import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
+// Import domain storage modules
+import { WalletStorage, type IWalletStorage } from "./storage/wallet-storage";
+import { CartStorage, type ICartStorage } from "./storage/cart-storage";
+import { ChatStorage, type IChatStorage } from "./storage/chat-storage";
+import { NotificationStorage, type INotificationStorage } from "./storage/notification-storage";
+
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
@@ -214,6 +220,20 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Domain storage instances (composition pattern)
+  private walletStorage: WalletStorage;
+  private cartStorage: CartStorage;
+  private chatStorage: ChatStorage;
+  private notificationStorage: NotificationStorage;
+
+  constructor() {
+    // Initialize domain storage modules
+    this.walletStorage = new WalletStorage();
+    this.cartStorage = new CartStorage();
+    this.chatStorage = new ChatStorage();
+    this.notificationStorage = new NotificationStorage();
+  }
+
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -520,172 +540,33 @@ export class DatabaseStorage implements IStorage {
       .where(eq(serviceProviders.id, providerId));
   }
 
-  // Wallet methods implementation
+  // Wallet methods - delegated to WalletStorage
   async getOrCreateWallet(userId: string): Promise<Wallet> {
-    // First try to get existing wallet
-    const [existingWallet] = await db.select().from(wallets).where(eq(wallets.userId, userId));
-    
-    if (existingWallet) {
-      return existingWallet;
-    }
-
-    // Create new wallet if none exists
-    const [newWallet] = await db.insert(wallets)
-      .values({
-        userId,
-        balance: "0.00",
-        currency: "USD",
-        isActive: true
-      })
-      .returning();
-    
-    return newWallet;
+    return this.walletStorage.getOrCreateWallet(userId);
   }
 
   async getWalletBalance(userId: string): Promise<number> {
-    const wallet = await this.getOrCreateWallet(userId);
-    return parseFloat(wallet.balance);
+    return this.walletStorage.getWalletBalance(userId);
   }
 
   async addWalletFunds(userId: string, amount: number, stripePaymentIntentId?: string, description?: string): Promise<WalletTransaction> {
-    const wallet = await this.getOrCreateWallet(userId);
-    const currentBalance = parseFloat(wallet.balance);
-    const newBalance = currentBalance + amount;
-
-    // Update wallet balance
-    await db.update(wallets)
-      .set({ 
-        balance: newBalance.toFixed(2),
-        updatedAt: new Date()
-      })
-      .where(eq(wallets.id, wallet.id));
-
-    // Record transaction
-    const [transaction] = await db.insert(walletTransactions)
-      .values({
-        walletId: wallet.id,
-        userId,
-        type: 'deposit',
-        amount: amount.toFixed(2),
-        balanceBefore: currentBalance.toFixed(2),
-        balanceAfter: newBalance.toFixed(2),
-        description: description || `Added funds to wallet`,
-        status: 'completed',
-        stripePaymentIntentId
-      })
-      .returning();
-
-    return transaction;
+    return this.walletStorage.addWalletFunds(userId, amount, stripePaymentIntentId, description);
   }
 
   async withdrawWalletFunds(userId: string, amount: number, description?: string): Promise<WalletTransaction> {
-    const wallet = await this.getOrCreateWallet(userId);
-    const currentBalance = parseFloat(wallet.balance);
-    
-    if (currentBalance < amount) {
-      throw new Error('Insufficient wallet balance');
-    }
-
-    const newBalance = currentBalance - amount;
-
-    // Update wallet balance
-    await db.update(wallets)
-      .set({ 
-        balance: newBalance.toFixed(2),
-        updatedAt: new Date()
-      })
-      .where(eq(wallets.id, wallet.id));
-
-    // Record transaction
-    const [transaction] = await db.insert(walletTransactions)
-      .values({
-        walletId: wallet.id,
-        userId,
-        type: 'withdraw',
-        amount: amount.toFixed(2),
-        balanceBefore: currentBalance.toFixed(2),
-        balanceAfter: newBalance.toFixed(2),
-        description: description || `Withdrawn funds from wallet`,
-        status: 'completed'
-      })
-      .returning();
-
-    return transaction;
+    return this.walletStorage.withdrawWalletFunds(userId, amount, description);
   }
 
   async processWalletPayment(userId: string, amount: number, bookingId?: string, serviceId?: string, description?: string): Promise<WalletTransaction> {
-    const wallet = await this.getOrCreateWallet(userId);
-    const currentBalance = parseFloat(wallet.balance);
-    
-    // Pre-check for better error messages (non-authoritative, UX only)
-    if (currentBalance < amount) {
-      throw new Error('Insufficient wallet balance');
-    }
-
-    // ATOMIC UPDATE: Decrement balance and check in SINGLE SQL statement
-    // This prevents race conditions by using database-level atomic operations
-    const [updatedWallet] = await db.update(wallets)
-      .set({ 
-        // CRITICAL: Use SQL decrement, not precomputed value
-        balance: sql`CAST(balance AS DECIMAL) - ${amount}`,
-        updatedAt: new Date()
-      })
-      .where(
-        and(
-          eq(wallets.id, wallet.id),
-          // Atomic check: only update if balance is STILL >= amount at execution time
-          sql`CAST(balance AS DECIMAL) >= ${amount}`
-        )
-      )
-      .returning();
-    
-    // If no rows updated, balance was insufficient at the moment of execution
-    // This catches race conditions where concurrent transactions depleted funds
-    if (!updatedWallet) {
-      throw new Error('Insufficient wallet balance (concurrent transaction detected)');
-    }
-    
-    // Use the ACTUAL balance from the database for transaction record
-    const newBalance = parseFloat(updatedWallet.balance);
-
-    // Record transaction
-    const [transaction] = await db.insert(walletTransactions)
-      .values({
-        walletId: wallet.id,
-        userId,
-        type: 'payment',
-        amount: amount.toFixed(2),
-        balanceBefore: currentBalance.toFixed(2),
-        balanceAfter: newBalance.toFixed(2),
-        description: description || `Payment for service`,
-        status: 'completed',
-        bookingId,
-        serviceId
-      })
-      .returning();
-
-    return transaction;
+    return this.walletStorage.processWalletPayment(userId, amount, bookingId, serviceId, description);
   }
 
   async getWalletTransactions(userId: string, limit: number = 50, offset: number = 0): Promise<WalletTransaction[]> {
-    return await db.select()
-      .from(walletTransactions)
-      .where(eq(walletTransactions.userId, userId))
-      .orderBy(desc(walletTransactions.createdAt))
-      .limit(limit)
-      .offset(offset);
+    return this.walletStorage.getWalletTransactions(userId, limit, offset);
   }
 
   async updateAutoReloadSettings(userId: string, settings: { enabled: boolean; threshold: number; amount: number; paymentMethodId?: string }): Promise<void> {
-    await db.update(wallets)
-      .set({
-        autoReloadEnabled: settings.enabled,
-        autoReloadThreshold: settings.threshold.toFixed(2),
-        autoReloadAmount: settings.amount.toFixed(2),
-        autoReloadPaymentMethodId: settings.paymentMethodId,
-        updatedAt: new Date()
-      })
-      .where(eq(wallets.userId, userId));
+    return this.walletStorage.updateAutoReloadSettings(userId, settings);
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
@@ -1067,170 +948,41 @@ export class DatabaseStorage implements IStorage {
     return result || undefined;
   }
 
-  // Cart operations
+  // Cart operations - delegated to CartStorage
   async getOrCreateCart(userId?: string, sessionToken?: string): Promise<Cart> {
-    // Require at least one identifier to prevent orphan carts
-    if (!userId && !sessionToken) {
-      throw new Error("Cart requires either userId or sessionToken");
-    }
-
-    // Try to find existing active cart that hasn't expired
-    let cart: Cart | undefined;
-    const now = new Date();
-    
-    if (userId) {
-      [cart] = await db.select().from(carts)
-        .where(and(
-          eq(carts.userId, userId),
-          eq(carts.status, "active"),
-          sql`${carts.expiresAt} > ${now}` // Check not expired
-        ))
-        .limit(1);
-    } else if (sessionToken) {
-      [cart] = await db.select().from(carts)
-        .where(and(
-          eq(carts.sessionToken, sessionToken),
-          eq(carts.status, "active"),
-          sql`${carts.expiresAt} > ${now}` // Check not expired
-        ))
-        .limit(1);
-    }
-
-    // Create new cart if none exists or existing one expired
-    if (!cart) {
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 14); // Cart expires in 14 days (Phase 4.1)
-
-      [cart] = await db.insert(carts).values({
-        userId: userId || null,
-        sessionToken: sessionToken || null,
-        status: "active",
-        expiresAt
-      }).returning();
-    }
-
-    return cart;
+    return this.cartStorage.getOrCreateCart(userId, sessionToken);
   }
 
   async mergeGuestCartToUser(sessionToken: string, userId: string): Promise<Cart> {
-    // Get guest cart
-    const [guestCart] = await db.select().from(carts)
-      .where(and(
-        eq(carts.sessionToken, sessionToken),
-        eq(carts.status, "active")
-      ))
-      .limit(1);
-
-    if (!guestCart) {
-      // No guest cart to merge, just create/get user cart
-      return this.getOrCreateCart(userId);
-    }
-
-    // Get or create user cart
-    const userCart = await this.getOrCreateCart(userId);
-
-    // Move all items from guest cart to user cart
-    const guestItems = await db.select().from(cartItems)
-      .where(eq(cartItems.cartId, guestCart.id));
-
-    if (guestItems.length > 0) {
-      // Update cart ID for all items
-      await db.update(cartItems)
-        .set({ cartId: userCart.id })
-        .where(eq(cartItems.cartId, guestCart.id));
-    }
-
-    // Mark guest cart as converted
-    await db.update(carts)
-      .set({ status: "converted" })
-      .where(eq(carts.id, guestCart.id));
-
-    return userCart;
+    return this.cartStorage.mergeGuestCartToUser(sessionToken, userId);
   }
 
   async getCart(cartId: string): Promise<Cart | undefined> {
-    const [cart] = await db.select().from(carts).where(eq(carts.id, cartId));
-    return cart || undefined;
+    return this.cartStorage.getCart(cartId);
   }
 
   async getCartWithItems(cartId: string): Promise<{ cart: Cart; items: CartItem[] } | undefined> {
-    const [cart] = await db.select().from(carts).where(eq(carts.id, cartId));
-    if (!cart) return undefined;
-
-    const items = await db.select().from(cartItems)
-      .where(eq(cartItems.cartId, cartId))
-      .orderBy(desc(cartItems.addedAt));
-
-    return { cart, items };
+    return this.cartStorage.getCartWithItems(cartId);
   }
 
   async addItemToCart(cartId: string, item: InsertCartItem): Promise<CartItem> {
-    // Check for duplicate service on same date/time (deduplicate)
-    const [existing] = await db.select().from(cartItems)
-      .where(and(
-        eq(cartItems.cartId, cartId),
-        item.serviceId ? eq(cartItems.serviceId, item.serviceId) : undefined,
-        eq(cartItems.scheduledDate, item.scheduledDate),
-        eq(cartItems.scheduledTime, item.scheduledTime)
-      ))
-      .limit(1);
-
-    if (existing) {
-      // Return existing item instead of creating duplicate
-      return existing;
-    }
-
-    const [cartItem] = await db.insert(cartItems).values({
-      ...item,
-      cartId
-    }).returning();
-
-    // Update cart timestamp
-    await db.update(carts)
-      .set({ updatedAt: new Date() })
-      .where(eq(carts.id, cartId));
-
-    return cartItem;
+    return this.cartStorage.addItemToCart(cartId, item);
   }
 
   async updateCartItem(itemId: string, updates: Partial<CartItem>): Promise<CartItem> {
-    // Only allow updating mutable fields (prevent id, cartId changes)
-    const allowedUpdates: Partial<CartItem> = {};
-    const mutableFields = ['comments', 'scheduledDate', 'scheduledTime', 'selectedAddOns', 
-                          'basePrice', 'addOnsPrice', 'subtotal', 'serviceDetails'];
-    
-    for (const key of mutableFields) {
-      if (key in updates) {
-        (allowedUpdates as any)[key] = (updates as any)[key];
-      }
-    }
-
-    const [item] = await db.update(cartItems)
-      .set({ ...allowedUpdates, updatedAt: new Date() })
-      .where(eq(cartItems.id, itemId))
-      .returning();
-    return item;
+    return this.cartStorage.updateCartItem(itemId, updates);
   }
 
   async removeCartItem(itemId: string): Promise<void> {
-    await db.delete(cartItems).where(eq(cartItems.id, itemId));
+    return this.cartStorage.removeCartItem(itemId);
   }
 
   async clearCart(cartId: string): Promise<void> {
-    console.log(`🗑️ Clearing cart: ${cartId}`);
-    const result = await db.delete(cartItems).where(eq(cartItems.cartId, cartId));
-    console.log(`✅ Deleted cart items:`, result);
-    
-    // Verify deletion
-    const remaining = await db.select().from(cartItems).where(eq(cartItems.cartId, cartId));
-    console.log(`📊 Remaining items after delete: ${remaining.length}`);
+    return this.cartStorage.clearCart(cartId);
   }
 
   async getCartItemCount(cartId: string): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` })
-      .from(cartItems)
-      .where(eq(cartItems.cartId, cartId));
-    return result[0]?.count || 0;
+    return this.cartStorage.getCartItemCount(cartId);
   }
 
   // Order operations
@@ -1469,149 +1221,58 @@ export class DatabaseStorage implements IStorage {
     return ticket;
   }
 
-  // Chat operations
+  // Chat operations - delegated to ChatStorage
   async getOrCreateConversation(bookingId: string, customerId: string, providerId: string): Promise<Conversation> {
-    const { conversations } = await import("@shared/schema");
-    
-    // Try to find existing conversation
-    let [conversation] = await db.select().from(conversations)
-      .where(and(
-        eq(conversations.bookingId, bookingId),
-        eq(conversations.customerId, customerId),
-        eq(conversations.providerId, providerId)
-      ));
-    
-    // Create if doesn't exist
-    if (!conversation) {
-      [conversation] = await db.insert(conversations).values({
-        bookingId,
-        customerId,
-        providerId,
-        status: "active",
-      }).returning();
-    }
-    
-    return conversation;
+    return this.chatStorage.getOrCreateConversation(bookingId, customerId, providerId);
   }
 
   async getConversation(conversationId: string): Promise<Conversation | undefined> {
-    const { conversations } = await import("@shared/schema");
-    const [conversation] = await db.select().from(conversations)
-      .where(eq(conversations.id, conversationId));
-    return conversation || undefined;
+    return this.chatStorage.getConversation(conversationId);
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    const { conversations } = await import("@shared/schema");
-    return await db.select().from(conversations)
-      .where(eq(conversations.customerId, userId))
-      .orderBy(desc(conversations.lastMessageAt));
+    return this.chatStorage.getUserConversations(userId);
   }
 
   async getProviderConversations(providerId: string): Promise<Conversation[]> {
-    const { conversations } = await import("@shared/schema");
-    return await db.select().from(conversations)
-      .where(eq(conversations.providerId, providerId))
-      .orderBy(desc(conversations.lastMessageAt));
+    return this.chatStorage.getProviderConversations(providerId);
   }
 
   async sendMessage(message: InsertMessage): Promise<Message> {
-    const { messages, conversations } = await import("@shared/schema");
-    
-    // Insert message
-    const [newMessage] = await db.insert(messages).values(message).returning();
-    
-    // Update conversation lastMessageAt
-    await db.update(conversations)
-      .set({ 
-        lastMessageAt: new Date(),
-        updatedAt: new Date()
-      })
-      .where(eq(conversations.id, message.conversationId));
-    
-    return newMessage;
+    return this.chatStorage.sendMessage(message);
   }
 
   async getConversationMessages(conversationId: string): Promise<Message[]> {
-    const { messages } = await import("@shared/schema");
-    return await db.select().from(messages)
-      .where(eq(messages.conversationId, conversationId))
-      .orderBy(messages.createdAt);
+    return this.chatStorage.getConversationMessages(conversationId);
   }
 
   async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
-    const { messages } = await import("@shared/schema");
-    await db.update(messages)
-      .set({ 
-        isRead: true,
-        readAt: new Date()
-      })
-      .where(and(
-        eq(messages.conversationId, conversationId),
-        sql`${messages.senderId} != ${userId}`,
-        eq(messages.isRead, false)
-      ));
+    return this.chatStorage.markMessagesAsRead(conversationId, userId);
   }
 
-  // Notification operations
+  // Notification operations - delegated to NotificationStorage
   async getNotificationsByUser(userId: string, limit: number = 50): Promise<Notification[]> {
-    const result = await db.select()
-      .from(notifications)
-      .where(eq(notifications.userId, userId))
-      .orderBy(desc(notifications.createdAt))
-      .limit(limit);
-    return result;
+    return this.notificationStorage.getNotificationsByUser(userId, limit);
   }
 
   async getUnreadNotificationsCount(userId: string): Promise<number> {
-    const result = await db.select({ count: sql<number>`count(*)` })
-      .from(notifications)
-      .where(
-        and(
-          eq(notifications.userId, userId),
-          eq(notifications.isRead, false)
-        )
-      );
-    return Number(result[0]?.count || 0);
+    return this.notificationStorage.getUnreadNotificationsCount(userId);
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const [result] = await db.insert(notifications)
-      .values(notification)
-      .returning();
-    return result;
+    return this.notificationStorage.createNotification(notification);
   }
 
   async markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
-    await db.update(notifications)
-      .set({ isRead: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notifications.id, notificationId),
-          eq(notifications.userId, userId)
-        )
-      );
+    return this.notificationStorage.markNotificationAsRead(notificationId, userId);
   }
 
   async markAllNotificationsAsRead(userId: string): Promise<void> {
-    await db.update(notifications)
-      .set({ isRead: true, readAt: new Date() })
-      .where(
-        and(
-          eq(notifications.userId, userId),
-          eq(notifications.isRead, false)
-        )
-      );
+    return this.notificationStorage.markAllNotificationsAsRead(userId);
   }
 
   async deleteExpiredNotifications(): Promise<void> {
-    await db.delete(notifications)
-      .where(
-        and(
-          sql`${notifications.expiresAt} IS NOT NULL`,
-          sql`${notifications.expiresAt} < NOW()`
-        )
-      );
+    return this.notificationStorage.deleteExpiredNotifications();
   }
 }
 
