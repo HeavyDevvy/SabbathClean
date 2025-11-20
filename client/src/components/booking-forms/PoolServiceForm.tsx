@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ServiceConfig } from "@/config/service-configs";
 
 interface PoolServiceFormProps {
   formData: {
@@ -8,10 +9,7 @@ interface PoolServiceFormProps {
     [key: string]: any;
   };
   setFormData: (data: any | ((prev: any) => any)) => void;
-  currentConfig: {
-    poolSizes?: Array<{ value: string; label: string; multiplier: number }>;
-    poolConditions?: Array<{ value: string; label: string }>;
-  };
+  currentConfig: Pick<ServiceConfig, 'poolSizes' | 'poolConditions'> | null;
 }
 
 export default function PoolServiceForm({
@@ -33,7 +31,7 @@ export default function PoolServiceForm({
             <SelectValue placeholder="Select pool size" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.poolSizes?.map((size: any) => (
+            {currentConfig?.poolSizes?.map((size) => (
               <SelectItem key={size.value} value={size.value}>
                 {size.label} - {size.multiplier}x multiplier
               </SelectItem>
@@ -54,7 +52,7 @@ export default function PoolServiceForm({
             <SelectValue placeholder="Select pool condition" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.poolConditions?.map((condition: any) => (
+            {currentConfig?.poolConditions?.map((condition) => (
               <SelectItem key={condition.value} value={condition.value}>
                 {condition.label}
               </SelectItem>

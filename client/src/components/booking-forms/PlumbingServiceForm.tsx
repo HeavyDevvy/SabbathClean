@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from "lucide-react";
+import type { ServiceConfig } from "@/config/service-configs";
 
 interface PlumbingServiceFormProps {
   formData: {
@@ -9,9 +10,7 @@ interface PlumbingServiceFormProps {
     [key: string]: any;
   };
   setFormData: (data: any | ((prev: any) => any)) => void;
-  currentConfig: {
-    plumbingIssues?: Array<{ value: string; label: string; price: number; description: string }>;
-  };
+  currentConfig: Pick<ServiceConfig, 'plumbingIssues'> | null;
 }
 
 export default function PlumbingServiceForm({
@@ -33,7 +32,7 @@ export default function PlumbingServiceForm({
             <SelectValue placeholder="Select the plumbing issue" />
           </SelectTrigger>
           <SelectContent className="max-h-72 overflow-y-auto">
-            {currentConfig.plumbingIssues?.map((issue: any) => (
+            {currentConfig?.plumbingIssues?.map((issue) => (
               <SelectItem key={issue.value} value={issue.value}>
                 <div className="flex flex-col items-start">
                   <span className="font-medium">{issue.label} - R{issue.price}</span>

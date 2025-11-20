@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ServiceConfig } from "@/config/service-configs";
 
 interface CleaningServiceFormProps {
   formData: {
@@ -8,10 +9,7 @@ interface CleaningServiceFormProps {
     [key: string]: any;
   };
   setFormData: (data: any | ((prev: any) => any)) => void;
-  currentConfig: {
-    cleaningTypes?: Array<{ value: string; label: string; price: number }>;
-    propertySizes?: Array<{ value: string; label: string }>;
-  };
+  currentConfig: Pick<ServiceConfig, 'cleaningTypes' | 'propertySizes'> | null;
 }
 
 export default function CleaningServiceForm({
@@ -33,7 +31,7 @@ export default function CleaningServiceForm({
             <SelectValue placeholder="Select cleaning type" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.cleaningTypes?.map((type: any) => (
+            {currentConfig?.cleaningTypes?.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label} - R{type.price}
               </SelectItem>
@@ -54,7 +52,7 @@ export default function CleaningServiceForm({
             <SelectValue placeholder="Select property size" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.propertySizes?.map((size: any) => (
+            {currentConfig?.propertySizes?.map((size) => (
               <SelectItem key={size.value} value={size.value}>
                 {size.label}
               </SelectItem>

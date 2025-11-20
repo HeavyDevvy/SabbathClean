@@ -1,5 +1,6 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ServiceConfig } from "@/config/service-configs";
 
 interface GardenServiceFormProps {
   formData: {
@@ -8,10 +9,7 @@ interface GardenServiceFormProps {
     [key: string]: any;
   };
   setFormData: (data: any | ((prev: any) => any)) => void;
-  currentConfig: {
-    gardenSizes?: Array<{ value: string; label: string; multiplier: number }>;
-    gardenConditions?: Array<{ value: string; label: string }>;
-  };
+  currentConfig: Pick<ServiceConfig, 'gardenSizes' | 'gardenConditions'> | null;
 }
 
 export default function GardenServiceForm({
@@ -33,7 +31,7 @@ export default function GardenServiceForm({
             <SelectValue placeholder="Select garden size" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.gardenSizes?.map((size: any) => (
+            {currentConfig?.gardenSizes?.map((size) => (
               <SelectItem key={size.value} value={size.value}>
                 {size.label} - {size.multiplier}x multiplier
               </SelectItem>
@@ -54,7 +52,7 @@ export default function GardenServiceForm({
             <SelectValue placeholder="Select garden condition" />
           </SelectTrigger>
           <SelectContent>
-            {currentConfig.gardenConditions?.map((condition: any) => (
+            {currentConfig?.gardenConditions?.map((condition) => (
               <SelectItem key={condition.value} value={condition.value}>
                 {condition.label}
               </SelectItem>
