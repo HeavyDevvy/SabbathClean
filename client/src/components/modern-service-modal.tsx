@@ -40,6 +40,10 @@ import { useCart } from "@/contexts/CartContext";
 import BookingConfirmationModal from "./booking-confirmation-modal";
 import CustomServiceContact from "./custom-service-contact";
 import CleaningServiceForm from "./booking-forms/CleaningServiceForm";
+import GardenServiceForm from "./booking-forms/GardenServiceForm";
+import PoolServiceForm from "./booking-forms/PoolServiceForm";
+import PlumbingServiceForm from "./booking-forms/PlumbingServiceForm";
+import ElectricalServiceForm from "./booking-forms/ElectricalServiceForm";
 import { serviceAddOns, suggestAddOns, type AddOn } from "../../../config/addons";
 import { serviceEstimates, calculateEstimatedHours } from "../../../config/estimates";
 import { southAfricanBanks, validateAccountNumber } from "../../../config/banks";
@@ -2153,252 +2157,35 @@ export default function ModernServiceModal({
         )}
 
         {isGardenService && (
-          <>
-            <div>
-              <Label>Garden Size Range *</Label>
-              <Select value={formData.gardenSize} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, gardenSize: value }))
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select garden size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.gardenSizes?.map((size: any) => (
-                    <SelectItem key={size.value} value={size.value}>
-                      {size.label} - {size.multiplier}x multiplier
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Garden Condition *</Label>
-              <Select value={formData.gardenCondition} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, gardenCondition: value }))
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select garden condition" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.gardenConditions?.map((condition: any) => (
-                    <SelectItem key={condition.value} value={condition.value}>
-                      {condition.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </>
+          <GardenServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
         )}
 
         {isPoolService && (
-          <>
-            <div>
-              <Label>Pool Size Range *</Label>
-              <Select value={formData.poolSize} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, poolSize: value }))
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pool size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.poolSizes?.map((size: any) => (
-                    <SelectItem key={size.value} value={size.value}>
-                      {size.label} - {size.multiplier}x multiplier
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Pool Condition *</Label>
-              <Select value={formData.poolCondition} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, poolCondition: value }))
-              }>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select pool condition" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig.poolConditions?.map((condition: any) => (
-                    <SelectItem key={condition.value} value={condition.value}>
-                      {condition.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </>
+          <PoolServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
         )}
 
         {isPlumbing && (
-          <>
-            <div>
-              <Label>What needs to be fixed? *</Label>
-              <Select value={formData.plumbingIssue} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, plumbingIssue: value }))
-              }>
-                <SelectTrigger data-testid="select-plumbing-issue">
-                  <SelectValue placeholder="Select the plumbing issue" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72 overflow-y-auto">
-                  {currentConfig.plumbingIssues?.map((issue: any) => (
-                    <SelectItem key={issue.value} value={issue.value}>
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{issue.label} - R{issue.price}</span>
-                        <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Booking Urgency *</Label>
-              <Select value={formData.urgency} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, urgency: value }))
-              }>
-                <SelectTrigger data-testid="select-plumbing-urgency">
-                  <SelectValue placeholder="Select urgency level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="emergency">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium text-red-600">Emergency (Immediate)</span>
-                      <span className="text-xs text-gray-500 mt-1">Provider dispatched within 1 hour - Burst pipes, flooding</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="urgent">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium text-orange-600">Urgent (Same Day)</span>
-                      <span className="text-xs text-gray-500 mt-1">Service within 24 hours - Major leaks, no water</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="same-day">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium text-yellow-600">Same Day</span>
-                      <span className="text-xs text-gray-500 mt-1">Service today if available</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="next-day">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Next Day</span>
-                      <span className="text-xs text-gray-500 mt-1">Service tomorrow</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="standard">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Standard (Flexible)</span>
-                      <span className="text-xs text-gray-500 mt-1">Schedule at your convenience - Non-urgent repairs</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {(formData.urgency === "emergency" || formData.urgency === "urgent" || formData.urgency === "same-day") && (
-                <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-xs text-orange-700 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    <span>
-                      {formData.urgency === "emergency" && "Emergency service includes R150 callout fee. Provider will contact you immediately."}
-                      {formData.urgency === "urgent" && "Urgent service includes R100 priority fee. Service scheduled for today."}
-                      {formData.urgency === "same-day" && "Same-day service subject to availability. Additional R50 fee may apply."}
-                    </span>
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
+          <PlumbingServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
         )}
 
         {isElectrical && (
-          <>
-            <div>
-              <Label htmlFor="electrical-issue">What needs to be fixed? *</Label>
-              <Select value={formData.electricalIssue} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, electricalIssue: value }))
-              }>
-                <SelectTrigger data-testid="select-electrical-issue">
-                  <SelectValue placeholder="Select the electrical issue" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72 overflow-y-auto">
-                  {currentConfig.electricalIssues?.map((issue: any) => (
-                    <SelectItem key={issue.value} value={issue.value}>
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{issue.label} - R{issue.price}</span>
-                        <span className="text-xs text-gray-500 mt-1">{issue.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>How urgent is this? *</Label>
-              <Select value={formData.urgency} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, urgency: value }))
-              }>
-                <SelectTrigger data-testid="select-electrical-urgency">
-                  <SelectValue placeholder="Select urgency level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="emergency">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Emergency (24/7) - 2.5x price</span>
-                      <span className="text-xs text-gray-500 mt-1">Immediate response for critical electrical issues</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="urgent">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Urgent (Same Day) - 1.8x price</span>
-                      <span className="text-xs text-gray-500 mt-1">Fast response within hours for urgent repairs</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="next-day">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Next Day</span>
-                      <span className="text-xs text-gray-500 mt-1">Service tomorrow at regular price</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="standard">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Standard (Flexible)</span>
-                      <span className="text-xs text-gray-500 mt-1">Schedule at your convenience - Non-urgent repairs</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="scheduled">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Scheduled (Flexible) - 10% discount</span>
-                      <span className="text-xs text-gray-500 mt-1">Book in advance for non-urgent work</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {(formData.urgency === "emergency" || formData.urgency === "urgent") && (
-                <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-xs text-orange-700 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    <span>
-                      {formData.urgency === "emergency" && "Emergency service charged at 2.5x base price. Certified electrician will respond immediately for safety-critical issues."}
-                      {formData.urgency === "urgent" && "Urgent service charged at 1.8x base price. Same-day response by qualified electrician for priority repairs."}
-                    </span>
-                  </p>
-                </div>
-              )}
-              {formData.urgency === "scheduled" && (
-                <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-xs text-green-700 flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    <span>
-                      Save 10% by scheduling in advance. Great for planned upgrades and non-urgent electrical work.
-                    </span>
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
+          <ElectricalServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
         )}
 
         {serviceId === "event-staff" && (
