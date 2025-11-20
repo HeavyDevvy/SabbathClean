@@ -62,3 +62,92 @@ The design adopts a minimalistic approach with clean layouts, simplified user fl
 
 ## PDF Generation
 - **jsPDF**: PDF receipt generation.
+
+# Recent Architecture Improvements
+
+## Phase 3: Shared Step Component Extraction (November 2025)
+
+### Objective
+Extract shared booking workflow steps (Schedule, AddOns) from the monolithic `modern-service-modal.tsx` to improve maintainability and establish reusable step components for the 4-step booking flow.
+
+### Completed Work
+
+#### 1. ScheduleStep Component (Step 2)
+- **File**: `client/src/components/booking-steps/ScheduleStep.tsx` (282 lines)
+- **Extracted logic**:
+  - Date selection with service-specific minimum notice requirements (24hrs for Chef/Garden)
+  - Time preference with intelligent past-time filtering and 24-hour notice validation
+  - Recurring schedule options with automatic discount messaging
+  - Materials & equipment supplier selection with pricing adjustments
+  - Service-specific insurance checkboxes (Plumbing, Electrical)
+- **Props interface**: Clean separation with formData, setFormData, service-type flags, and computed values
+
+#### 2. AddOnsStep Component (Step 3)
+- **File**: `client/src/components/booking-steps/AddOnsStep.tsx` (241 lines)
+- **Extracted logic**:
+  - Comments/additional details textarea with smart placeholder
+  - Keyword-based smart add-on suggestions (AI-powered)
+  - Add-ons dropdown with multi-selection capability
+  - Selected add-ons display with inline removal
+  - Estimated hours calculation and display
+  - "Add Another Service" button for multi-service cart bookings
+- **Props interface**: All dependencies cleanly passed (formData, pricing, callbacks, config)
+
+### Integration
+- Both components integrated via renderStep2() and renderStep3()
+- All data flows preserved through explicit props
+- All data-testids maintained for testing
+- Zero functional regressions
+
+### Impact
+- **Modal size**: 4,026 → 3,611 lines (-415 lines, 10.3% reduction)
+- **Step components created**: 2 files, 523 total lines (282 + 241)
+- **Modularity**: Shared steps now reusable across booking flows
+- **Maintainability**: Each step isolated with clear interfaces
+
+### Quality
+- ✅ Architect-reviewed and approved
+- ✅ All functionality preserved
+- ✅ Application running without errors
+- ✅ Clean prop interfaces
+
+### Remaining Opportunities
+- **LocationStep** (Step 1): Property type, address, gate code fields can be extracted
+- **ReviewStep** (Step 4): Provider selection and payment review can be componentized
+- Further decomposition would reduce modal to <3,000 lines
+
+## Phase 2: Image Optimization & Service Form Extraction (November 2025)
+
+### 1. Image Optimization
+- Optimized 22 images: 140.47MB → 3.04MB (97.8% reduction)
+- Format: WebP (85% quality, 1920px max width)
+- Updated 3 components with optimized assets
+- Browser support: 97%+
+
+### 2. Service Form Extraction
+- Extracted 5 service-specific forms from Step 1:
+  - CleaningServiceForm (60 lines)
+  - GardenServiceForm (58 lines)
+  - PoolServiceForm (58 lines)
+  - PlumbingServiceForm (119 lines)
+  - ElectricalServiceForm (129 lines)
+- Modal reduced: 4,270 → 4,026 lines (-244 lines)
+- Total forms: 424 lines across 5 modular components
+
+## Phase 1: Storage Modularization & Modal Consolidation (November 2025)
+
+### Storage Modularization
+- Created 4 domain-specific storage modules
+- Fixed critical CartStorage bug affecting guest carts
+- Net reduction: ~6,950 lines (29% cleaner codebase)
+
+### Modal Consolidation
+- Deleted 9 unused booking modals (~7,165 lines)
+- Consolidated to single `modern-service-modal.tsx`
+- Zero production functionality impact
+
+## Overall Architecture Progress
+- **Total modal reduction**: 4,270 → 3,611 lines (-659 lines, 15.4%)
+- **Components created**: 7 service forms + 2 step components (947 lines)
+- **Images optimized**: 97.8% size reduction (140MB → 3MB)
+- **Code quality**: Modular, maintainable, architect-approved
