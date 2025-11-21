@@ -1,0 +1,144 @@
+Service Provider Application Branding Update Instructions
+CRITICAL: Follow ALL requirements below and commit changes properly
+1. Colour Scheme Implementation
+Apply ONLY the Berry Events colour palette throughout the Join as Provider / Service Provider Application flow:
+Colour Palette (use EXACT hex codes):
+
+#44062D – primary dark (headers, primary buttons, key accents)
+#3C0920 – secondary dark (hover states, borders, secondary sections)
+#EED1C4 – warm cream (cards, input backgrounds, secondary sections)
+#F7F2EF – soft off-white (main page background)
+#C56B86 – muted rose accent (links, highlights, badges)
+
+Requirements:
+
+Remove ALL old blues, purples, or non-palette colours
+Update: buttons, CTAs, step indicators, text links, form labels, backgrounds, borders
+Ensure WCAG AA contrast compliance (minimum 4.5:1 for text, 3:1 for UI components)
+Test hover states, focus states, and active states with palette colours only
+
+2. Logo and Branding
+
+Add Berry Events logo to the top of Service Provider Application page
+Position in header/top section with consistent alignment matching main app pages
+Ensure responsive scaling (no stretching or pixelation)
+Test on mobile (375px), tablet (768px), and desktop (1920px) viewports
+Logo should load properly without broken image errors
+
+3. Stepper/Progress Indicator Styling
+Step indicator colours:
+
+Active step: #44062D
+Completed steps: #C56B86
+Inactive steps: #F7F2EF background with #3C0920 text
+
+Requirements:
+
+Match existing app typography (font-family, sizes, weights)
+Match border-radius, shadows, and spacing from global styles
+Ensure no overlapping text or misaligned icons on any screen size
+Test step transitions and visual feedback
+
+4. Consistency Standards
+Match existing app styling:
+
+Typography: same font-family, font-sizes, font-weights, line-heights
+Border radius: use existing values from global theme
+Shadows: apply existing box-shadow values
+Button styles: match padding, hover effects, transitions, focus rings
+Input fields: match height, padding, border styles, focus states
+Spacing: use existing margin/padding scale (likely 4px/8px grid)
+
+DO NOT change:
+
+Any form validation logic
+Field requirements or data structure
+Navigation logic between steps
+API calls or data submission
+
+5. Error Prevention & Testing
+Before committing, verify:
+
+ No console errors or warnings
+ No TypeScript/JavaScript errors
+ All steps load correctly without blank screens
+ Navigation between steps works as before
+ All imports and component references are correct
+ Images/assets load properly (logo, icons)
+ Forms submit successfully
+ Validation messages display correctly with new colours
+ Success/confirmation screens render properly
+
+Test on:
+
+Chrome, Firefox, Safari
+Mobile viewport (375px)
+Tablet viewport (768px)
+Desktop viewport (1920px+)
+
+6. Implementation Checklist
+Step-by-step process:
+
+Create a new branch: git checkout -b branding-update-service-provider
+Locate all Service Provider Application component files
+Update colour variables in theme/CSS files first
+Apply colours to components systematically (one step at a time)
+Add logo to header component
+Update stepper component styling
+Test each page/step after updating
+Fix any console errors immediately
+Verify responsive behavior on all screen sizes
+Run final checklist (Section 5 above)
+
+7. Git Workflow (MANDATORY)
+After completing changes:
+bash# Check what changed
+git status
+
+# Stage all changes
+git add .
+
+# Commit with descriptive message
+git commit -m "Update Service Provider Application branding to Berry Events colour palette"
+
+# Push to GitHub
+git push origin branding-update-service-provider
+
+# Verify push succeeded
+git log --oneline -n 1
+If errors occur:
+
+Pull latest changes: git pull origin main
+Resolve conflicts if any
+Re-commit and push
+
+8. Files Likely to Modify
+Look for these files/folders:
+
+/components/ServiceProvider/**
+/pages/join-provider/** or similar
+/styles/theme.css or /styles/variables.css
+/components/Stepper/**
+Any provider-specific layout components
+
+DO NOT modify:
+
+Unrelated app pages
+API routes (unless fixing import paths)
+Database schemas
+Authentication logic
+
+9. Final Verification
+Before marking complete, confirm:
+
+ All Service Provider Application pages use ONLY specified colour palette
+ Logo displays correctly at top of all provider pages
+ Stepper uses correct colours for active/completed/inactive states
+ No visual inconsistencies with rest of Berry Events app
+ Navigation flows work identically to before
+ No console errors in browser dev tools
+ All changes committed and pushed to GitHub
+ Can successfully complete full provider application flow
+
+Success criteria:
+The Join as Provider / Service Provider Application should look like a seamless part of the Berry Events application with consistent branding, colours, and visual styling throughout.

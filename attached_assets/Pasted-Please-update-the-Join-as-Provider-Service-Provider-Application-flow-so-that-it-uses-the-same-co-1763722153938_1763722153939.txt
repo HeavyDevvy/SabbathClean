@@ -1,0 +1,52 @@
+Please update the “Join as Provider” / Service Provider Application flow so that it uses the same colour scheme and branding as the rest of the Berry Events application.
+
+1. Colour scheme
+
+Apply ONLY the Berry Events colour palette throughout the Join as Provider / Service Provider Application views (including all pages, modals, and step components):
+	•	#44062D – primary dark (main brand colour for headers, primary buttons, key accents)
+	•	#3C0920 – secondary dark (hover states, secondary sections, borders where needed)
+	•	#EED1C4 – warm cream (cards, input backgrounds, secondary sections)
+	•	#F7F2EF – soft off-white (main page background)
+	•	#C56B86 – muted rose accent (links, highlights, subtle accents and badges)
+
+Requirements:
+	•	Remove any old blues, purples, or other colours that are not part of this palette.
+	•	Update all buttons, CTAs, step indicators, text links, form labels, and backgrounds in the Join as Provider flow to use only the above colours.
+	•	Ensure sufficient contrast for readability (especially on buttons and smaller text).
+
+2. Logo and branding
+	•	Add the Berry Events logo (use the logo image uploaded with this prompt) to the top of the Service Provider Application page.
+	•	The logo should sit in the header or top section, aligned consistently with the rest of the app (same alignment and spacing as on the main/home pages).
+	•	Make sure the logo scales correctly on different screen sizes and does not appear stretched or pixelated.
+
+3. Stepper / progress alignment
+
+For the multi-step “Join as Provider” / Service Provider Application process:
+	•	Style the stepper/progress indicator using the Berry Events colour palette:
+	•	Active step: use #44062D as the primary highlight.
+	•	Completed steps: use #C56B86 or another suitable accent from the palette.
+	•	Inactive steps: use a muted tone (e.g. #F7F2EF background with #3C0920 text).
+	•	Make sure the step titles, numbers/icons, and connecting lines all visually align with the rest of the app’s styling (same fonts, font sizes, border radius, etc.).
+	•	Ensure spacing and alignment are consistent across desktop and mobile (no overlapping text or misaligned icons).
+
+4. Consistency with the rest of the app
+	•	Match the typography (font family, font sizes, font weights) already used in the main app.
+	•	Match border radius, shadows, and button styles to the existing global style used elsewhere (e.g. same rounded corners, hover behaviour, and focus states).
+	•	Do not change any logic or form fields – this update is purely for styling and branding unless fixing obvious UI bugs.
+
+5. Error handling and blank screens
+	•	Make sure there are no JavaScript/TypeScript errors, styling errors, or console errors introduced by these changes.
+	•	The Join as Provider / Service Provider Application flow must:
+	•	Load correctly on every step.
+	•	Not show any blank screens or unresolved components.
+	•	Successfully navigate between steps as before.
+	•	If any imports, components, or assets were renamed during the update, ensure all references are correctly updated.
+
+6. Final checks
+
+Before finishing, please:
+	•	Double-check that every part of the Join as Provider / Service Provider Application (all steps, success/confirmation screens, error states, and validation messages) uses only the specified colour palette and shows the logo at the top.
+	•	Confirm that navigation through the steps still works exactly as before (no broken routes or missing components).
+	•	Confirm there are no console errors or warnings related to the updated components.
+
+Do not modify any unrelated parts of the app – limit all changes to the Join as Provider / Service Provider Application screens and shared styling/theme files if necessary.

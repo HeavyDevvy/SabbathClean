@@ -22,6 +22,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { useLocation } from "wouter";
+import berryLogo from "@assets/berry-logo.png";
 
 interface ProviderData {
   // Basic Information
@@ -258,13 +259,13 @@ export default function EnhancedProviderOnboarding() {
                 <Card 
                   className={`cursor-pointer border-2 transition-all ${
                     providerData.applicationType === 'individual' 
-                      ? 'border-blue-500 bg-blue-50' 
+                      ? 'border-[#44062D] bg-[#EED1C4]/30' 
                       : 'border-gray-200'
                   }`}
                   onClick={() => setProviderData({ ...providerData, applicationType: 'individual' })}
                 >
                   <CardContent className="flex flex-col items-center p-4">
-                    <User className="h-8 w-8 text-blue-600 mb-2" />
+                    <User className="h-8 w-8 text-[#44062D] mb-2" />
                     <span className="font-medium">Individual</span>
                     <span className="text-sm text-gray-600 text-center">Personal service provider</span>
                   </CardContent>
@@ -273,13 +274,13 @@ export default function EnhancedProviderOnboarding() {
                 <Card 
                   className={`cursor-pointer border-2 transition-all ${
                     providerData.applicationType === 'company' 
-                      ? 'border-blue-500 bg-blue-50' 
+                      ? 'border-[#44062D] bg-[#EED1C4]/30' 
                       : 'border-gray-200'
                   }`}
                   onClick={() => setProviderData({ ...providerData, applicationType: 'company' })}
                 >
                   <CardContent className="flex flex-col items-center p-4">
-                    <Building2 className="h-8 w-8 text-blue-600 mb-2" />
+                    <Building2 className="h-8 w-8 text-[#44062D] mb-2" />
                     <span className="font-medium">Company</span>
                     <span className="text-sm text-gray-600 text-center">Business service provider</span>
                   </CardContent>
@@ -797,11 +798,21 @@ export default function EnhancedProviderOnboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-12 px-4">
+    <div className="min-h-screen bg-[#F7F2EF] py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader className="text-center border-b">
-            <CardTitle className="text-2xl font-bold text-gray-900">
+        {/* Berry Events Logo */}
+        <div className="flex justify-center mb-8">
+          <img 
+            src={berryLogo} 
+            alt="Berry Events Logo" 
+            className="h-16 w-auto object-contain"
+            data-testid="img-berry-logo"
+          />
+        </div>
+        
+        <Card className="bg-white shadow-lg">
+          <CardHeader className="text-center border-b border-[#EED1C4]">
+            <CardTitle className="text-2xl font-bold text-[#44062D]">
               Service Provider Application
             </CardTitle>
             <p className="text-gray-600 mt-2">
@@ -813,18 +824,20 @@ export default function EnhancedProviderOnboarding() {
               {[1, 2, 3, 4].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
                       currentStep >= step
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-600"
+                        ? "bg-[#44062D] text-white"
+                        : currentStep > step
+                        ? "bg-[#C56B86] text-white"
+                        : "bg-[#F7F2EF] text-[#3C0920] border-2 border-[#3C0920]"
                     }`}
                   >
                     {currentStep > step ? <CheckCircle className="h-5 w-5" /> : step}
                   </div>
                   {step < 4 && (
                     <div
-                      className={`w-12 h-1 ${
-                        currentStep > step ? "bg-blue-600" : "bg-gray-200"
+                      className={`w-12 h-1 transition-colors ${
+                        currentStep > step ? "bg-[#C56B86]" : "bg-[#EED1C4]"
                       }`}
                     />
                   )}
@@ -842,12 +855,13 @@ export default function EnhancedProviderOnboarding() {
           <CardContent className="p-6">
             {renderStep()}
             
-            <div className="flex justify-between pt-6 border-t mt-6">
+            <div className="flex justify-between pt-6 border-t border-[#EED1C4] mt-6">
               <div>
                 {currentStep > 1 && (
                   <Button
                     onClick={handlePrevious}
                     variant="outline"
+                    className="border-[#44062D] text-[#44062D] hover:bg-[#EED1C4]/30"
                     disabled={isSubmitting}
                     data-testid="button-previous"
                   >
@@ -860,6 +874,7 @@ export default function EnhancedProviderOnboarding() {
                 <Button
                   onClick={() => setLocation("/")}
                   variant="ghost"
+                  className="text-gray-600 hover:text-[#44062D] hover:bg-[#F7F2EF]"
                   disabled={isSubmitting}
                   data-testid="button-cancel"
                 >
@@ -869,7 +884,7 @@ export default function EnhancedProviderOnboarding() {
                 {currentStep < 4 ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-blue-600 hover:bg-blue-700"
+                    className="bg-[#44062D] hover:bg-[#3C0920] text-white"
                     disabled={isSubmitting}
                     data-testid="button-next"
                   >
@@ -878,7 +893,7 @@ export default function EnhancedProviderOnboarding() {
                 ) : (
                   <Button
                     onClick={handleSubmit}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-[#44062D] hover:bg-[#3C0920] text-white"
                     disabled={isSubmitting}
                     data-testid="button-submit"
                   >
