@@ -1,0 +1,257 @@
+Here are comprehensive instructions for your Replit prompt to add the profile picture upload feature with proper version control:
+
+Service Provider Application - Profile Picture Upload Feature
+CRITICAL: Follow ALL requirements below and commit changes properly
+1. Add Profile Picture Upload Section
+Location: Step 3 of Service Provider Application (Join as Provider flow)
+Requirements:
+
+Add new upload block titled: "Profile picture"
+Position: integrate naturally with existing document upload sections
+Copy exact component, layout, and behavior from existing document uploads
+Change only the label and file type acceptance
+
+Upload capabilities:
+
+Allow upload from device storage
+Allow photo capture using device camera (same as other document uploads)
+Accept image formats: .jpg, .jpeg, .png, .webp
+Optional: Consider .heic for iOS compatibility
+
+2. Implementation Details
+Component structure:
+javascript// Use same component as other document uploads
+// Example field name: profilePicture or profile_image
+
+{
+  fieldName: 'profilePicture', // or 'profile_image'
+  label: 'Profile picture',
+  accept: 'image/jpeg,image/jpg,image/png,image/webp',
+  required: true, // Match requirement level of other documents
+  allowCamera: true,
+  allowUpload: true
+}
+File validation:
+
+Max file size: 5MB (or match existing document size limits)
+Validate file type on upload
+Show clear error if wrong format or too large
+Compress image if needed (optional enhancement)
+
+3. Form State & Data Handling
+State management:
+
+Add profilePicture (or profile_image) to form state object
+Store uploaded file data consistently with other documents
+Ensure state persists when navigating between steps
+
+Data structure example:
+javascriptformData: {
+  // ... existing fields
+  documents: {
+    idDocument: File,
+    businessLicense: File,
+    // ... other documents
+  },
+  profilePicture: File, // Store separately or with documents
+}
+Backend submission:
+
+Include profile picture in FormData or JSON payload
+Use clear, consistent field naming: profilePicture or profile_image
+Ensure backend endpoint accepts this new field
+Match naming convention of existing document fields
+
+4. Validation & Error Handling
+Validation rules (match existing document validation):
+
+Required field validation if other documents are required
+File type validation (only allowed image formats)
+File size validation (max 5MB recommended)
+Clear error messages for each validation failure
+
+Error message examples:
+
+"Profile picture is required"
+"Please upload a valid image file (.jpg, .png)"
+"File size must be under 5MB"
+"Failed to upload profile picture. Please try again."
+
+Error display:
+
+Show errors in same style/location as other document errors
+Red text or border highlighting (matching existing error styling)
+Clear error message below upload field
+Prevent form submission if validation fails
+
+5. UI & Styling Requirements
+Visual consistency:
+
+Match spacing, padding, margins of existing document sections
+Use same border styles, colors, and border-radius
+Apply same font family, sizes, and weights for labels
+Match button styles (Upload, Take Photo, Remove)
+Use same icons for camera, upload, and delete actions
+
+Layout requirements:
+
+Integrate seamlessly into existing Step 3 layout
+No overlapping elements on any screen size
+Maintain responsive behavior (mobile, tablet, desktop)
+Test on: 375px (mobile), 768px (tablet), 1024px+ (desktop)
+
+Interactive states:
+
+Hover states on buttons (same as existing)
+Focus states on upload area (accessibility)
+Loading state during upload (spinner or progress indicator)
+Success state after successful upload (checkmark or preview)
+Preview uploaded image (thumbnail if possible)
+
+6. Testing Checklist
+Before committing, verify:
+
+ Profile picture section appears on Step 3
+ Upload from device works correctly
+ Camera capture works on mobile devices
+ Accepts all specified image formats (.jpg, .jpeg, .png, .webp)
+ Rejects invalid file types with clear error
+ File size validation works (if implemented)
+ Required validation triggers if field is mandatory
+ Error messages display correctly
+ Uploaded image preview shows (if implemented)
+ Can remove uploaded image and re-upload
+ Form state includes profilePicture data
+ Navigate forward from Step 3 without errors
+ Navigate backward to Step 3 - uploaded image persists
+ Form submission includes profile picture in payload
+ Backend receives profile picture correctly
+ No console errors or warnings
+ No TypeScript errors
+ All steps still load correctly
+ Existing document uploads still work identically
+ Responsive layout works on all screen sizes
+
+Test scenarios:
+
+Upload valid image → should succeed
+Upload invalid file type → should show error
+Upload oversized file → should show error (if size limit exists)
+Take photo with camera → should work on mobile
+Navigate away and back → image should persist
+Remove image and re-upload → should work
+Submit form → should include profile picture data
+
+7. Code Changes Checklist
+Files likely to modify:
+
+/components/ServiceProvider/Step3.tsx (or similar)
+/components/ServiceProvider/DocumentUpload.tsx (or similar)
+/types/serviceProvider.ts (add profilePicture to type definitions)
+/api/serviceProvider/submit.ts (ensure backend accepts new field)
+Form validation schema file (add profilePicture validation)
+
+DO NOT modify:
+
+Step 1, 2, 4+ unless fixing related bugs
+Existing document upload logic (only replicate it)
+Unrelated API routes
+Database schemas (unless adding profile picture storage)
+
+8. Implementation Steps
+Step-by-step process:
+
+Create feature branch: git checkout -b feature/profile-picture-upload
+Locate Step 3 component file
+Identify existing document upload component/logic
+Copy document upload component for profile picture
+Update label to "Profile picture"
+Update accepted file types to images only
+Add profilePicture field to form state
+Update form validation schema
+Test upload functionality
+Test camera functionality (mobile)
+Verify form submission includes profile picture
+Test all validation scenarios
+Check responsive layout
+Run full testing checklist (Section 6)
+Fix any console errors
+Commit and push changes
+
+9. Git Workflow (MANDATORY)
+After completing changes:
+bash# Check current status
+git status
+
+# Stage all changes
+git add .
+
+# Commit with clear message
+git commit -m "Add profile picture upload to Service Provider Application Step 3"
+
+# Push to GitHub
+git push origin feature/profile-picture-upload
+
+# Verify push succeeded
+git log --oneline -n 1
+
+# Check for any errors
+git status
+If errors occur:
+bash# Pull latest changes
+git pull origin main
+
+# Resolve any conflicts
+# Re-add and commit
+
+# Push again
+git push origin feature/profile-picture-upload
+10. Backend Considerations
+Ensure backend handles:
+
+New profilePicture field in request payload
+Image file storage (S3, cloud storage, or local)
+Image validation on server side (file type, size)
+Database field for profile picture URL/path
+Return uploaded image URL in response (if needed)
+
+API endpoint update:
+javascript// Example expected payload structure
+{
+  // ... existing provider data
+  documents: {
+    idDocument: "base64..." or File,
+    businessLicense: "base64..." or File,
+    // ... other documents
+  },
+  profilePicture: "base64..." or File, // New field
+}
+11. Accessibility Requirements
+Ensure accessibility:
+
+Upload buttons have proper ARIA labels
+Error messages are announced to screen readers
+Keyboard navigation works for all upload actions
+Focus indicators are visible and clear
+Image preview has alt text if displayed
+
+12. Final Verification
+Before marking complete, confirm:
+
+ Profile picture upload section displays correctly on Step 3
+ Matches existing document upload styling perfectly
+ Upload from device works
+ Camera capture works (test on mobile)
+ Validation works correctly
+ Error messages display properly
+ Form includes profile picture in submission
+ Backend receives profile picture data
+ No console errors or TypeScript errors
+ All steps navigate correctly
+ Existing functionality unchanged
+ Responsive on all screen sizes
+ All changes committed and pushed to GitHub
+ Can successfully complete entire application with profile picture
+
+Success criteria:
+Service providers can upload or capture a profile picture in Step 3, and it is submitted along with other documents without breaking existing functionality.

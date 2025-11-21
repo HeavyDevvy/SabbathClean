@@ -1,0 +1,42 @@
+Please update Step 3 of the Service Provider Application (Join as Provider flow) with an additional document upload section for a Profile Picture.
+
+1. Add a profile picture upload section
+
+On Step 3 (where the other documents are uploaded):
+	•	Add a new upload block titled: “Profile picture”.
+	•	This block must:
+	•	Allow the service provider to upload an image from their device.
+	•	Give them the option to take a photo with their camera, exactly the same way the other document upload sections work.
+	•	Use the same component, layout, and behaviour as the existing document upload inputs (copy the same upload/take-photo logic and UI, but change the label and accepted file type if needed).
+	•	Accept common image formats (e.g. .jpg, .jpeg, .png).
+
+2. Behaviour & validation
+	•	Treat the Profile picture as a separate document in the form state and submission payload.
+	•	Use the same validation pattern as the other uploads:
+	•	If other documents are required, make this profile picture required as well (or follow the same required/optional logic currently used for the other docs).
+	•	Show clear error messages if upload fails or is missing (following the same style as existing document errors).
+	•	Ensure the uploaded/taken profile picture is:
+	•	Properly stored in the form state.
+	•	Included in whatever data is sent to the backend / API for the Service Provider Application, in a clearly named field (e.g. profilePicture or profile_image), consistent with the current naming conventions.
+
+3. UI & styling
+	•	The new Profile picture section must visually match the existing document upload sections:
+	•	Same spacing, borders, fonts, buttons, icons, and hover/focus states.
+	•	Same “Upload” and “Take Photo” buttons/options used elsewhere.
+	•	Ensure the new section fits neatly into the existing layout on desktop and mobile with no overlapping or broken layout.
+
+4. No errors / blank screens
+
+After implementing this:
+	•	Make sure there are no JavaScript/TypeScript errors related to:
+	•	The new upload field.
+	•	State handling.
+	•	Form submission logic.
+	•	Ensure Step 3 and all other steps:
+	•	Load correctly with no blank screens.
+	•	Navigate forwards and backwards without issues.
+	•	Confirm that:
+	•	Submitting the form still works correctly.
+	•	The backend receives all documents plus the new profile picture field without breaking existing behaviour.
+
+Please do not change any other logic or UI outside of adding this new profile picture upload section on Step 3 and wiring it into the existing form flow.

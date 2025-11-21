@@ -59,6 +59,7 @@ interface ProviderData {
   businessRegistration: File | null;
   bankStatement: File | null;
   certificates: File[];
+  profilePicture: File | null;
   
   // Verification
   kycStatus: 'pending' | 'verified' | 'failed';
@@ -75,7 +76,8 @@ export default function EnhancedProviderOnboarding() {
     proofOfAddress: useRef<HTMLInputElement>(null),
     businessRegistration: useRef<HTMLInputElement>(null),
     bankStatement: useRef<HTMLInputElement>(null),
-    certificates: useRef<HTMLInputElement>(null)
+    certificates: useRef<HTMLInputElement>(null),
+    profilePicture: useRef<HTMLInputElement>(null)
   };
 
   const [providerData, setProviderData] = useState<ProviderData>({
@@ -104,6 +106,7 @@ export default function EnhancedProviderOnboarding() {
     businessRegistration: null,
     bankStatement: null,
     certificates: [],
+    profilePicture: null,
     kycStatus: 'pending',
     kybStatus: 'pending'
   });
@@ -513,6 +516,54 @@ export default function EnhancedProviderOnboarding() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Profile Picture */}
+              <Card className="border-2 border-dashed border-gray-300">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <User className="mx-auto h-12 w-12 text-gray-400" />
+                    <h4 className="mt-2 font-medium text-gray-900">Profile Picture</h4>
+                    <p className="text-sm text-gray-600 mb-4">Clear photo of yourself for your profile</p>
+                    
+                    <div className="flex flex-col space-y-2">
+                      <Button
+                        onClick={() => fileInputRefs.profilePicture.current?.click()}
+                        variant="outline"
+                        className="w-full"
+                        data-testid="button-upload-profile-picture"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Photo
+                      </Button>
+                      
+                      <Button
+                        onClick={() => openCamera('profilePicture')}
+                        variant="outline"
+                        className="w-full"
+                        data-testid="button-camera-profile-picture"
+                      >
+                        <Camera className="h-4 w-4 mr-2" />
+                        Take Photo
+                      </Button>
+                    </div>
+                    
+                    <input
+                      ref={fileInputRefs.profilePicture}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload('profilePicture', e.target.files?.[0] || null)}
+                    />
+                    
+                    {providerData.profilePicture && (
+                      <p className="mt-2 text-sm text-green-600 flex items-center justify-center">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        {providerData.profilePicture.name}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* ID Document */}
               <Card className="border-2 border-dashed border-gray-300">
                 <CardContent className="p-6">
