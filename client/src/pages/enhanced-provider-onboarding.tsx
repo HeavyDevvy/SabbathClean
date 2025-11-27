@@ -224,6 +224,56 @@ export default function EnhancedProviderOnboarding() {
         return;
       }
 
+      const accountHolderClean = providerData.accountHolder.trim();
+      const accountNumberClean = providerData.accountNumber.replace(/\D/g, "");
+      const branchCodeClean = providerData.branchCode.replace(/\D/g, "");
+
+      if (!providerData.bankName) {
+        toast({
+          title: "Banking Details Error",
+          description: "Please select your bank",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (!providerData.accountType) {
+        toast({
+          title: "Banking Details Error",
+          description: "Please select your account type",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (!accountHolderClean) {
+        toast({
+          title: "Banking Details Error",
+          description: "Please enter the account holder name",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (accountNumberClean.length < 6) {
+        toast({
+          title: "Banking Details Error",
+          description: "Account number is too short",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (branchCodeClean.length < 4) {
+        toast({
+          title: "Banking Details Error",
+          description: "Branch code is invalid",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const registerRes = await authClient.register({
         email: providerData.email,
         password: providerData.password,
@@ -251,9 +301,9 @@ export default function EnhancedProviderOnboarding() {
         location: locationStr,
         bankingDetails: {
           bankName: providerData.bankName,
-          accountHolder: providerData.accountHolder,
-          accountNumber: providerData.accountNumber,
-          branchCode: providerData.branchCode,
+          accountHolder: accountHolderClean,
+          accountNumber: accountNumberClean,
+          branchCode: branchCodeClean,
           accountType: providerData.accountType,
         },
         providerType: providerData.applicationType,
@@ -289,9 +339,9 @@ export default function EnhancedProviderOnboarding() {
       try {
         const verifyRes = await apiRequest("POST", "/api/providers/verify-bank", {
           bankName: providerData.bankName,
-          accountHolder: providerData.accountHolder,
-          accountNumber: providerData.accountNumber,
-          branchCode: providerData.branchCode,
+          accountHolder: accountHolderClean,
+          accountNumber: accountNumberClean,
+          branchCode: branchCodeClean,
           accountType: providerData.accountType,
         });
         await verifyRes.json();

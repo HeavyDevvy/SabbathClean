@@ -21,7 +21,9 @@ export default function ProviderDashboard() {
   const isProvider = user?.isProvider || false;
   const userId = user?.id || '';
   const { data: provider } = useQuery<any>({
-    queryKey: ["/api/providers/by-user", userId],
+    queryKey: [
+      userId ? `/api/providers/by-user/${userId}` : "/api/providers/by-user/idle"
+    ],
     enabled: !!userId && isProvider,
   });
   const isApproved = (provider?.verificationStatus === 'approved') || !!provider?.isVerified;

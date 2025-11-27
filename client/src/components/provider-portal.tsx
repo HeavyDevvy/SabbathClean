@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import TrainingCenter from "@/components/training-center";
-import ProviderLiveTracking from "@/components/provider-live-tracking";
+import { lazy, Suspense } from "react";
+const TrainingCenter = lazy(() => import("@/components/training-center"));
+const ProviderLiveTracking = lazy(() => import("@/components/provider-live-tracking"));
 import { ChatDialog } from "@/components/chat-dialog";
-import { format } from "date-fns";
 import { 
   User,
   Calendar,
@@ -100,6 +100,13 @@ export default function ProviderPortal({
     return !isNaN(d.getTime()) && d >= sevenDaysAgo;
   }).length;
   const providerRating = provider.rating ? Number(provider.rating) : 0;
+  const formatDate = (d: Date) => {
+    try {
+      return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return d.toISOString().slice(0, 10);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -360,16 +367,20 @@ export default function ProviderPortal({
 
         {/* Live Tracking */}
         <TabsContent value="tracking" className="space-y-6">
-          <ProviderLiveTracking providerId={providerId} />
+          <Suspense fallback={<div className="p-4">Loading live tracking...</div>}>
+            <ProviderLiveTracking providerId={providerId} />
+          </Suspense>
         </TabsContent>
 
         {/* Training Center */}
         <TabsContent value="training">
-          <TrainingCenter 
-            providerId={providerId}
-            providerType={providerType}
-            isAdmin={isAdmin}
-          />
+          <Suspense fallback={<div className="p-4">Loading training center...</div>}>
+            <TrainingCenter 
+              providerId={providerId}
+              providerType={providerType}
+              isAdmin={isAdmin}
+            />
+          </Suspense>
         </TabsContent>
 
         {/* Bookings Tab */}
@@ -404,7 +415,7 @@ export default function ProviderPortal({
                       <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
                         <div className="flex items-center text-[#44062D]/70">
                           <Calendar className="h-4 w-4 mr-2" />
-                          {format(new Date(booking.scheduledDate), "MMM d, yyyy")}
+                          {formatDate(new Date(booking.scheduledDate))}
                         </div>
                         <div className="flex items-center text-[#44062D]/70">
                           <Clock className="h-4 w-4 mr-2" />

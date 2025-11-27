@@ -3,7 +3,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -255,9 +254,10 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
                 Allow customers to track your arrival in real-time
               </p>
             </div>
-            <Switch
+            <input
+              type="checkbox"
               checked={isLocationEnabled}
-              onCheckedChange={handleLocationToggle}
+              onChange={(e) => handleLocationToggle(e.target.checked)}
               data-testid="location-toggle"
             />
           </div>

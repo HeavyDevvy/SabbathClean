@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { lazy, Suspense } from "react";
+import React from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,7 +25,7 @@ const BookingConfirmation = lazy(() => import("@/pages/booking-confirmation"));
 const Providers = lazy(() => import("@/pages/providers"));
 const EnhancedProviderOnboarding = lazy(() => import("@/pages/enhanced-provider-onboarding"));
 const ProviderTraining = lazy(() => import("@/pages/provider-training"));
-const ProviderDashboard = lazy(() => import("@/pages/provider-dashboard"));
+import ProviderDashboard from "@/pages/provider-dashboard";
 const Offline = lazy(() => import("@/pages/offline"));
 const Bookings = lazy(() => import("@/pages/bookings"));
 const NotificationSettings = lazy(() => import("@/components/notification-settings"));
@@ -113,13 +114,40 @@ function App() {
           <CartProvider>
             <TooltipProvider>
               <Toaster />
-              <Router />
+              <ErrorBoundary>
+                <Router />
+              </ErrorBoundary>
             </TooltipProvider>
           </CartProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }>{
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch() {}
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center min-h-screen p-6">
+          <div className="max-w-md text-center space-y-4">
+            <h1 className="text-2xl font-semibold">Something went wrong</h1>
+            <p className="text-gray-600">Please refresh the page or navigate back to the home page.</p>
+            <a href="/" className="inline-block px-4 py-2 rounded bg-[#44062D] text-white">Go Home</a>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children as any;
+  }
 }
 
 export default App;

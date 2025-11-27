@@ -16,6 +16,11 @@ if (import.meta.env.DEV) {
       event.preventDefault();
       return;
     }
+    const reasonStr = typeof event.reason === 'string' ? event.reason : event.reason?.message || '';
+    if (reasonStr.includes('Failed to fetch dynamically imported module') || reasonStr.includes('net::ERR_ABORTED')) {
+      event.preventDefault();
+      return;
+    }
     // Call original handler for other errors
     if (originalUnhandledRejection) {
       originalUnhandledRejection.call(window, event);
@@ -31,6 +36,14 @@ if (import.meta.env.DEV) {
       return;
     }
     originalWarn.apply(console, args);
+  };
+  const originalError = console.error;
+  console.error = (...args: any[]) => {
+    const msg = args[0]?.toString() || '';
+    if (msg.includes('Failed to fetch dynamically imported module') || msg.includes('net::ERR_ABORTED')) {
+      return;
+    }
+    originalError.apply(console, args);
   };
 } else {
   // Register service worker only in production

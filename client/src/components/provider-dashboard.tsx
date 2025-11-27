@@ -3,7 +3,6 @@ import { Star, Calendar, MapPin, Clock, Banknote, TrendingUp, Users, Award } fro
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import CustomerRatingModal from "./customer-rating-modal";
@@ -146,12 +145,9 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
                     <div key={booking.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={booking.customer?.profileImage} />
-                            <AvatarFallback className="bg-blue-100 text-blue-600">
-                              {booking.customer?.firstName?.[0]}{booking.customer?.lastName?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            {booking.customer?.firstName?.[0]}{booking.customer?.lastName?.[0]}
+                          </div>
                           <div>
                             <h4 className="font-medium">
                               {booking.customer?.firstName} {booking.customer?.lastName}
@@ -217,12 +213,9 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
                     <div key={review.id} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={review.customer?.profileImage} />
-                            <AvatarFallback className="bg-gray-100">
-                              {review.customer?.firstName?.[0]}{review.customer?.lastName?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
+                          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            {review.customer?.firstName?.[0]}{review.customer?.lastName?.[0]}
+                          </div>
                           <div className="flex-1">
                             <h5 className="font-medium">
                               {review.customer?.firstName} {review.customer?.lastName}
