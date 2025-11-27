@@ -66,12 +66,12 @@ export default function ProviderDashboard() {
     <div className="min-h-screen bg-gray-50">
       {authGate}
       {/* Security Notice */}
-      <div className="bg-blue-600 text-white p-3">
+      <div className="bg-[#44062D] text-white p-3">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <Shield className="h-5 w-5" />
           <div className="flex-1">
             <span className="font-medium">Secure Provider Portal</span>
-            <span className="ml-2 text-blue-100">
+            <span className="ml-2 text-white/70">
               {isAdmin ? 'Admin Access' : 'Service Provider Access'} • {user?.firstName} {user?.lastName}
             </span>
           </div>
@@ -89,20 +89,20 @@ export default function ProviderDashboard() {
       {/* Provider Status Check */}
       {!isLoading && isAuthenticated && !isProvider ? (
         <div className="max-w-7xl mx-auto p-4">
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-[#EED1C4] bg-[#EED1C4]/30">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-[#44062D] mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-medium text-red-800">Provider Status Required</h3>
-                  <p className="text-sm text-red-700 mt-1">
+                  <h3 className="font-medium text-[#44062D]">Provider Status Required</h3>
+                  <p className="text-sm text-[#3C0920] mt-1">
                     You need to be registered as a service provider to access this dashboard. 
                     Complete the provider onboarding process to unlock provider features.
                   </p>
                   <div className="mt-4">
                     <Button 
                       onClick={() => setLocation('/provider-onboarding')}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-[#44062D] hover:bg-[#3C0920]"
                       data-testid="button-provider-onboarding"
                     >
                       Become a Provider
@@ -115,19 +115,19 @@ export default function ProviderDashboard() {
         </div>
       ) : (!isLoading && isAuthenticated && !isApproved) ? (
         <div className="max-w-7xl mx-auto p-4">
-          <Card className="border-yellow-200 bg-yellow-50">
+          <Card className="border-[#EED1C4] bg-[#EED1C4]/30">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-[#44062D] mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-medium text-yellow-800">Provider Approval Pending</h3>
-                  <p className="text-sm text-yellow-700 mt-1">
+                  <h3 className="font-medium text-[#44062D]">Provider Approval Pending</h3>
+                  <p className="text-sm text-[#3C0920] mt-1">
                     Your provider account is pending approval. You will gain access once approved.
                   </p>
                   <div className="mt-4">
                     <Button 
                       onClick={() => setLocation('/provider-support')}
-                      className="bg-yellow-600 hover:bg-yellow-700"
+                      className="bg-[#44062D] hover:bg-[#3C0920]"
                       data-testid="button-provider-support"
                     >
                       View Provider Support

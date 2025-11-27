@@ -1,9 +1,64 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      white: "#FFFFFF",
+      black: "#000000",
+      // Berry Events 5-color palette
+      plum: "#44062D",
+      wine: "#3C0920",
+      cream: "#EED1C4",
+      offwhite: "#F7F2EF",
+      rose: "#C56B86",
+      // Map common utility colors to brand equivalents
+      gray: {
+        50: "#F7F2EF",
+        100: "#EED1C4",
+        200: "#EED1C4",
+        300: "#EED1C4",
+        400: "#3C0920",
+        500: "#3C0920",
+        600: "#3C0920",
+        700: "#44062D",
+        800: "#44062D",
+        900: "#44062D",
+      },
+      blue: {
+        50: "#EED1C4",
+        100: "#EED1C4",
+        200: "#EED1C4",
+        400: "#44062D",
+        600: "#44062D",
+        700: "#44062D",
+        800: "#44062D",
+      },
+      green: {
+        50: "#EED1C4",
+        100: "#EED1C4",
+        600: "#44062D",
+        700: "#3C0920",
+      },
+      yellow: {
+        50: "#EED1C4",
+        100: "#EED1C4",
+        600: "#C56B86",
+        700: "#3C0920",
+        800: "#3C0920",
+      },
+      red: {
+        50: "#EED1C4",
+        100: "#EED1C4",
+        600: "#3C0920",
+        700: "#3C0920",
+      },
+    },
     extend: {
       borderRadius: {
         lg: "var(--radius)",
@@ -94,5 +149,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [tailwindcssAnimate, typography],
 } satisfies Config;

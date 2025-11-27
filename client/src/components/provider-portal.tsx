@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { 
   User,
   Calendar,
-  DollarSign,
+  Banknote,
   Star,
   TrendingUp,
   Settings,
@@ -25,6 +25,7 @@ import {
   Navigation,
   MessageCircle
 } from "lucide-react";
+import berryLogo from "@assets/berry-logo.png";
 
 interface ProviderPortalProps {
   providerId: string;
@@ -115,14 +116,14 @@ export default function ProviderPortal({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <User className="h-6 w-6 text-blue-600" />
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#EED1C4]/40">
+            <img src={berryLogo} alt="Berry Events" className="h-8 w-8 object-contain" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[#44062D]">
               {isAdmin ? 'Admin Portal' : 'Provider Portal'}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[#44062D]/70">
               {provider.name || `${provider.firstName || ''} ${provider.lastName || ''}`.trim() || 'Service Provider'} • {providerType === 'company' ? 'Company' : 'Individual'}
             </p>
           </div>
@@ -130,13 +131,13 @@ export default function ProviderPortal({
         
         <div className="flex items-center gap-4">
           {/* Social Score Badge */}
-          <Card className="bg-gradient-to-r from-purple-50 to-blue-50">
+          <Card className="bg-[#EED1C4]/40 border-[#EED1C4]/60">
             <CardContent className="p-3">
               <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-purple-600" />
+                <Award className="h-4 w-4 text-[#44062D]" />
                 <div>
-                  <div className="text-xs text-gray-600">Social Score</div>
-                  <div className="font-bold text-purple-600">
+                  <div className="text-xs text-[#44062D]/70">Social Score</div>
+                  <div className="font-bold text-[#44062D]">
                     {score.score}
                   </div>
                 </div>
@@ -144,13 +145,13 @@ export default function ProviderPortal({
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-50 to-orange-50">
+          <Card className="bg-[#EED1C4]/40 border-[#EED1C4]/60">
             <CardContent className="p-3">
               <div className="flex items-center gap-3">
-                <Award className="h-4 w-4 text-yellow-600" />
+                <Award className="h-4 w-4 text-[#44062D]" />
                 <div>
-                  <div className="text-xs text-gray-600">Referral Code</div>
-                  <div className="font-bold text-yellow-700">
+                  <div className="text-xs text-[#44062D]/70">Referral Code</div>
+                  <div className="font-bold text-[#44062D]">
                     {referral?.code || '----'}
                   </div>
                 </div>
@@ -166,7 +167,7 @@ export default function ProviderPortal({
             </CardContent>
           </Card>
           
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="text-[#44062D] border-[#44062D]/30">
             <Bell className="h-4 w-4 mr-2" />
             Notifications
           </Button>
@@ -195,49 +196,49 @@ export default function ProviderPortal({
         <TabsContent value="dashboard" className="space-y-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className="border-[#EED1C4]/60">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-blue-600" />
+                  <Calendar className="h-5 w-5 text-[#44062D]" />
                   <div>
-                    <div className="text-sm text-gray-600">This Week</div>
+                    <div className="text-sm text-[#44062D]/70">This Week</div>
                     <div className="text-xl font-bold">{weeklyBookingsCount} Bookings</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-[#EED1C4]/60">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-green-600" />
+                  <Banknote className="h-5 w-5 text-[#44062D]" />
                   <div>
-                    <div className="text-sm text-gray-600">Earnings</div>
+                    <div className="text-sm text-[#44062D]/70">Earnings (ZAR)</div>
                     <div className="text-xl font-bold">R{providerEarnings.totalEarnings.toFixed(2)}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-[#EED1C4]/60">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <Star className="h-5 w-5 text-yellow-600" />
+                  <Star className="h-5 w-5 text-[#44062D]" />
                   <div>
-                    <div className="text-sm text-gray-600">Rating</div>
+                    <div className="text-sm text-[#44062D]/70">Rating</div>
                     <div className="text-xl font-bold">{providerRating.toFixed(1)}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-[#EED1C4]/60">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <TrendingUp className="h-5 w-5 text-purple-600" />
+                  <TrendingUp className="h-5 w-5 text-[#44062D]" />
                   <div>
-                    <div className="text-sm text-gray-600">Queue Priority</div>
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-sm text-[#44062D]/70">Queue Priority</div>
+                    <div className="text-xl font-bold text-[#44062D]">
                       +{score.queueBonus}%
                     </div>
                   </div>
@@ -256,33 +257,33 @@ export default function ProviderPortal({
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <Shield className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-blue-600">+{score.trainingBonus}</div>
-                  <div className="text-sm text-gray-600">Social Score Bonus</div>
-                  <div className="text-xs text-gray-500 mt-1">From completed training</div>
+                <div className="text-center p-4 bg-[#EED1C4]/30 rounded-lg">
+                  <Shield className="h-8 w-8 text-[#44062D] mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-[#44062D]">+{score.trainingBonus}</div>
+                  <div className="text-sm text-[#44062D]/70">Social Score Bonus</div>
+                  <div className="text-xs text-[#44062D]/60 mt-1">From completed training</div>
                 </div>
                 
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <TrendingUp className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-green-600">+{score.queueBonus}%</div>
-                  <div className="text-sm text-gray-600">Queue Priority</div>
-                  <div className="text-xs text-gray-500 mt-1">Higher booking chances</div>
+                <div className="text-center p-4 bg-[#EED1C4]/30 rounded-lg">
+                  <TrendingUp className="h-8 w-8 text-[#44062D] mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-[#44062D]">+{score.queueBonus}%</div>
+                  <div className="text-sm text-[#44062D]/70">Queue Priority</div>
+                  <div className="text-xs text-[#44062D]/60 mt-1">Higher booking chances</div>
                 </div>
                 
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <Award className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-yellow-600">{score.tier}</div>
-                  <div className="text-sm text-gray-600">Provider Tier</div>
-                  <div className="text-xs text-gray-500 mt-1">Based on training & performance</div>
+                <div className="text-center p-4 bg-[#EED1C4]/30 rounded-lg">
+                  <Award className="h-8 w-8 text-[#44062D] mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-[#44062D]">{score.tier}</div>
+                  <div className="text-sm text-[#44062D]/70">Provider Tier</div>
+                  <div className="text-xs text-[#44062D]/60 mt-1">Based on training & performance</div>
                 </div>
               </div>
               
-              <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+              <div className="mt-4 p-4 bg-[#EED1C4]/30 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Continue Your Training Journey</h4>
-                    <p className="text-sm text-gray-600">Complete more modules to boost your social score and earnings</p>
+                    <h4 className="font-medium text-[#44062D]">Continue Your Training Journey</h4>
+                    <p className="text-sm text-[#44062D]/70">Complete more modules to boost your social score and earnings</p>
                   </div>
                   <Button onClick={() => setActiveTab('training')}>
                     <GraduationCap className="h-4 w-4 mr-2" />
@@ -387,45 +388,40 @@ export default function ProviderPortal({
               ) : (
                 <div className="space-y-4">
                   {bookings.map((booking: any) => (
-                    <div key={booking.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div key={booking.id} className="border rounded-lg p-4 hover:bg-[#EED1C4]/20 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="font-semibold text-lg">{booking.serviceType}</h3>
-                          <p className="text-sm text-gray-600">Booking #{booking.id.slice(0, 8)}</p>
+                          <p className="text-sm text-[#44062D]/70">Booking #{booking.id.slice(0, 8)}</p>
                         </div>
                         <Badge 
-                          className={
-                            booking.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            booking.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                          }
+                          className={'bg-[#EED1C4]/40 text-[#44062D]'}
                         >
                           {booking.status}
                         </Badge>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-[#44062D]/70">
                           <Calendar className="h-4 w-4 mr-2" />
                           {format(new Date(booking.scheduledDate), "MMM d, yyyy")}
                         </div>
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-[#44062D]/70">
                           <Clock className="h-4 w-4 mr-2" />
                           {booking.scheduledTime}
                         </div>
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-[#44062D]/70">
                           <MapPin className="h-4 w-4 mr-2" />
                           {booking.address}
                         </div>
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-[#44062D]/70">
                           <User className="h-4 w-4 mr-2" />
                           {booking.customerName || 'Customer'}
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between pt-3 border-t">
-                        <div className="text-lg font-semibold text-green-600">
+                        <div className="text-lg font-semibold text-[#44062D]">
                           R{parseFloat(booking.totalPrice || '0').toFixed(2)}
                         </div>
                         <Button

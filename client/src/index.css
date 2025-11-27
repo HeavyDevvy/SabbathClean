@@ -215,10 +215,10 @@ img {
   /* Berry Events Brand - New 5-Color Palette */
   --background: hsl(27 38% 96%); /* Soft off-white #F7F2EF */
   --foreground: hsl(313 76% 15%); /* Deep plum #44062D for text */
-  --card: hsl(0 0% 100%); /* Pure white for cards */
-  --card-foreground: hsl(313 76% 15%); /* Deep plum text */
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(313 76% 15%);
+  --card: #F7F2EF; /* Soft off-white */
+  --card-foreground: #44062D; /* Deep plum text */
+  --popover: #F7F2EF;
+  --popover-foreground: #44062D;
   --primary: hsl(313 76% 15%); /* Deep plum #44062D */
   --primary-foreground: hsl(21 32% 86%); /* Warm cream #EED1C4 */
   --secondary: hsl(317 70% 13%); /* Wine/berry #3C0920 */
@@ -226,19 +226,19 @@ img {
   --muted: hsl(21 32% 86%); /* Warm cream for muted areas #EED1C4 */
   --muted-foreground: hsl(313 76% 15%); /* Deep plum text */
   --accent: hsl(349 43% 60%); /* Muted rose accent #C56B86 */
-  --accent-foreground: hsl(0 0% 100%); /* White text on accent */
-  --destructive: hsl(355 55% 49%); /* Error red #C23844 */
-  --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(21 20% 88%); /* Light warm border */
-  --input: hsl(27 38% 96%); /* Soft off-white for inputs */
-  --ring: hsl(313 76% 15%); /* Deep plum for focus rings */
+  --accent-foreground: #F7F2EF; /* Off-white text on accent */
+  --destructive: #3C0920; /* Wine/Berry for error */
+  --destructive-foreground: #F7F2EF;
+  --border: #EED1C4; /* Warm cream border */
+  --input: #F7F2EF; /* Soft off-white for inputs */
+  --ring: #44062D; /* Deep plum focus ring */
   --chart-1: hsl(349 43% 60%); /* Rose accent */
-  --chart-2: hsl(143 34% 27%); /* Success green */
+  --chart-2: #C56B86; /* Rose accent */
   --chart-3: hsl(21 32% 86%); /* Warm cream */
   --chart-4: hsl(313 76% 15%); /* Deep plum */
   --chart-5: hsl(317 70% 13%); /* Wine/berry */
-  --sidebar: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(313 76% 15%);
+  --sidebar: #F7F2EF;
+  --sidebar-foreground: #44062D;
   --sidebar-primary: hsl(313 76% 15%);
   --sidebar-primary-foreground: hsl(21 32% 86%);
   --sidebar-accent: hsl(27 38% 96%);
@@ -249,9 +249,9 @@ img {
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.75rem; /* 12px for consistent rounding */
-  --neutral: hsl(313 20% 50%); /* Neutral gray */
-  --error: hsl(355 55% 49%); /* Error red #C23844 */
-  --success: hsl(143 34% 27%); /* Success green #2D5C3F */
+  --neutral: #3C0920; /* Use wine/brown as neutral */
+  --error: #3C0920; /* Error themed as wine */
+  --success: #C56B86; /* Success themed as rose accent */
 }
 
 .dark {
@@ -299,11 +299,15 @@ img {
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
@@ -341,6 +345,7 @@ img {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
   
   .line-clamp-2 {
@@ -348,6 +353,7 @@ img {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 }
 

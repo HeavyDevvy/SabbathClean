@@ -105,12 +105,7 @@ export class AuthClient {
         return null;
       }
 
-      const response = await fetch('/api/auth/user', {
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await apiRequest('GET', '/api/auth/user');
 
       if (response.status === 401 || response.status === 403) {
         // Token expired or invalid, try to refresh
@@ -144,14 +139,7 @@ export class AuthClient {
         throw new Error('No access token');
       }
 
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest('PUT', '/api/user/profile', data);
 
       if (response.status === 401) {
         // Token expired, try to refresh
@@ -182,13 +170,7 @@ export class AuthClient {
   async logout(): Promise<void> {
     try {
       if (this.accessToken) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        await apiRequest('POST', '/api/auth/logout');
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -204,13 +186,7 @@ export class AuthClient {
         return false;
       }
 
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: this.refreshToken }),
-      });
+      const response = await apiRequest('POST', '/api/auth/refresh', { refreshToken: this.refreshToken });
 
       if (!response.ok) {
         return false;

@@ -142,9 +142,14 @@ app.use((req, res, next) => {
 
   if (!useMem) {
     try {
-      const { pool } = await import("./db");
+      const dbModule = await import("./db");
+      const dbPool = dbModule.pool;
+      if (!dbPool) {
+        log("database pool unavailable");
+        process.exit(1);
+      }
       await withRetry(async () => {
-        const client = await pool.connect();
+        const client = await dbPool.connect();
         client.release();
       });
       log("database connectivity verified");
@@ -169,8 +174,11 @@ app.use((req, res, next) => {
     } catch {}
     if (!useMem) {
       try {
-        const { pool } = await import("./db");
-        await pool.end();
+        const dbModule = await import("./db");
+        const dbPool = dbModule.pool;
+        if (dbPool) {
+          await dbPool.end();
+        }
       } catch {}
     }
     process.exit(0);

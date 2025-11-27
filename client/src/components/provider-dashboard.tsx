@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Calendar, MapPin, Clock, DollarSign, TrendingUp, Users, Award } from "lucide-react";
+import { Star, Calendar, MapPin, Clock, Banknote, TrendingUp, Users, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +65,7 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-blue-600" />
+                <Banknote className="h-5 w-5 text-[#44062D]" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">This Month</p>
@@ -279,7 +279,7 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <Banknote className="h-12 w-12 text-[#44062D] mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Earnings tracking coming soon</h3>
                 <p className="text-gray-600">View detailed earnings breakdowns and payment history</p>
               </div>

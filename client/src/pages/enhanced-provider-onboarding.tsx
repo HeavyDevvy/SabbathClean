@@ -300,6 +300,7 @@ export default function EnhancedProviderOnboarding() {
       }, 2000);
       
     } catch (error) {
+      console.error('Provider application submission error:', error);
       toast({
         title: "Verification Failed",
         description: "There was an issue with the verification process. Please try again.",
