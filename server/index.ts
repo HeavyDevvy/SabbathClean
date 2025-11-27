@@ -15,16 +15,37 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser()); // Enable cookie parsing for cart sessions
+// Basic CORS support
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "*";
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+  next();
+});
 
 // Serve PWA files with proper headers
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.resolve(__dirname, '../public/sw.js'));
 });
 
 app.get('/manifest.json', (req, res) => {
   res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.resolve(__dirname, '../public/manifest.json'));
 });
 

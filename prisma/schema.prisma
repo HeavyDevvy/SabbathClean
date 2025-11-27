@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  emailVerified     DateTime?
+  password          String
+  firstName         String
+  lastName          String
+  phoneNumber       String?
+  profilePictureUrl String?
+  role              UserRole   @default(CLIENT)
+  isActive          Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  bookings          Booking[]
+  payments          Payment[]
+  reviews           Review[]
+  sentMessages      Message[]  @relation("SentMessages")
+  receivedMessages  Message[]  @relation("ReceivedMessages")
+  provider          ServiceProvider?
+  sessions          Session[]
+  accounts          Account[]
+
+  @@index([email])
+  @@map("users")
+}
+
+enum UserRole {
+  CLIENT
+  PROVIDER
+  ADMIN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model ServiceProvider {
+  id                  String              @id @default(cuid())
+  userId              String              @unique
+  businessName        String
+  description         String              @db.Text
+  category            ServiceCategory
+  hourlyRate          Decimal             @db.Decimal(10, 2)
+  availabilityCalendar Json?
+  portfolioImages     String[]
+  rating              Decimal             @default(0) @db.Decimal(3, 2)
+  totalReviews        Int                 @default(0)
+  bankName            String?
+  accountNumber       String?
+  accountHolderName   String?
+  branchCode          String?
+  isVerified          Boolean             @default(false)
+  verificationStatus  VerificationStatus  @default(PENDING)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+  payments  Payment[]
+  reviews   Review[]
+
+  @@index([category, rating])
+  @@map("service_providers")
+}
+
+enum ServiceCategory {
+  CATERING
+  PHOTOGRAPHY
+  VENUE
+  ENTERTAINMENT
+  DECORATION
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  providerId      String
+  eventDate       DateTime
+  eventTime       String
+  eventDuration   Int
+  eventType       String
+  eventLocation   String
+  numberOfGuests  Int?
+  specialRequests String?       @db.Text
+  status          BookingStatus @default(PENDING)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id])
+  provider        ServiceProvider @relation(fields: [providerId], references: [id])
+  payment         Payment?
+  review          Review?
+  messages        Message[]
+
+  @@index([userId, status])
+  @@index([providerId, status])
+  @@index([eventDate])
+  @@map("bookings")
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  bookingId          String        @unique
+  userId             String
+  providerId         String
+  amount             Decimal       @db.Decimal(10, 2)
+  platformCommission Decimal       @db.Decimal(10, 2)
+  providerPayout     Decimal       @db.Decimal(10, 2)
+  paymentMethod      String
+  paymentStatus      PaymentStatus @default(PENDING)
+  transactionId      String?       @unique
+  paymentDate        DateTime?
+  payoutDate         DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  booking  Booking       @relation(fields: [bookingId], references: [id])
+  user     User          @relation(fields: [userId], references: [id])
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+
+  @@index([userId])
+  @@index([providerId])
+  @@index([paymentStatus])
+  @@map("payments")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  userId     String
+  providerId String
+  rating     Int
+  reviewText String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  provider ServiceProvider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, rating])
+  @@map("reviews")
+}
+
+model Message {
+  id          String  @id @default(cuid())
+  bookingId   String
+  senderId    String
+  receiverId  String
+  messageText String  @db.Text
+  isRead      Boolean @default(false)
+  createdAt   DateTime @default(now())
+
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+  sender   User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@index([bookingId])
+  @@index([senderId, receiverId])
+  @@map("messages")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}

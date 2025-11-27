@@ -61,6 +61,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", uptime: process.uptime(), env: process.env.NODE_ENV, storage: useMem ? "memory" : "database", db: dbStatus, timestamp: Date.now() });
   });
   
+  // Banking verification endpoint (mocked verification compatible with production)
+  app.post("/api/providers/verify-bank", async (req, res) => {
+    try {
+      const { bankName, accountHolder, accountNumber, branchCode, accountType } = req.body || {};
+      if (!bankName || !accountHolder || !accountNumber || !branchCode || !accountType) {
+        return res.status(400).json({ message: "Missing banking fields", code: "BANK_VALIDATION_MISSING_FIELDS" });
+      }
+      if (String(accountNumber).length < 6) {
+        return res.status(422).json({ message: "Account number is too short", code: "BANK_VALIDATION_ACCOUNT_NUMBER" });
+      }
+      if (String(branchCode).length < 4) {
+        return res.status(422).json({ message: "Branch code is invalid", code: "BANK_VALIDATION_BRANCH_CODE" });
+      }
+      res.json({ status: "verified", providerBankingStatus: "verified" });
+    } catch (e: any) {
+      res.status(500).json({ message: e?.message || "Bank verification failed", code: "BANK_VERIFICATION_ERROR" });
+    }
+  });
+  
   // User routes
   app.post("/api/users", async (req, res) => {
     try {

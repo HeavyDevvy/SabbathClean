@@ -286,7 +286,25 @@ export default function EnhancedProviderOnboarding() {
         description: "Verifying your banking details...",
       });
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      try {
+        const verifyRes = await apiRequest("POST", "/api/providers/verify-bank", {
+          bankName: providerData.bankName,
+          accountHolder: providerData.accountHolder,
+          accountNumber: providerData.accountNumber,
+          branchCode: providerData.branchCode,
+          accountType: providerData.accountType,
+        });
+        await verifyRes.json();
+      } catch (e: any) {
+        console.error("Bank verification error:", e?.message || e);
+        toast({
+          title: "Verification Failed",
+          description: e?.message || "Banking verification failed. Please check your details and try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
       
       // Success
       toast({
@@ -301,9 +319,10 @@ export default function EnhancedProviderOnboarding() {
       
     } catch (error) {
       console.error('Provider application submission error:', error);
+      const message = (error as any)?.message || "Verification failed due to a network or server error.";
       toast({
         title: "Verification Failed",
-        description: "There was an issue with the verification process. Please try again.",
+        description: message,
         variant: "destructive"
       });
     } finally {
