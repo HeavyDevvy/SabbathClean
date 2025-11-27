@@ -1,8 +1,11 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 function getApiBaseUrl(): string {
-  const v = (import.meta as any).env?.VITE_API_BASE_URL;
-  return v && typeof v === "string" && v.length > 0 ? v : "http://localhost:5001";
+  const env = (import.meta as any).env || {};
+  const v = env.NEXT_PUBLIC_API_BASE_URL || env.VITE_API_BASE_URL;
+  if (v && typeof v === "string" && v.length > 0) return v;
+  if (typeof window !== "undefined") return "";
+  return "";
 }
 
 async function throwIfResNotOk(res: Response) {

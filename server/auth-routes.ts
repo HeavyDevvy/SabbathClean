@@ -1,12 +1,13 @@
 import type { Express } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { resolveAppBaseUrl, env as appEnv } from "../config/env";
 import { storage } from "./storage";
 import { z } from "zod";
 import sgMail from "@sendgrid/mail";
 import crypto from "crypto";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+const JWT_SECRET = appEnv.jwtSecret || "your-super-secret-jwt-key";
 const REMEMBER_TOKEN_EXPIRES = 30 * 24 * 60 * 60 * 1000; // 30 days
 const EMAIL_VERIFICATION_EXPIRES = 24 * 60 * 60 * 1000; // 24 hours
 const PASSWORD_RESET_EXPIRES = 1 * 60 * 60 * 1000; // 1 hour
@@ -71,7 +72,7 @@ const sendVerificationEmail = async (email: string, firstName: string, verificat
     return;
   }
 
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/verify-email?token=${verificationToken}`;
+  const verificationUrl = `${resolveAppBaseUrl(appEnv.appBaseUrl)}/verify-email?token=${verificationToken}`;
   
   const msg = {
     to: email,
@@ -108,7 +109,7 @@ const sendPasswordResetEmail = async (email: string, firstName: string, resetTok
     return;
   }
 
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+  const resetUrl = `${resolveAppBaseUrl(appEnv.appBaseUrl)}/reset-password?token=${resetToken}`;
   
   const msg = {
     to: email,
