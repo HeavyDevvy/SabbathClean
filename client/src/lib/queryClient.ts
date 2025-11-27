@@ -2,10 +2,10 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 function getApiBaseUrl(): string {
   const env = (import.meta as any).env || {};
-  const v = env.NEXT_PUBLIC_API_BASE_URL || env.VITE_API_BASE_URL;
-  if (v && typeof v === "string" && v.length > 0) return v;
-  if (typeof window !== "undefined") return "";
-  return "";
+  const isDev = !!env.DEV;
+  if (isDev) return "http://localhost:5001";
+  const v = env.NEXT_PUBLIC_API_BASE_URL || env.VITE_API_BASE_URL || env.APP_BASE_URL;
+  return v && typeof v === "string" && v.length > 0 ? v : "";
 }
 
 async function throwIfResNotOk(res: Response) {
@@ -43,7 +43,8 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  const fullUrl = url.startsWith("/api") ? `${getApiBaseUrl()}${url}` : url;
+  const base = getApiBaseUrl();
+  const fullUrl = url.startsWith("/api") ? (base ? `${base}${url}` : url) : url;
   const res = await fetch(fullUrl, {
     method,
     headers,
@@ -70,7 +71,8 @@ export const getQueryFn: <T>(options: {
     }
 
     const key = (queryKey[0] as string) || "";
-    const fullUrl = key.startsWith("/api") ? `${getApiBaseUrl()}${key}` : key;
+    const base = getApiBaseUrl();
+    const fullUrl = key.startsWith("/api") ? (base ? `${base}${key}` : key) : key;
     const res = await fetch(fullUrl, {
       headers,
       credentials: "include",
