@@ -4,7 +4,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "USE_MEM_STORAGE=1 NODE_ENV=development tsx server/index.ts",
+    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev:build": "vite build && NODE_ENV=development tsx server/index.ts",
     "build": "prisma generate && vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "GATE_CODE_ENCRYPTION_KEY=dev_encryption_key_32bytes_ok! NODE_ENV=production node dist/index.js",
     "check": "tsc",

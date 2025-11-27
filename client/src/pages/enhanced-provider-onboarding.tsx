@@ -205,6 +205,24 @@ export default function EnhancedProviderOnboarding() {
     
     // Simulate KYC/KYB verification process
     try {
+      if (!providerData.firstName || !providerData.lastName || !providerData.email) {
+        toast({
+          title: "Missing information",
+          description: "Please fill in your name and email",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (providerData.services.length === 0) {
+        toast({
+          title: "Select services",
+          description: "Please select at least one service you offer",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
       if (providerData.password.length < 8) {
         toast({
           title: "Password Error",
@@ -287,6 +305,15 @@ export default function EnhancedProviderOnboarding() {
 
       const newUserId = registerRes.user.id;
       const locationStr = providerData.city || providerData.address || "";
+      if (!locationStr) {
+        toast({
+          title: "Missing location",
+          description: "Please provide your city or address",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       const providerPayload: any = {
         userId: newUserId,

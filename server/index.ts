@@ -83,13 +83,35 @@ app.use((req, res, next) => {
 
 (async () => {
   const isDev = app.get("env") === "development";
-  const useMem = process.env.USE_MEM_STORAGE === "1";
-  if (!useMem && !process.env.DATABASE_URL) {
+  let useMem = process.env.USE_MEM_STORAGE === "1";
+  const hasDbUrl = !!process.env.DATABASE_URL;
+  const isDbUrlValid = (() => {
+    try {
+      if (!hasDbUrl) return false;
+      new URL(process.env.DATABASE_URL as string);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  if (!useMem && !hasDbUrl) {
     if (isDev) {
       process.env.USE_MEM_STORAGE = "1";
+      useMem = true;
       log("DATABASE_URL not set; using in-memory storage for development");
     } else {
       log("DATABASE_URL must be set or USE_MEM_STORAGE=1");
+      process.exit(1);
+    }
+  }
+
+  if (!useMem && hasDbUrl && !isDbUrlValid) {
+    if (isDev) {
+      process.env.USE_MEM_STORAGE = "1";
+      useMem = true;
+      log("DATABASE_URL invalid; using in-memory storage for development");
+    } else {
+      log("DATABASE_URL invalid");
       process.exit(1);
     }
   }
