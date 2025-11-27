@@ -323,7 +323,7 @@ export function useBookingFlow(options: BookingFlowOptions = {}) {
     setStep,
     updateFormData,
     setFormData,
-    showConfirmation,
+    showConfirmationDialog: showConfirmation,
     hideConfirmation,
     resetFlow
   };

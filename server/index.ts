@@ -1,10 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
+import { createServer as createNetServer } from "net";
 
 // Load environment variables from .env file
 config();
@@ -61,20 +61,36 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  const isDev = app.get("env") === "development";
+  const useMem = process.env.USE_MEM_STORAGE === "1";
+  if (!useMem && !process.env.DATABASE_URL) {
+    if (isDev) {
+      process.env.USE_MEM_STORAGE = "1";
+      log("DATABASE_URL not set; using in-memory storage for development");
+    } else {
+      log("DATABASE_URL must be set or USE_MEM_STORAGE=1");
+      process.exit(1);
+    }
+  }
+
+  const { registerRoutes } = await import("./routes");
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
+    const body = isDev
+      ? { message, code: err.code, stack: err.stack }
+      : { message };
+    log(`error ${status}: ${message}`);
+    res.status(status).json(body);
     throw err;
   });
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (isDev) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -84,11 +100,89 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
+  const portEnv = process.env.PORT || "5001";
+  const port = parseInt(portEnv, 10);
+
+  const assertPortAvailable = (p: number) =>
+    new Promise<void>((resolve, reject) => {
+      const tester = createNetServer().once("error", (err: any) => {
+        if (err.code === "EADDRINUSE") {
+          reject(new Error(`Port ${p} is in use`));
+        } else {
+          reject(err);
+        }
+      }).once("listening", () => {
+        tester.close(() => resolve());
+      }).listen(p, "0.0.0.0");
+    });
+
+  try {
+    await assertPortAvailable(port);
+  } catch (e: any) {
+    log(e.message);
+    process.exit(1);
+  }
+
+  const withRetry = async <T>(fn: () => Promise<T>, retries = 3, delay = 500, factor = 2): Promise<T> => {
+    let attempt = 0;
+    let lastErr: any;
+    while (attempt <= retries) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastErr = err;
+        if (attempt === retries) break;
+        const wait = delay * Math.pow(factor, attempt);
+        await new Promise(r => setTimeout(r, wait));
+        attempt++;
+      }
+    }
+    throw lastErr;
+  };
+
+  if (!useMem) {
+    try {
+      const { pool } = await import("./db");
+      await withRetry(async () => {
+        const client = await pool.connect();
+        client.release();
+      });
+      log("database connectivity verified");
+    } catch (err: any) {
+      log(`database connectivity failed: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
+  server.on("error", (err: any) => {
+    if (err.code === "EADDRINUSE") {
+      log(`port ${port} is already in use`);
+    } else {
+      log(`server error: ${err.message}`);
+    }
+    process.exit(1);
+  });
+
+  const shutdown = async () => {
+    try {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    } catch {}
+    if (!useMem) {
+      try {
+        const { pool } = await import("./db");
+        await pool.end();
+      } catch {}
+    }
+    process.exit(0);
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
+    reusePort: false,
   }, () => {
     log(`serving on port ${port}`);
   });

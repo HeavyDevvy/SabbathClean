@@ -38,7 +38,13 @@ interface EnhancedServicesProps {
 }
 
 export default function EnhancedServices({ onServiceSelect }: EnhancedServicesProps) {
-  const serviceCategories = [
+  const serviceCategories: {
+    id: string;
+    name: string;
+    description: string;
+    color: string;
+    services: Service[];
+  }[] = [
     {
       id: "indoor-services",
       name: "Indoor Services",

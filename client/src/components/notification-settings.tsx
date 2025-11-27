@@ -29,12 +29,9 @@ export default function NotificationSettings() {
 
   const {
     isSupported,
-    permission,
     isSubscribed,
-    isLoading,
-    requestPermission,
-    subscribe,
-    unsubscribe,
+    subscribeToPush,
+    unsubscribeFromPush,
     sendTestNotification,
   } = usePushNotifications();
 
@@ -55,8 +52,9 @@ export default function NotificationSettings() {
 
   const getPermissionStatus = () => {
     if (!isSupported) return { text: "Not Supported", color: "bg-gray-500" };
-    if (permission === 'granted') return { text: "Enabled", color: "bg-green-500" };
-    if (permission === 'denied') return { text: "Blocked", color: "bg-red-500" };
+    const perm = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+    if (perm === 'granted') return { text: "Enabled", color: "bg-green-500" };
+    if (perm === 'denied') return { text: "Blocked", color: "bg-red-500" };
     return { text: "Not Set", color: "bg-yellow-500" };
   };
 
@@ -102,53 +100,49 @@ export default function NotificationSettings() {
 
           {isSupported && (
             <div className="flex flex-wrap gap-2">
-              {permission !== 'granted' && (
+              {typeof Notification !== 'undefined' && Notification.permission !== 'granted' && (
                 <Button
-                  onClick={requestPermission}
-                  disabled={isLoading}
+                  onClick={subscribeToPush}
                   size="sm"
                   data-testid="button-enable-notifications"
                 >
                   <Bell className="h-4 w-4 mr-2" />
-                  {isLoading ? "Requesting..." : "Enable Notifications"}
+                  Enable Notifications
                 </Button>
               )}
 
-              {permission === 'granted' && !isSubscribed && (
+              {typeof Notification !== 'undefined' && Notification.permission === 'granted' && !isSubscribed && (
                 <Button
-                  onClick={subscribe}
-                  disabled={isLoading}
+                  onClick={subscribeToPush}
                   size="sm"
                   data-testid="button-subscribe-push"
                 >
                   <Bell className="h-4 w-4 mr-2" />
-                  {isLoading ? "Subscribing..." : "Subscribe to Push"}
+                  Subscribe to Push
                 </Button>
               )}
 
               {isSubscribed && (
                 <>
-                  <Button
-                    onClick={sendTestNotification}
-                    disabled={isLoading}
-                    size="sm"
-                    variant="outline"
-                    data-testid="button-test-notification"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Send Test
-                  </Button>
-                  
-                  <Button
-                    onClick={unsubscribe}
-                    disabled={isLoading}
-                    size="sm"
-                    variant="outline"
-                    data-testid="button-unsubscribe-push"
-                  >
-                    <BellOff className="h-4 w-4 mr-2" />
-                    Unsubscribe
-                  </Button>
+                <Button
+                  onClick={sendTestNotification}
+                  size="sm"
+                  variant="outline"
+                  data-testid="button-test-notification"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Send Test
+                </Button>
+                
+                <Button
+                  onClick={unsubscribeFromPush}
+                  size="sm"
+                  variant="outline"
+                  data-testid="button-unsubscribe-push"
+                >
+                  <BellOff className="h-4 w-4 mr-2" />
+                  Unsubscribe
+                </Button>
                 </>
               )}
             </div>

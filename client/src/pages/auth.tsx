@@ -9,6 +9,8 @@ import { User, Mail, Phone, Lock, UserPlus, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
 import EnhancedSocialLogin from "@/components/enhanced-social-login";
 import { useAuth } from "@/contexts/AuthContext";
+import { authClient } from "@/lib/auth-client";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -16,6 +18,7 @@ export default function Auth() {
   const { login, register, refreshUser } = useAuth();
   const [showSocialLogin, setShowSocialLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [tabValue, setTabValue] = useState("signin");
   
   const [signUpData, setSignUpData] = useState({
     firstName: "",
@@ -65,15 +68,17 @@ export default function Auth() {
     } catch (error: any) {
       console.error('Registration error:', error);
       
-      let errorMessage = error.message || "Failed to create account. Please try again.";
-      
-      if (error.message?.includes('Email already registered')) {
-        errorMessage = "This email is already registered. Please try signing in instead.";
-      } else if (error.message?.includes('Invalid input data')) {
-        errorMessage = "Please check your information and try again.";
-      } else if (error.message?.includes('password')) {
-        errorMessage = "Password must be at least 6 characters long.";
-      }
+          let errorMessage = error.message || "Failed to create account. Please try again.";
+          
+          if (error.message?.includes('Email already registered')) {
+        errorMessage = "This email is already registered. Please sign in instead.";
+        setSignInData({ email: signUpData.email, password: "" });
+        setTabValue("signin");
+          } else if (error.message?.includes('Invalid input data')) {
+            errorMessage = "Please check your information and try again.";
+          } else if (error.message?.includes('password')) {
+            errorMessage = "Password must be at least 6 characters long.";
+          }
       
       toast({
         title: "Registration Failed",
@@ -97,10 +102,39 @@ export default function Auth() {
         description: "You have been signed in successfully.",
       });
       
-      // Redirect to home after successful signin
-      setTimeout(() => {
+      // Role-based redirect after successful signin
+      try {
+        // Ensure auth context has latest user
+        refreshUser();
+        const currentUser = await authClient.getCurrentUser();
+        if (currentUser) {
+          if (currentUser.isProvider) {
+            try {
+              const res = await apiRequest("GET", `/api/providers/by-user/${currentUser.id}`);
+              const provider = await res.json();
+              const status = provider?.verificationStatus || (provider?.isVerified ? 'approved' : 'pending');
+              if (status === 'approved') {
+                setLocation("/provider-dashboard");
+              } else {
+                toast({
+                  title: "Pending Approval",
+                  description: "Your provider account is pending approval.",
+                });
+                setLocation("/providers");
+              }
+            } catch {
+              // No provider record yet, treat as customer
+              setLocation("/bookings");
+            }
+          } else {
+            setLocation("/bookings");
+          }
+        } else {
+          setLocation("/");
+        }
+      } catch {
         setLocation("/");
-      }, 1000);
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       
@@ -110,6 +144,10 @@ export default function Auth() {
         errorMessage = "Invalid email or password. Please check your credentials and try again.";
       } else if (error.message?.includes('User not found')) {
         errorMessage = "No account found with this email. Please check your email or sign up instead.";
+      } else if (error.message?.includes('Provider under review')) {
+        errorMessage = "Your application is under review. You'll receive an email once approved.";
+      } else if (error.message?.includes('Provider not approved')) {
+        errorMessage = "Your application was not approved. Please contact support for more information.";
       }
       
       toast({
@@ -132,9 +170,38 @@ export default function Auth() {
     refreshUser();
     
     setShowSocialLogin(false);
-    setTimeout(() => {
-      setLocation("/");
-    }, 1000);
+    // Role-based redirect for social login
+    setTimeout(async () => {
+      try {
+        const currentUser = await authClient.getCurrentUser();
+        if (currentUser) {
+          if (currentUser.isProvider) {
+            try {
+              const res = await apiRequest("GET", `/api/providers/by-user/${currentUser.id}`);
+              const provider = await res.json();
+              const status = provider?.verificationStatus || (provider?.isVerified ? 'approved' : 'pending');
+              if (status === 'approved') {
+                setLocation("/provider-dashboard");
+              } else {
+                toast({
+                  title: "Pending Approval",
+                  description: "Your provider account is pending approval.",
+                });
+                setLocation("/providers");
+              }
+            } catch {
+              setLocation("/bookings");
+            }
+          } else {
+            setLocation("/bookings");
+          }
+        } else {
+          setLocation("/");
+        }
+      } catch {
+        setLocation("/");
+      }
+    }, 500);
   };
 
   return (
@@ -147,7 +214,7 @@ export default function Auth() {
           <p className="text-gray-600">Your trusted home services platform</p>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" data-testid="tab-signin">
                 <LogIn className="h-4 w-4 mr-2" />

@@ -14,7 +14,7 @@ export interface ICartStorage {
   mergeGuestCartToUser(sessionToken: string, userId: string): Promise<Cart>;
   getCart(cartId: string): Promise<Cart | undefined>;
   getCartWithItems(cartId: string): Promise<{ cart: Cart; items: CartItem[] } | undefined>;
-  addItemToCart(cartId: string, item: InsertCartItem): Promise<CartItem>;
+  addItemToCart(cartId: string, item: Omit<InsertCartItem, 'cartId'>): Promise<CartItem>;
   updateCartItem(itemId: string, updates: Partial<CartItem>): Promise<CartItem>;
   removeCartItem(itemId: string): Promise<void>;
   clearCart(cartId: string): Promise<void>;
@@ -63,7 +63,7 @@ export class CartStorage implements ICartStorage {
       }).returning();
     }
 
-    return cart;
+    return cart!;
   }
 
   async mergeGuestCartToUser(sessionToken: string, userId: string): Promise<Cart> {
@@ -118,7 +118,7 @@ export class CartStorage implements ICartStorage {
     return { cart, items };
   }
 
-  async addItemToCart(cartId: string, item: InsertCartItem): Promise<CartItem> {
+  async addItemToCart(cartId: string, item: Omit<InsertCartItem, 'cartId'>): Promise<CartItem> {
     // Check for duplicate service on same date/time (deduplicate)
     // Build conditions array and filter out undefined to prevent Drizzle errors
     const conditions = [
@@ -142,7 +142,7 @@ export class CartStorage implements ICartStorage {
     }
 
     const [cartItem] = await db.insert(cartItems).values({
-      ...item,
+      ...(item as any),
       cartId
     }).returning();
 

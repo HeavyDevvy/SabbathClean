@@ -125,7 +125,7 @@ export function registerCustomerReviewRoutes(app: Express) {
         );
 
       // Calculate average ratings
-      const avgRatings = reviews.reduce((acc, review) => {
+      const avgRatings = (reviews as any[]).reduce((acc: { overall: number; communication: number; courtesy: number; cleanliness: number; accessibility: number; instructions: number }, review: any) => {
         return {
           overall: acc.overall + review.rating,
           communication: acc.communication + (review.communication || 0),

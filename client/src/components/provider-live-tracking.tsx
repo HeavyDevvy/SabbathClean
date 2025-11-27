@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Route,
-  Zap
+  Zap,
+  Calendar
 } from "lucide-react";
 
 interface ProviderLiveTrackingProps {
@@ -42,11 +44,12 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [isWatchingLocation, setIsWatchingLocation] = useState(false);
+  const [watchId, setWatchId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch current provider location and status
-  const { data: providerLocation } = useQuery({
+  const { data: providerLocation } = useQuery<LocationData>({
     queryKey: [`/api/providers/${providerId}/location`],
     retry: false,
   });
@@ -60,13 +63,8 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
   // Update provider location mutation
   const updateLocationMutation = useMutation({
     mutationFn: async (locationData: { latitude: number; longitude: number; isOnline: boolean }) => {
-      const response = await fetch(`/api/providers/${providerId}/location`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(locationData),
-      });
-      if (!response.ok) throw new Error('Failed to update location');
-      return response.json();
+      const res = await apiRequest('POST', `/api/providers/${providerId}/location`, locationData);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/providers/${providerId}/location`] });
@@ -87,13 +85,8 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
   // Update provider status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async (isOnline: boolean) => {
-      const response = await fetch(`/api/providers/${providerId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isOnline }),
-      });
-      if (!response.ok) throw new Error('Failed to update status');
-      return response.json();
+      const res = await apiRequest('PUT', `/api/providers/${providerId}/status`, { isOnline });
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/providers/${providerId}/location`] });
@@ -103,13 +96,8 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
   // Set enroute status for a booking
   const setEnrouteMutation = useMutation({
     mutationFn: async ({ bookingId, latitude, longitude }: { bookingId: string; latitude: number; longitude: number }) => {
-      const response = await fetch(`/api/bookings/${bookingId}/enroute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ providerId, latitude, longitude }),
-      });
-      if (!response.ok) throw new Error('Failed to set enroute status');
-      return response.json();
+      const res = await apiRequest('POST', `/api/bookings/${bookingId}/enroute`, { providerId, latitude, longitude });
+      return res.json();
     },
     onSuccess: () => {
       toast({
@@ -161,7 +149,7 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
   const startLocationTracking = () => {
     if (!navigator.geolocation) return;
 
-    const watchId = navigator.geolocation.watchPosition(
+    const id = navigator.geolocation.watchPosition(
       (position) => {
         const locationData = {
           latitude: position.coords.latitude,
@@ -177,12 +165,24 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
         // Update location every 30 seconds when tracking
         updateLocationMutation.mutate(locationData);
       },
-      (error) => console.error("Location tracking error:", error),
+      (error) => {
+        setIsWatchingLocation(false);
+        if (id) {
+          navigator.geolocation.clearWatch(id);
+          setWatchId(null);
+        }
+        toast({
+          title: "Location Tracking Error",
+          description: "Unable to track location. Check permissions and try again.",
+          variant: "destructive",
+        });
+      },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
     );
 
     setIsWatchingLocation(true);
-    return watchId;
+    setWatchId(id);
+    return id;
   };
 
   // Handle location toggle
@@ -195,35 +195,44 @@ export default function ProviderLiveTracking({ providerId }: ProviderLiveTrackin
         startLocationTracking();
       }
     }
+    if (!enabled) {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        setWatchId(null);
+      }
+      setIsWatchingLocation(false);
+    }
     
     await updateStatusMutation.mutateAsync(enabled);
   };
 
   // Handle enroute button click
   const handleSetEnroute = (bookingId: string) => {
-    if (!currentLocation) {
-      getCurrentLocation();
-      setTimeout(() => {
-        if (currentLocation) {
-          setEnrouteMutation.mutate({
-            bookingId,
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-          });
-        }
-      }, 1000);
-    } else {
+    const hasLocation = (loc: LocationData | null): loc is LocationData => !!loc;
+    if (hasLocation(currentLocation)) {
       setEnrouteMutation.mutate({
         bookingId,
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
+        latitude: (currentLocation as LocationData).latitude,
+        longitude: (currentLocation as LocationData).longitude,
       });
+      return;
     }
+
+    getCurrentLocation();
+    setTimeout(() => {
+      if (hasLocation(currentLocation)) {
+        setEnrouteMutation.mutate({
+          bookingId,
+          latitude: (currentLocation as LocationData).latitude,
+          longitude: (currentLocation as LocationData).longitude,
+        });
+      }
+    }, 1000);
   };
 
   useEffect(() => {
     if (providerLocation) {
-      setIsLocationEnabled(providerLocation.isOnline || false);
+      setIsLocationEnabled(providerLocation.isOnline ?? false);
       setCurrentLocation(providerLocation);
     }
   }, [providerLocation]);

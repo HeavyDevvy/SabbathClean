@@ -107,6 +107,32 @@ export default function CartCheckout() {
     return 'Unknown';
   };
 
+  const luhnCheck = (num: string) => {
+    const digits = num.replace(/\s/g, '').split('').reverse().map(n => parseInt(n, 10));
+    let sum = 0;
+    for (let i = 0; i < digits.length; i++) {
+      let d = digits[i];
+      if (i % 2 === 1) {
+        d *= 2;
+        if (d > 9) d -= 9;
+      }
+      sum += d;
+    }
+    return sum % 10 === 0;
+  };
+
+  const isValidExpiry = (exp: string) => {
+    const m = exp.match(/^(\d{2})\/(\d{2})$/);
+    if (!m) return false;
+    const month = parseInt(m[1], 10);
+    const year = 2000 + parseInt(m[2], 10);
+    if (month < 1 || month > 12) return false;
+    const now = new Date();
+    const expDate = new Date(year, month - 1, 1);
+    const endOfMonth = new Date(expDate.getFullYear(), expDate.getMonth() + 1, 0);
+    return endOfMonth >= new Date(now.getFullYear(), now.getMonth(), 1);
+  };
+
   const handleCheckout = async () => {
     // Validate payment information
     if (paymentMethod === "card") {
@@ -121,10 +147,26 @@ export default function CartCheckout() {
       
       // Additional card validation
       const cleanCardNumber = cardNumber.replace(/\s/g, '');
-      if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19) {
+      if (cleanCardNumber.length < 13 || cleanCardNumber.length > 19 || !luhnCheck(cleanCardNumber)) {
         toast({
           title: "Invalid card number",
           description: "Please enter a valid card number",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!isValidExpiry(cardExpiry)) {
+        toast({
+          title: "Invalid expiry date",
+          description: "Use MM/YY and ensure the card is not expired",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!/^\d{3,4}$/.test(cardCVV)) {
+        toast({
+          title: "Invalid CVV",
+          description: "CVV must be 3–4 digits",
           variant: "destructive",
         });
         return;
@@ -410,7 +452,12 @@ export default function CartCheckout() {
                     <Input
                       id="cardNumber"
                       value={cardNumber}
-                      onChange={(e) => setCardNumber(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^\d]/g, '').slice(0, 19);
+                        const parts = [] as string[];
+                        for (let i = 0; i < v.length; i += 4) parts.push(v.slice(i, i + 4));
+                        setCardNumber(parts.join(' '));
+                      }}
                       placeholder="1234 5678 9012 3456"
                       maxLength={19}
                       data-testid="input-card-number"

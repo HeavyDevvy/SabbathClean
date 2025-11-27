@@ -131,6 +131,8 @@ export interface IStorage {
   getBookingsByProvider(providerId: string): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBookingStatus(id: string, status: string): Promise<Booking>;
+  updateBookingSchedule(id: string, scheduledDate: Date, scheduledTime: string): Promise<Booking>;
+  cancelBooking(id: string, reason?: string): Promise<Booking>;
   
   // Review operations
   getReviewsByProvider(providerId: string): Promise<Review[]>;
@@ -169,13 +171,14 @@ export interface IStorage {
   getSkillAssessments(serviceType: string): Promise<SkillAssessment[]>;
   getProviderAssessmentResults(providerId: string): Promise<ProviderAssessmentResult[]>;
   createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult>;
+  getProviderModuleProgress(providerId: string, moduleId: string): Promise<ProviderTrainingProgress | undefined>;
   
   // Cart operations
   getOrCreateCart(userId?: string, sessionToken?: string): Promise<Cart>;
   mergeGuestCartToUser(sessionToken: string, userId: string): Promise<Cart>;
   getCart(cartId: string): Promise<Cart | undefined>;
   getCartWithItems(cartId: string): Promise<{ cart: Cart; items: CartItem[] } | undefined>;
-  addItemToCart(cartId: string, item: InsertCartItem): Promise<CartItem>;
+  addItemToCart(cartId: string, item: Omit<InsertCartItem, 'cartId'>): Promise<CartItem>;
   updateCartItem(itemId: string, updates: Partial<CartItem>): Promise<CartItem>;
   removeCartItem(itemId: string): Promise<void>;
   clearCart(cartId: string): Promise<void>;
@@ -764,6 +767,10 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
+  async createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    return this.addPaymentMethod(paymentMethod);
+  }
+
   async updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod> {
     const [result] = await db.update(paymentMethods)
       .set({ ...data, updatedAt: new Date() })
@@ -965,7 +972,7 @@ export class DatabaseStorage implements IStorage {
     return this.cartStorage.getCartWithItems(cartId);
   }
 
-  async addItemToCart(cartId: string, item: InsertCartItem): Promise<CartItem> {
+  async addItemToCart(cartId: string, item: Omit<InsertCartItem, 'cartId'>): Promise<CartItem> {
     return this.cartStorage.addItemToCart(cartId, item);
   }
 
@@ -989,7 +996,7 @@ export class DatabaseStorage implements IStorage {
   async createOrder(order: InsertOrder, orderItemsData: InsertOrderItem[], options?: { clearCart?: boolean }): Promise<Order> {
     // Wrap entire order creation in transaction
     const shouldClearCart = options?.clearCart ?? true; // Default to true for backwards compatibility
-    return await db.transaction(async (tx) => {
+    return await db.transaction(async (tx: any) => {
       // Phase 3.2: Fetch cart items first for stable 1:1 mapping
       const cartItemById = new Map<string, CartItem>();
       
@@ -998,7 +1005,7 @@ export class DatabaseStorage implements IStorage {
           .where(eq(cartItems.cartId, order.cartId));
         
         // Build cart item lookup by ID (guaranteed unique)
-        existingCartItems.forEach(cartItem => {
+        existingCartItems.forEach((cartItem: CartItem) => {
           cartItemById.set(cartItem.id, cartItem);
         });
       }
@@ -1285,6 +1292,17 @@ export class MemStorage implements IStorage {
   private paymentMethods: Map<string, PaymentMethod> = new Map();
   private providerLocations: Map<string, ProviderLocation> = new Map();
   private jobQueue: Map<string, JobQueue> = new Map();
+  private carts: Map<string, Cart> = new Map();
+  private cartItemsMap: Map<string, CartItem> = new Map();
+  private gateCodes: Map<string, any> = new Map();
+  private orders: Map<string, any> = new Map();
+  private orderItems: Map<string, any> = new Map();
+  private wallets: Map<string, any> = new Map();
+  private walletTxs: Map<string, any[]> = new Map();
+  private supportTickets: Map<string, any> = new Map();
+  private conversations: Map<string, Conversation> = new Map();
+  private messagesByConversation: Map<string, Message[]> = new Map();
+  private notificationsByUser: Map<string, Notification[]> = new Map();
 
   constructor() {
     this.seedData();
@@ -1815,22 +1833,403 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(user => user.email === email);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
+    const user = {
+      ...insertUser,
       id,
-      address: insertUser.address || null,
-      phone: insertUser.phone || null,
-      isProvider: insertUser.isProvider || false,
-      createdAt: new Date()
-    };
+      username: insertUser.username ?? null,
+      password: insertUser.password ?? null,
+      address: insertUser.address ?? null,
+      phone: insertUser.phone ?? null,
+      city: insertUser.city ?? null,
+      province: insertUser.province ?? null,
+      postalCode: insertUser.postalCode ?? null,
+      latitude: (insertUser as any).latitude ?? null,
+      longitude: (insertUser as any).longitude ?? null,
+      profileImage: (insertUser as any).profileImage ?? null,
+      isProvider: insertUser.isProvider ?? false,
+      isVerified: (insertUser as any).isVerified ?? false,
+      googleId: (insertUser as any).googleId ?? null,
+      appleId: (insertUser as any).appleId ?? null,
+      twitterId: (insertUser as any).twitterId ?? null,
+      instagramId: (insertUser as any).instagramId ?? null,
+      authProvider: (insertUser as any).authProvider ?? 'email',
+      rememberToken: null,
+      rememberTokenExpiresAt: null,
+      emailVerificationToken: null,
+      emailVerificationExpiresAt: null,
+      passwordResetToken: null,
+      passwordResetExpiresAt: null,
+      preferences: (insertUser as any).preferences ?? null,
+      notificationSettings: (insertUser as any).notificationSettings ?? null,
+      preferredServices: (insertUser as any).preferredServices ?? [],
+      preferredProviders: (insertUser as any).preferredProviders ?? [],
+      savedAddresses: (insertUser as any).savedAddresses ?? null,
+      defaultAddress: (insertUser as any).defaultAddress ?? null,
+      defaultCity: (insertUser as any).defaultCity ?? null,
+      defaultPostalCode: (insertUser as any).defaultPostalCode ?? null,
+      lastLoginAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as User;
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    const current = this.users.get(id);
+    if (!current) throw new Error("User not found");
+    const updated = { ...current, ...userData, updatedAt: new Date() } as User;
+    this.users.set(id, updated);
+    return updated;
+  }
+
+  async updateUserLastLogin(id: string): Promise<void> {
+    const current = this.users.get(id);
+    if (!current) return;
+    this.users.set(id, { ...current, lastLoginAt: new Date() } as User);
+  }
+
+  async updateRememberToken(id: string, token: string, expiresAt: Date): Promise<void> {
+    const current = this.users.get(id);
+    if (!current) return;
+    this.users.set(id, { ...current, rememberToken: token, rememberTokenExpiresAt: expiresAt } as User);
+  }
+
+  async clearRememberToken(id: string): Promise<void> {
+    const current = this.users.get(id);
+    if (!current) return;
+    this.users.set(id, { ...current, rememberToken: null, rememberTokenExpiresAt: null } as User);
+  }
+
+  async getUserByEmailVerificationToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.emailVerificationToken === token);
+  }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    const current = this.users.get(userId);
+    if (!current) return;
+    this.users.set(userId, { ...current, isVerified: true, emailVerificationToken: null, emailVerificationExpiresAt: null, updatedAt: new Date() } as User);
+  }
+
+  async setPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    const current = this.users.get(userId);
+    if (!current) return;
+    this.users.set(userId, { ...current, passwordResetToken: token, passwordResetExpiresAt: expiresAt, updatedAt: new Date() } as User);
+  }
+
+  async getUserByPasswordResetToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.passwordResetToken === token);
+  }
+
+  async resetUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    const current = this.users.get(userId);
+    if (!current) return;
+    this.users.set(userId, { ...current, password: hashedPassword, passwordResetToken: null, passwordResetExpiresAt: null, updatedAt: new Date() } as User);
+  }
+
+  async getOrCreateCart(userId?: string, sessionToken?: string): Promise<Cart> {
+    const now = new Date();
+    let cart: Cart | undefined;
+    if (userId) {
+      cart = Array.from(this.carts.values()).find(c => c.userId === userId && c.status === 'active' && (!c.expiresAt || (c.expiresAt as Date) > now));
+    } else if (sessionToken) {
+      cart = Array.from(this.carts.values()).find(c => c.sessionToken === sessionToken && c.status === 'active' && (!c.expiresAt || (c.expiresAt as Date) > now));
+    }
+    if (!cart) {
+      const id = randomUUID();
+      const expiresAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+      cart = {
+        id,
+        userId: userId || null,
+        sessionToken: sessionToken || null,
+        status: 'active',
+        expiresAt,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Cart;
+      this.carts.set(id, cart);
+    }
+    return cart;
+  }
+
+  async mergeGuestCartToUser(sessionToken: string, userId: string): Promise<Cart> {
+    const guestCart = Array.from(this.carts.values()).find(c => c.sessionToken === sessionToken && c.status === 'active');
+    const userCart = await this.getOrCreateCart(userId);
+    if (guestCart) {
+      for (const item of Array.from(this.cartItemsMap.values()).filter(i => i.cartId === guestCart.id)) {
+        this.cartItemsMap.set(item.id, { ...item, cartId: userCart.id, updatedAt: new Date() } as CartItem);
+      }
+      this.carts.set(guestCart.id, { ...guestCart, status: 'converted', updatedAt: new Date() } as Cart);
+    }
+    return userCart;
+  }
+
+  async getCart(cartId: string): Promise<Cart | undefined> {
+    return this.carts.get(cartId);
+  }
+
+  async getCartWithItems(cartId: string): Promise<{ cart: Cart; items: CartItem[] } | undefined> {
+    const cart = this.carts.get(cartId);
+    if (!cart) return undefined;
+    const items = Array.from(this.cartItemsMap.values()).filter(i => i.cartId === cartId).sort((a, b) => {
+      const ta = (a.addedAt as Date) || new Date(0);
+      const tb = (b.addedAt as Date) || new Date(0);
+      return tb.getTime() - ta.getTime();
+    });
+    return { cart, items };
+  }
+
+  async addItemToCart(cartId: string, item: Omit<InsertCartItem, 'cartId'>): Promise<CartItem> {
+    const dup = Array.from(this.cartItemsMap.values()).find(i => i.cartId === cartId && String(i.scheduledDate) === String(item.scheduledDate) && i.scheduledTime === item.scheduledTime && (!item.serviceId || i.serviceId === item.serviceId));
+    if (dup) return dup;
+    const id = randomUUID();
+    const cartItem: CartItem = {
+      id,
+      cartId,
+      serviceId: item.serviceId || null,
+      providerId: item.providerId || null,
+      serviceType: item.serviceType,
+      serviceName: item.serviceName,
+      scheduledDate: item.scheduledDate as any,
+      scheduledTime: item.scheduledTime,
+      duration: item.duration || null,
+      basePrice: item.basePrice as any,
+      addOnsPrice: (item.addOnsPrice || '0') as any,
+      subtotal: item.subtotal as any,
+      tipAmount: (item.tipAmount || '0') as any,
+      serviceDetails: item.serviceDetails || null,
+      selectedAddOns: (item.selectedAddOns || []) as any,
+      comments: item.comments || null,
+      addedAt: new Date(),
+      updatedAt: new Date(),
+    } as CartItem;
+    this.cartItemsMap.set(id, cartItem);
+    const cart = this.carts.get(cartId);
+    if (cart) this.carts.set(cartId, { ...cart, updatedAt: new Date() } as Cart);
+    return cartItem;
+  }
+
+  async updateCartItem(itemId: string, updates: Partial<CartItem>): Promise<CartItem> {
+    const current = this.cartItemsMap.get(itemId);
+    if (!current) throw new Error('Cart item not found');
+    const mutableKeys = ['comments','scheduledDate','scheduledTime','selectedAddOns','basePrice','addOnsPrice','subtotal','serviceDetails'] as const;
+    const allowed: any = {};
+    for (const k of mutableKeys) if ((updates as any)[k] !== undefined) allowed[k] = (updates as any)[k];
+    const updated = { ...current, ...allowed, updatedAt: new Date() } as CartItem;
+    this.cartItemsMap.set(itemId, updated);
+    return updated;
+  }
+
+  async removeCartItem(itemId: string): Promise<void> {
+    this.cartItemsMap.delete(itemId);
+  }
+
+  async clearCart(cartId: string): Promise<void> {
+    for (const [id, item] of Array.from(this.cartItemsMap.entries())) {
+      if (item.cartId === cartId) this.cartItemsMap.delete(id);
+    }
+  }
+
+  async getCartItemCount(cartId: string): Promise<number> {
+    return Array.from(this.cartItemsMap.values()).filter(i => i.cartId === cartId).length;
+  }
+
+  async createGateCode(bookingId: string, encryptedGateCode: string, iv: string, authTag: string): Promise<BookingGateCode> {
+    const id = randomUUID();
+    const code: BookingGateCode = {
+      id,
+      bookingId,
+      encryptedGateCode,
+      iv,
+      authTag: authTag || null,
+      createdAt: new Date(),
+      accessedAt: null,
+      accessedBy: null,
+      deletedAt: null,
+    } as any;
+    this.gateCodes.set(id, code);
+    return code;
+  }
+
+  async getGateCodeForProvider(bookingId: string, providerId: string): Promise<BookingGateCode | null> {
+    const code = Array.from(this.gateCodes.values()).find(c => c.bookingId === bookingId && !c.deletedAt);
+    if (!code) return null;
+    this.gateCodes.set(code.id, { ...code, accessedAt: new Date(), accessedBy: providerId } as any);
+    return this.gateCodes.get(code.id) || null;
+  }
+
+  async deleteGateCodeAfterCompletion(bookingId: string): Promise<void> {
+    for (const [id, code] of Array.from(this.gateCodes.entries())) {
+      if (code.bookingId === bookingId) {
+        this.gateCodes.set(id, { ...code, deletedAt: new Date() } as any);
+      }
+    }
+  }
+
+  async logGateCodeAccess(gateCodeId: string, providerId: string): Promise<void> {
+    const code = this.gateCodes.get(gateCodeId);
+    if (!code) return;
+    this.gateCodes.set(gateCodeId, { ...code, accessedAt: new Date(), accessedBy: providerId } as any);
+  }
+
+  async getWalletBalance(userId: string): Promise<number> {
+    const existing = this.wallets.get(userId);
+    if (existing) return Number(existing.balance || 0);
+    this.wallets.set(userId, { id: randomUUID(), userId, balance: 1000.0, currency: 'USD', updatedAt: new Date() });
+    return 1000.0;
+  }
+
+  async getOrCreateWallet(userId: string): Promise<any> {
+    const wallet = this.wallets.get(userId);
+    if (wallet) return wallet;
+    const created = { id: randomUUID(), userId, balance: 1000.0, currency: 'USD', isActive: true, updatedAt: new Date() };
+    this.wallets.set(userId, created);
+    return created;
+  }
+
+  async processWalletPayment(userId: string, amount: number, bookingId?: string, serviceId?: string, description?: string): Promise<any> {
+    const wallet = (await this.getOrCreateWallet(userId));
+    if (Number(wallet.balance) < amount) throw new Error('Insufficient wallet balance');
+    const before = Number(wallet.balance);
+    const after = before - amount;
+    const updated = { ...wallet, balance: after, updatedAt: new Date() };
+    this.wallets.set(userId, updated);
+    const tx = {
+      id: randomUUID(),
+      walletId: updated.id,
+      userId,
+      type: 'payment',
+      amount: amount.toFixed(2),
+      balanceBefore: before.toFixed(2),
+      balanceAfter: after.toFixed(2),
+      description: description || 'Payment',
+      status: 'completed',
+      bookingId: bookingId || null,
+      serviceId: serviceId || null,
+      createdAt: new Date(),
+    };
+    const list = this.walletTxs.get(userId) || [];
+    list.push(tx);
+    this.walletTxs.set(userId, list);
+    return tx;
+  }
+
+  async addWalletFunds(userId: string, amount: number, stripePaymentIntentId?: string, description?: string): Promise<any> {
+    const wallet = await this.getOrCreateWallet(userId);
+    const before = Number(wallet.balance);
+    const after = before + amount;
+    const updated = { ...wallet, balance: after, updatedAt: new Date() };
+    this.wallets.set(userId, updated);
+    const tx = {
+      id: randomUUID(),
+      walletId: updated.id,
+      userId,
+      type: 'deposit',
+      amount: amount.toFixed(2),
+      balanceBefore: before.toFixed(2),
+      balanceAfter: after.toFixed(2),
+      description: description || 'Added funds',
+      status: 'completed',
+      stripePaymentIntentId: stripePaymentIntentId || null,
+      createdAt: new Date(),
+    };
+    const list = this.walletTxs.get(userId) || [];
+    list.push(tx);
+    this.walletTxs.set(userId, list);
+    return tx;
+  }
+
+  async withdrawWalletFunds(userId: string, amount: number, description?: string): Promise<any> {
+    const wallet = await this.getOrCreateWallet(userId);
+    const before = Number(wallet.balance);
+    if (before < amount) throw new Error('Insufficient wallet balance');
+    const after = before - amount;
+    const updated = { ...wallet, balance: after, updatedAt: new Date() };
+    this.wallets.set(userId, updated);
+    const tx = {
+      id: randomUUID(),
+      walletId: updated.id,
+      userId,
+      type: 'withdraw',
+      amount: amount.toFixed(2),
+      balanceBefore: before.toFixed(2),
+      balanceAfter: after.toFixed(2),
+      description: description || 'Withdraw',
+      status: 'completed',
+      createdAt: new Date(),
+    };
+    const list = this.walletTxs.get(userId) || [];
+    list.push(tx);
+    this.walletTxs.set(userId, list);
+    return tx;
+  }
+
+  async getWalletTransactions(userId: string, limit: number = 50, offset: number = 0): Promise<any[]> {
+    const list = this.walletTxs.get(userId) || [];
+    return list.slice(offset, offset + limit).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateAutoReloadSettings(userId: string, settings: { enabled: boolean; threshold: number; amount: number; paymentMethodId?: string }): Promise<void> {
+    const wallet = await this.getOrCreateWallet(userId);
+    this.wallets.set(userId, { ...wallet, autoReloadEnabled: settings.enabled, autoReloadThreshold: settings.threshold, autoReloadAmount: settings.amount, autoReloadPaymentMethodId: settings.paymentMethodId, updatedAt: new Date() });
+  }
+
+  async createOrder(order: InsertOrder, orderItemsData: InsertOrderItem[], options?: { clearCart?: boolean }): Promise<Order> {
+    const id = randomUUID();
+    const now = new Date();
+    const newOrder = { ...order, id, createdAt: now, updatedAt: now } as Order;
+    this.orders.set(id, newOrder);
+    for (const oi of orderItemsData) {
+      const itemId = randomUUID();
+      const orderItem = { ...oi, id: itemId, orderId: id, createdAt: now, updatedAt: now } as any;
+      this.orderItems.set(itemId, orderItem);
+    }
+    if (options?.clearCart && order.cartId) {
+      await this.clearCart(order.cartId);
+    }
+    return newOrder;
+  }
+
+  async updateOrderStatus(orderId: string, status: string, paymentStatus?: string): Promise<Order> {
+    const current = this.orders.get(orderId);
+    if (!current) throw new Error('Order not found');
+    const updated = { ...current, status, paymentStatus: paymentStatus || (current as any).paymentStatus, updatedAt: new Date() } as Order;
+    this.orders.set(orderId, updated);
+    return updated;
+  }
+
+  async getOrderWithItems(orderId: string): Promise<{ order: Order; items: any[] } | undefined> {
+    const order = this.orders.get(orderId);
+    if (!order) return undefined;
+    const items = Array.from(this.orderItems.values()).filter(i => i.orderId === orderId);
+    return { order: order as Order, items };
+  }
+
+  async getOrder(orderId: string): Promise<Order | undefined> {
+    const order = this.orders.get(orderId);
+    return order as Order | undefined;
+  }
+
+  async getUserOrders(userId: string): Promise<Order[]> {
+    return Array.from(this.orders.values()).filter((o: any) => o.userId === userId) as Order[];
+  }
+
+  async updateOrder(orderId: string, updates: Partial<Order>): Promise<Order> {
+    const current = this.orders.get(orderId);
+    if (!current) throw new Error('Order not found');
+    const updated = { ...current, ...updates, updatedAt: new Date() } as Order;
+    this.orders.set(orderId, updated);
+    return updated;
   }
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
@@ -1845,28 +2244,39 @@ export class MemStorage implements IStorage {
 
   async createServiceProvider(insertProvider: InsertServiceProvider): Promise<ServiceProvider> {
     const id = randomUUID();
-    const provider: ServiceProvider = {
+    const provider = {
       ...insertProvider,
       id,
-      firstName: insertProvider.firstName || null,
-      lastName: insertProvider.lastName || null,
-      email: insertProvider.email || null,
-      phone: insertProvider.phone || null,
-      bio: insertProvider.bio || null,
-      profileImage: insertProvider.profileImage || null,
-      experience: insertProvider.experience || null,
-      availability: insertProvider.availability || {},
-      isVerified: insertProvider.isVerified || false,
-      insuranceVerified: insertProvider.insuranceVerified || false,
-      backgroundCheckVerified: insertProvider.backgroundCheckVerified || false,
-      hasInsurance: insertProvider.hasInsurance || false,
-      backgroundCheckConsent: insertProvider.backgroundCheckConsent || false,
-      rating: "0",
-      totalReviews: 0,
-      idDocument: insertProvider.idDocument || null,
-      qualificationCertificate: insertProvider.qualificationCertificate || null,
-      createdAt: new Date()
-    };
+      firstName: insertProvider.firstName ?? null,
+      lastName: insertProvider.lastName ?? null,
+      email: insertProvider.email ?? null,
+      phone: insertProvider.phone ?? null,
+      bio: insertProvider.bio ?? null,
+      profileImage: insertProvider.profileImage ?? null,
+      hourlyRate: insertProvider.hourlyRate as any,
+      servicesOffered: insertProvider.servicesOffered ?? [],
+      experience: insertProvider.experience ?? null,
+      availability: insertProvider.availability ?? {},
+      isVerified: insertProvider.isVerified ?? false,
+      verificationStatus: (insertProvider as any).verificationStatus ?? 'pending',
+      insuranceVerified: insertProvider.insuranceVerified ?? false,
+      backgroundCheckVerified: insertProvider.backgroundCheckVerified ?? false,
+      hasInsurance: insertProvider.hasInsurance ?? false,
+      backgroundCheckConsent: insertProvider.backgroundCheckConsent ?? false,
+      rating: (insertProvider as any).rating ?? '0',
+      totalReviews: (insertProvider as any).totalReviews ?? 0,
+      location: (insertProvider as any).location ?? null,
+      latitude: (insertProvider as any).latitude ?? null,
+      longitude: (insertProvider as any).longitude ?? null,
+      idDocument: insertProvider.idDocument ?? null,
+      qualificationCertificate: insertProvider.qualificationCertificate ?? null,
+      providerType: (insertProvider as any).providerType ?? 'individual',
+      companyName: (insertProvider as any).companyName ?? null,
+      companyRegistration: (insertProvider as any).companyRegistration ?? null,
+      taxNumber: (insertProvider as any).taxNumber ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as ServiceProvider;
     this.serviceProviders.set(id, provider);
     return provider;
   }
@@ -1896,11 +2306,23 @@ export class MemStorage implements IStorage {
 
   async createService(insertService: InsertService): Promise<Service> {
     const id = randomUUID();
-    const service: Service = { 
-      ...insertService, 
+    const service: Service = {
       id,
-      isActive: insertService.isActive !== undefined ? insertService.isActive : true
-    };
+      name: insertService.name,
+      description: insertService.description,
+      category: insertService.category,
+      subcategory: insertService.subcategory ?? null,
+      basePrice: insertService.basePrice as any,
+      priceType: insertService.priceType ?? "hourly",
+      estimatedDuration: insertService.estimatedDuration ?? null,
+      icon: insertService.icon ?? null,
+      features: insertService.features ?? [],
+      requirements: insertService.requirements ?? [],
+      isActive: insertService.isActive !== undefined ? insertService.isActive : true,
+      sortOrder: insertService.sortOrder ?? 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Service;
     this.services.set(id, service);
     return service;
   }
@@ -1924,15 +2346,48 @@ export class MemStorage implements IStorage {
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const id = randomUUID();
     const booking: Booking = {
-      ...insertBooking,
       id,
-      status: insertBooking.status || "pending",
-      specialInstructions: insertBooking.specialInstructions || null,
-      isRecurring: insertBooking.isRecurring || false,
-      recurringFrequency: insertBooking.recurringFrequency || null,
+      customerId: insertBooking.customerId,
+      providerId: insertBooking.providerId ?? null,
+      serviceId: insertBooking.serviceId,
+      bookingNumber: insertBooking.bookingNumber,
+      scheduledDate: insertBooking.scheduledDate as any,
+      scheduledTime: insertBooking.scheduledTime,
+      duration: insertBooking.duration,
+      totalPrice: insertBooking.totalPrice as any,
+      platformFee: insertBooking.platformFee ?? ("0" as any),
+      paymentProcessingFee: insertBooking.paymentProcessingFee ?? ("0" as any),
+      providerPayout: insertBooking.providerPayout ?? ("0" as any),
+      tipAmount: insertBooking.tipAmount ?? ("0" as any),
+      paymentStatus: insertBooking.paymentStatus ?? "pending",
+      paymentIntentId: insertBooking.paymentIntentId ?? null,
+      status: insertBooking.status ?? "pending",
+      serviceType: insertBooking.serviceType,
+      serviceDetails: insertBooking.serviceDetails ?? null,
+      customerDetails: insertBooking.customerDetails ?? null,
+      address: insertBooking.address,
+      city: insertBooking.city ?? null,
+      postalCode: insertBooking.postalCode ?? null,
+      propertyType: insertBooking.propertyType ?? null,
+      propertySize: insertBooking.propertySize ?? null,
+      rooms: insertBooking.rooms ?? null,
+      bathrooms: insertBooking.bathrooms ?? null,
+      accessInstructions: insertBooking.accessInstructions ?? null,
+      specialInstructions: insertBooking.specialInstructions ?? null,
+      emergencyContact: insertBooking.emergencyContact ?? null,
+      isRecurring: insertBooking.isRecurring ?? false,
+      recurringFrequency: insertBooking.recurringFrequency ?? null,
+      recurringEndDate: insertBooking.recurringEndDate ?? null,
+      parentBookingId: insertBooking.parentBookingId ?? null,
+      remindersSent: insertBooking.remindersSent ?? 0,
+      customerRating: insertBooking.customerRating ?? null,
+      customerRatingBreakdown: insertBooking.customerRatingBreakdown ?? null,
+      providerRating: insertBooking.providerRating ?? null,
+      providerRatingBreakdown: insertBooking.providerRatingBreakdown ?? null,
+      notes: insertBooking.notes ?? null,
       createdAt: new Date(),
-      updatedAt: new Date()
-    };
+      updatedAt: new Date(),
+    } as Booking;
     this.bookings.set(id, booking);
     return booking;
   }
@@ -1948,6 +2403,29 @@ export class MemStorage implements IStorage {
     };
     this.bookings.set(id, updatedBooking);
     return updatedBooking;
+  }
+
+  async updateBookingSchedule(id: string, scheduledDate: Date, scheduledTime: string): Promise<Booking> {
+    const booking = this.bookings.get(id);
+    if (!booking) throw new Error("Booking not found");
+    const updated = { ...booking, scheduledDate, scheduledTime, updatedAt: new Date() } as Booking;
+    this.bookings.set(id, updated);
+    return updated;
+  }
+
+  async cancelBooking(id: string, reason?: string): Promise<Booking> {
+    const booking = this.bookings.get(id);
+    if (!booking) throw new Error("Booking not found");
+    const cancelNote = reason ? `Cancelled by customer. Reason: ${reason}` : 'Cancelled by customer.';
+    const updated = { 
+      ...booking, 
+      status: 'cancelled', 
+      paymentStatus: 'refunded', 
+      notes: booking.notes ? `${booking.notes}\n\n${cancelNote}` : cancelNote,
+      updatedAt: new Date() 
+    } as Booking;
+    this.bookings.set(id, updated);
+    return updated;
   }
 
   async getReviewsByProvider(providerId: string): Promise<Review[]> {
@@ -1980,20 +2458,56 @@ export class MemStorage implements IStorage {
   async createPaymentMethod(paymentMethodData: InsertPaymentMethod): Promise<PaymentMethod> {
     const paymentMethod: PaymentMethod = {
       id: randomUUID(),
-      type: paymentMethodData.type,
       userId: paymentMethodData.userId,
-      cardNumber: paymentMethodData.cardNumber || null,
-      cardHolderName: paymentMethodData.cardHolderName || null,
-      expiryMonth: paymentMethodData.expiryMonth || null,
-      expiryYear: paymentMethodData.expiryYear || null,
-      bankName: paymentMethodData.bankName || null,
-      cardType: paymentMethodData.cardType || null,
-      isActive: paymentMethodData.isActive ?? true,
+      type: paymentMethodData.type,
+      stripePaymentMethodId: paymentMethodData.stripePaymentMethodId ?? null,
+      cardLast4: paymentMethodData.cardLast4 ?? null,
+      cardBrand: paymentMethodData.cardBrand ?? null,
+      cardHolderName: paymentMethodData.cardHolderName ?? null,
+      expiryMonth: paymentMethodData.expiryMonth ?? null,
+      expiryYear: paymentMethodData.expiryYear ?? null,
+      bankName: paymentMethodData.bankName ?? null,
+      accountHolderName: paymentMethodData.accountHolderName ?? null,
+      nickname: paymentMethodData.nickname ?? null,
+      billingAddress: paymentMethodData.billingAddress ?? null,
       isDefault: paymentMethodData.isDefault ?? false,
+      isActive: paymentMethodData.isActive ?? true,
       createdAt: new Date(),
-    };
+      updatedAt: new Date(),
+    } as PaymentMethod;
     this.paymentMethods.set(paymentMethod.id, paymentMethod);
     return paymentMethod;
+  }
+
+  // IStorage payment methods - compatibility
+  async getUserPaymentMethods(userId: string): Promise<PaymentMethod[]> {
+    return Array.from(this.paymentMethods.values()).filter(pm => pm.userId === userId);
+  }
+
+  async getPaymentMethod(id: string): Promise<PaymentMethod | undefined> {
+    return this.paymentMethods.get(id);
+  }
+
+  async addPaymentMethod(paymentMethodData: InsertPaymentMethod): Promise<PaymentMethod> {
+    return this.createPaymentMethod(paymentMethodData);
+  }
+
+  async updatePaymentMethod(id: string, data: Partial<PaymentMethod>): Promise<PaymentMethod> {
+    const current = this.paymentMethods.get(id);
+    if (!current) throw new Error('Payment method not found');
+    const updated = { ...current, ...data, updatedAt: new Date() } as PaymentMethod;
+    this.paymentMethods.set(id, updated);
+    return updated;
+  }
+
+  async removePaymentMethod(id: string): Promise<void> {
+    this.paymentMethods.delete(id);
+  }
+
+  async unsetDefaultPaymentMethods(userId: string): Promise<void> {
+    for (const [id, pm] of Array.from(this.paymentMethods.entries())) {
+      if (pm.userId === userId) this.paymentMethods.set(id, { ...pm, isDefault: false } as PaymentMethod);
+    }
   }
 
   async deletePaymentMethod(id: string): Promise<void> {
@@ -2013,7 +2527,7 @@ export class MemStorage implements IStorage {
     const existingLocation = Array.from(this.providerLocations.values()).find(loc => loc.providerId === locationData.providerId);
     
     if (existingLocation) {
-      const updatedLocation = { ...existingLocation, ...locationData, updatedAt: new Date() };
+      const updatedLocation = { ...existingLocation, ...locationData, updatedAt: new Date() } as ProviderLocation;
       this.providerLocations.set(existingLocation.id, updatedLocation);
       return updatedLocation;
     } else {
@@ -2037,15 +2551,65 @@ export class MemStorage implements IStorage {
   async createJobQueueItem(jobData: InsertJobQueue): Promise<JobQueue> {
     const job: JobQueue = {
       id: randomUUID(),
-      ...jobData,
-      status: jobData.status ?? "pending",
+      serviceType: jobData.serviceType,
+      bookingId: jobData.bookingId ?? null,
+      customerLatitude: jobData.customerLatitude,
+      customerLongitude: jobData.customerLongitude,
       maxRadius: jobData.maxRadius ?? 20,
       priority: jobData.priority ?? 1,
+      status: jobData.status ?? "pending",
       assignedProviderId: jobData.assignedProviderId ?? null,
+      expiresAt: jobData.expiresAt,
       createdAt: new Date(),
-    };
+    } as JobQueue;
     this.jobQueue.set(job.id, job);
     return job;
+  }
+
+  // Support ticket operations (MemStorage)
+  async createSupportTicket(ticket: any): Promise<any> {
+    const id = randomUUID();
+    const now = new Date();
+    const newTicket = {
+      id,
+      ticketNumber: ticket.ticketNumber,
+      userId: ticket.userId ?? null,
+      bookingId: ticket.bookingId ?? null,
+      category: ticket.category,
+      priority: ticket.priority ?? "medium",
+      subject: ticket.subject,
+      description: ticket.message ?? ticket.description ?? "",
+      status: ticket.status ?? "open",
+      assignedTo: null,
+      resolutionNotes: null,
+      attachments: null,
+      customerSatisfactionRating: null,
+      resolvedAt: null,
+      createdAt: now,
+      updatedAt: now,
+      // Extra metadata
+      name: ticket.name ?? null,
+      email: ticket.email ?? null,
+      phone: ticket.phone ?? null,
+    };
+    this.supportTickets.set(newTicket.ticketNumber, newTicket);
+    return newTicket;
+  }
+
+  async getSupportTicket(ticketNumber: string): Promise<any> {
+    return this.supportTickets.get(ticketNumber) || undefined;
+  }
+
+  async getUserSupportTickets(userId: string): Promise<any[]> {
+    return Array.from(this.supportTickets.values()).filter((t: any) => t.userId === userId);
+  }
+
+  async updateSupportTicketStatus(ticketNumber: string, status: string): Promise<any> {
+    const current = this.supportTickets.get(ticketNumber);
+    if (!current) return undefined;
+    const updated = { ...current, status, updatedAt: new Date() };
+    this.supportTickets.set(ticketNumber, updated);
+    return updated;
   }
 
   // Training system methods (stub implementations for MemStorage)
@@ -2096,7 +2660,143 @@ export class MemStorage implements IStorage {
   async createAssessmentResult(result: InsertProviderAssessmentResult): Promise<ProviderAssessmentResult> {
     throw new Error("Assessment result creation not implemented in MemStorage");
   }
+
+  async getProviderModuleProgress(providerId: string, moduleId: string): Promise<ProviderTrainingProgress | undefined> {
+    return undefined;
+  }
+
+  // Admin methods (minimal in-memory implementation)
+  async getAdminStats(): Promise<any> {
+    return {
+      totalUsers: this.users.size,
+      totalProviders: this.serviceProviders.size,
+      activeBookings: Array.from(this.bookings.values()).filter(b => b.status === 'confirmed').length,
+      totalRevenue: 0,
+      pendingApplications: Array.from(this.serviceProviders.values()).filter(p => (p as any).verificationStatus === 'pending').length,
+      monthlyRecurringRevenue: 0,
+      customerAcquisitionCost: 0,
+      customerLifetimeValue: 0,
+      churnRate: 0,
+      conversionRate: 0,
+      averageOrderValue: 0,
+      providerUtilization: 0,
+      customerSatisfaction: 5,
+      revenueGrowth: 0,
+      userGrowth: 0,
+      bookingGrowth: 0,
+      todayBookings: 0,
+      thisWeekRevenue: 0,
+      thisMonthRevenue: 0,
+      averageResponseTime: 0,
+      disputeRate: 0,
+      retentionRate: 100,
+    };
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getAllProviders(): Promise<ServiceProvider[]> {
+    return Array.from(this.serviceProviders.values());
+  }
+
+  async updateProviderVerificationStatus(providerId: string, status: string): Promise<void> {
+    const current = this.serviceProviders.get(providerId);
+    if (!current) return;
+    this.serviceProviders.set(providerId, { ...current, verificationStatus: status, isVerified: status === 'approved', updatedAt: new Date() } as any);
+  }
+
+  // Chat methods (in-memory)
+  async getOrCreateConversation(bookingId: string, customerId: string, providerId: string): Promise<Conversation> {
+    const existing = Array.from(this.conversations.values()).find(c => c.bookingId === bookingId && c.customerId === customerId && c.providerId === providerId);
+    if (existing) return existing;
+    const conv: Conversation = {
+      id: randomUUID(),
+      bookingId,
+      customerId,
+      providerId,
+      subject: null as any,
+      status: 'active' as any,
+      lastMessageAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any;
+    this.conversations.set(conv.id, conv);
+    this.messagesByConversation.set(conv.id, []);
+    return conv;
+  }
+
+  async getConversation(conversationId: string): Promise<Conversation | undefined> {
+    return this.conversations.get(conversationId);
+  }
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    return Array.from(this.conversations.values()).filter(c => c.customerId === userId || c.providerId === userId);
+  }
+
+  async getProviderConversations(providerId: string): Promise<Conversation[]> {
+    return Array.from(this.conversations.values()).filter(c => c.providerId === providerId);
+  }
+
+  async sendMessage(message: InsertMessage): Promise<Message> {
+    const msg: Message = {
+      id: randomUUID(),
+      ...message,
+      isRead: false as any,
+      createdAt: new Date(),
+    } as any;
+    const list = this.messagesByConversation.get(message.conversationId) || [];
+    list.push(msg);
+    this.messagesByConversation.set(message.conversationId, list);
+    const conv = this.conversations.get(message.conversationId);
+    if (conv) this.conversations.set(conv.id, { ...conv, lastMessageAt: new Date(), updatedAt: new Date() } as any);
+    return msg;
+  }
+
+  async getConversationMessages(conversationId: string): Promise<Message[]> {
+    return this.messagesByConversation.get(conversationId) || [];
+  }
+
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+    const msgs = this.messagesByConversation.get(conversationId) || [];
+    this.messagesByConversation.set(conversationId, msgs.map(m => ({ ...m, isRead: true, readAt: new Date() } as any)));
+  }
+
+  // Notification methods (in-memory)
+  async getNotificationsByUser(userId: string, limit: number = 50): Promise<Notification[]> {
+    const list = this.notificationsByUser.get(userId) || [];
+    return list.slice(0, limit);
+  }
+
+  async getUnreadNotificationsCount(userId: string): Promise<number> {
+    const list = this.notificationsByUser.get(userId) || [];
+    return list.filter(n => !n.isRead).length;
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const n: Notification = { id: randomUUID(), ...notification, createdAt: new Date() } as any;
+    const list = this.notificationsByUser.get(notification.userId) || [];
+    list.push(n);
+    this.notificationsByUser.set(notification.userId, list);
+    return n;
+  }
+
+  async markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
+    const list = this.notificationsByUser.get(userId) || [];
+    this.notificationsByUser.set(userId, list.map(n => n.id === notificationId ? ({ ...n, isRead: true, readAt: new Date() } as any) : n));
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    const list = this.notificationsByUser.get(userId) || [];
+    this.notificationsByUser.set(userId, list.map(n => ({ ...n, isRead: true, readAt: new Date() } as any)));
+  }
+
+  async deleteExpiredNotifications(): Promise<void> {
+    // No-op for in-memory
+  }
 }
 
 // Switch to database storage for production
-export const storage = new DatabaseStorage();
+const useMemStorage = process.env.USE_MEM_STORAGE === '1';
+export const storage: IStorage = useMemStorage ? (new MemStorage() as unknown as IStorage) : new DatabaseStorage();

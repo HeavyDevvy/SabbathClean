@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
@@ -13,10 +14,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Wallet, CreditCard, Plus, ArrowUpDown, DollarSign, Settings, History } from "lucide-react";
+import { Wallet, CreditCard, Plus, ArrowUpDown, Banknote, Settings, History, Home } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise =
+  typeof stripePublicKey === "string" && stripePublicKey.startsWith("pk_")
+    ? loadStripe(stripePublicKey)
+    : null;
 
 interface WalletData {
   balance: number;
@@ -246,6 +252,7 @@ export default function WalletPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [transactionsOpen, setTransactionsOpen] = useState(false);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const { data: walletData, isLoading } = useQuery<WalletData>({
     queryKey: ["/api/wallet/balance"],
@@ -257,7 +264,7 @@ export default function WalletPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#EED1C4]/30 to-white dark:from-gray-900 dark:to-gray-800 p-4">
         <div className="max-w-6xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -273,25 +280,31 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#EED1C4]/30 to-white dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 bg-blue-500 rounded-full">
-            <Wallet className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#44062D] rounded-full">
+              <Wallet className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-[#44062D] dark:text-white">My Wallet</h1>
+              <p className="text-gray-600 dark:text-gray-300">Manage your Berry Events wallet</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Wallet</h1>
-            <p className="text-gray-600 dark:text-gray-300">Manage your Berry Events wallet</p>
-          </div>
+          <Button variant="outline" onClick={() => navigate("/")}> 
+            <Home className="h-4 w-4 mr-2" />
+            Return Home
+          </Button>
         </div>
 
         {walletData && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
             {/* Balance Card */}
-            <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+            <Card className="bg-[#44062D] text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
+                  <Banknote className="h-5 w-5" />
                   Current Balance
                 </CardTitle>
               </CardHeader>
@@ -299,7 +312,7 @@ export default function WalletPage() {
                 <p className="text-3xl font-bold" data-testid="text-balance">
                   R{walletData.balance.toFixed(2)}
                 </p>
-                <p className="text-blue-100">ZAR</p>
+                <p className="text-[#EED1C4]">ZAR</p>
               </CardContent>
             </Card>
 
@@ -322,14 +335,20 @@ export default function WalletPage() {
                       Add Funds
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Add Funds to Wallet</DialogTitle>
-                    </DialogHeader>
-                    <Elements stripe={stripePromise}>
-                      <AddFundsForm onSuccess={() => setAddFundsOpen(false)} />
-                    </Elements>
-                  </DialogContent>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add Funds to Wallet</DialogTitle>
+                      </DialogHeader>
+                      {stripePromise ? (
+                        <Elements stripe={stripePromise}>
+                          <AddFundsForm onSuccess={() => setAddFundsOpen(false)} />
+                        </Elements>
+                      ) : (
+                        <div className="text-sm text-red-600">
+                          Stripe is not configured. Set `VITE_STRIPE_PUBLIC_KEY` to your publishable key.
+                        </div>
+                      )}
+                    </DialogContent>
                 </Dialog>
               </CardContent>
             </Card>
@@ -408,7 +427,7 @@ export default function WalletPage() {
                         </div>
                         <div className="text-right">
                           <p className={`font-medium ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                            {transaction.type === 'deposit' ? '+' : '-'}${Math.abs(parseFloat(transaction.amount)).toFixed(2)}
+                            {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(Math.abs(parseFloat(transaction.amount)))}
                           </p>
                           <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                             {transaction.status}
@@ -436,7 +455,7 @@ export default function WalletPage() {
                     </div>
                     <div className="text-right">
                       <p className={`font-medium ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                        {transaction.type === 'deposit' ? '+' : '-'}${Math.abs(parseFloat(transaction.amount)).toFixed(2)}
+                        {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(Math.abs(parseFloat(transaction.amount)))}
                       </p>
                       <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                         {transaction.status}

@@ -270,7 +270,7 @@ export default function Profile() {
   });
 
   // Load existing user data
-  const { data: userData, isLoading: isLoadingUser } = useQuery({
+  const { data: userData, isLoading: isLoadingUser } = useQuery<any>({
     queryKey: [`/api/users/${userId}`],
     retry: false,
     enabled: !!userId,

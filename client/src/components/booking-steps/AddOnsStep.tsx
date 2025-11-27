@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle, Sparkles } from "lucide-react";
-import { type AddOn } from "../../../config/addons";
+import { type AddOn } from "../../../../config/addons";
 
 interface AddOnsStepProps {
   formData: {

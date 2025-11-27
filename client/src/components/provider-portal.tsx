@@ -83,10 +83,22 @@ export default function ProviderPortal({
     retry: false,
   });
 
+  const { data: referral } = useQuery<{ code: string}>({
+    queryKey: [`/api/providers/${providerId}/referral-code`],
+    retry: false,
+  });
+
   // Provide safe defaults for data
   const provider: ProviderData = providerData || { name: 'Service Provider', firstName: 'Service', lastName: 'Provider' };
   const providerEarnings: EarningsData = earnings || { totalEarnings: 0, pendingPayouts: 0, completedJobs: 0 };
   const score: SocialScoreData = socialScore || { score: 0, queueBonus: 0, trainingBonus: 0, tier: 'Bronze' };
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const weeklyBookingsCount = (bookings || []).filter((b: any) => {
+    const d = new Date(b.scheduledDate);
+    return !isNaN(d.getTime()) && d >= sevenDaysAgo;
+  }).length;
+  const providerRating = provider.rating ? Number(provider.rating) : 0;
 
   if (isLoading) {
     return (
@@ -131,6 +143,28 @@ export default function ProviderPortal({
               </div>
             </CardContent>
           </Card>
+
+          <Card className="bg-gradient-to-r from-yellow-50 to-orange-50">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-3">
+                <Award className="h-4 w-4 text-yellow-600" />
+                <div>
+                  <div className="text-xs text-gray-600">Referral Code</div>
+                  <div className="font-bold text-yellow-700">
+                    {referral?.code || '----'}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => referral?.code && navigator.clipboard.writeText(referral.code)}
+                  data-testid="button-copy-referral"
+                >
+                  Copy
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           
           <Button variant="outline" size="sm">
             <Bell className="h-4 w-4 mr-2" />
@@ -167,7 +201,7 @@ export default function ProviderPortal({
                   <Calendar className="h-5 w-5 text-blue-600" />
                   <div>
                     <div className="text-sm text-gray-600">This Week</div>
-                    <div className="text-xl font-bold">12 Bookings</div>
+                    <div className="text-xl font-bold">{weeklyBookingsCount} Bookings</div>
                   </div>
                 </div>
               </CardContent>
@@ -179,7 +213,7 @@ export default function ProviderPortal({
                   <DollarSign className="h-5 w-5 text-green-600" />
                   <div>
                     <div className="text-sm text-gray-600">Earnings</div>
-                    <div className="text-xl font-bold">R8,540</div>
+                    <div className="text-xl font-bold">R{providerEarnings.totalEarnings.toFixed(2)}</div>
                   </div>
                 </div>
               </CardContent>
@@ -191,7 +225,7 @@ export default function ProviderPortal({
                   <Star className="h-5 w-5 text-yellow-600" />
                   <div>
                     <div className="text-sm text-gray-600">Rating</div>
-                    <div className="text-xl font-bold">4.8</div>
+                    <div className="text-xl font-bold">{providerRating.toFixed(1)}</div>
                   </div>
                 </div>
               </CardContent>

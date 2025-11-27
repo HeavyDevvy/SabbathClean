@@ -18,6 +18,7 @@ import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shi
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { authClient, type User as AuthUser } from "@/lib/auth-client";
 
 const providerSchema = z.object({
   // Personal Information
@@ -97,6 +98,7 @@ export default function ProviderOnboarding() {
   const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: string}>({});
   const [isMobile, setIsMobile] = useState(false);
   const [applicationSubmitted, setApplicationSubmitted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const { toast } = useToast();
 
   const form = useForm<ProviderFormData>({
@@ -116,6 +118,11 @@ export default function ProviderOnboarding() {
       setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     };
     checkMobile();
+
+    (async () => {
+      const user = await authClient.getCurrentUser();
+      setCurrentUser(user);
+    })();
   }, []);
 
   const createProviderMutation = useMutation({
@@ -217,13 +224,23 @@ export default function ProviderOnboarding() {
   };
 
   const handleSubmit = (data: ProviderFormData) => {
+    if (!currentUser?.id) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in before submitting your provider application.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const providerData = {
       ...data,
+      userId: currentUser.id,
       profileImage: uploadedFiles.profileImage,
       idDocument: uploadedFiles.idDocument,
       qualificationCertificate: uploadedFiles.qualificationCertificate,
     };
-    
+
     createProviderMutation.mutate(providerData);
   };
 
@@ -704,7 +721,7 @@ export default function ProviderOnboarding() {
                     </Button>
                     <Button 
                       type="submit"
-                      disabled={createProviderMutation.isPending || !form.watch("termsAccepted") || !form.watch("backgroundCheckConsent") || !uploadedFiles.profileImage || !uploadedFiles.idDocument}
+                      disabled={createProviderMutation.isPending || !form.watch("termsAccepted") || !form.watch("backgroundCheckConsent") || !uploadedFiles.profileImage || !uploadedFiles.idDocument || !currentUser?.id}
                       className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 flex-1"
                       data-testid="button-submit-application"
                     >

@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { storage } from "./storage";
 import { serviceProviders, providerLocations, jobQueue, bookings } from "../shared/schema";
 import { eq, and, sql, asc, desc } from "drizzle-orm";
 
@@ -61,7 +62,7 @@ export class LocationService {
 
     // Calculate distances and filter by radius
     const providersWithDistance = availableProviders
-      .map(provider => {
+      .map((provider: any) => {
         if (!provider.latitude || !provider.longitude) return null;
         
         const distance = this.calculateDistance(
@@ -74,8 +75,8 @@ export class LocationService {
           distance,
         };
       })
-      .filter(provider => provider !== null && provider.distance <= maxRadius)
-      .sort((a, b) => {
+      .filter((provider: any) => provider !== null && provider.distance <= maxRadius)
+      .sort((a: any, b: any) => {
         // Sort by a combination of distance (30%) and rating (70%)
         const scoreA = (Number(a?.rating) || 0) * 0.7 - ((a?.distance || 0) * 0.3);
         const scoreB = (Number(b?.rating) || 0) * 0.7 - ((b?.distance || 0) * 0.3);
@@ -177,11 +178,18 @@ export class LocationService {
     location: LocationPoint,
     isOnline: boolean = true
   ) {
+    if (process.env.USE_MEM_STORAGE === '1') {
+      return await storage.updateProviderLocation({
+        providerId,
+        latitude: Number(location.latitude),
+        longitude: Number(location.longitude),
+        isOnline,
+      } as any);
+    }
     const [existingLocation] = await db
       .select()
       .from(providerLocations)
       .where(eq(providerLocations.providerId, providerId));
-
     if (existingLocation) {
       return await db
         .update(providerLocations)
@@ -194,31 +202,44 @@ export class LocationService {
         })
         .where(eq(providerLocations.providerId, providerId))
         .returning();
-    } else {
-      return await db
-        .insert(providerLocations)
-        .values({
-          providerId,
-          latitude: Number(location.latitude),
-          longitude: Number(location.longitude),
-          isOnline,
-        })
-        .returning();
     }
+    return await db
+      .insert(providerLocations)
+      .values({
+        providerId,
+        latitude: Number(location.latitude),
+        longitude: Number(location.longitude),
+        isOnline,
+      })
+      .returning();
   }
 
   // Get provider's current location
   static async getProviderLocation(providerId: string) {
+    if (process.env.USE_MEM_STORAGE === '1') {
+      return await storage.getProviderLocation(providerId);
+    }
     const [location] = await db
       .select()
       .from(providerLocations)
       .where(eq(providerLocations.providerId, providerId));
-
     return location;
   }
 
   // Set provider online/offline status
   static async setProviderOnlineStatus(providerId: string, isOnline: boolean) {
+    if (process.env.USE_MEM_STORAGE === '1') {
+      const existing = await storage.getProviderLocation(providerId);
+      const latitude = Number(existing?.latitude || 0);
+      const longitude = Number(existing?.longitude || 0);
+      await storage.updateProviderLocation({
+        providerId,
+        latitude,
+        longitude,
+        isOnline,
+      } as any);
+      return;
+    }
     await db
       .update(providerLocations)
       .set({

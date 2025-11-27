@@ -114,10 +114,6 @@ export default function EnhancedHome() {
       <EnhancedHeader 
         onBookingClick={handleBookingClick}
         onServiceSelect={handleServiceSelect}
-        isAuthenticated={isAuthenticated}
-        user={user || undefined}
-        notificationCount={notificationCount}
-        messageCount={messageCount}
       />
 
       <main>

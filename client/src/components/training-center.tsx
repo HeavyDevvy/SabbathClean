@@ -101,17 +101,17 @@ export default function TrainingCenter({
   const queryClient = useQueryClient();
 
   // Fetch training data
-  const { data: trainingData, isLoading } = useQuery({
+  const { data: trainingData, isLoading } = useQuery<{ modules: TrainingModule[] }>({
     queryKey: [`/api/training/provider/${providerId}`],
     retry: false,
   });
 
-  const { data: certifications = [] } = useQuery({
+  const { data: certifications = [] } = useQuery<Certification[]>({
     queryKey: [`/api/training/certifications/${providerId}`],
     retry: false,
   });
 
-  const { data: socialScore = { score: 0, queueBonus: 0, trainingBonus: 0, tier: 'Bronze' } } = useQuery({
+  const { data: socialScore = { score: 0, queueBonus: 0, trainingBonus: 0, tier: 'Bronze' } } = useQuery<{ score: number; queueBonus: number; trainingBonus: number; tier: string }>({
     queryKey: [`/api/providers/${providerId}/social-score`],
     retry: false,
   });

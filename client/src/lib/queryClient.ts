@@ -2,8 +2,19 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      const data = await res.clone().json();
+      const message =
+        (data && (data.message || data.error)) ||
+        (Array.isArray(data?.errors) && data.errors[0]?.message) ||
+        res.statusText;
+      throw new Error(message);
+    } catch {
+      const text = (await res.text()) || res.statusText;
+      const cleaned = text.startsWith('{') ? res.statusText : text;
+      const fallback = res.status === 409 ? 'Email already registered' : cleaned;
+      throw new Error(fallback);
+    }
   }
 }
 

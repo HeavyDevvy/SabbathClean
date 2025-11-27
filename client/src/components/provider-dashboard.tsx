@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import CustomerRatingModal from "./customer-rating-modal";
 
 interface ProviderDashboardProps {
@@ -18,21 +17,26 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   // Fetch provider's completed bookings
-  const { data: bookings, isLoading: bookingsLoading } = useQuery({
-    queryKey: ["/api/providers", providerId, "bookings"],
-    queryFn: () => apiRequest("GET", `/api/providers/${providerId}/bookings?status=completed`),
+  interface ProviderBookingsResponse { bookings: any[] }
+  const { data: bookings, isLoading: bookingsLoading } = useQuery<ProviderBookingsResponse>({
+    queryKey: [`/api/providers/${providerId}/bookings?status=completed`],
   });
 
   // Fetch provider statistics
-  const { data: stats } = useQuery({
-    queryKey: ["/api/providers", providerId, "stats"],
-    queryFn: () => apiRequest("GET", `/api/providers/${providerId}/stats`),
+  interface ProviderStats {
+    completedJobs?: number;
+    monthlyEarnings?: number;
+    averageRating?: number;
+    totalCustomers?: number;
+  }
+  const { data: stats } = useQuery<ProviderStats>({
+    queryKey: [`/api/providers/${providerId}/stats`],
   });
 
   // Fetch customer reviews submitted by this provider
-  const { data: customerReviews } = useQuery({
-    queryKey: ["/api/providers", providerId, "customer-reviews"],
-    queryFn: () => apiRequest("GET", `/api/providers/${providerId}/customer-reviews`),
+  interface CustomerReviewsResponse { reviews?: any[] }
+  const { data: customerReviews } = useQuery<CustomerReviewsResponse>({
+    queryKey: [`/api/providers/${providerId}/customer-reviews`],
   });
 
   const handleRateCustomer = (booking: any) => {
@@ -206,10 +210,10 @@ export default function ProviderDashboard({ providerId }: ProviderDashboardProps
             <CardHeader>
               <CardTitle>Customer Reviews You've Submitted</CardTitle>
             </CardHeader>
-            <CardContent>
-              {customerReviews?.reviews?.length > 0 ? (
+          <CardContent>
+              { (customerReviews?.reviews ?? []).length > 0 ? (
                 <div className="space-y-4">
-                  {customerReviews.reviews.map((review: any) => (
+                  {(customerReviews?.reviews ?? []).map((review: any) => (
                     <div key={review.id} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-3">

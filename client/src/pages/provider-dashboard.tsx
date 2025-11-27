@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import ProviderPortal from "@/components/provider-portal";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,10 +16,31 @@ import {
 export default function ProviderDashboard() {
   const [, setLocation] = useLocation();
   const { user, isLoading, isAuthenticated } = useAuth();
+  // Always compute state and queries to keep hook order consistent across renders
+  // Check if user is a provider (from their profile, not URL)
+  const isProvider = user?.isProvider || false;
+  const userId = user?.id || '';
+  const { data: provider } = useQuery<any>({
+    queryKey: ["/api/providers/by-user", userId],
+    enabled: !!userId && isProvider,
+  });
+  const isApproved = (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
+  const providerId = provider?.id || '';
+  // Read provider type from user profile (assuming it's stored there)
+  const providerType: 'individual' | 'company' = (user as any)?.providerType || 'individual';
+  // Check admin status from user roles (assuming roles are stored in user object)
+  const isAdmin = (user as any)?.roles?.includes('admin') || false;
   
-  // Redirect to login if not authenticated
-  if (!isLoading && !isAuthenticated) {
-    return (
+  // Decide what to render based on current auth/loading state without changing hook order
+  let authGate: JSX.Element | null = null;
+  if (isLoading) {
+    authGate = (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+      </div>
+    );
+  } else if (!isAuthenticated) {
+    authGate = (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
@@ -40,25 +62,9 @@ export default function ProviderDashboard() {
     );
   }
 
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-      </div>
-    );
-  }
-
-  // Check if user is a provider (from their profile, not URL)
-  const isProvider = user?.isProvider || false;
-  const providerId = user?.id || '';
-  // Read provider type from user profile (assuming it's stored there)
-  const providerType: 'individual' | 'company' = (user as any)?.providerType || 'individual';
-  // Check admin status from user roles (assuming roles are stored in user object)
-  const isAdmin = (user as any)?.roles?.includes('admin') || false;
-  
   return (
     <div className="min-h-screen bg-gray-50">
+      {authGate}
       {/* Security Notice */}
       <div className="bg-blue-600 text-white p-3">
         <div className="max-w-7xl mx-auto flex items-center gap-3">
@@ -81,7 +87,7 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Provider Status Check */}
-      {!isProvider ? (
+      {!isLoading && isAuthenticated && !isProvider ? (
         <div className="max-w-7xl mx-auto p-4">
           <Card className="border-red-200 bg-red-50">
             <CardContent className="p-4">
@@ -107,7 +113,32 @@ export default function ProviderDashboard() {
             </CardContent>
           </Card>
         </div>
-      ) : (
+      ) : (!isLoading && isAuthenticated && !isApproved) ? (
+        <div className="max-w-7xl mx-auto p-4">
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-yellow-800">Provider Approval Pending</h3>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Your provider account is pending approval. You will gain access once approved.
+                  </p>
+                  <div className="mt-4">
+                    <Button 
+                      onClick={() => setLocation('/provider-support')}
+                      className="bg-yellow-600 hover:bg-yellow-700"
+                      data-testid="button-provider-support"
+                    >
+                      View Provider Support
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (!isLoading && isAuthenticated && isApproved) ? (
         <div className="max-w-7xl mx-auto p-4">
           <Card className="border-green-200 bg-green-50">
             <CardContent className="p-4">
@@ -132,14 +163,16 @@ export default function ProviderDashboard() {
             </CardContent>
           </Card>
         </div>
-      )}
+      ) : null}
 
       {/* Provider Portal */}
-      <ProviderPortal 
-        providerId={providerId}
-        providerType={providerType}
-        isAdmin={isAdmin}
-      />
+      {!isLoading && isAuthenticated && (
+        <ProviderPortal 
+          providerId={providerId}
+          providerType={providerType}
+          isAdmin={isAdmin}
+        />
+      )}
 
       {/* Removed Demo Access Panel for security - no PII in URLs */}
     </div>

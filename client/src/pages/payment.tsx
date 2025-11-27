@@ -90,8 +90,6 @@ export default function PaymentPage() {
       <div className="min-h-screen bg-gray-50">
         <EnhancedHeader 
           onBookingClick={() => {}} 
-          isAuthenticated={isAuthenticated}
-          user={user || undefined}
         />
         <div className="max-w-2xl mx-auto px-4 py-16">
           <Card>
@@ -111,8 +109,6 @@ export default function PaymentPage() {
       <div className="min-h-screen bg-gray-50">
         <EnhancedHeader 
           onBookingClick={() => {}} 
-          isAuthenticated={isAuthenticated}
-          user={user || undefined}
         />
         <div className="max-w-2xl mx-auto px-4 py-16">
           <Card>
@@ -131,8 +127,6 @@ export default function PaymentPage() {
     <div className="min-h-screen bg-gray-50">
       <EnhancedHeader 
         onBookingClick={() => {}} 
-        isAuthenticated={isAuthenticated}
-        user={user || undefined}
       />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -222,6 +222,11 @@ export const authorizeProviderAccess = async (req: any, res: any, next: any) => 
       }
     }
 
+    const status = (provider as any).verificationStatus || (provider.isVerified ? 'approved' : 'pending');
+    if (status !== 'approved') {
+      return res.status(403).json({ message: 'Provider not approved' });
+    }
+
     // Store the provider in request for use in route handler
     req.provider = provider;
     next();
@@ -308,6 +313,20 @@ export function registerAuthRoutes(app: Express) {
       const isValidPassword = await bcrypt.compare(validatedData.password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      if (user.isProvider) {
+        const providers = await storage.getAllProviders();
+        const provider = providers.find(p => p.userId === user.id);
+        if (provider) {
+          const status = (provider as any).verificationStatus || (provider.isVerified ? 'approved' : 'pending');
+          if (status !== 'approved') {
+            if (status === 'rejected' || status === 'declined') {
+              return res.status(403).json({ message: 'Provider not approved' });
+            }
+            return res.status(403).json({ message: 'Provider under review' });
+          }
+        }
       }
 
       // Generate tokens
@@ -1144,7 +1163,7 @@ export function registerAuthRoutes(app: Express) {
       
       // Get admin credentials from environment variables (with fallback for development)
       const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@berryevents.co.za';
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '12345'; // Temporary fallback
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '123456';
       
       // Debug: Admin login attempt (credentials removed for security)
       console.log('Admin login attempt:', { 
@@ -1281,7 +1300,19 @@ export function registerAuthRoutes(app: Express) {
   app.get('/api/admin/providers', authenticateAdmin, async (req, res) => {
     try {
       const providers = await storage.getAllProviders();
-      res.json(providers);
+      const users = await storage.getAllUsers();
+      const userById = new Map(users.map(u => [u.id, u]));
+      const enriched = providers.map(p => {
+        const u = userById.get(p.userId!);
+        return {
+          ...p,
+          email: p.email || u?.email || p.email,
+          firstName: p.firstName || u?.firstName || p.firstName,
+          lastName: p.lastName || u?.lastName || p.lastName,
+          phone: p.phone || u?.phone || p.phone,
+        };
+      });
+      res.json(enriched);
     } catch (error) {
       console.error('Admin providers error:', error);
       res.status(500).json({ message: 'Failed to fetch providers' });
@@ -1293,6 +1324,10 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { providerId } = req.params;
       await storage.updateProviderVerificationStatus(providerId, 'approved');
+      const provider = await storage.getServiceProvider(providerId);
+      if (provider?.userId) {
+        await storage.updateUser(provider.userId, { isProvider: true, isVerified: true });
+      }
       res.json({ message: 'Provider approved successfully' });
     } catch (error) {
       console.error('Provider approval error:', error);
@@ -1304,6 +1339,10 @@ export function registerAuthRoutes(app: Express) {
     try {
       const { providerId } = req.params;
       await storage.updateProviderVerificationStatus(providerId, 'rejected');
+      const provider = await storage.getServiceProvider(providerId);
+      if (provider?.userId) {
+        await storage.updateUser(provider.userId, { isProvider: true });
+      }
       res.json({ message: 'Provider declined successfully' });
     } catch (error) {
       console.error('Provider decline error:', error);

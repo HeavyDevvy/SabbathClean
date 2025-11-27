@@ -31,7 +31,7 @@ export default function PaymentMethodSelector({
     cardHolderName: "",
     expiryMonth: "",
     expiryYear: "",
-    cardType: "",
+    cardBrand: "",
     bankName: "",
   });
   
@@ -55,7 +55,7 @@ export default function PaymentMethodSelector({
         cardHolderName: "",
         expiryMonth: "",
         expiryYear: "",
-        cardType: "",
+        cardBrand: "",
         bankName: "",
       });
       toast({
@@ -87,15 +87,15 @@ export default function PaymentMethodSelector({
 
   const handleAddPaymentMethod = () => {
     // Mask card number for storage (keep only last 4 digits)
-    const maskedCardNumber = newPaymentMethod.cardNumber.replace(/\d(?=\d{4})/g, "*");
+    const last4 = newPaymentMethod.cardNumber.slice(-4);
     
     // Detect card type from number
-    const cardType = detectCardType(newPaymentMethod.cardNumber);
+    const cardBrand = detectCardType(newPaymentMethod.cardNumber);
     
     addPaymentMethodMutation.mutate({
       ...newPaymentMethod,
-      cardNumber: maskedCardNumber,
-      cardType,
+      cardLast4: last4,
+      cardBrand,
     });
   };
 
@@ -183,10 +183,10 @@ export default function PaymentMethodSelector({
             <Label htmlFor={method.id} className="flex items-center space-x-3 cursor-pointer flex-1">
               {method.type === "card" ? (
                 <>
-                  {getCardIcon(method.cardType || "")}
+                  {getCardIcon(method.cardBrand || "")}
                   <div className="flex-1">
                     <p className="font-medium">
-                      {method.cardHolderName} •••• {method.cardNumber?.slice(-4)}
+                      {method.cardHolderName} •••• {method.cardLast4}
                     </p>
                     <p className="text-sm text-gray-500">
                       Expires {method.expiryMonth?.toString().padStart(2, "0")}/{method.expiryYear}

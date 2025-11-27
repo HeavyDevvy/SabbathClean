@@ -22,7 +22,6 @@ const MinimalistHome = lazy(() => import("@/pages/minimalist-home"));
 const Booking = lazy(() => import("@/pages/booking"));
 const BookingConfirmation = lazy(() => import("@/pages/booking-confirmation"));
 const Providers = lazy(() => import("@/pages/providers"));
-const ProviderOnboarding = lazy(() => import("@/pages/provider-onboarding"));
 const EnhancedProviderOnboarding = lazy(() => import("@/pages/enhanced-provider-onboarding"));
 const ProviderTraining = lazy(() => import("@/pages/provider-training"));
 const ProviderDashboard = lazy(() => import("@/pages/provider-dashboard"));

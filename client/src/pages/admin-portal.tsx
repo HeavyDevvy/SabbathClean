@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Shield, Users, BookCheck, DollarSign, TrendingUp, Settings, Mail, FileText, CheckCircle, XCircle, 
+import { Shield, Users, BookCheck, Banknote, TrendingUp, Settings, Mail, FileText, CheckCircle, XCircle, 
          Activity, Calendar, Clock, ArrowUp, ArrowDown, Star, Target, Zap, BarChart3, PieChart, 
          Globe, Smartphone, MessageCircle, AlertTriangle, Award, Coins, Briefcase } from "lucide-react";
 import { useLocation } from "wouter";
@@ -71,12 +71,20 @@ interface User {
 
 interface Provider {
   id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  companyName?: string;
+  servicesOffered?: string[];
   verificationStatus: string;
-  rating: number;
-  totalReviews: number;
+  rating?: number;
+  totalReviews?: number;
+  createdAt?: string;
+  location?: string;
+  hourlyRate?: string;
+  qualificationCertificate?: string;
+  idDocument?: string;
 }
 
 export default function AdminPortal() {
@@ -86,6 +94,7 @@ export default function AdminPortal() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState('30d');
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [loginData, setLoginData] = useState({
     email: "",
     password: ""
@@ -97,6 +106,8 @@ export default function AdminPortal() {
     email: "",
     isVerified: false
   });
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
 
   // Real-time data refresh using React Query
   useEffect(() => {
@@ -197,6 +208,14 @@ export default function AdminPortal() {
     }
   });
 
+  const filteredProviders = (providers || [])
+    .filter((p) => statusFilter === 'all' ? true : (p.verificationStatus === statusFilter))
+    .sort((a, b) => {
+      const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bDate - aDate;
+    });
+
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
     adminLoginMutation.mutate(loginData);
@@ -251,15 +270,17 @@ export default function AdminPortal() {
       // Refetch data using React Query instead of page reload
       queryClient.invalidateQueries({ queryKey: ['/api/admin/providers'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      setSelectedProvider(null);
+      setShowDeclineConfirm(false);
     }
   });
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#EED1C4]/30 to-white flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <Shield className="h-12 w-12 text-[#44062D] mx-auto mb-4" />
             <CardTitle className="text-2xl font-bold text-gray-900">
               Berry Events Admin Portal
             </CardTitle>
@@ -295,7 +316,7 @@ export default function AdminPortal() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700" 
+                className="w-full bg-[#44062D] hover:bg-[#44062D]/90" 
                 disabled={adminLoginMutation.isPending}
                 data-testid="button-admin-login"
               >
@@ -307,7 +328,7 @@ export default function AdminPortal() {
               <Button
                 variant="ghost"
                 onClick={() => setLocation("/")}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-[#44062D] hover:text-[#44062D]/80"
                 data-testid="button-back-home"
               >
                 ← Back to Homepage
@@ -322,11 +343,11 @@ export default function AdminPortal() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+  <header className="bg-white shadow-sm border-b border-b-[#EED1C4]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Shield className="h-8 w-8 text-blue-600 mr-3" />
+              <Shield className="h-8 w-8 text-[#44062D] mr-3" />
               <h1 className="text-xl font-bold text-gray-900">Berry Events CRM</h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -354,7 +375,7 @@ export default function AdminPortal() {
             <p className="text-gray-600">Real-time insights and performance metrics</p>
           </div>
           <div className="flex space-x-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700">
+            <Badge variant="outline" className="bg-[#EED1C4]/60 text-[#44062D]">
               <Activity className="h-3 w-3 mr-1" />
               Live Data
             </Badge>
@@ -368,20 +389,20 @@ export default function AdminPortal() {
         {/* Key Performance Indicators */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Monthly Recurring Revenue */}
-          <Card data-testid="stat-mrr" className="border-l-4 border-l-blue-500">
+          <Card data-testid="stat-mrr" className="border-l-4 border-l-[#44062D]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Monthly Recurring Revenue</p>
                   <p className="text-3xl font-bold text-gray-900">R{(stats?.monthlyRecurringRevenue || stats?.totalRevenue || 0).toLocaleString()}</p>
                   <div className="flex items-center mt-2">
-                    <ArrowUp className="h-4 w-4 text-green-600 mr-1" />
-                    <span className="text-sm text-green-600 font-medium">+{stats?.revenueGrowth || 12}%</span>
+                    <ArrowUp className="h-4 w-4 text-[#44062D] mr-1" />
+                    <span className="text-sm text-[#44062D] font-medium">+{stats?.revenueGrowth || 12}%</span>
                     <span className="text-sm text-gray-500 ml-1">vs last month</span>
                   </div>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <DollarSign className="h-8 w-8 text-blue-600" />
+                <div className="p-3 bg-[#EED1C4]/60 rounded-full">
+                  <Banknote className="h-8 w-8 text-[#44062D]" />
                 </div>
               </div>
               <Progress value={(stats?.revenueGrowth || 12) + 50} className="mt-4" />
@@ -389,20 +410,20 @@ export default function AdminPortal() {
           </Card>
 
           {/* Customer Acquisition Cost */}
-          <Card data-testid="stat-cac" className="border-l-4 border-l-green-500">
+          <Card data-testid="stat-cac" className="border-l-4 border-l-[#44062D]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Customer Acquisition Cost</p>
                   <p className="text-3xl font-bold text-gray-900">R{stats?.customerAcquisitionCost || 45}</p>
                   <div className="flex items-center mt-2">
-                    <ArrowDown className="h-4 w-4 text-green-600 mr-1" />
-                    <span className="text-sm text-green-600 font-medium">-8%</span>
+                    <ArrowDown className="h-4 w-4 text-[#44062D] mr-1" />
+                    <span className="text-sm text-[#44062D] font-medium">-8%</span>
                     <span className="text-sm text-gray-500 ml-1">improvement</span>
                   </div>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <Target className="h-8 w-8 text-green-600" />
+                <div className="p-3 bg-[#EED1C4]/60 rounded-full">
+                  <Target className="h-8 w-8 text-[#44062D]" />
                 </div>
               </div>
               <Progress value={75} className="mt-4" />
@@ -410,20 +431,20 @@ export default function AdminPortal() {
           </Card>
 
           {/* Customer Lifetime Value */}
-          <Card data-testid="stat-clv" className="border-l-4 border-l-purple-500">
+          <Card data-testid="stat-clv" className="border-l-4 border-l-[#44062D]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Customer Lifetime Value</p>
                   <p className="text-3xl font-bold text-gray-900">R{stats?.customerLifetimeValue || 1250}</p>
                   <div className="flex items-center mt-2">
-                    <ArrowUp className="h-4 w-4 text-purple-600 mr-1" />
-                    <span className="text-sm text-purple-600 font-medium">+15%</span>
+                    <ArrowUp className="h-4 w-4 text-[#44062D] mr-1" />
+                    <span className="text-sm text-[#44062D] font-medium">+15%</span>
                     <span className="text-sm text-gray-500 ml-1">growth</span>
                   </div>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-full">
-                  <Users className="h-8 w-8 text-purple-600" />
+                <div className="p-3 bg-[#EED1C4]/60 rounded-full">
+                  <Users className="h-8 w-8 text-[#44062D]" />
                 </div>
               </div>
               <Progress value={85} className="mt-4" />
@@ -431,20 +452,20 @@ export default function AdminPortal() {
           </Card>
 
           {/* Conversion Rate */}
-          <Card data-testid="stat-conversion" className="border-l-4 border-l-orange-500">
+          <Card data-testid="stat-conversion" className="border-l-4 border-l-[#44062D]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Booking Conversion Rate</p>
                   <p className="text-3xl font-bold text-gray-900">{stats?.conversionRate || 24}%</p>
                   <div className="flex items-center mt-2">
-                    <ArrowUp className="h-4 w-4 text-orange-600 mr-1" />
-                    <span className="text-sm text-orange-600 font-medium">+3%</span>
+                    <ArrowUp className="h-4 w-4 text-[#44062D] mr-1" />
+                    <span className="text-sm text-[#44062D] font-medium">+3%</span>
                     <span className="text-sm text-gray-500 ml-1">this month</span>
                   </div>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-full">
-                  <Zap className="h-8 w-8 text-orange-600" />
+                <div className="p-3 bg-[#EED1C4]/60 rounded-full">
+                  <Zap className="h-8 w-8 text-[#44062D]" />
                 </div>
               </div>
               <Progress value={stats?.conversionRate || 24} className="mt-4" />
@@ -454,66 +475,66 @@ export default function AdminPortal() {
 
         {/* Secondary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-          <Card data-testid="stat-total-users" className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card data-testid="stat-total-users" className="bg-gradient-to-br from-[#EED1C4]/30 to-white">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Users className="h-6 w-6 text-blue-600" />
+                <Users className="h-6 w-6 text-[#44062D]" />
                 <div className="ml-3">
-                  <p className="text-xs font-medium text-blue-800">Total Users</p>
-                  <p className="text-xl font-bold text-blue-900">{stats?.totalUsers || 0}</p>
-                  <p className="text-xs text-blue-600">+{stats?.userGrowth || 8}% growth</p>
+                  <p className="text-xs font-medium text-[#44062D]">Total Users</p>
+                  <p className="text-xl font-bold text-[#44062D]">{stats?.totalUsers || 0}</p>
+                  <p className="text-xs text-[#44062D]/80">+{stats?.userGrowth || 8}% growth</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-active-providers" className="bg-gradient-to-br from-green-50 to-green-100">
+          <Card data-testid="stat-active-providers" className="bg-gradient-to-br from-[#EED1C4]/30 to-white">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Shield className="h-6 w-6 text-green-600" />
+                <Shield className="h-6 w-6 text-[#44062D]" />
                 <div className="ml-3">
-                  <p className="text-xs font-medium text-green-800">Active Providers</p>
-                  <p className="text-xl font-bold text-green-900">{stats?.totalProviders || 0}</p>
-                  <p className="text-xs text-green-600">{stats?.providerUtilization || 78}% utilization</p>
+                  <p className="text-xs font-medium text-[#44062D]">Active Providers</p>
+                  <p className="text-xl font-bold text-[#44062D]">{stats?.totalProviders || 0}</p>
+                  <p className="text-xs text-[#44062D]/80">{stats?.providerUtilization || 78}% utilization</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-today-bookings" className="bg-gradient-to-br from-orange-50 to-orange-100">
+          <Card data-testid="stat-today-bookings" className="bg-gradient-to-br from-[#EED1C4]/30 to-white">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <BookCheck className="h-6 w-6 text-orange-600" />
+                <BookCheck className="h-6 w-6 text-[#44062D]" />
                 <div className="ml-3">
-                  <p className="text-xs font-medium text-orange-800">Today's Bookings</p>
-                  <p className="text-xl font-bold text-orange-900">{stats?.todayBookings || 12}</p>
-                  <p className="text-xs text-orange-600">+{stats?.bookingGrowth || 15}% vs yesterday</p>
+                  <p className="text-xs font-medium text-[#44062D]">Today's Bookings</p>
+                  <p className="text-xl font-bold text-[#44062D]">{stats?.todayBookings || 12}</p>
+                  <p className="text-xs text-[#44062D]/80">+{stats?.bookingGrowth || 15}% vs yesterday</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-customer-satisfaction" className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card data-testid="stat-customer-satisfaction" className="bg-gradient-to-br from-[#EED1C4]/30 to-white">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Star className="h-6 w-6 text-purple-600" />
+                <Star className="h-6 w-6 text-[#44062D]" />
                 <div className="ml-3">
-                  <p className="text-xs font-medium text-purple-800">Satisfaction Score</p>
-                  <p className="text-xl font-bold text-purple-900">{stats?.customerSatisfaction || 4.8}/5.0</p>
-                  <p className="text-xs text-purple-600">Excellent rating</p>
+                  <p className="text-xs font-medium text-[#44062D]">Satisfaction Score</p>
+                  <p className="text-xl font-bold text-[#44062D]">{stats?.customerSatisfaction || 4.8}/5.0</p>
+                  <p className="text-xs text-[#44062D]/80">Excellent rating</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card data-testid="stat-response-time" className="bg-gradient-to-br from-teal-50 to-teal-100">
+          <Card data-testid="stat-response-time" className="bg-gradient-to-br from-[#EED1C4]/30 to-white">
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Clock className="h-6 w-6 text-teal-600" />
+                <Clock className="h-6 w-6 text-[#44062D]" />
                 <div className="ml-3">
-                  <p className="text-xs font-medium text-teal-800">Avg Response Time</p>
-                  <p className="text-xl font-bold text-teal-900">{stats?.averageResponseTime || 2.3}min</p>
-                  <p className="text-xs text-teal-600">Fast response</p>
+                  <p className="text-xs font-medium text-[#44062D]">Avg Response Time</p>
+                  <p className="text-xl font-bold text-[#44062D]">{stats?.averageResponseTime || 2.3}min</p>
+                  <p className="text-xs text-[#44062D]/80">Fast response</p>
                 </div>
               </div>
             </CardContent>
@@ -817,43 +838,97 @@ export default function AdminPortal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {providers?.map((provider) => (
-                    <div key={provider.id} className="flex items-center justify-between p-4 border rounded-lg" data-testid={`provider-${provider.id}`}>
-                      <div>
-                        <p className="font-medium">{provider.firstName} {provider.lastName}</p>
-                        <p className="text-sm text-gray-600">{provider.email}</p>
-                        <p className="text-xs text-gray-500">
-                          Status: {provider.verificationStatus} | 
-                          Rating: {provider.rating}/5 ({provider.totalReviews} reviews)
-                        </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Label>Status</Label>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                        className="border rounded-md px-2 py-1 text-sm"
+                        data-testid="select-status-filter"
+                      >
+                        <option value="all">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Declined</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[800px]">
+                      <div className="grid grid-cols-7 gap-4 px-4 py-2 text-xs font-semibold text-gray-600">
+                        <div>Provider / Business</div>
+                        <div>Email</div>
+                        <div>Phone</div>
+                        <div>Service Type</div>
+                        <div>Status</div>
+                        <div>Date Submitted</div>
+                        <div>Actions</div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {provider.verificationStatus === 'pending' && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() => handleProviderApproval.mutate({ providerId: provider.id, action: 'approve' })}
-                              className="bg-green-600 hover:bg-green-700"
-                              data-testid={`approve-${provider.id}`}
+
+                      <div className="divide-y">
+                        {filteredProviders.map((provider) => {
+                          const name = provider.companyName || `${provider.firstName || ''} ${provider.lastName || ''}`.trim();
+                          const email = provider.email || 'Not provided';
+                          const phone = provider.phone || 'Not provided';
+                          const services = provider.servicesOffered && provider.servicesOffered.length > 0 ? provider.servicesOffered.join(', ') : 'Not provided';
+                          const dateStr = provider.createdAt ? format(new Date(provider.createdAt), 'LLL dd, yyyy') : 'Not provided';
+                          const status = provider.verificationStatus;
+                          return (
+                            <div
+                              key={provider.id}
+                              className="grid grid-cols-7 gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                              onClick={() => setSelectedProvider(provider)}
+                              data-testid={`provider-${provider.id}`}
                             >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleProviderApproval.mutate({ providerId: provider.id, action: 'decline' })}
-                              data-testid={`decline-${provider.id}`}
-                            >
-                              Decline
-                            </Button>
-                          </>
-                        )}
-                        {provider.verificationStatus === 'approved' && (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        )}
+                              <div className="font-medium text-gray-900">{name || 'Not provided'}</div>
+                              <div className="text-gray-700">{email}</div>
+                              <div className="text-gray-700">{phone}</div>
+                              <div className="text-gray-700">{services}</div>
+                              <div>
+                                {status === 'pending' && (
+                                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
+                                )}
+                                {status === 'approved' && (
+                                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Approved</Badge>
+                                )}
+                                {status === 'rejected' && (
+                                  <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">Declined</Badge>
+                                )}
+                              </div>
+                              <div className="text-gray-700">{dateStr}</div>
+                              <div className="flex items-center space-x-2">
+                                {status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      onClick={(e) => { e.stopPropagation(); handleProviderApproval.mutate({ providerId: provider.id, action: 'approve' }); }}
+                                      className="bg-green-600 hover:bg-green-700"
+                                      data-testid={`approve-${provider.id}`}
+                                    >
+                                      Approve
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={(e) => { e.stopPropagation(); setSelectedProvider(provider); setShowDeclineConfirm(true); }}
+                                      data-testid={`decline-${provider.id}`}
+                                    >
+                                      Decline
+                                    </Button>
+                                  </>
+                                )}
+                                {status === 'approved' && (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1004,6 +1079,112 @@ export default function AdminPortal() {
                   Cancel
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {selectedProvider && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-3xl max-h-[80vh] overflow-y-auto mx-4">
+            <CardHeader>
+              <CardTitle>Provider Profile</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  {selectedProvider.verificationStatus === 'pending' && (
+                    <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
+                  )}
+                  {selectedProvider.verificationStatus === 'approved' && (
+                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Approved</Badge>
+                  )}
+                  {selectedProvider.verificationStatus === 'rejected' && (
+                    <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">Declined</Badge>
+                  )}
+                </div>
+                <Button variant="outline" onClick={() => setSelectedProvider(null)}>Close</Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Personal Information</h3>
+                  <div className="mt-2 space-y-1 text-sm text-gray-800">
+                    <div>Full Name: {(selectedProvider.companyName ? '' : `${selectedProvider.firstName || ''} ${selectedProvider.lastName || ''}`.trim()) || 'Not provided'}</div>
+                    <div>Email Address: {selectedProvider.email || 'Not provided'}</div>
+                    <div>Phone Number: {selectedProvider.phone || 'Not provided'}</div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Business Information</h3>
+                  <div className="mt-2 space-y-1 text-sm text-gray-800">
+                    <div>Business Name: {selectedProvider.companyName || 'Not provided'}</div>
+                    <div>Service Type / Category: {(selectedProvider.servicesOffered && selectedProvider.servicesOffered.length > 0) ? selectedProvider.servicesOffered.join(', ') : 'Not provided'}</div>
+                    <div>Business Description: {'Not provided'}</div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Service Details</h3>
+                  <div className="mt-2 space-y-1 text-sm text-gray-800">
+                    <div>Services Offered: {(selectedProvider.servicesOffered && selectedProvider.servicesOffered.length > 0) ? selectedProvider.servicesOffered.join(', ') : 'Not provided'}</div>
+                    <div>Service Areas / Locations: {selectedProvider.location || 'Not provided'}</div>
+                    <div>Pricing Information: {selectedProvider.hourlyRate ? `R${selectedProvider.hourlyRate}` : 'Not provided'}</div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700">Additional Information</h3>
+                  <div className="mt-2 space-y-1 text-sm text-gray-800">
+                    <div>Portfolio Links / Website: {'Not provided'}</div>
+                    <div>Certifications: {selectedProvider.qualificationCertificate ? 'Provided' : 'Not provided'}</div>
+                    <div>Documents: {selectedProvider.idDocument ? 'Provided' : 'Not provided'}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">Metadata</h3>
+                <div className="mt-2 space-y-1 text-sm text-gray-800">
+                  <div>Date Applied: {selectedProvider.createdAt ? format(new Date(selectedProvider.createdAt), 'LLL dd, yyyy') : 'Not provided'}</div>
+                  <div>Current Status: {selectedProvider.verificationStatus}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                {selectedProvider.verificationStatus === 'pending' && (
+                  <>
+                    <Button
+                      onClick={() => handleProviderApproval.mutate({ providerId: selectedProvider.id, action: 'approve' })}
+                      className="bg-green-600 hover:bg-green-700"
+                      data-testid={`approve-detail-${selectedProvider.id}`}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setShowDeclineConfirm(true)}
+                      data-testid={`decline-detail-${selectedProvider.id}`}
+                    >
+                      Decline
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {showDeclineConfirm && (
+                <div className="mt-4 p-4 border rounded-md">
+                  <div className="text-sm font-medium">Are you sure you want to decline this application?</div>
+                  <div className="mt-3 flex items-center space-x-2">
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        handleProviderApproval.mutate({ providerId: selectedProvider.id, action: 'decline' });
+                      }}
+                    >
+                      Confirm Decline
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowDeclineConfirm(false)}>Cancel</Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

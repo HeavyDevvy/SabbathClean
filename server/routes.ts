@@ -25,8 +25,41 @@ import {
   insertSkillAssessmentSchema,
   insertProviderAssessmentResultSchema
 } from "@shared/schema";
+import { createHash } from "crypto";
+import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  function generateReferralCode(providerId: string) {
+    return createHash("sha256").update(providerId).digest("hex").slice(0, 8).toUpperCase();
+  }
+  app.get("/health", async (_req, res) => {
+    const useMem = process.env.USE_MEM_STORAGE === "1";
+    let dbStatus = useMem ? "skipped" : "unknown";
+    if (!useMem) {
+      try {
+        const client = await pool!.connect();
+        client.release();
+        dbStatus = "ok";
+      } catch {
+        dbStatus = "error";
+      }
+    }
+    res.json({ status: "ok", uptime: process.uptime(), env: process.env.NODE_ENV, storage: useMem ? "memory" : "database", db: dbStatus, timestamp: Date.now() });
+  });
+  app.get("/api/health", async (_req, res) => {
+    const useMem = process.env.USE_MEM_STORAGE === "1";
+    let dbStatus = useMem ? "skipped" : "unknown";
+    if (!useMem) {
+      try {
+        const client = await pool!.connect();
+        client.release();
+        dbStatus = "ok";
+      } catch {
+        dbStatus = "error";
+      }
+    }
+    res.json({ status: "ok", uptime: process.uptime(), env: process.env.NODE_ENV, storage: useMem ? "memory" : "database", db: dbStatus, timestamp: Date.now() });
+  });
   
   // User routes
   app.post("/api/users", async (req, res) => {
@@ -67,7 +100,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         // Create new user with the provided ID
         user = await storage.createUser({
-          id: userId,
           firstName,
           lastName,
           email,
@@ -105,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user profile with preferences
-  app.get("/api/user/profile", authenticateToken, async (req, res) => {
+  app.get("/api/user/profile", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -124,7 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user profile preferences
-  app.patch("/api/user/profile", authenticateToken, async (req, res) => {
+  app.patch("/api/user/profile", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -210,12 +242,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Return top 3 rated providers within radius
           providers = nearbyProviders
             .slice(0, 3)
-            .map(provider => provider ? ({
+            .map((provider: any) => provider ? ({
               ...provider,
               distance: `${provider.distance?.toFixed(1)}km away`,
               isNearby: true
             }) : null)
-            .filter(provider => provider !== null);
+            .filter((provider: any) => provider !== null);
             
         } catch (locationError) {
           console.error("Location service error:", locationError);
@@ -251,6 +283,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get provider by associated user ID
+  app.get("/api/providers/by-user/:userId", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const providers = await storage.getAllProviders();
+      const provider = providers.find(p => p.userId === userId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+      res.json(provider);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.get("/api/providers/:id", async (req, res) => {
     try {
       const provider = await storage.getServiceProvider(req.params.id);
@@ -267,6 +314,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const providerData = insertServiceProviderSchema.parse(req.body);
       const provider = await storage.createServiceProvider(providerData);
+      try {
+        const userId = (providerData as any).userId;
+        if (userId) {
+          const user = await storage.getUser(userId);
+          if (user && !user.isProvider) {
+            await storage.updateUser(userId, { isProvider: true });
+          }
+        }
+      } catch {}
       res.json(provider);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -330,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const completedBookings = allBookings.filter(booking => booking.status === 'completed');
       
       // Calculate total earnings (total amount - platform commission)
-      const totalRevenue = completedBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+      const totalRevenue = completedBookings.reduce((sum, booking) => sum + (Number((booking as any).totalAmount || 0)), 0);
       const platformCommission = totalRevenue * 0.15; // 15% commission
       const totalEarnings = totalRevenue - platformCommission;
       
@@ -338,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pendingBookings = allBookings.filter(booking => 
         booking.status === 'completed' && booking.paymentStatus !== 'paid'
       );
-      const pendingPayouts = pendingBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0) * 0.85;
+      const pendingPayouts = pendingBookings.reduce((sum, booking) => sum + (Number((booking as any).totalAmount || 0)), 0) * 0.85;
       
       res.json({
         totalEarnings: Math.round(totalEarnings * 100) / 100,
@@ -353,10 +409,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/providers/:id/referral-code", async (req, res) => {
+    try {
+      const providerId = req.params.id;
+      const provider = await storage.getServiceProvider(providerId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+      const code = generateReferralCode(provider.id);
+      res.json({ code });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/providers/referral/:code", async (req, res) => {
+    try {
+      const code = String(req.params.code || "").toUpperCase();
+      const providers = await storage.getAllProviders();
+      const provider = providers.find(p => generateReferralCode(p.id) === code);
+      if (!provider) {
+        return res.status(404).json({ message: "Invalid referral code" });
+      }
+      res.json({ providerId: provider.id, provider });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Location Tracking Routes
   
   // Update provider location (for providers to share their real-time location)
-  app.post("/api/providers/:id/location", authenticateToken, authorizeProviderAccess, async (req, res) => {
+  app.post("/api/providers/:id/location", authenticateToken, authorizeProviderAccess, async (req: any, res) => {
     try {
       const { latitude, longitude, isOnline = true } = req.body;
       const providerId = req.params.id;
@@ -378,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get provider's current location (for customers to track provider)
-  app.get("/api/providers/:id/location", async (req, res) => {
+  app.get("/api/providers/:id/location", async (req: any, res) => {
     try {
       const providerId = req.params.id;
       const location = await LocationService.getProviderLocation(providerId);
@@ -432,12 +516,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         booking: {
           id: booking.id,
           status: booking.status,
-          customerAddress: booking.customerAddress
+          customerAddress: (booking as any).customerAddress || booking.address
         },
         provider: {
           id: provider?.id,
           name: `${provider?.firstName} ${provider?.lastName}`,
-          phone: provider?.phoneNumber,
+          phone: provider?.phone,
           rating: provider?.rating
         },
         location: {
@@ -471,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update booking status to enroute
-      const booking = await storage.updateBooking(bookingId, { status: 'enroute' });
+      const booking = await storage.updateBookingStatus(bookingId, 'enroute');
       
       // Send real-time update to customer via WebSocket
       try {
@@ -620,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // In a real app, get userId from session/auth
       const userId = req.query.userId as string || "user-1"; 
-      const paymentMethods = await storage.getPaymentMethodsByUser(userId);
+      const paymentMethods = await storage.getUserPaymentMethods(userId);
       res.json(paymentMethods);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -635,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         userId
       });
-      const paymentMethod = await storage.createPaymentMethod(paymentMethodData);
+      const paymentMethod = await storage.addPaymentMethod(paymentMethodData);
       res.json(paymentMethod);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -644,7 +728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/payment-methods/:id", async (req, res) => {
     try {
-      await storage.deletePaymentMethod(req.params.id);
+      await storage.removePaymentMethod(req.params.id);
       res.json({ message: "Payment method deleted successfully" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -771,7 +855,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment method routes
   app.get("/api/payment-methods/:userId", async (req, res) => {
     try {
-      const paymentMethods = await storage.getPaymentMethodsByUser(req.params.userId);
+      const paymentMethods = await storage.getUserPaymentMethods(req.params.userId);
       res.json(paymentMethods);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
@@ -781,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payment-methods", async (req, res) => {
     try {
       const paymentData = insertPaymentMethodSchema.parse(req.body);
-      const paymentMethod = await storage.createPaymentMethod(paymentData);
+      const paymentMethod = await storage.addPaymentMethod(paymentData);
       res.json(paymentMethod);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -806,11 +890,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       
       // Return top 3 providers with distance info
-      const topProviders = nearbyProviders.slice(0, 3).map(provider => provider ? ({
+      const topProviders = nearbyProviders.slice(0, 3).map((provider: any) => provider ? ({
         ...provider,
         distanceText: provider.distance ? `${provider.distance.toFixed(1)}km away` : 'Distance unknown',
         isNearby: true
-      }) : null).filter(provider => provider !== null);
+      }) : null).filter((provider: any) => provider !== null);
       
       res.json(topProviders);
     } catch (error: any) {
@@ -1210,7 +1294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerNotificationRoutes(app, storage);
 
   // Wallet API Routes
-  app.get("/api/wallet/balance", authenticateToken, async (req, res) => {
+  app.get("/api/wallet/balance", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1218,23 +1302,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const balance = await storage.getWalletBalance(userId);
-      const wallet = await storage.getOrCreateWallet(userId);
-      
       res.json({ 
         balance, 
-        currency: wallet.currency,
-        autoReload: {
-          enabled: wallet.autoReloadEnabled,
-          threshold: parseFloat(wallet.autoReloadThreshold || "0"),
-          amount: parseFloat(wallet.autoReloadAmount || "0")
-        }
+        currency: 'USD',
+        autoReload: { enabled: false, threshold: 0, amount: 0 }
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
   });
 
-  app.post("/api/wallet/add-funds", authenticateToken, async (req, res) => {
+  app.post("/api/wallet/add-funds", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1266,7 +1344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/wallet/payment", authenticateToken, async (req, res) => {
+  app.post("/api/wallet/payment", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1302,7 +1380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/wallet/transactions", authenticateToken, async (req, res) => {
+  app.get("/api/wallet/transactions", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1320,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/wallet/auto-reload", authenticateToken, async (req, res) => {
+  app.put("/api/wallet/auto-reload", authenticateToken, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1347,7 +1425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe Payment Intent creation for wallet funding
-  app.post("/api/wallet/create-payment-intent", authenticateToken, async (req, res) => {
+  app.post("/api/wallet/create-payment-intent", authenticateToken, async (req: any, res) => {
     try {
       const { amount } = req.body;
       
@@ -1548,6 +1626,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const originalUpdateLocation = app._router.stack.find((layer: any) => 
     layer.route && layer.route.path === '/api/providers/:id/location' && layer.route.methods.post
   );
+
+  // Wallet routes
+  app.get('/api/wallet/balance', authenticateToken, async (req: any, res) => {
+    try {
+      const balance = await storage.getWalletBalance(req.user.id);
+      res.json({ balance, currency: 'USD' });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
 
   return httpServer;
 }

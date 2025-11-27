@@ -40,6 +40,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthM
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    city: '',
+    province: '',
     rememberMe: false
   });
   const { toast } = useToast();
@@ -224,9 +230,16 @@ export default function AuthModal({ isOpen, onClose, onSuccess, message }: AuthM
     if (isLogin) {
       await handleLogin(e);
     } else {
-      // Register functionality - redirect to signup page
-      onClose();
-      window.location.href = "/auth";
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        city: formData.city,
+        province: formData.province,
+      } as RegisterData;
+      registerMutation.mutate(payload);
     }
   };
 

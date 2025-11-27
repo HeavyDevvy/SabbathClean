@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import type { Booking } from "@shared/schema";
+// Avoid strict schema typing for runtime payloads
 import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
 // Helper function to convert image to DataURL for jsPDF
@@ -81,7 +81,7 @@ export interface BookingReceiptData {
   bookingNumber?: string;
 }
 
-export const mapBookingToReceiptData = (booking: Booking): BookingReceiptData => {
+export const mapBookingToReceiptData = (booking: any): BookingReceiptData => {
   const basePrice = parseFloat(booking.basePrice || "0");
   const addOnsPrice = parseFloat(booking.addOnsPrice || "0");
   const totalPrice = parseFloat(booking.totalPrice || "0");
@@ -114,15 +114,15 @@ export const mapBookingToReceiptData = (booking: Booking): BookingReceiptData =>
     totalCost: totalPrice,
     basePrice,
     addOnsPrice: addOnsPrice > 0 ? addOnsPrice : undefined,
-    provider: booking.providerName ? {
-      name: booking.providerName,
+    provider: (booking as any).providerName ? {
+      name: (booking as any).providerName,
       verified: true
     } : undefined,
-    paymentMethod: booking.paymentMethod || 'card',
-    cardBrand: booking.cardBrand || undefined,
-    cardLast4: booking.cardLast4 || undefined,
-    bankName: booking.bankName || undefined,
-    accountLast4: booking.accountLast4 || undefined,
+    paymentMethod: (booking as any).paymentMethod || 'card',
+    cardBrand: (booking as any).cardBrand || undefined,
+    cardLast4: (booking as any).cardLast4 || undefined,
+    bankName: (booking as any).bankName || undefined,
+    accountLast4: (booking as any).accountLast4 || undefined,
     commission: platformFee,
     bookingStatus: booking.status,
     bookingNumber: booking.bookingNumber || undefined

@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "./storage";
-import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema } from "@shared/schema";
+import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema, type InsertCartItem } from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { encryptGateCode } from "./encryption";
@@ -70,7 +70,7 @@ export function registerCartRoutes(app: Express) {
       const { gateCode, ...itemDataRaw } = req.body;
       
       // Validate request body
-      const itemData = insertCartItemSchema.parse(itemDataRaw);
+      const itemData: Omit<InsertCartItem, 'cartId'> = insertCartItemSchema.omit({ cartId: true }).parse(itemDataRaw as any);
       
       // Check cart item limit (max 3 services)
       const currentCount = await storage.getCartItemCount(cart.id);
@@ -109,7 +109,7 @@ export function registerCartRoutes(app: Express) {
         }
       });
     } catch (error: any) {
-      console.error("Error adding item to cart:", error);
+      console.error("Error adding item to cart:", error?.message || String(error));
       
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 
@@ -118,7 +118,7 @@ export function registerCartRoutes(app: Express) {
         });
       }
       
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error?.message || 'Failed to add item' });
     }
   });
   

@@ -48,11 +48,16 @@ const socialProviders = [
   },
 ];
 
+interface SocialAuthPayload {
+  user: any;
+  accessToken?: string;
+}
+
 export default function EnhancedSocialLogin({ isOpen, onClose, onSuccess }: EnhancedSocialLoginProps) {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
-  const socialLoginMutation = useMutation({
+  const socialLoginMutation = useMutation<SocialAuthPayload, Error, string>({
     mutationFn: async (provider: string) => {
       setIsProcessing(provider);
       

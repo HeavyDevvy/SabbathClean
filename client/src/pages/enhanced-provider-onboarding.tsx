@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import berryLogo from "@assets/berry-logo.png";
+import { authClient } from "@/lib/auth-client";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ProviderData {
   // Basic Information
@@ -64,6 +66,8 @@ interface ProviderData {
   // Verification
   kycStatus: 'pending' | 'verified' | 'failed';
   kybStatus: 'pending' | 'verified' | 'failed';
+  password: string;
+  confirmPassword: string;
 }
 
 export default function EnhancedProviderOnboarding() {
@@ -108,7 +112,9 @@ export default function EnhancedProviderOnboarding() {
     certificates: [],
     profilePicture: null,
     kycStatus: 'pending',
-    kybStatus: 'pending'
+    kybStatus: 'pending',
+    password: "",
+    confirmPassword: ""
   });
 
   const availableServices = [
@@ -199,6 +205,65 @@ export default function EnhancedProviderOnboarding() {
     
     // Simulate KYC/KYB verification process
     try {
+      if (providerData.password.length < 8) {
+        toast({
+          title: "Password Error",
+          description: "Password must be at least 8 characters",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      if (providerData.password !== providerData.confirmPassword) {
+        toast({
+          title: "Password Error",
+          description: "Passwords do not match",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const registerRes = await authClient.register({
+        email: providerData.email,
+        password: providerData.password,
+        firstName: providerData.firstName,
+        lastName: providerData.lastName,
+        phone: providerData.phone,
+        address: providerData.address,
+        city: providerData.city,
+        province: providerData.province,
+      });
+
+      const newUserId = registerRes.user.id;
+      const locationStr = providerData.city || providerData.address || "";
+
+      const providerPayload: any = {
+        userId: newUserId,
+        firstName: providerData.firstName,
+        lastName: providerData.lastName,
+        email: providerData.email,
+        phone: providerData.phone,
+        bio: providerData.description || "",
+        hourlyRate: "250.00",
+        servicesOffered: providerData.services.map(s => s.toLowerCase().replace(/\s+/g, '-')),
+        experience: providerData.experience,
+        location: locationStr,
+        bankingDetails: {
+          bankName: providerData.bankName,
+          accountHolder: providerData.accountHolder,
+          accountNumber: providerData.accountNumber,
+          branchCode: providerData.branchCode,
+          accountType: providerData.accountType,
+        },
+        providerType: providerData.applicationType,
+        companyName: providerData.companyName || null,
+        companyRegistration: providerData.companyRegistration || null,
+      };
+
+      const createRes = await apiRequest("POST", "/api/providers", providerPayload);
+      await createRes.json();
+
       // Step 1: Document verification
       toast({
         title: "Verifying Documents",
@@ -363,6 +428,30 @@ export default function EnhancedProviderOnboarding() {
                     data-testid="input-phone"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Create Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={providerData.password}
+                  onChange={(e) => setProviderData({...providerData, password: e.target.value})}
+                  required
+                  data-testid="input-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={providerData.confirmPassword}
+                  onChange={(e) => setProviderData({...providerData, confirmPassword: e.target.value})}
+                  required
+                  data-testid="input-confirm-password"
+                />
               </div>
             </div>
 

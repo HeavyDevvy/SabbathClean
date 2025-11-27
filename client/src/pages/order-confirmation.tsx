@@ -379,7 +379,7 @@ export default function OrderConfirmation() {
                       </div>
                     )}
                     
-                    {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 && (
+                    {item.selectedAddOns && Array.isArray(item.selectedAddOns) && item.selectedAddOns.length > 0 ? (
                       <div className="ml-4 space-y-1">
                         {(item.selectedAddOns as string[]).map((addon, addonIdx) => (
                           <div key={addonIdx} className="flex items-center text-xs text-gray-600">
@@ -388,7 +388,7 @@ export default function OrderConfirmation() {
                           </div>
                         ))}
                       </div>
-                    )}
+                    ) : null}
                     
                     {/* HOUSE CLEANING ONLY: Show tip if present */}
                     {parseDecimal(item.tipAmount || "0") > 0 && (
@@ -544,7 +544,7 @@ export default function OrderConfirmation() {
               serviceName: order.items.map(item => item.serviceName).join(', '),
               date: order.items[0]?.scheduledDate ? new Date(order.items[0].scheduledDate).toLocaleDateString() : '',
               time: order.items[0]?.scheduledTime || '',
-              providerName: order.items[0]?.providerName,
+              providerName: (order.items[0] as any)?.providerName,
               bookingReference: bookingReference,
               totalAmount: parseDecimal(order.totalAmount)
             }}

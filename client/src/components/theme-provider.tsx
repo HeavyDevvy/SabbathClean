@@ -1,30 +1,42 @@
-import { createContext, useContext, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light";
+type Theme = "light" | "dark" | "system";
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  actualTheme: "light";
+  actualTheme: "light" | "dark";
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme: Theme = "light";
-  const actualTheme: "light" = "light";
+  const [theme, setThemeState] = useState<Theme>(() => {
+    const saved = localStorage.getItem("berry-events-theme") as Theme | null;
+    return saved || "light";
+  });
+
+  const applyTheme = (t: Theme) => {
+    const root = document.documentElement;
+    const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const shouldUseDark = t === "dark" || (t === "system" && systemPrefersDark);
+    root.classList.toggle("dark", shouldUseDark);
+  };
 
   useEffect(() => {
-    const root = document.documentElement;
-    // Always remove dark class to force light theme
-    root.classList.remove("dark");
-    localStorage.setItem("berry-events-theme", "light");
-  }, []);
+    applyTheme(theme);
+    localStorage.setItem("berry-events-theme", theme);
+  }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
-    // No-op: theme is always light
-    console.log("Theme is locked to light mode");
+    setThemeState(newTheme);
   };
+
+  const actualTheme: "light" | "dark" = (() => {
+    const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (theme === "system") return systemPrefersDark ? "dark" : "light";
+    return theme;
+  })();
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, actualTheme }}>
