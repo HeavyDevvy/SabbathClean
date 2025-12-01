@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { prisma } from "../../../../lib/prisma";
+import { env } from "../../../../config/env";
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,8 +50,21 @@ export async function POST(req: NextRequest) {
         lastName: true,
       },
     });
+    const secret = env.jwtSecret || "";
+    const accessToken = jwt.sign({ userId: user.id, type: "access" }, secret, { expiresIn: "24h" });
+    const refreshToken = jwt.sign({ userId: user.id, type: "refresh" }, secret, { expiresIn: "30d" });
 
-    return NextResponse.json({ user }, { status: 201 });
+    return NextResponse.json({
+      message: "Registration successful",
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      accessToken,
+      refreshToken,
+    }, { status: 201 });
   } catch (err: any) {
     console.error("Register API error", err);
 
