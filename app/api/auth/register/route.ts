@@ -1,59 +1,73 @@
-import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import { prisma } from "../../../../lib/prisma"
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { prisma } from "../../../../lib/prisma";
 
-export async function POST(request: Request) {
+/**
+ * POST /api/auth/register
+ * Handles user sign-up from the Berry Events frontend.
+ */
+export async function POST(req: Request) {
   try {
-    const body = await request.json()
-    const { email, password, firstName, lastName, phoneNumber } = body || {}
+    const body = await req.json();
 
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+    } = body || {};
+
+    // Basic validation
     if (!email || !password || !firstName || !lastName) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      )
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
+    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 },
-      )
+        { message: "An account with this email already exists" },
+        { status: 409 }
+      );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create user in DB
     const user = await prisma.user.create({
       data: {
-        email,
-        password: hashedPassword,
         firstName,
         lastName,
-        phoneNumber,
+        email,
+        phoneNumber: phoneNumber || null,
+        password: hashedPassword,
+        // Adjust these fields to match your actual Prisma schema:
+        isActive: true,
+        role: "CLIENT",
       },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-      },
-    })
+    });
 
+    // You can return minimal info to the frontend
     return NextResponse.json(
-      { message: "User created successfully", user },
-      { status: 201 },
-    )
+      {
+        message: "Registration successful",
+        userId: user.id,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    )
+      { message: "Failed to create account" },
+      { status: 500 }
+    );
   }
 }
-

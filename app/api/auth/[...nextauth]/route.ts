@@ -1,11 +1,12 @@
-import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
-import bcrypt from "bcryptjs"
-import { prisma } from "../../../../lib/prisma"
+import NextAuth from "next-auth";
+import type { NextAuthOptions, SessionStrategy } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
+import { prisma } from "../../../../lib/prisma";
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -16,28 +17,28 @@ export const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid credentials");
         }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-        })
+        });
 
         if (!user || !user.password) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid credentials");
         }
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
-          user.password,
-        )
+          user.password
+        );
 
         if (!isPasswordValid) {
-          throw new Error("Invalid credentials")
+          throw new Error("Invalid credentials");
         }
 
         if (!user.isActive) {
-          throw new Error("Account is disabled")
+          throw new Error("Account is disabled");
         }
 
         return {
@@ -46,7 +47,7 @@ export const authOptions = {
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
-        }
+        };
       },
     }),
     GoogleProvider({
@@ -55,7 +56,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as SessionStrategy,
     maxAge: 30 * 24 * 60 * 60,
   },
   pages: {
@@ -63,24 +64,23 @@ export const authOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role
-        token.id = (user as any).id
+        token.role = (user as any).role;
+        token.id = (user as any).id;
       }
-      return token
+      return token;
     },
-    async session({ session, token }: any) {
+    async session({ session, token }) {
       if (session.user) {
-        ;(session.user as any).role = (token as any).role
-        ;(session.user as any).id = (token as any).id
+        (session.user as any).role = (token as any).role;
+        (session.user as any).id = (token as any).id;
       }
-      return session
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+};
 
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
-
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };

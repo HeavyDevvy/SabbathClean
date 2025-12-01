@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import "./index.css";
+import "./index.pcss";
 import { registerServiceWorker, unregisterServiceWorker } from "./utils/pwa";
 
 // In development, unregister service workers to prevent caching issues
