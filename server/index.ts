@@ -189,16 +189,29 @@ app.use((req, res, next) => {
       const dbPool = dbModule.pool;
       if (!dbPool) {
         log("database pool unavailable");
-        process.exit(1);
+        if (isDev) {
+          process.env.USE_MEM_STORAGE = "1";
+          useMem = true;
+          log("falling back to in-memory storage in development");
+        } else {
+          process.exit(1);
+        }
+      } else {
+        await withRetry(async () => {
+          const client = await dbPool.connect();
+          client.release();
+        });
+        log("database connectivity verified");
       }
-      await withRetry(async () => {
-        const client = await dbPool.connect();
-        client.release();
-      });
-      log("database connectivity verified");
     } catch (err: any) {
       log(`database connectivity failed: ${err.message}`);
-      process.exit(1);
+      if (isDev) {
+        process.env.USE_MEM_STORAGE = "1";
+        useMem = true;
+        log("falling back to in-memory storage in development");
+      } else {
+        process.exit(1);
+      }
     }
   }
 
