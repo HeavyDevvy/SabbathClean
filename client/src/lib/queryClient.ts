@@ -2,8 +2,9 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 function getApiBaseUrl(): string {
   const env = (import.meta as any).env || {};
+  const loc = typeof window !== "undefined" ? window.location.origin : "";
   const isDev = !!env.DEV;
-  if (isDev) return "http://localhost:5001";
+  if (isDev || (loc && loc.includes("localhost"))) return "";
   const v = env.NEXT_PUBLIC_API_BASE_URL || env.VITE_API_BASE_URL || env.APP_BASE_URL;
   return v && typeof v === "string" && v.length > 0 ? v : "";
 }
@@ -45,15 +46,28 @@ export async function apiRequest(
 
   const base = getApiBaseUrl();
   const fullUrl = url.startsWith("/api") ? (base ? `${base}${url}` : url) : url;
-  const res = await fetch(fullUrl, {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
+  try {
+    const res = await fetch(fullUrl, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
+    await throwIfResNotOk(res);
+    return res;
+  } catch (err) {
+    if (url.startsWith("/api") && base) {
+      const res2 = await fetch(url, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: "include",
+      });
+      await throwIfResNotOk(res2);
+      return res2;
+    }
+    throw err;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -73,17 +87,30 @@ export const getQueryFn: <T>(options: {
     const key = (queryKey[0] as string) || "";
     const base = getApiBaseUrl();
     const fullUrl = key.startsWith("/api") ? (base ? `${base}${key}` : key) : key;
-    const res = await fetch(fullUrl, {
-      headers,
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    try {
+      const res = await fetch(fullUrl, {
+        headers,
+        credentials: "include",
+      });
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null as any;
+      }
+      await throwIfResNotOk(res);
+      return await res.json();
+    } catch (err) {
+      if (key.startsWith("/api") && base) {
+        const res2 = await fetch(key, {
+          headers,
+          credentials: "include",
+        });
+        if (unauthorizedBehavior === "returnNull" && res2.status === 401) {
+          return null as any;
+        }
+        await throwIfResNotOk(res2);
+        return await res2.json();
+      }
+      throw err;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({

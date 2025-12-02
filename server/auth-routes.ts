@@ -252,7 +252,7 @@ export function registerAuthRoutes(app: Express) {
       // Hash password
       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
-      // Generate email verification token
+      // Generate email verification token (skipped in development if email not configured)
       const emailVerificationToken = crypto.randomBytes(32).toString('hex');
       const emailVerificationExpiresAt = new Date(Date.now() + EMAIL_VERIFICATION_EXPIRES);
 
@@ -261,13 +261,15 @@ export function registerAuthRoutes(app: Express) {
         ...validatedData,
         password: hashedPassword,
         authProvider: 'email',
-        isVerified: false,
+        isVerified: process.env.SENDGRID_API_KEY ? false : true,
         emailVerificationToken,
         emailVerificationExpiresAt
       });
 
-      // Send verification email
-      await sendVerificationEmail(newUser.email, newUser.firstName, emailVerificationToken);
+      // Send verification email when configured
+      if (process.env.SENDGRID_API_KEY) {
+        await sendVerificationEmail(newUser.email, newUser.firstName, emailVerificationToken);
+      }
 
       // Generate tokens
       const { accessToken, refreshToken } = generateTokens(newUser.id, false);
@@ -276,7 +278,7 @@ export function registerAuthRoutes(app: Express) {
       await storage.updateUserLastLogin(newUser.id);
 
       res.status(201).json({
-        message: 'Registration successful. Please check your email to verify your account.',
+        message: 'Registration successful',
         user: {
           id: newUser.id,
           email: newUser.email,
@@ -288,7 +290,7 @@ export function registerAuthRoutes(app: Express) {
         },
         accessToken,
         refreshToken,
-        requiresEmailVerification: true
+        requiresEmailVerification: !!process.env.SENDGRID_API_KEY
       });
     } catch (error: any) {
       if (error.name === 'ZodError') {

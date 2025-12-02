@@ -68,16 +68,33 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCartMutation = useMutation({
     mutationFn: async (item: Partial<CartItem>) => {
       console.log("➕ Adding item to cart via API (raw):", item);
-      
-      // Transform data to match backend schema - keep dates as ISO strings
+
+      // Normalize types to match backend schema (decimal fields as strings, ISO date)
+      const normalizedScheduledDate = typeof item.scheduledDate === 'string'
+        ? item.scheduledDate
+        : (item.scheduledDate instanceof Date ? item.scheduledDate.toISOString() : String(item.scheduledDate || ''));
+
+      const toStringOrZero = (v: any) => (
+        v === undefined || v === null ? '0' : typeof v === 'string' ? v : String(v)
+      );
+
       const transformedItem = {
-        ...item,
-        cartId: cart?.id, // Add the current cart ID
-        serviceType: item.serviceId, // Map serviceId to serviceType
-        scheduledDate: item.scheduledDate, // Keep as ISO string - backend will coerce to Date
-        duration: parseInt(item.duration?.toString().replace(/[^\d]/g, '') || '2'), // Extract number from "2-4 hours"
-      };
-      
+        serviceId: item.serviceId,
+        serviceType: item.serviceId, // backend expects a textual service type; map from id
+        serviceName: item.serviceName,
+        providerId: item.providerId ?? null,
+        scheduledDate: normalizedScheduledDate,
+        scheduledTime: item.scheduledTime,
+        duration: parseInt((item.duration as any)?.toString().replace(/[^\d]/g, '') || '2', 10),
+        basePrice: toStringOrZero(item.basePrice),
+        addOnsPrice: toStringOrZero(item.addOnsPrice),
+        subtotal: toStringOrZero(item.subtotal),
+        tipAmount: toStringOrZero(item.tipAmount),
+        selectedAddOns: Array.isArray(item.selectedAddOns) ? item.selectedAddOns : [],
+        comments: item.comments ?? null,
+        serviceDetails: item.serviceDetails ?? null,
+      } as any;
+
       console.log("➕ Transformed item for API:", transformedItem);
       const response = await apiRequest('POST', '/api/cart/items', transformedItem);
       const data = await response.json();
