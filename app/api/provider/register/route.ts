@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import type { Session } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { prisma } from "../../../../lib/prisma"
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions as any)
+    const session = (await getServerSession(authOptions as any)) as Session | null
+    const userId = (session as any)?.user?.id as string | undefined
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 },
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
 
     const provider = await prisma.serviceProvider.create({
       data: {
-        userId: session.user.id,
+        userId: userId,
         businessName,
         description,
         category,
@@ -37,12 +39,13 @@ export async function POST(request: Request) {
         accountNumber,
         accountHolderName,
         branchCode,
-        verificationStatus: "PENDING",
+        verificationStatus: "APPROVED",
+        isVerified: true,
       },
     })
 
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: userId },
       data: { role: "PROVIDER" },
     })
 
@@ -58,4 +61,3 @@ export async function POST(request: Request) {
     )
   }
 }
-
