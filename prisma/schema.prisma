@@ -205,6 +205,49 @@ model Message {
   @@map("messages")
 }
 
+model Cart {
+  id           String    @id @default(cuid())
+  userId       String?
+  sessionToken String?
+  status       String    @default("active")
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  items        CartItem[]
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("carts")
+}
+
+model CartItem {
+  id             String   @id @default(cuid())
+  cartId         String
+  serviceId      String?
+  providerId     String?
+  serviceType    String
+  serviceName    String
+  scheduledDate  DateTime
+  scheduledTime  String
+  duration       Int?
+  basePrice      Decimal  @db.Decimal(10, 2)
+  addOnsPrice    Decimal  @default(0) @db.Decimal(10, 2)
+  subtotal       Decimal  @db.Decimal(10, 2)
+  tipAmount      Decimal  @default(0) @db.Decimal(10, 2)
+  serviceDetails Json?
+  selectedAddOns Json?
+  comments       String?
+  status         String   @default("pending")
+  addedAt        DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@index([cartId])
+  @@map("cart_items")
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
