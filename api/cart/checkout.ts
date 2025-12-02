@@ -13,6 +13,26 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
+async function getOrCreateProviderForUser(uId: string): Promise<string> {
+  const existing = await prisma.serviceProvider.findFirst({ where: { userId: uId } });
+  if (existing) return existing.id;
+  const user = await prisma.user.findUnique({ where: { id: uId } });
+  const businessName = user ? `${user.firstName} ${user.lastName}`.trim() || "System Provider" : "System Provider";
+  const provider = await prisma.serviceProvider.create({
+    data: {
+      userId: uId,
+      businessName,
+      description: "Auto-generated provider for checkout",
+      category: "OTHER",
+      hourlyRate: "0",
+      portfolioImages: [],
+      isVerified: true,
+      verificationStatus: "APPROVED",
+    }
+  });
+  return provider.id;
+}
+
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "POST") {
     res.statusCode = 405;
@@ -62,10 +82,11 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     const confirmations: Array<{ bookingId: string; paymentId: string }> = [];
 
     for (const item of items) {
+      const resolvedProviderId = item.providerId || await getOrCreateProviderForUser(userId);
       const booking = await prisma.booking.create({
         data: {
           userId: userId,
-          providerId: item.providerId || cart.id, // fallback to avoid failure if provider missing
+          providerId: resolvedProviderId,
           eventDate: item.scheduledDate,
           eventTime: item.scheduledTime || "",
           eventDuration: item.duration || 1,
@@ -82,7 +103,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         data: {
           bookingId: booking.id,
           userId: userId,
-          providerId: booking.providerId,
+          providerId: resolvedProviderId,
           amount: String(item.subtotal || "0"),
           platformCommission: "0",
           providerPayout: String(item.subtotal || "0"),
@@ -110,4 +131,3 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     return;
   }
 }
-
