@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma";
-import { env } from "../../config/env";
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
@@ -41,7 +40,7 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    const secret = env.jwtSecret || "";
+    const secret = process.env.JWT_SECRET || "";
     const accessToken = jwt.sign({ userId: user.id, type: "access" }, secret, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ userId: user.id, type: "refresh" }, secret, { expiresIn: "30d" });
 
