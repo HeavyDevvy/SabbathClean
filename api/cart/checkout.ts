@@ -120,9 +120,45 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     await prisma.cart.update({ where: { id: cart.id }, data: { status: "checked_out" } });
     await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
 
+    const first = confirmations[0];
+    const booking = first ? await prisma.booking.findUnique({ where: { id: first.bookingId } }) : null;
+    const payment = first ? await prisma.payment.findUnique({ where: { id: first.paymentId } }) : null;
+    const subtotal = booking ? String(booking.totalAmount || "0") : "0";
+    const platformFee = String((Number(subtotal) * 0.15).toFixed(2));
+    const totalAmount = String((Number(subtotal) + Number(platformFee)).toFixed(2));
+
+    const order = booking ? {
+      id: booking.id,
+      orderNumber: `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(-6)}`,
+      createdAt: booking.createdAt,
+      subtotal,
+      platformFee,
+      totalAmount,
+      paymentMethod: payment?.paymentMethod || "card",
+      paymentStatus: payment?.paymentStatus || "COMPLETED",
+      items: [
+        {
+          id: booking.id,
+          serviceId: booking.eventType,
+          serviceType: booking.eventType,
+          serviceName: booking.eventType,
+          scheduledDate: booking.eventDate,
+          scheduledTime: booking.eventTime,
+          duration: booking.eventDuration,
+          basePrice: subtotal,
+          addOnsPrice: "0",
+          subtotal,
+          tipAmount: "0",
+          serviceDetails: null,
+          selectedAddOns: [],
+          comments: null,
+        },
+      ],
+    } : null;
+
     res.statusCode = 201;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ message: "Checkout completed", confirmations }));
+    res.end(JSON.stringify({ message: "Checkout completed", confirmations, order }));
     return;
   } catch (e: any) {
     res.statusCode = 500;
