@@ -12,13 +12,26 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
+function writeCookie(res: any, name: string, value: string, days = 14) {
+  const maxAge = days * 24 * 60 * 60;
+  const cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+  const prev = res.getHeader("Set-Cookie");
+  const arr = Array.isArray(prev) ? prev.concat(cookie) : prev ? [prev as string, cookie] : [cookie];
+  res.setHeader("Set-Cookie", arr);
+}
+
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method === "POST") {
     try {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-      const sessionToken = readCookie(req, "cart_session") || undefined;
+      let sessionToken = readCookie(req, "cart_session") || undefined;
       let cart = await prisma.cart.findFirst({ where: { sessionToken } });
       if (!cart) {
+        // create session cart and set cookie
+        if (!sessionToken) {
+          sessionToken = Math.random().toString(36).slice(2);
+          writeCookie(res, "cart_session", sessionToken);
+        }
         cart = await prisma.cart.create({ data: { sessionToken, status: "active" } });
       }
 
