@@ -155,9 +155,10 @@ function AddFundsForm({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function AutoReloadSettings({ walletData }: { walletData: WalletData }) {
-  const [enabled, setEnabled] = useState(walletData.autoReload.enabled);
-  const [threshold, setThreshold] = useState(walletData.autoReload.threshold.toString());
-  const [amount, setAmount] = useState(walletData.autoReload.amount.toString());
+  const safeAutoReload = walletData?.autoReload ?? { enabled: false, threshold: 0, amount: 0 };
+  const [enabled, setEnabled] = useState(!!safeAutoReload.enabled);
+  const [threshold, setThreshold] = useState(String(safeAutoReload.threshold));
+  const [amount, setAmount] = useState(String(safeAutoReload.amount));
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -368,10 +369,10 @@ export default function WalletPage() {
                 <div className="flex items-center justify-between mb-4">
                   <span>Status:</span>
                   <Badge 
-                    variant={walletData.autoReload.enabled ? "default" : "secondary"}
+                    variant={walletData?.autoReload?.enabled ? "default" : "secondary"}
                     data-testid="badge-auto-reload-status"
                   >
-                    {walletData.autoReload.enabled ? "Enabled" : "Disabled"}
+                    {walletData?.autoReload?.enabled ? "Enabled" : "Disabled"}
                   </Badge>
                 </div>
                 <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>

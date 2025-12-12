@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { parseDecimal, formatCurrency } from "@/lib/currency";
 import type { Order, OrderItem } from "@shared/schema";
 import WhatsAppShareButton from "@/components/whatsapp-share-button";
-import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
+import berryLogoPath from "@assets/berry-logo.png";
 
 // Helper to convert logo to DataURL for jsPDF
 const loadImageAsDataURL = (src: string): Promise<string> => {
@@ -46,7 +46,7 @@ export default function OrderConfirmation() {
   const orderId = params?.orderId;
   
   const { data: order, isLoading } = useQuery<OrderWithItems>({
-    queryKey: ['/api/orders', orderId],
+    queryKey: ['/api/orders/' + orderId],
     enabled: !!orderId,
   });
   
@@ -57,6 +57,7 @@ export default function OrderConfirmation() {
   
   const generatePDF = async () => {
     if (!order) return;
+    const items = Array.isArray(order.items) ? order.items : [];
     
     try {
       const doc = new jsPDF();
@@ -112,7 +113,7 @@ export default function OrderConfirmation() {
       doc.text('Service Details', 20, yPos);
       yPos += 8;
       
-      order.items.forEach((item, index) => {
+      items.forEach((item, index) => {
         if (yPos > pageHeight - 60) {
           doc.addPage();
           yPos = 20;
@@ -298,7 +299,31 @@ export default function OrderConfirmation() {
       </div>
     );
   }
-  
+
+  const items = Array.isArray(order.items) ? order.items : [];
+  const firstItem = items[0];
+
+  const handleGeneralShare = async () => {
+    try {
+      const shareText = `Booking Confirmed – Berry Events\n\n` +
+        `Services: ${items.map(i => i.serviceName).join(', ')}\n` +
+        (firstItem?.scheduledDate ? `Date: ${new Date(firstItem.scheduledDate).toLocaleDateString()}\n` : '') +
+        (firstItem?.scheduledTime ? `Time: ${firstItem.scheduledTime}\n` : '') +
+        (firstItem && (firstItem as any).providerName ? `Provider: ${(firstItem as any).providerName}\n` : '') +
+        `Reference: ${bookingReference}\n` +
+        `Total: R${parseDecimal(order.totalAmount).toFixed(2)}`;
+      const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+      if (navigator.share) {
+        await navigator.share({ title: 'Berry Events Booking', text: shareText, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+        toast({ title: 'Link copied', description: 'Booking details copied to clipboard' });
+      }
+    } catch (err) {
+      toast({ title: 'Share failed', description: 'Unable to share booking details', variant: 'destructive' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted to-white py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -312,6 +337,9 @@ export default function OrderConfirmation() {
           <p className="text-gray-600">
             Your services have been successfully booked
           </p>
+          <div className="mt-2 text-sm font-medium text-green-700">
+            ✔️ Payment Completed → ✔️ Booking Confirmed
+          </div>
           <div className="mt-4 inline-flex items-center gap-2 bg-muted px-4 py-2 rounded-full">
             <FileText className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-foreground" data-testid="booking-reference">
@@ -321,9 +349,9 @@ export default function OrderConfirmation() {
         </div>
         
         <Card className="mb-6 p-6">
-          <h2 className="text-xl font-semibold mb-4">Booked Services ({order.items.length})</h2>
+          <h2 className="text-xl font-semibold mb-4">Booked Services ({items.length})</h2>
           <div className="space-y-4">
-            {order.items.map((item, idx) => {
+            {items.map((item, idx) => {
               const serviceDetails = item.serviceDetails ? 
                 (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                 : {};
@@ -416,13 +444,13 @@ export default function OrderConfirmation() {
           <div className="space-y-3">
             {/* Use authoritative order values from backend, not recomputed */}
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Base Services ({order.items.length} {order.items.length === 1 ? 'service' : 'services'})</span>
+              <span>Base Services ({items.length} {items.length === 1 ? 'service' : 'services'})</span>
               <span className="font-medium" data-testid="payment-base-services">
-                {formatCurrency(order.items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0))}
+                {formatCurrency(items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0))}
               </span>
             </div>
             {(() => {
-              const totalAddOns = order.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
+              const totalAddOns = items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
               return totalAddOns > 0 ? (
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Add-ons & Extras</span>
@@ -434,7 +462,7 @@ export default function OrderConfirmation() {
             })()}
             {(() => {
               // Calculate total discounts: (basePrice + addOns) - subtotal
-              const totalDiscounts = order.items.reduce((sum, item) => {
+              const totalDiscounts = items.reduce((sum, item) => {
                 const itemBeforeDiscount = parseDecimal(item.basePrice) + parseDecimal(item.addOnsPrice || "0");
                 const itemAfterDiscount = parseDecimal(item.subtotal);
                 return sum + (itemBeforeDiscount - itemAfterDiscount);
@@ -461,7 +489,7 @@ export default function OrderConfirmation() {
             </div>
             {/* HOUSE CLEANING ONLY: Show total tips using backend-stored values */}
             {(() => {
-              const totalTips = order.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
+              const totalTips = items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
               return totalTips > 0 ? (
                 <div className="flex justify-between text-sm">
                   <span className="text-success font-medium">Provider Tips</span>
@@ -541,16 +569,24 @@ export default function OrderConfirmation() {
           </Button>
           <WhatsAppShareButton
             bookingDetails={{
-              serviceName: order.items.map(item => item.serviceName).join(', '),
-              date: order.items[0]?.scheduledDate ? new Date(order.items[0].scheduledDate).toLocaleDateString() : '',
-              time: order.items[0]?.scheduledTime || '',
-              providerName: (order.items[0] as any)?.providerName,
+              serviceName: items.map(item => item.serviceName).join(', '),
+              date: firstItem?.scheduledDate ? new Date(firstItem.scheduledDate).toLocaleDateString() : '',
+              time: firstItem?.scheduledTime || '',
+              providerName: (firstItem as any)?.providerName,
               bookingReference: bookingReference,
               totalAmount: parseDecimal(order.totalAmount)
             }}
             variant="outline"
             className="flex-1"
           />
+          <Button
+            onClick={handleGeneralShare}
+            variant="outline"
+            className="flex-1"
+            data-testid="button-share-general"
+          >
+            Share Booking
+          </Button>
           <Button
             onClick={() => navigate("/")}
             className="flex-1 bg-primary hover:bg-accent text-primary-foreground"

@@ -11,6 +11,7 @@ import type { Message, Conversation } from "@shared/schema";
 
 interface ChatInterfaceProps {
   bookingId: string;
+  bookingNumber?: string;
   customerId: string;
   providerId: string;
   customerName: string;
@@ -20,6 +21,7 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({
   bookingId,
+  bookingNumber,
   customerId,
   providerId,
   customerName,
@@ -31,6 +33,36 @@ export function ChatInterface({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const { toast } = useToast();
+  const [headerName, setHeaderName] = useState<string>(() => {
+    const initial = currentUserId === customerId ? (providerName?.trim() || "") : (customerName?.trim() || "");
+    return initial || (currentUserId === customerId ? "Service Provider" : "Customer");
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const isCustomerView = currentUserId === customerId;
+    const initial = isCustomerView ? (providerName?.trim() || "") : (customerName?.trim() || "");
+    const isGeneric = !initial || /^(Provider|Service Provider|Customer)$/i.test(initial);
+    const resolve = async () => {
+      try {
+        if (isCustomerView) {
+          const res = await apiRequest("GET", `/api/providers/${providerId}`);
+          const p = await res.json();
+          const name = p?.businessName || p?.name || [p?.firstName, p?.lastName].filter(Boolean).join(" ");
+          if (!cancelled) setHeaderName(name || "Service Provider");
+        } else {
+          const res = await apiRequest("GET", `/api/users/${customerId}`);
+          const u = await res.json();
+          const name = [u?.firstName, u?.lastName].filter(Boolean).join(" ");
+          if (!cancelled) setHeaderName(name || "Customer");
+        }
+      } catch {
+        if (!cancelled) setHeaderName(isCustomerView ? "Service Provider" : "Customer");
+      }
+    };
+    if (isGeneric) resolve();
+    return () => { cancelled = true; };
+  }, [bookingId, customerId, providerId, providerName, customerName, currentUserId]);
 
   // Get or create conversation
   const { data: conversationData, error: conversationError } = useQuery({
@@ -72,9 +104,8 @@ export function ChatInterface({
     queryKey: ["/api/conversations", conversation?.id, "messages"],
     queryFn: async () => {
       if (!conversation?.id) return [];
-      const response = await fetch(`/api/conversations/${conversation.id}/messages`);
-      if (!response.ok) throw new Error("Failed to fetch messages");
-      return response.json();
+      const res = await apiRequest("GET", `/api/conversations/${conversation.id}/messages`);
+      return res.json();
     },
     enabled: !!conversation?.id
   });
@@ -197,7 +228,7 @@ export function ChatInterface({
     return (
       <div className="flex items-center justify-center h-full py-12">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-berry-primary" />
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: '#C56B86' }} />
           <p className="text-sm text-muted-foreground">Loading conversation...</p>
         </div>
       </div>
@@ -211,15 +242,15 @@ export function ChatInterface({
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarFallback className="bg-berry-primary text-white">
-              <User className="h-5 w-5" />
+              <User className="h-5 w-5" style={{ color: '#44062D' }} />
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">
-              {currentUserId === customerId ? providerName : customerName}
+              {headerName}
             </h3>
             <p className="text-xs text-gray-500">
-              Booking #{bookingId.slice(0, 8)}
+              {bookingNumber ? `Booking ${(bookingNumber || '').replace(/-\d+$/, '')}` : `Booking #${bookingId.slice(0, 8)}`}
             </p>
           </div>
         </div>
@@ -229,7 +260,7 @@ export function ChatInterface({
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 min-h-0">
         {messagesLoading ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-6 w-6 animate-spin text-berry-primary" />
+            <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#C56B86' }} />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center">
@@ -244,7 +275,11 @@ export function ChatInterface({
           </div>
         ) : (
           <>
-            {messages.map((message) => {
+            {[...messages].sort((a, b) => {
+              const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              return ta - tb;
+            }).map((message) => {
               const isOwnMessage = message.senderId === currentUserId;
               
               return (
@@ -298,7 +333,7 @@ export function ChatInterface({
             {sendMessageMutation.isPending ? (
               <Loader2 className="h-6 w-6 animate-spin text-berry-primary" />
             ) : (
-              <Send className="h-7 w-7 text-berry-primary" strokeWidth={2.5} />
+              <Send className="h-7 w-7" style={{ color: '#44062D' }} strokeWidth={2.5} />
             )}
           </Button>
         </div>

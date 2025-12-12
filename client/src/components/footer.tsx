@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import AppStoreCards from "@/components/app-store-cards";
 import { 
   Facebook, 
   Twitter, 
@@ -14,7 +13,7 @@ import {
 } from "lucide-react";
 import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 
-export default function Footer() {
+export default function Footer({ hideNewsletter = false }: { hideNewsletter?: boolean }) {
   const currentYear = new Date().getFullYear();
 
   const footerSections = [
@@ -67,46 +66,47 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Newsletter Section */}
-      <div className="py-16" style={{ backgroundColor: '#44062D' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-3xl font-bold text-white mb-4">
-              Stay connected with Berry Events
-            </h3>
-            <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: '#EED1C4' }}>
-              Get the latest updates on new services, special offers, and home care tips 
-              delivered straight to your inbox.
-            </p>
-            
-            <div className="max-w-md mx-auto">
-              <div className="flex gap-3">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 text-white"
-                  style={{ backgroundColor: '#3C0920', borderColor: '#C56B86' }}
-                  data-testid="input-newsletter-email"
-                />
-                <Button 
-                  className="font-semibold px-6 py-3 rounded-lg shadow-lg text-white"
-                  style={{ backgroundColor: '#C56B86' }}
-                  data-testid="button-newsletter-subscribe"
-                >
-                  Subscribe
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-sm mt-3" style={{ color: '#EED1C4' }}>
-                We respect your privacy. Unsubscribe at any time.
+      {!hideNewsletter && (
+        <div className="py-16" style={{ backgroundColor: '#44062D' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h3 className="text-3xl font-bold text-white mb-4">
+                Stay connected with Berry Events
+              </h3>
+              <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: '#EED1C4' }}>
+                Get the latest updates on new services, special offers, and home care tips 
+                delivered straight to your inbox.
               </p>
+              
+              <div className="max-w-md mx-auto">
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="flex-1 px-4 py-3 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 text-white"
+                    style={{ backgroundColor: '#3C0920', borderColor: '#C56B86' }}
+                    data-testid="input-newsletter-email"
+                  />
+                  <Button 
+                    className="font-semibold px-6 py-3 rounded-lg shadow-lg text-white"
+                    style={{ backgroundColor: '#C56B86' }}
+                    data-testid="button-newsletter-subscribe"
+                  >
+                    Subscribe
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-sm mt-3" style={{ color: '#EED1C4' }}>
+                  We respect your privacy. Unsubscribe at any time.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Footer Content */}
-      <div className="py-16">
+      <div className={hideNewsletter ? "pt-8 pb-8" : "pt-16 pb-8"}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
             {/* Brand Section */}
@@ -205,64 +205,10 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Contact Information Bar */}
-      <div className="bg-gray-800 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start">
-              <Phone className="h-5 w-5 text-blue-400 mr-3" />
-              <div>
-                <div className="text-white font-medium">Customer Support</div>
-                <div className="text-gray-300 text-sm">0800 BERRY (23779)</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-center md:justify-start">
-              <Mail className="h-5 w-5 text-green-400 mr-3" />
-              <div>
-                <div className="text-white font-medium">Email Us</div>
-                <div className="text-gray-300 text-sm">support@berryevents.co.za</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-center md:justify-start">
-              <MapPin className="h-5 w-5 text-purple-400 mr-3" />
-              <div>
-                <div className="text-white font-medium">Service Areas</div>
-                <div className="text-gray-300 text-sm">Cape Town, Johannesburg, Durban</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile App Download Section */}
-      <div className="bg-gray-800 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Download the Berry Events Mobile App
-            </h3>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Book services faster, track your appointments, and get instant notifications on your mobile device. 
-              Available for iOS and Android.
-            </p>
-          </div>
-          
-          {/* App Store Cards */}
-          <div className="max-w-4xl mx-auto">
-            <AppStoreCards />
-          </div>
-        </div>
-      </div>
-
       {/* Bottom Bar */}
       <div className="bg-black py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} Berry Events. All rights reserved.
-            </div>
             
             <div className="flex flex-wrap gap-6 text-sm">
               <a href="/privacy" className="text-gray-400 hover:text-white transition-colors duration-200">
@@ -280,12 +226,6 @@ export default function Footer() {
             </div>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-gray-800 text-center">
-            <p className="text-gray-500 text-xs">
-              Berry Events is a registered trademark. Licensed and regulated by the Companies and Intellectual Property Commission (CIPC). 
-              All service providers are independent contractors and are fully insured.
-            </p>
-          </div>
         </div>
       </div>
     </footer>

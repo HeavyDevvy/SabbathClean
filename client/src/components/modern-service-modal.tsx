@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -304,59 +306,52 @@ export default function ModernServiceModal({
     totalPrice: 0
   });
 
-  const [providers] = useState([
-    {
-      id: 1,
-      name: "Thabo Mthembu",
-      rating: 4.9,
-      reviews: 156,
-      distance: 3.2,
-      specializations: ["Deep Cleaning", "Move In/Out"],
-      verified: true,
-      responseTime: "< 2 hours",
-      // Enhanced profile fields (conditionally displayed based on service type)
-      bio: "Professional service provider with 7+ years experience in home services. Known for reliability, attention to detail, and customer satisfaction.",
-      profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      jobsCompleted: 156,
-      qualifications: ["Certified Professional", "Health & Safety Trained", "Background Checked"],
-      experience: 7,
-      availability: "Mon-Sat"
-    },
-    {
-      id: 2,
-      name: "Nomsa Dlamini", 
-      rating: 4.8,
-      reviews: 203,
-      distance: 5.7,
-      specializations: ["Garden Design", "Lawn Care"],
-      verified: true,
-      responseTime: "< 1 hour",
-      // Enhanced profile fields (conditionally displayed based on service type)
-      bio: "Experienced home service professional with expertise across multiple service areas. Known for attention to detail and reliability. Fully insured and background-checked.",
-      profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-      jobsCompleted: 203,
-      qualifications: ["Certified Professional", "First Aid Trained", "Insured"],
-      experience: 10,
-      availability: "Mon-Fri"
-    },
-    {
-      id: 3,
-      name: "Sipho Ndlovu",
-      rating: 4.7,
-      reviews: 98,
-      distance: 8.1,
-      specializations: ["Emergency Services", "Quick Response"],
-      verified: true,
-      responseTime: "< 30 min",
-      // Enhanced profile fields (conditionally displayed based on service type)
-      bio: "Multi-skilled home services provider with fast response time and excellent problem-solving skills. Committed to quality service delivery.",
-      profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      jobsCompleted: 98,
-      qualifications: ["Multi-Service Certified", "Emergency Response", "Licensed Professional"],
-      experience: 5,
-      availability: "7 days/week"
+  const dbServiceId = useMemo(() => {
+    const map: Record<string, string> = {
+      'cleaning': 'house-cleaning',
+      'garden-care': 'gardening',
+      'garden-maintenance': 'gardening',
+      'pool-cleaning': 'pool-cleaning',
+      'chef-catering': 'chef-catering',
+      'plumbing': 'plumbing',
+      'electrical': 'electrical',
+      'waitering': 'event-staff',
+      'moving': 'moving',
+      'au-pair': 'au-pair'
+    };
+    return map[serviceId] || serviceId;
+  }, [serviceId]);
+
+  const { data: fetchedProviders = [] } = useQuery<any[]>({
+    queryKey: dbServiceId ? ["/api/providers/service/" + dbServiceId] : ["/api/providers/service/idle"],
+    enabled: !!dbServiceId,
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/providers/service/${dbServiceId}`);
+      const raw = await res.json();
+      return Array.isArray(raw) ? raw : [];
     }
-  ]);
+  });
+
+  const providers = useMemo(() => {
+    return fetchedProviders
+      .filter(p => (p?.isVerified === true) || ((p?.verificationStatus || 'pending') === 'approved'))
+      .map(p => ({
+        id: p.id,
+        name: (p.companyName || `${p.firstName || ''} ${p.lastName || ''}`).trim() || 'Service Provider',
+        rating: Number(p.rating) || 0,
+        reviews: Number(p.totalReviews) || 0,
+        distance: p.location || '—',
+        specializations: Array.isArray(p.servicesOffered) ? p.servicesOffered : [],
+        verified: true,
+        responseTime: '< 2 hours',
+        bio: p.bio,
+        profileImage: p.profileImage,
+        jobsCompleted: p.totalReviews || 0,
+        qualifications: [],
+        experience: p.experience ? Number(String(p.experience).replace(/[^0-9]/g, '')) : undefined,
+        availability: (p.availability && typeof p.availability === 'string') ? p.availability : undefined,
+      }));
+  }, [fetchedProviders]);
 
   const mappedServiceId = serviceId ? (serviceIdMapping[serviceId] || serviceId) : "";
   const currentConfig = mappedServiceId ? (serviceConfigs[mappedServiceId] || null) : null;
@@ -1002,7 +997,7 @@ export default function ModernServiceModal({
     const cartItem = {
       serviceId: dbServiceId, // Use database-compatible service ID
       serviceName: currentConfig?.title ?? '',
-      providerId: null, // Set to null - will be assigned after checkout
+      providerId: (formData.selectedProvider as any)?.id || null,
       providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
       scheduledTime: formData.timePreference,
@@ -1193,7 +1188,7 @@ export default function ModernServiceModal({
     const cartItem = {
       serviceId: dbServiceId,
       serviceName: currentConfig?.title ?? '',
-      providerId: null,
+      providerId: (formData.selectedProvider as any)?.id || null,
       providerName: formData.selectedProvider?.name || "To be assigned",
       scheduledDate: formData.preferredDate,
       scheduledTime: formData.timePreference,
@@ -1344,16 +1339,9 @@ export default function ModernServiceModal({
 
   // Render service selection step (Step 0) when no service is selected
   const renderServiceSelection = () => {
-    const availableServices = [
-      { id: "cleaning", config: serviceConfigs["cleaning"], description: "Professional house cleaning services" },
-      { id: "garden-care", config: serviceConfigs["garden-care"], description: "Complete garden maintenance" },
-      { id: "plumbing", config: serviceConfigs["plumbing"], description: "Expert plumbing repairs and installation" },
-      { id: "electrical", config: serviceConfigs["electrical"], description: "Certified electrical repairs and installations" },
-      { id: "chef-catering", config: serviceConfigs["chef-catering"], description: "Professional catering and chef services" },
-      { id: "event-staff", config: serviceConfigs["event-staff"], description: "Waitering and event staffing" },
-      { id: "moving", config: serviceConfigs["moving"], description: "Professional moving and relocation services" },
-      { id: "au-pair", config: serviceConfigs["au-pair"], description: "Trusted childcare and au pair services" }
-    ];
+    const availableServices = Object.entries(serviceConfigs)
+      .map(([id, config]) => ({ id, config, description: config.description || "Service available" }))
+      .filter(s => s.config.enabled !== false);
 
     // Extract last 5 unique services from recent orders with their last used details
     const recentServiceIds: string[] = [];

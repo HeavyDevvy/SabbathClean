@@ -104,7 +104,7 @@ const allServices: Service[] = [
     duration: "1-4 hours",
     urgent: true,
     icon: Droplet,
-    gradient: "from-cyan-500 to-blue-600"
+    gradient: "from-green-600 to-emerald-600"
   },
   {
     id: "electrical",
@@ -222,14 +222,14 @@ export default function HowItWorksSection({ onBookNowClick }: HowItWorksSectionP
               <div className="relative bg-white rounded-xl border-2 border-gray-100 p-4 hover:border-gray-200 hover:shadow-lg transition-all duration-300 group-hover:scale-105 z-10">
                 {/* Step Number */}
                 <div className="absolute -top-3 left-4">
-                  <div className={`w-6 h-6 bg-gradient-to-r ${step.color} rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
-                    {step.id}
-                  </div>
+                <div className={`w-6 h-6 bg-gradient-to-r from-[#44062D] to-[#C56B86] rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg`}>
+                  {step.id}
+                </div>
                 </div>
 
                 {/* Icon */}
-                <div className={`w-12 h-12 bg-gradient-to-r ${step.color} rounded-lg flex items-center justify-center mb-4 mx-auto shadow-md`}>
-                  <step.icon className="h-6 w-6 text-white" />
+                <div className={`w-12 h-12 bg-gradient-to-r from-[#44062D] to-[#C56B86] rounded-lg flex items-center justify-center mb-4 mx-auto shadow-md`}>
+                  <step.icon className="h-6 w-6" style={{ color: '#FFFFFF' }} />
                 </div>
 
                 {/* Content */}

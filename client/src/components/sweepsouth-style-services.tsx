@@ -124,6 +124,28 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
     }
   ];
 
+  const iconColors: Record<string, string> = {
+    'chef-catering': '#2ECC71',
+    'waitering': '#4C6EF5',
+    'moving': '#A855F7',
+    'au-pair': '#E11D48',
+    'house-cleaning': '#3B82F6',
+    'plumbing': '#0EA5E9',
+    'electrical': '#F59E0B',
+    'pool-cleaning': '#0EA5E9'
+  };
+
+  const iconBgColors: Record<string, string> = {
+    'chef-catering': 'rgba(46, 204, 113, 0.15)',
+    'waitering': 'rgba(76, 110, 245, 0.15)',
+    'moving': 'rgba(168, 85, 247, 0.15)',
+    'au-pair': 'rgba(225, 29, 72, 0.15)',
+    'house-cleaning': 'rgba(59, 130, 246, 0.15)',
+    'plumbing': 'rgba(14, 165, 233, 0.15)',
+    'electrical': 'rgba(245, 158, 11, 0.15)',
+    'pool-cleaning': 'rgba(14, 165, 233, 0.15)'
+  };
+
   return (
     <section className="py-8 md:py-12 lg:py-16" style={{ backgroundColor: '#EED1C4' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,20 +164,22 @@ export default function SweepSouthStyleServices({ onServiceSelect }: SweepSouthS
             return (
               <button
                 key={service.id}
-                className="group p-8 bg-white border border-gray-200 hover:border-gray-300 rounded-2xl transition-all duration-200 hover:shadow-lg hover:-translate-y-1 text-center"
+                className="group p-8 bg-white border border-gray-200 hover:border-gray-300 rounded-2xl transition-all duration-500 ease-out hover:shadow-2xl hover:-translate-y-4 hover:scale-[1.02] hover:rotate-1 text-center"
+                style={{ willChange: 'transform' }}
                 onClick={() => onServiceSelect(service.id)}
                 data-testid={`service-card-${service.id}`}
               >
                 {/* Service Icon */}
-                <div className="w-20 h-20 mx-auto mb-5 rounded-full flex items-center justify-center transition-colors" style={{ backgroundColor: 'rgba(197, 107, 134, 0.1)' }}>
-                  <Icon className="h-10 w-10" style={{ color: '#C56B86' }} />
+                <div className="w-20 h-20 mx-auto mb-5 rounded-full flex items-center justify-center shadow-xl relative overflow-hidden transition-all duration-500 ease-out group-hover:scale-125 group-hover:shadow-2xl group-hover:rotate-12" style={{ backgroundColor: iconBgColors[service.id] ?? 'rgba(197, 107, 134, 0.1)', willChange: 'transform' }}>
+                  <div className="absolute inset-0 pointer-events-none rounded-full" style={{ background: 'radial-gradient(120px 120px at 120% 120%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)' }} />
+                  <Icon className="h-10 w-10 relative z-10 transition-transform duration-300 group-hover:scale-110" style={{ color: iconColors[service.id] ?? '#C56B86' }} />
                 </div>
                 
                 {/* Service Name */}
-                <h3 className="text-lg font-bold whitespace-pre-line mb-2" style={{ color: '#44062D' }}>
+                <h3 className="text-lg font-bold whitespace-pre-line mb-2 transition-colors duration-300 group-hover:text-primary group-hover:scale-105" style={{ color: '#44062D' }}>
                   {service.name}
                 </h3>
-                <p className="text-sm font-medium" style={{ color: '#3C0920' }}>
+                <p className="text-sm font-medium transition-colors duration-300 group-hover:text-gray-700" style={{ color: '#3C0920' }}>
                   From R{service.basePrice}/{service.priceUnit}
                 </p>
               </button>

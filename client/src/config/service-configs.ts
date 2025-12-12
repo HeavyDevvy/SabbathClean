@@ -44,9 +44,12 @@ export interface ServiceConfig {
   childrenCount?: Array<{ value: string; label: string; multiplier: number }>;
   childrenAges?: Array<{ value: string; label: string; multiplier: number }>;
   addOns: Array<{ id: string; name: string; price: number; description?: string }>;
+  description?: string;
+  enabled?: boolean;
+  minHours?: number;
 }
 
-export const serviceConfigs: Record<string, ServiceConfig> = {
+const baseServiceConfigs: Record<string, ServiceConfig> = {
   "cleaning": {
     title: "House Cleaning Service",
     icon: Sparkles,
@@ -460,6 +463,34 @@ export const serviceConfigs: Record<string, ServiceConfig> = {
     ]
   }
 };
+
+// Apply admin overrides from localStorage (enable/disable, edits, new services)
+let mergedServiceConfigs: Record<string, ServiceConfig> = { ...baseServiceConfigs };
+try {
+  const raw = typeof window !== 'undefined' ? localStorage.getItem('serviceConfigOverrides') : null;
+  const overrides = raw ? JSON.parse(raw) as Record<string, Partial<ServiceConfig>> : {};
+  for (const [id, override] of Object.entries(overrides)) {
+    if (mergedServiceConfigs[id]) {
+      mergedServiceConfigs[id] = { ...mergedServiceConfigs[id], ...override } as ServiceConfig;
+    } else {
+      mergedServiceConfigs[id] = {
+        title: override.title || id,
+        icon: Wrench,
+        basePrice: (override.basePrice as number) ?? 0,
+        steps: (override.steps as number) ?? 4,
+        propertyTypes: (override.propertyTypes as any) ?? [],
+        addOns: (override.addOns as any) ?? [],
+        description: override.description,
+        enabled: override.enabled !== undefined ? override.enabled : true,
+        minHours: override.minHours as number | undefined,
+      } as ServiceConfig;
+    }
+  }
+} catch (e) {
+  // silently ignore malformed overrides
+}
+
+export const serviceConfigs: Record<string, ServiceConfig> = mergedServiceConfigs;
 
 export const serviceIdMapping: Record<string, string> = {
   "cleaning": "cleaning",

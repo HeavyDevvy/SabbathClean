@@ -56,6 +56,19 @@ export async function apiRequest(
     await throwIfResNotOk(res);
     return res;
   } catch (err) {
+    const msg = String((err as any)?.message || "");
+    if (/Failed to fetch|ERR_ABORTED/i.test(msg)) {
+      // brief retry to tolerate transient preview reloads
+      await new Promise((r) => setTimeout(r, 250));
+      const retryRes = await fetch(fullUrl, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: "include",
+      });
+      await throwIfResNotOk(retryRes);
+      return retryRes;
+    }
     if (url.startsWith("/api") && base) {
       const res2 = await fetch(url, {
         method,
@@ -97,7 +110,12 @@ export const getQueryFn: <T>(options: {
       }
       await throwIfResNotOk(res);
       return await res.json();
-    } catch (err) {
+    } catch (err: any) {
+      // Swallow aborted fetches for cart route to avoid noisy console errors
+      const msg = String(err?.message || "");
+      if (key === "/api/cart" && /Abort|ERR_ABORTED|Failed to fetch/i.test(msg)) {
+        return { id: "guest-cart", status: "active", items: [] } as any;
+      }
       if (key.startsWith("/api") && base) {
         const res2 = await fetch(key, {
           headers,

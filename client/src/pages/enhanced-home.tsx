@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import EnhancedHeader from "@/components/enhanced-header";
 import EnhancedHero from "@/components/enhanced-hero";
@@ -30,6 +30,17 @@ export default function EnhancedHome() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [notificationCount] = useState(3);
   const [messageCount] = useState(1);
+  const [berryStarsEnabled, setBerryStarsEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('platformSettings');
+      const parsed = raw ? JSON.parse(raw) : {};
+      setBerryStarsEnabled(parsed.berryStarsEnabled !== false);
+    } catch {
+      setBerryStarsEnabled(true);
+    }
+  }, []);
 
   // Show loading state while auth is loading
   if (isLoading) {
@@ -130,7 +141,9 @@ export default function EnhancedHome() {
 
 
         {/* Featured Providers Section */}
-        <BerryStarsSection onBookService={handleServiceSelect} />
+        {berryStarsEnabled && (
+          <BerryStarsSection onBookService={handleServiceSelect} />
+        )}
 
         {/* Trust & Safety Section */}
         <TrustSafetySection />
@@ -139,7 +152,7 @@ export default function EnhancedHome() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer hideNewsletter />
 
       {/* Booking Authentication Modal - shows when user tries to book without being logged in */}
       <BookingAuthModal

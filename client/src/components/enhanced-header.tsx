@@ -2,6 +2,8 @@ import { useState, memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search, Bell, User, Calendar, Settings, Home, LayoutGrid, LogOut, CreditCard, ChevronDown, Sparkles, Droplets, Zap, TreePine, ChefHat, Users, Wrench, Scissors, Smartphone, MessageSquare, Shield, Wallet, Truck, Baby } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
@@ -24,11 +26,13 @@ import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
 interface EnhancedHeaderProps {
   onBookingClick: () => void;
   onServiceSelect?: (serviceId: string) => void;
+  mode?: 'default' | 'admin';
 }
 
 const EnhancedHeader = memo(function EnhancedHeader({ 
   onBookingClick, 
   onServiceSelect,
+  mode = 'default',
 }: EnhancedHeaderProps) {
   const [, setLocation] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -39,6 +43,25 @@ const EnhancedHeader = memo(function EnhancedHeader({
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const { unreadCount } = useNotifications(isAuthenticated);
+  const { data: provider } = useQuery<any>({
+    queryKey: user?.isProvider && user?.id ? ["/api/providers/by-user/" + user.id] : ["/api/providers/by-user/idle"],
+    enabled: !!user?.isProvider && !!user?.id,
+  });
+  const isApproved = (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
+  const [showPendingModal, setShowPendingModal] = useState(false);
+
+  const handleProviderHubClick = (e?: React.MouseEvent) => {
+    if (!isAuthenticated || !user?.isProvider) {
+      setLocation("/provider-onboarding");
+      return;
+    }
+    if (!isApproved) {
+      e?.preventDefault();
+      setShowPendingModal(true);
+      return;
+    }
+    setLocation('/provider-dashboard');
+  };
 
   const handleLogout = async () => {
     try {
@@ -76,9 +99,12 @@ const EnhancedHeader = memo(function EnhancedHeader({
     }
   };
 
+  const isAdminMode = mode === 'admin';
+
   return (
     <header className="sticky top-0 z-50 shadow-sm" style={{ backgroundColor: '#44062D' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {!isAdminMode && (
         <div className="flex justify-between items-center h-auto py-2">
           {/* Logo */}
           <Link href="/" className="flex items-center">
@@ -131,15 +157,17 @@ const EnhancedHeader = memo(function EnhancedHeader({
                 Sign In
               </Link>
             )}
-            {isAuthenticated && user?.isProvider && (
-              <Link 
-                href="/provider-dashboard" 
-                className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium text-sm"
-                data-testid="nav-provider-dashboard"
-              >
-                Provider Hub
-              </Link>
-            )}
+          {isAuthenticated && user?.isProvider && (
+            <Button 
+              onClick={handleProviderHubClick}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:text-[#EED1C4] transition-colors duration-200 font-medium text-sm"
+              data-testid="nav-provider-dashboard"
+            >
+              Provider Hub
+            </Button>
+          )}
           </nav>
 
           {/* Desktop Actions */}
@@ -274,9 +302,32 @@ const EnhancedHeader = memo(function EnhancedHeader({
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
+        )}
+
+        {isAdminMode && (
+          <div className="grid grid-cols-3 items-center h-20">
+            <div></div>
+            <div className="flex justify-center">
+              <Link href="/" className="flex items-center">
+                <img src={logo} alt="Berry Events logo" className="h-[72px] w-[72px] object-contain" loading="eager" data-critical="true" />
+              </Link>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="border-white text-[#44062D] hover:bg-white hover:text-[#44062D]"
+                data-testid="admin-header-logout"
+              >
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Search Bar */}
-        {isSearchVisible && (
+        {!isAdminMode && isSearchVisible && (
           <div className="lg:hidden py-3 border-t border-gray-100">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -291,7 +342,7 @@ const EnhancedHeader = memo(function EnhancedHeader({
         )}
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
+        {!isAdminMode && isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100">
             <div className="py-4 space-y-3">
               {/* Mobile Search */}
@@ -362,13 +413,12 @@ const EnhancedHeader = memo(function EnhancedHeader({
                     My Wallet
                   </Link>
                   {user?.isProvider && (
-                    <Link 
-                      href="/provider-dashboard" 
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                    <button 
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 font-medium"
+                      onClick={(e) => { handleProviderHubClick(e as any); setIsMobileMenuOpen(false); }}
                     >
                       Provider Dashboard
-                    </Link>
+                    </button>
                   )}
                 </>
               ) : (
@@ -409,22 +459,38 @@ const EnhancedHeader = memo(function EnhancedHeader({
         )}
       </div>
 
-      {/* Authentication Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={() => {
-          setIsAuthModalOpen(false);
-        }}
-      />
+      {!isAdminMode && (
+        <>
+          <AuthModal 
+            isOpen={isAuthModalOpen}
+            onClose={() => setIsAuthModalOpen(false)}
+            onSuccess={() => {
+              setIsAuthModalOpen(false);
+            }}
+          />
 
-      {/* User Profile Modal */}
-      {user && (
-        <UserProfileModal 
-          isOpen={isProfileModalOpen}
-          onClose={() => setIsProfileModalOpen(false)}
-          user={user}
-        />
+          {user && (
+            <UserProfileModal 
+              isOpen={isProfileModalOpen}
+              onClose={() => setIsProfileModalOpen(false)}
+              user={user}
+            />
+          )}
+          <Dialog open={showPendingModal} onOpenChange={setShowPendingModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Provider Profile Under Review</DialogTitle>
+                <DialogDescription>
+                  Your service provider profile is still being reviewed.
+                  You’ll be able to access the Service Provider Hub once your profile has been approved.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end">
+                <Button onClick={() => setShowPendingModal(false)}>OK</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </header>
   );

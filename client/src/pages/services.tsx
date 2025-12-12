@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import EnhancedHeader from "@/components/enhanced-header";
+import { serviceConfigs, serviceIdMapping } from "@/config/service-configs";
 import ModernServiceModal from "@/components/modern-service-modal";
 import { useAuth } from "@/hooks/useAuth";
 import { 
@@ -122,11 +123,19 @@ export default function ServicesPage() {
   const [selectedServiceId, setSelectedServiceId] = useState("");
   const { user, isAuthenticated } = useAuth();
 
+  const disabledSet = new Set(
+    Object.entries(serviceConfigs)
+      .filter(([_, cfg]) => cfg.enabled === false)
+      .map(([id]) => id)
+  );
+
   const filteredServices = allServices.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          service.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || service.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const mapped = serviceIdMapping[service.id] || service.id;
+    const isEnabled = !disabledSet.has(mapped);
+    return matchesSearch && matchesCategory && isEnabled;
   });
 
   const handleBookService = (serviceId: string) => {

@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle, User, FileText, Camera, Shield, Smartphone, Mail, Clock, Home } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { authClient, type User as AuthUser } from "@/lib/auth-client";
@@ -94,6 +94,7 @@ const timeSlots = [
 ];
 
 export default function ProviderOnboarding() {
+  const [, setLocation] = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: string}>({});
   const [isMobile, setIsMobile] = useState(false);
@@ -133,6 +134,9 @@ export default function ProviderOnboarding() {
         title: "Application Submitted Successfully!",
         description: "We'll review your application and contact you within 24-48 hours.",
       });
+      setTimeout(() => {
+        setLocation("/");
+      }, 600);
     },
     onError: (error: any) => {
       toast({
@@ -239,6 +243,7 @@ export default function ProviderOnboarding() {
       profileImage: uploadedFiles.profileImage,
       idDocument: uploadedFiles.idDocument,
       qualificationCertificate: uploadedFiles.qualificationCertificate,
+      verificationStatus: 'pending'
     };
 
     createProviderMutation.mutate(providerData);

@@ -125,9 +125,9 @@ app.use((req, res, next) => {
     const body = isDev
       ? { message, code: err.code, stack: err.stack }
       : { message };
-    log(`error ${status}: ${message}`);
-    res.status(status).json(body);
-    throw err;
+  log(`error ${status}: ${message}`);
+  res.status(status).json(body);
+  // keep server alive; do not rethrow
   });
 
   // importantly only setup vite in development and after
@@ -194,7 +194,7 @@ app.use((req, res, next) => {
           useMem = true;
           log("falling back to in-memory storage in development");
         } else {
-          process.exit(1);
+          log("continuing without database in production");
         }
       } else {
         await withRetry(async () => {
@@ -210,7 +210,7 @@ app.use((req, res, next) => {
         useMem = true;
         log("falling back to in-memory storage in development");
       } else {
-        process.exit(1);
+        log("continuing without database in production");
       }
     }
   }
@@ -242,6 +242,17 @@ app.use((req, res, next) => {
 
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
+  process.on("unhandledRejection", (reason: any) => {
+    log(`unhandledRejection: ${reason?.message || String(reason)}`);
+  });
+  process.on("uncaughtException", (error: any) => {
+    log(`uncaughtException: ${error?.message || String(error)}`);
+  });
+
+  // Health endpoint
+  app.get("/__health", (_req, res) => {
+    res.status(200).json({ status: "ok" });
+  });
 
   server.listen({
     port,

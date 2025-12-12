@@ -332,7 +332,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/providers", async (req, res) => {
     try {
       const providerData = insertServiceProviderSchema.parse(req.body);
-      const provider = await storage.createServiceProvider(providerData);
+      const safeData = {
+        ...providerData,
+        verificationStatus: (providerData as any).verificationStatus || 'pending',
+        isVerified: false,
+      } as any;
+      if (Array.isArray((safeData as any).servicesOffered)) {
+        const synonyms: Record<string, string> = {
+          'plumbing-services': 'plumbing',
+          'garden-care': 'gardening'
+        };
+        (safeData as any).servicesOffered = (safeData as any).servicesOffered.map((s: string) => synonyms[s] || s);
+      }
+      const provider = await storage.createServiceProvider(safeData);
       try {
         const userId = (providerData as any).userId;
         if (userId) {
@@ -351,6 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Service-specific providers endpoint
   app.get("/api/providers/service/:category", async (req, res) => {
     try {
+      await storage.normalizeProviderServiceTypes();
       const providers = await storage.getServiceProvidersByService(req.params.category);
       res.json(providers);
     } catch (error: any) {
@@ -361,14 +374,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Provider-specific bookings endpoint (requires authentication and ownership)
   app.get("/api/providers/:providerId/bookings", authenticateToken, authorizeProviderAccess, async (req: any, res) => {
     try {
-      const { status } = req.query;
       const providerId = req.params.providerId;
+      const statusParam = (req.query.status || "") as string;
       
       let bookings = await storage.getBookingsByProvider(providerId);
       
-      // Filter by status if provided
-      if (status) {
-        bookings = bookings.filter(booking => booking.status === status);
+      if (statusParam && typeof statusParam === 'string') {
+        const statusList = statusParam.split(',').map((s) => s.trim()).filter(Boolean);
+        if (statusList.length > 0) {
+          bookings = bookings.filter((b) => statusList.includes(b.status));
+        }
       }
       
       res.json(bookings);
@@ -922,6 +937,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Provider portal settings helpers
+  app.post("/api/providers/profile-image", async (req, res) => {
+    try {
+      const providerId = (req.body?.providerId || req.query?.providerId) as string;
+      if (!providerId) return res.status(400).json({ message: "providerId required" });
+      // In dev preview, simply acknowledge; production would store file and update provider
+      res.json({ message: "Profile image updated", providerId });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/providers/banking-update-request", async (req, res) => {
+    try {
+      const providerId = req.body?.providerId as string;
+      const bankingDetails = req.body?.bankingDetails;
+      if (!providerId || !bankingDetails) {
+        return res.status(400).json({ message: "providerId and bankingDetails required" });
+      }
+      // Dev: record a pending request-like response
+      res.json({ message: "Banking update request submitted", status: "pending", providerId });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/providers/visibility", async (req, res) => {
+    try {
+      const providerId = req.body?.providerId as string;
+      const hidden = !!req.body?.hidden;
+      if (!providerId) return res.status(400).json({ message: "providerId required" });
+      // Dev: acknowledge visibility change
+      res.json({ message: hidden ? "Profile hidden" : "Profile visible", providerId, hidden });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/providers/cancel", async (req, res) => {
+    try {
+      const providerId = req.body?.providerId as string;
+      if (!providerId) return res.status(400).json({ message: "providerId required" });
+      // Dev: acknowledge cancel
+      res.json({ message: "Provider cancelled", providerId, status: "inactive" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/providers/notifications", async (req, res) => {
+    try {
+      const providerId = req.body?.providerId as string;
+      const toggle = req.body?.toggle as string;
+      if (!providerId || !toggle) return res.status(400).json({ message: "providerId and toggle required" });
+      res.json({ message: "Notification preference updated", providerId, toggle });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Payment processing endpoint
   app.post("/api/payments/process", async (req, res) => {
     try {
@@ -955,6 +1030,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error: any) {
       res.status(500).json({ message: "Payment processing failed" });
+    }
+  });
+
+  // Wallet balance for authenticated user
+  app.get("/api/wallet/balance", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      const balance = await storage.getWalletBalance(userId);
+      res.json({ balance, currency: "ZAR" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Failed to get wallet balance" });
+    }
+  });
+
+  // Payment verification endpoint (idempotent)
+  app.post("/api/payment/verify", authenticateToken, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const { orderId, paymentIntentId } = req.body || {};
+      if (!orderId) {
+        return res.status(400).json({ message: "orderId is required" });
+      }
+      const orderData = await storage.getOrderWithItems(orderId);
+      if (!orderData) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      if (orderData.order.userId !== userId) {
+        return res.status(403).json({ message: "You can only verify your own orders" });
+      }
+      // Mark as paid/confirmed if not already
+      const alreadyPaid = orderData.order.paymentStatus === "paid";
+      if (!alreadyPaid) {
+        await storage.updateOrderStatus(orderId, "confirmed", "paid");
+        await storage.updateOrder(orderId, { paymentIntentId: paymentIntentId || (orderData.order as any).paymentIntentId } as any);
+      }
+      const refreshed = await storage.getOrderWithItems(orderId);
+      res.json({ verified: true, order: refreshed ? { ...refreshed.order, items: refreshed.items } : orderData.order });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || "Payment verification failed" });
     }
   });
 

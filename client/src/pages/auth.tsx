@@ -11,6 +11,8 @@ import EnhancedSocialLogin from "@/components/enhanced-social-login";
 import { useAuth } from "@/contexts/AuthContext";
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/queryClient";
+import { Checkbox } from "@/components/ui/checkbox";
+// Background set via absolute asset path to avoid compile-time import
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -34,6 +36,8 @@ export default function Auth() {
     password: ""
   });
 
+  const [acceptTcs, setAcceptTcs] = useState(false);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -41,6 +45,15 @@ export default function Auth() {
       toast({
         title: "Password Mismatch",
         description: "Passwords do not match. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!acceptTcs) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the Terms & Conditions to continue.",
         variant: "destructive"
       });
       return;
@@ -205,8 +218,9 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen relative bg-cover bg-center flex items-center justify-center p-4" style={{ backgroundImage: "url('/attached_assets/signin-background.png')" }}>
+      <div className="absolute inset-0 bg-black/40" />
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900">
             Berry Events
@@ -389,6 +403,19 @@ export default function Auth() {
                       required
                       data-testid="input-confirm-password"
                     />
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="acceptTcs"
+                    checked={acceptTcs}
+                    onCheckedChange={(checked) => setAcceptTcs(!!checked)}
+                    data-testid="checkbox-accept-tcs"
+                  />
+                  <div>
+                    <Label htmlFor="acceptTcs" className="font-medium">I accept the Terms & Conditions</Label>
+                    <p className="text-xs text-gray-500">You must accept to create an account.</p>
                   </div>
                 </div>
 

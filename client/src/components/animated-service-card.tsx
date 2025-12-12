@@ -21,6 +21,28 @@ export default function AnimatedServiceCard({
 }: AnimatedServiceCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
+  const colorHexMap: Record<string, string> = {
+    'chef-catering': '#2ECC71',
+    'waitering': '#4C6EF5',
+    'moving': '#A855F7',
+    'au-pair': '#E11D48',
+    'cleaning': '#3B82F6',
+    'house-cleaning': '#3B82F6',
+    'plumbing': '#0EA5E9',
+    'electrical': '#F59E0B',
+    'pool-cleaning': '#0EA5E9'
+  };
+
+  const hexToRgba = (hex: string, alpha = 0.18) => {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  
+
   const themeColors = {
     blue: {
       border: 'hover:border-primary/30',
@@ -67,9 +89,19 @@ export default function AnimatedServiceCard({
       <CardContent className="p-6 flex flex-col h-full">
         {/* Enhanced Service Header with Micro-interactions */}
         <div className="relative mb-4">
-          <div className={`w-16 h-16 bg-gradient-to-br ${service.gradient} rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-125 group-hover:shadow-2xl group-hover:rotate-12 transition-all duration-500 ease-out mx-auto relative overflow-hidden ${isHovered ? 'animate-pulse-glow' : ''}`}>
-            <div className="absolute inset-0 bg-white/20 transform scale-0 group-hover:scale-100 transition-transform duration-500 rounded-2xl animate-shimmer"></div>
-            <service.icon className="h-8 w-8 text-white relative z-10 group-hover:scale-110 group-hover:animate-bounce-gentle transition-transform duration-300" />
+          <div
+            className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-125 group-hover:shadow-2xl group-hover:rotate-12 transition-all duration-500 ease-out mx-auto relative overflow-hidden ${isHovered ? 'animate-pulse-glow' : ''}`}
+            style={{
+              backgroundColor: hexToRgba(colorHexMap[service.id] || '#44062D')
+            }}
+          >
+            <div
+              className="absolute inset-0 pointer-events-none rounded-2xl"
+              style={{
+                background: 'radial-gradient(120px 120px at 120% 120%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%)'
+              }}
+            />
+            <service.icon className="h-8 w-8 relative z-10 group-hover:scale-110 group-hover:animate-bounce-gentle transition-transform duration-300" style={{ color: colorHexMap[service.id] || '#FFFFFF' }} />
           </div>
           {(service.popular || service.urgent) && (
             <div className="absolute -top-1 -right-1 animate-bounce-gentle">

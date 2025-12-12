@@ -65,7 +65,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
   ];
 
   return (
-    <section className="relative py-16 lg:py-24 overflow-hidden" style={{ backgroundColor: '#F7F2EF' }}>
+    <section className="relative py-12 lg:py-16 overflow-hidden" style={{ backgroundColor: '#F7F2EF' }}>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-12 lg:gap-12 lg:items-center">
           {/* Content Column */}
@@ -93,7 +93,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
             </p>
 
             {/* CTA Button */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button 
                 size="lg" 
                 className="text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -216,16 +216,7 @@ export default function EnhancedHero({ onBookingClick, onDemoClick }: EnhancedHe
           </div>
         </div>
 
-        {/* Additional Trust Section */}
-        <div className="mt-20 text-center">
-          <p className="text-gray-500 text-sm mb-6">Trusted by leading organizations</p>
-          <div className="flex items-center justify-center space-x-8 opacity-60">
-            <div className="text-2xl font-bold text-gray-400">PropertyFox</div>
-            <div className="text-2xl font-bold text-gray-400">Seeff</div>
-            <div className="text-2xl font-bold text-gray-400">Pam Golding</div>
-            <div className="text-2xl font-bold text-gray-400">RE/MAX</div>
-          </div>
-        </div>
+        
       </div>
     </section>
   );

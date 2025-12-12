@@ -6,6 +6,7 @@ import ModernServiceModal from "@/components/modern-service-modal";
 import AnimatedServiceCard from "@/components/animated-service-card";
 import CustomServiceContact from "@/components/custom-service-contact";
 import { useState, useMemo } from "react";
+import { serviceConfigs, serviceIdMapping } from "@/config/service-configs";
 import { 
   Home, 
   TreePine, 
@@ -286,6 +287,13 @@ const specializedServices: Service[] = [
 // Combine all services for compatibility
 const services: Service[] = [...indoorServices, ...outdoorServices, ...specializedServices];
 
+// Filter out disabled services based on admin overrides
+const disabledSet = new Set(
+  Object.entries(serviceConfigs)
+    .filter(([_, cfg]) => cfg.enabled === false)
+    .map(([id]) => id)
+);
+
 export default function ComprehensiveServices({ onServiceSelect }: ComprehensiveServicesProps) {
   const [showServiceModal, setShowServiceModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string>("");
@@ -297,7 +305,11 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
 
   // Filter services based on search term and category
   const filteredServices = useMemo(() => {
-    let filtered = services;
+    const servicesWithFilter = services.filter(s => {
+      const mapped = serviceIdMapping[s.id] || s.id;
+      return !disabledSet.has(mapped);
+    });
+    let filtered = servicesWithFilter;
 
     // Filter by category
     if (selectedCategory !== "All") {
@@ -322,10 +334,10 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
   const filteredSpecializedServices = filteredServices.filter(s => s.category === "Specialized Services");
 
   return (
-    <section className="py-16 lg:py-24" style={{ backgroundColor: '#EED1C4' }} data-testid="comprehensive-services-section">
+    <section className="py-12 lg:py-16" style={{ backgroundColor: '#EED1C4' }} data-testid="comprehensive-services-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <Badge className="text-white px-4 py-2 text-sm font-semibold border-0 mb-4" style={{ backgroundColor: '#C56B86' }}>
             <Sparkles className="h-4 w-4 mr-2" />
             Complete Home Services
@@ -343,7 +355,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="mb-12 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:space-x-4">
+        <div className="mb-10 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:space-x-4">
           <div className="relative flex-1 max-w-md mx-auto sm:mx-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -383,7 +395,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         )}
 
         {/* Indoor Services Section */}
-        <div className="mb-16">
+        <div className="mb-12">
           <div className="flex items-center mb-8">
             <Home className="h-8 w-8 mr-3 text-blue-600" />
             <h3 className="text-3xl font-bold text-gray-900">Indoor Services</h3>
@@ -392,7 +404,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             </Badge>
           </div>
           {filteredIndoorServices.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredIndoorServices.map((service, index) => (
               <AnimatedServiceCard
                 key={service.id}
@@ -413,7 +425,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         </div>
 
         {/* Outdoor Services Section */}
-        <div className="mb-16">
+        <div className="mb-12">
           <div className="flex items-center mb-8">
             <TreePine className="h-8 w-8 mr-3 text-green-600" />
             <h3 className="text-3xl font-bold text-gray-900">Outdoor Services</h3>
@@ -422,7 +434,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
             </Badge>
           </div>
           {filteredOutdoorServices.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredOutdoorServices.map((service, index) => (
               <AnimatedServiceCard
                 key={service.id}
@@ -443,7 +455,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         </div>
 
         {/* Specialized Services Section */}
-        <div className="mb-16">
+        <div className="mb-12">
           <div className="flex items-center mb-8">
             <Star className="h-8 w-8 mr-3 text-purple-600" />
             <h3 className="text-3xl font-bold text-gray-900">Specialized Services</h3>
@@ -473,7 +485,7 @@ export default function ComprehensiveServices({ onServiceSelect }: Comprehensive
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center rounded-3xl p-8 lg:p-12 text-white" style={{ backgroundColor: '#44062D' }}>
+        <div className="text-center rounded-3xl p-6 lg:p-10 text-white" style={{ backgroundColor: '#44062D' }}>
           <h3 className="text-3xl font-bold mb-4">
             Need a custom service solution?
           </h3>

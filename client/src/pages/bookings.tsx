@@ -128,95 +128,75 @@ export default function BookingsPage() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  // Fetch orders from the new cart-based booking system
-  const { data: orders = [], isLoading } = useQuery<any[]>({
-    queryKey: ['/api/orders', user?.id],
+  // Fetch canonical bookings for this customer
+  const { data: bookingsData = [], isLoading } = useQuery<any[]>({
+    queryKey: ['/api/bookings/customer', user?.id],
     queryFn: async () => {
       const accessToken = localStorage.getItem('accessToken');
       const headers: Record<string, string> = {};
       if (accessToken) {
         headers["Authorization"] = `Bearer ${accessToken}`;
       }
-      
-      const res = await fetch('/api/orders', {
+      const res = await fetch(`/api/bookings/customer/${user?.id}`, {
         headers,
         credentials: "include",
       });
-      
       if (!res.ok) {
-        throw new Error(`Failed to fetch orders: ${res.statusText}`);
+        throw new Error(`Failed to fetch bookings: ${res.statusText}`);
       }
-      
       return res.json();
     },
     enabled: !!user?.id && isAuthenticated,
   });
 
-  // Transform orders with items into individual booking cards
-  const bookings = orders.flatMap((order: any) => {
-    if (!order.items || order.items.length === 0) {
-      return [];
-    }
-    
-    // Create a booking card for each order item (service)
-    return order.items.map((item: any) => ({
-      id: item.id,
-      bookingNumber: order.orderNumber,
-      serviceType: item.serviceName || item.serviceType,
-      scheduledDate: item.scheduledDate,
-      scheduledTime: item.scheduledTime,
-      duration: item.duration || 2,
-      status: order.status, // Use order status (confirmed, pending, completed, cancelled)
-      address: item.serviceDetails?.address || "Address not provided",
-      totalPrice: item.subtotal,
-      specialInstructions: item.comments || item.serviceDetails?.specialRequests || "",
-      // Provider information for chat feature
-      providerId: item.providerId,
-      providerName: item.providerName,
-      // Additional fields from order
-      paymentStatus: order.paymentStatus,
-      createdAt: order.createdAt,
-      // Store order reference for actions
-      orderId: order.id,
-      // Store full service details for rebooking
-      serviceDetails: item.serviceDetails,
-      selectedAddOns: item.selectedAddOns || [],
-    }));
-  });
+  // Use canonical bookings from server
+  const bookings = bookingsData;
 
-  // Helper function to check if a booking is in the past
+  // Robust time parser: supports HH:mm, HH:mm:ss, and 12h formats with AM/PM
+  const parseTime = (t: string) => {
+    const s = String(t || '').trim();
+    const ampm = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)$/i);
+    if (ampm) {
+      let hh = parseInt(ampm[1], 10);
+      const mm = parseInt(ampm[2], 10);
+      const ap = ampm[3].toUpperCase();
+      if (ap === 'PM' && hh < 12) hh += 12;
+      if (ap === 'AM' && hh === 12) hh = 0;
+      return { hh, mm };
+    }
+    const basic = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+    if (basic) {
+      return { hh: parseInt(basic[1], 10), mm: parseInt(basic[2], 10) };
+    }
+    return null;
+  };
+
+  // Helper function to check if a booking is in the past (date + time)
   const isBookingInPast = (booking: any): boolean => {
-    if (!booking.scheduledDate || !booking.scheduledTime) {
-      return false;
+    const d = new Date(booking?.scheduledDate);
+    if (isNaN(d.getTime())) return false;
+    const tm = parseTime(String(booking?.scheduledTime || ''));
+    if (tm) {
+      d.setHours(tm.hh, tm.mm, 0, 0);
+    } else {
+      // If time is missing or unparsable, assume start of day to avoid keeping clearly past dates in upcoming
+      d.setHours(0, 0, 0, 0);
     }
-    
-    try {
-      // Combine date and time to create a datetime
-      const [hours, minutes] = booking.scheduledTime.split(':');
-      const bookingDateTime = new Date(booking.scheduledDate);
-      bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-      
-      // Compare with current time
-      return bookingDateTime < new Date();
-    } catch (error) {
-      console.error('Error parsing booking date/time:', error);
-      return false;
-    }
+    return d.getTime() < Date.now();
   };
 
   // Filter bookings based on date/time and status
+  const pastStatuses = new Set(["completed", "cancelled", "declined", "expired", "failed"]);
+  const activeStatuses = new Set(["pending", "confirmed", "accepted", "pending-provider"]);
+
   const upcomingBookings = bookings.filter((b: any) => {
-    // Check status first - completed/cancelled/in-progress always go to past
-    const isPastStatus = b.status === "completed" || b.status === "cancelled" || b.status === "in-progress";
-    
-    // Upcoming = NOT past status AND NOT past date
-    return !isPastStatus && !isBookingInPast(b);
+    const status = String(b.status || '').toLowerCase();
+    return activeStatuses.has(status) && !isBookingInPast(b);
   });
   
   const pastBookings = bookings.filter((b: any) => {
-    // Past = completed/cancelled/in-progress status OR date/time is in the past
-    const isPastStatus = b.status === "completed" || b.status === "cancelled" || b.status === "in-progress";
-    return isPastStatus || isBookingInPast(b);
+    const status = String(b.status || '').toLowerCase();
+    return isBookingInPast(b) || pastStatuses.has(status);
   });
 
   const renderBookingCard = (booking: any) => {
@@ -234,7 +214,7 @@ export default function BookingsPage() {
                   <span className="ml-1">{booking.status}</span>
                 </Badge>
               </div>
-              <p className="text-gray-600 mb-1">Booking #{booking.bookingNumber}</p>
+              <p className="text-gray-600 mb-1">Booking #{(booking.bookingNumber || '').replace(/-\d+$/, '') || booking.bookingNumber}</p>
             </div>
             <Button variant="ghost" size="sm">
               <MoreVertical className="h-4 w-4" />
@@ -306,13 +286,14 @@ export default function BookingsPage() {
               {!(booking.status === "completed" || isBookingInPast(booking)) && (
                 <>
                   {/* Show chat for all active bookings */}
-                  {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress") && (
+                  {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "in-progress" || booking.status === "pending-provider" || booking.status === "accepted") && (
                     booking.providerId ? (
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => setChatBooking({
                           id: booking.id,
+                          bookingNumber: booking.bookingNumber,
                           customerId: user?.id,
                           providerId: booking.providerId,
                           providerName: booking.providerName || 'Provider',
@@ -557,9 +538,9 @@ export default function BookingsPage() {
           setIsBookingOpen(false);
           setSelectedServiceId("");
           setPrefillData(null);
-          queryClient.invalidateQueries({ queryKey: ['/api/orders', user?.id] });
+          queryClient.invalidateQueries({ queryKey: ['/api/bookings/customer', user?.id] });
         }}
-        recentOrders={orders}
+        recentOrders={[]}
         prefillFromRecent={prefillData}
       />
 
@@ -578,6 +559,7 @@ export default function BookingsPage() {
           open={true}
           onOpenChange={(open) => !open && setChatBooking(null)}
           bookingId={chatBooking.id}
+          bookingNumber={chatBooking.bookingNumber}
           customerId={chatBooking.customerId}
           providerId={chatBooking.providerId}
           customerName={chatBooking.customerName}

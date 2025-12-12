@@ -123,8 +123,20 @@ export default function EnhancedProviderOnboarding() {
     "Electrical Work",
     "Chef & Catering",
     "Waitering Services",
-    "Garden Care"
+    "Garden Care",
+    "Home Moving",
+    "Au Pair Services"
   ];
+  const canonicalServiceMap: Record<string, string> = {
+    "House Cleaning": "house-cleaning",
+    "Plumbing Services": "plumbing",
+    "Electrical Work": "electrical",
+    "Chef & Catering": "chef-catering",
+    "Waitering Services": "event-staff",
+    "Garden Care": "gardening",
+    "Home Moving": "moving",
+    "Au Pair Services": "au-pair",
+  };
 
   const southAfricanBanks = [
     "ABSA Bank",
@@ -323,7 +335,7 @@ export default function EnhancedProviderOnboarding() {
         phone: providerData.phone,
         bio: providerData.description || "",
         hourlyRate: "250.00",
-        servicesOffered: providerData.services.map(s => s.toLowerCase().replace(/\s+/g, '-')),
+        servicesOffered: providerData.services.map(s => canonicalServiceMap[s] || s.toLowerCase().replace(/\s+/g, '-')),
         experience: providerData.experience,
         location: locationStr,
         bankingDetails: {
@@ -336,6 +348,7 @@ export default function EnhancedProviderOnboarding() {
         providerType: providerData.applicationType,
         companyName: providerData.companyName || null,
         companyRegistration: providerData.companyRegistration || null,
+        verificationStatus: 'pending'
       };
 
       const createRes = await apiRequest("POST", "/api/providers", providerPayload);
@@ -389,10 +402,10 @@ export default function EnhancedProviderOnboarding() {
         description: "Your application is under review. You'll receive an email within 24-48 hours with the verification status.",
       });
       
-      // Redirect to success page
+      // Redirect to Home
       setTimeout(() => {
-        setLocation("/provider-dashboard");
-      }, 2000);
+        setLocation("/");
+      }, 1500);
       
     } catch (error) {
       console.error('Provider application submission error:', error);

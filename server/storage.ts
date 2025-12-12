@@ -104,6 +104,8 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   getAllProviders(): Promise<ServiceProvider[]>;
   updateProviderVerificationStatus(providerId: string, status: string): Promise<void>;
+  updateServiceProvider(id: string, data: Partial<ServiceProvider>): Promise<ServiceProvider>;
+  normalizeProviderServiceTypes(): Promise<void>;
 
   // Wallet methods
   getOrCreateWallet(userId: string): Promise<Wallet>;
@@ -543,6 +545,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(serviceProviders.id, providerId));
   }
 
+  async updateServiceProvider(id: string, data: Partial<ServiceProvider>): Promise<ServiceProvider> {
+    const [provider] = await db.update(serviceProviders)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(serviceProviders.id, id))
+      .returning();
+    return provider;
+  }
+
+  async normalizeProviderServiceTypes(): Promise<void> {
+    const synonyms: Record<string, string> = {
+      'plumbing-services': 'plumbing',
+      'garden-care': 'gardening'
+    };
+    const providers = await this.getAllProviders();
+    for (const p of providers) {
+      const list = Array.isArray(p.servicesOffered) ? p.servicesOffered : [];
+      const mapped = list.map((s: string) => synonyms[s] || s);
+      const changed = JSON.stringify(list) !== JSON.stringify(mapped);
+      if (changed) {
+        await this.updateServiceProvider(p.id, { servicesOffered: mapped });
+      }
+    }
+  }
+
   // Wallet methods - delegated to WalletStorage
   async getOrCreateWallet(userId: string): Promise<Wallet> {
     return this.walletStorage.getOrCreateWallet(userId);
@@ -578,9 +604,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {
-    const providers = await db.select().from(serviceProviders)
-      .where(eq(serviceProviders.servicesOffered, [serviceCategory]));
-    return providers;
+    const allProviders = await db.select().from(serviceProviders);
+    const filtered = (allProviders || []).filter((p: any) => {
+      const approved = (p.verificationStatus === 'approved') || !!p.isVerified;
+      const offers = Array.isArray(p.servicesOffered) && p.servicesOffered.includes(serviceCategory);
+      return approved && offers;
+    });
+    return filtered as ServiceProvider[];
   }
 
   async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
@@ -2238,7 +2268,8 @@ export class MemStorage implements IStorage {
 
   async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {
     return Array.from(this.serviceProviders.values()).filter(
-      provider => provider.servicesOffered.includes(serviceCategory)
+      provider => ((provider as any).verificationStatus === 'approved' || !!provider.isVerified) &&
+        Array.isArray(provider.servicesOffered) && provider.servicesOffered.includes(serviceCategory)
     );
   }
 
@@ -2292,6 +2323,30 @@ export class MemStorage implements IStorage {
     };
     this.serviceProviders.set(id, updatedProvider);
     return updatedProvider;
+  }
+
+  async updateServiceProvider(id: string, data: Partial<ServiceProvider>): Promise<ServiceProvider> {
+    const provider = this.serviceProviders.get(id);
+    if (!provider) throw new Error("Provider not found");
+    const updated = { ...provider, ...data, updatedAt: new Date() } as ServiceProvider;
+    this.serviceProviders.set(id, updated);
+    return updated;
+  }
+
+  async normalizeProviderServiceTypes(): Promise<void> {
+    const synonyms: Record<string, string> = {
+      'plumbing-services': 'plumbing',
+      'garden-care': 'gardening'
+    };
+    const values = Array.from(this.serviceProviders.values());
+    for (const p of values) {
+      const list = Array.isArray(p.servicesOffered) ? p.servicesOffered : [];
+      const mapped = list.map((s: string) => synonyms[s] || s);
+      const changed = JSON.stringify(list) !== JSON.stringify(mapped);
+      if (changed) {
+        this.serviceProviders.set(p.id, { ...p, servicesOffered: mapped, updatedAt: new Date() } as ServiceProvider);
+      }
+    }
   }
 
   async getAllServices(): Promise<Service[]> {
@@ -2797,6 +2852,13 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Switch to database storage for production
-const useMemStorage = process.env.USE_MEM_STORAGE === '1';
-export const storage: IStorage = useMemStorage ? (new MemStorage() as unknown as IStorage) : new DatabaseStorage();
+// Switch to in-memory storage for development, or when explicitly requested
+const useMemStorage = process.env.USE_MEM_STORAGE === '1' || process.env.NODE_ENV !== 'production';
+let storageImpl: IStorage;
+try {
+  storageImpl = useMemStorage ? (new MemStorage() as unknown as IStorage) : new DatabaseStorage();
+} catch (e) {
+  // Fallback to memory if database storage fails to initialize
+  storageImpl = new MemStorage() as unknown as IStorage;
+}
+export const storage: IStorage = storageImpl;

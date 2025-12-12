@@ -41,7 +41,18 @@ export function registerCartRoutes(app: Express) {
       const cart = await storage.getOrCreateCart(userId, sessionToken);
       
       // Get cart with items
-      const cartData = await storage.getCartWithItems(cart.id);
+      let cartData = await storage.getCartWithItems(cart.id);
+      
+      // If user is authenticated, attempt merging any guest cart referenced by cookie, then return user cart
+      try {
+        const authedUserId = (req as any).user?.id;
+        const cookieSession = (req as any).cookies?.cartSession;
+        if (authedUserId && cookieSession) {
+          await storage.mergeGuestCartToUser(cookieSession, authedUserId);
+          const refreshed = await storage.getOrCreateCart(authedUserId, undefined);
+          cartData = await storage.getCartWithItems(refreshed.id) || cartData;
+        }
+      } catch {}
       
       if (!cartData) {
         return res.status(200).json({ ...cart, items: [] });
@@ -68,8 +79,31 @@ export function registerCartRoutes(app: Express) {
   // POST /api/cart/items - Add item to cart
   app.post("/api/cart/items", optionalAuth, async (req: Request, res: Response) => {
     try {
-      const isDev = process.env.NODE_ENV !== 'production';
-      if (isDev) {
+      const { userId, sessionToken } = getCartIdentifier(req, res);
+      const cart = await storage.getOrCreateCart(userId, sessionToken);
+      const { gateCode, ...itemDataRaw } = req.body;
+      const itemData: Omit<InsertCartItem, 'cartId'> = insertCartItemSchema.omit({ cartId: true }).parse(itemDataRaw as any);
+      const currentCount = await storage.getCartItemCount(cart.id);
+      if (currentCount >= 3) {
+        return res.status(400).json({ message: "Cart limit reached. Maximum 3 services allowed per booking." });
+      }
+      const cartItem = await storage.addItemToCart(cart.id, itemData);
+      if (gateCode && gateCode.trim()) {
+        const { encryptedGateCode: encryptedData, iv, authTag } = encryptGateCode(gateCode.trim());
+        await storage.createGateCode(cartItem.id, encryptedData, iv, authTag || "");
+      }
+      const cartData = await storage.getCartWithItems(cart.id);
+      if (!cartData) {
+        return res.status(201).json({ item: cartItem, cart });
+      }
+      res.status(201).json({ item: cartItem, cart: { ...cartData.cart, items: cartData.items } });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid cart item data", errors: error.errors });
+      }
+      try {
+        const { userId, sessionToken } = getCartIdentifier(req, res);
+        const cart = await storage.getOrCreateCart(userId, sessionToken);
         const safeItem: any = {
           serviceId: req.body?.serviceId || null,
           providerId: req.body?.providerId || null,
@@ -86,106 +120,15 @@ export function registerCartRoutes(app: Express) {
           selectedAddOns: Array.isArray(req.body?.selectedAddOns) ? req.body.selectedAddOns : [],
           comments: req.body?.comments || null,
         };
-        const cartItem = { id: randomUUID(), cartId: 'guest-cart', ...safeItem } as any;
-        const cartData = { cart: { id: 'guest-cart', status: 'active' }, items: [cartItem] };
-        return res.status(201).json({
-          item: cartItem,
-          cart: { ...(cartData.cart), items: cartData.items }
-        });
-      }
-      const { userId, sessionToken } = getCartIdentifier(req, res);
-      
-      // Get or create cart
-      const cart = await storage.getOrCreateCart(userId, sessionToken);
-      
-      // Extract gate code before validation (not part of schema)
-      const { gateCode, ...itemDataRaw } = req.body;
-      
-      // Validate request body
-      const itemData: Omit<InsertCartItem, 'cartId'> = insertCartItemSchema.omit({ cartId: true }).parse(itemDataRaw as any);
-      
-      // Check cart item limit (max 3 services)
-      const currentCount = await storage.getCartItemCount(cart.id);
-      if (currentCount >= 3) {
-        return res.status(400).json({ 
-          message: "Cart limit reached. Maximum 3 services allowed per booking." 
-        });
-      }
-      
-      // Add item to cart (deduplication handled in storage layer)
-      const cartItem = await storage.addItemToCart(cart.id, itemData);
-      
-      // If gate code provided, encrypt and store it (Phase 3.2)
-      if (gateCode && gateCode.trim()) {
-        const { encryptedGateCode: encryptedData, iv, authTag } = encryptGateCode(gateCode.trim());
-        await storage.createGateCode(
-          cartItem.id, // Using cart item ID as reference
-          encryptedData,
-          iv,
-          authTag || ""
-        );
-      }
-      
-      // Return updated cart with flattened structure
-      const cartData = await storage.getCartWithItems(cart.id);
-      
-      if (!cartData) {
-        return res.status(500).json({ message: "Failed to retrieve cart data" });
-      }
-      
-      res.status(201).json({ 
-        item: cartItem,
-        cart: {
-          ...cartData.cart,
-          items: cartData.items
+        const cartItem = await storage.addItemToCart(cart.id, safeItem);
+        const cartData = await storage.getCartWithItems(cart.id);
+        if (!cartData) {
+          return res.status(201).json({ item: cartItem, cart });
         }
-      });
-    } catch (error: any) {
-      console.error("Error adding item to cart:", error?.message || String(error));
-
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Invalid cart item data",
-          errors: error.errors 
-        });
+        return res.status(201).json({ item: cartItem, cart: { ...cartData.cart, items: cartData.items } });
+      } catch (fallbackErr: any) {
+        return res.status(500).json({ message: fallbackErr?.message || 'Failed to add item' });
       }
-
-      // Fallback: if an upstream module throws an opaque network error during dev, add item without validation
-      if (String(error?.message || "").includes("Unexpected server response")) {
-        try {
-          const { userId, sessionToken } = getCartIdentifier(req, res);
-          const cart = await storage.getOrCreateCart(userId, sessionToken);
-          const safeItem: any = {
-            serviceId: req.body?.serviceId || null,
-            providerId: req.body?.providerId || null,
-            serviceType: req.body?.serviceType || req.body?.serviceId || "service",
-            serviceName: req.body?.serviceName || "Service",
-            scheduledDate: req.body?.scheduledDate ? new Date(req.body.scheduledDate) : new Date(),
-            scheduledTime: req.body?.scheduledTime || "",
-            duration: Number(req.body?.duration || 2),
-            basePrice: String(req.body?.basePrice || "0"),
-            addOnsPrice: String(req.body?.addOnsPrice || "0"),
-            subtotal: String(req.body?.subtotal || req.body?.basePrice || "0"),
-            tipAmount: String(req.body?.tipAmount || "0"),
-            serviceDetails: req.body?.serviceDetails || null,
-            selectedAddOns: Array.isArray(req.body?.selectedAddOns) ? req.body.selectedAddOns : [],
-            comments: req.body?.comments || null,
-          };
-          const cartItem = await storage.addItemToCart(cart.id, safeItem);
-          const cartData = await storage.getCartWithItems(cart.id);
-          if (!cartData) {
-            return res.status(201).json({ item: cartItem, cart });
-          }
-          return res.status(201).json({
-            item: cartItem,
-            cart: { ...cartData.cart, items: cartData.items }
-          });
-        } catch (fallbackErr: any) {
-          console.error("Cart fallback failed:", fallbackErr?.message || String(fallbackErr));
-        }
-      }
-
-      res.status(500).json({ message: error?.message || 'Failed to add item' });
     }
   });
   
@@ -246,10 +189,34 @@ export function registerCartRoutes(app: Express) {
       
       // Get cart for authenticated user only
       const cart = await storage.getOrCreateCart(userId, undefined);
-      const cartData = await storage.getCartWithItems(cart.id);
+      let cartData = await storage.getCartWithItems(cart.id);
+      let usingGuestCart = false;
+      // If user cart is empty, attempt to merge guest cart by session cookie and retry
+      if (!cartData || cartData.items.length === 0) {
+        try {
+          const sessionToken = (req as any).cookies?.cartSession;
+          if (sessionToken) {
+          await storage.mergeGuestCartToUser(sessionToken, userId);
+            const refreshedCart = await storage.getOrCreateCart(userId, undefined);
+            cartData = await storage.getCartWithItems(refreshedCart.id);
+          }
+        } catch {}
+      }
       
       if (!cartData || cartData.items.length === 0) {
-        return res.status(400).json({ message: "Cart is empty" });
+        // As a fallback, use guest cart directly if present
+        const sessionToken = (req as any).cookies?.cartSession;
+        if (sessionToken) {
+          const guestCart = await storage.getOrCreateCart(undefined, sessionToken);
+          const guestData = await storage.getCartWithItems(guestCart.id);
+          if (guestData && guestData.items.length > 0) {
+            cartData = guestData;
+            usingGuestCart = true;
+          }
+        }
+        if (!cartData || cartData.items.length === 0) {
+          return res.status(400).json({ message: "Cart is empty" });
+        }
       }
       
       // Calculate totals
@@ -291,7 +258,7 @@ export function registerCartRoutes(app: Express) {
       // WALLET PAYMENT: Start with pending status, update to paid/confirmed AFTER successful deduction
       const orderData = {
         userId, // Authentication required - userId is always present
-        cartId: cart.id,
+        cartId: usingGuestCart ? cartData.cart.id : cart.id,
         orderNumber,
         subtotal: subtotal.toString(),
         platformFee: platformFee.toString(),
@@ -357,7 +324,10 @@ export function registerCartRoutes(app: Express) {
           await storage.updateOrderStatus(order.id, 'confirmed', 'paid');
           
           // Clear cart only after successful wallet deduction
-          if (orderData.cartId) {
+          if (usingGuestCart) {
+            await storage.clearCart(cartData.cart.id);
+            console.log(`✅ Guest cart ${cartData.cart.id} cleared after successful wallet payment`);
+          } else if (orderData.cartId) {
             await storage.clearCart(orderData.cartId);
             console.log(`✅ Cart ${orderData.cartId} cleared after successful wallet payment`);
           }
@@ -389,7 +359,68 @@ export function registerCartRoutes(app: Express) {
       if (!completeOrder) {
         return res.status(500).json({ message: "Failed to retrieve order" });
       }
+
+      // Create booking records for each order item
+      try {
+        const createdBookings: any[] = [];
+        for (let idx = 0; idx < completeOrder.items.length; idx++) {
+          const item: any = completeOrder.items[idx];
+          const details = typeof item.serviceDetails === 'string' ? (() => { try { return JSON.parse(item.serviceDetails); } catch { return {}; } })() : (item.serviceDetails || {});
+          const itemSubtotal = parseFloat(String(item.subtotal || '0')) || 0;
+          const itemTip = parseFloat(String(item.tipAmount || '0')) || 0;
+          const itemTotal = itemSubtotal + itemTip;
+          const perItemPlatformFee = Math.round(itemSubtotal * 0.15 * 100) / 100;
+          const bookingNumber = `${order.orderNumber}-${idx + 1}`;
+          const providerIdForBooking = item.providerId || (details?.provider?.id ?? null);
+          const bookingData: any = {
+            customerId: userId,
+            providerId: providerIdForBooking,
+            serviceId: item.serviceId,
+            bookingNumber,
+            scheduledDate: item.scheduledDate,
+            scheduledTime: item.scheduledTime,
+            duration: item.duration || 2,
+            totalPrice: itemTotal.toString(),
+            platformFee: perItemPlatformFee.toString(),
+            tipAmount: (item.tipAmount || '0'),
+            paymentStatus: completeOrder.order.paymentStatus || 'paid',
+            status: 'pending-provider',
+            serviceType: item.serviceType,
+            serviceDetails: item.serviceDetails || null,
+            customerDetails: null,
+            address: details?.address || '',
+            city: details?.city || null,
+            postalCode: details?.postalCode || null,
+            propertyType: details?.propertyType || null,
+            propertySize: details?.propertySize || null,
+            rooms: details?.rooms || null,
+            bathrooms: details?.bathrooms || null,
+            accessInstructions: details?.accessInstructions || null,
+            specialInstructions: (item.comments || null),
+            emergencyContact: null,
+            isRecurring: false,
+          };
+          const booking = await storage.createBooking(bookingData);
+          createdBookings.push(booking);
+        }
+        // Attach created bookings summary to response for client-side refreshes if needed
+        (completeOrder as any).createdBookings = createdBookings.map(b => ({ id: b.id, status: b.status }));
+      } catch (createErr) {
+        console.error('Error creating bookings from order items:', createErr);
+        // Do not fail the checkout if booking creation fails
+      }
       
+      // Clear non-wallet carts immediately (guest or user)
+      if (paymentMethod !== "wallet") {
+        try {
+          if (usingGuestCart) {
+            await storage.clearCart(cartData.cart.id);
+          } else {
+            await storage.clearCart(cart.id);
+          }
+        } catch {}
+      }
+
       res.status(201).json({
         message: "Order created successfully",
         order: {
