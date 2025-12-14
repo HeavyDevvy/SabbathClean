@@ -218,7 +218,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen relative bg-cover bg-center flex items-center justify-center p-4" style={{ backgroundImage: "url('/attached_assets/signin-background.png')" }}>
+    <div className="min-h-screen relative bg-cover bg-center bg-no-repeat flex items-center justify-center p-4" style={{ backgroundImage: "url('/attached_assets/signin-background.png')" }}>
       <div className="absolute inset-0 bg-black/40" />
       <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
