@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma.js";
 
 export default async function handler(req: any, res: any) {
+  res.setHeader("Content-Type", "application/json");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -21,8 +22,11 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ error: "Missing JWT_SECRET in environment" });
     }
 
-    const ADMIN_EMAIL = "admin@berryevents.co.za";
-    const ADMIN_PASSWORD = "DevonSamBerry@69";
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      return res.status(500).json({ error: "Missing ADMIN_EMAIL or ADMIN_PASSWORD in environment" });
+    }
 
     if (email !== ADMIN_EMAIL) {
       return res.status(401).json({ error: "Invalid admin credentials" });
