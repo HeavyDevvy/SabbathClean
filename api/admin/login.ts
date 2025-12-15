@@ -1,9 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../lib/prisma.js";
 
 export default async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
+  console.log("[AdminLogin] method:", req.method);
+  const hasDbUrl = !!process.env.DATABASE_URL || !!process.env.POSTGRES_URL;
+  const hasJwtSecret = !!process.env.JWT_SECRET;
+  console.log("[AdminLogin] env:", { hasDbUrl, hasJwtSecret });
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -19,55 +22,42 @@ export default async function handler(req: any, res: any) {
 
     const secret = process.env.JWT_SECRET || "";
     if (!secret) {
-      return res.status(500).json({ error: "Missing JWT_SECRET in environment" });
+      console.error("[AdminLogin] JWT_SECRET missing");
+      return res.status(500).json({ error: "Admin login failed" });
     }
 
     const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
     if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-      return res.status(500).json({ error: "Missing ADMIN_EMAIL or ADMIN_PASSWORD in environment" });
+      console.error("[AdminLogin] ADMIN_EMAIL or ADMIN_PASSWORD missing");
+      return res.status(500).json({ error: "Admin login failed" });
     }
 
-    if (email !== ADMIN_EMAIL) {
+    if ((email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
       return res.status(401).json({ error: "Invalid admin credentials" });
     }
 
-    let user = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
-
-    if (!user) {
-      const hashed = await bcrypt.hash(ADMIN_PASSWORD, 10);
-      user = await prisma.user.create({
-        data: {
-          email: ADMIN_EMAIL,
-          password: hashed,
-          firstName: "Admin",
-          lastName: "User",
-          role: "ADMIN",
-          isActive: true,
-        },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          password: true,
-        },
-      }) as any;
+    const isBcryptHash = ADMIN_PASSWORD.startsWith("$2a$") || ADMIN_PASSWORD.startsWith("$2b$") || ADMIN_PASSWORD.startsWith("$2y$");
+    let passwordValid = false;
+    if (isBcryptHash) {
+      try {
+        passwordValid = await bcrypt.compare(password, ADMIN_PASSWORD);
+      } catch (e: any) {
+        console.error("[AdminLogin] bcrypt compare failed:", e?.message || e);
+        passwordValid = false;
+      }
+    } else {
+      passwordValid = password === ADMIN_PASSWORD;
     }
-
-    const isValid = await bcrypt.compare(password, (user as any).password);
-    if (!isValid) {
+    if (!passwordValid) {
       return res.status(401).json({ error: "Invalid admin credentials" });
     }
 
-    const uid = (user as any).id as string;
-    const uemail = (user as any).email as string;
-    const urole = (user as any).role as string;
-
-    const token = jwt.sign({ userId: uid, email: uemail, role: "ADMIN" }, secret, { expiresIn: "7d" });
-
-    return res.status(200).json({ token, user: { id: uid, email: uemail, role: urole } });
+    const uemail = ADMIN_EMAIL;
+    const token = jwt.sign({ userId: "env-admin", email: uemail, role: "ADMIN" }, secret, { expiresIn: "7d" });
+    return res.status(200).json({ token, user: { id: "env-admin", email: uemail, role: "ADMIN" } });
   } catch (error: any) {
-    console.error("Admin login failed:", error);
+    console.error("[AdminLogin] error:", { name: error?.name, message: error?.message, stack: error?.stack });
     return res.status(500).json({ error: "Admin login failed" });
   }
 }
