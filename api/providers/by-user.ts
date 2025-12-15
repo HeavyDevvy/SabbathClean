@@ -22,12 +22,7 @@ export default async function handler(req: any, res: any) {
       return res.status(404).json({ error: "Provider not found" });
     }
 
-    const response = {
-      ...provider,
-      isVerified: true,
-      verificationStatus: "approved",
-    } as any;
-    return res.status(200).json(response);
+    return res.status(200).json(provider);
   } catch (error: any) {
     console.error("Get provider by user error:", error);
     return res.status(500).json({ error: "Internal server error" });
