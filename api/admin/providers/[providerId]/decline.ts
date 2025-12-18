@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { prisma } from "../../../../../lib/prisma.js";
+import { prisma } from "../../../../lib/prisma.js";
 
 export default async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
@@ -23,18 +23,22 @@ export default async function handler(req: any, res: any) {
     if (!decoded || (decoded as any).role !== "ADMIN") {
       return res.status(403).json({ error: "Forbidden" });
     }
-    const id = req.query?.id || req.params?.id || (req.url?.split("/").slice(-3)[0]);
-    if (!id) {
-      return res.status(400).json({ error: "provider id required" });
+    const providerId =
+      req.query?.providerId ||
+      req.params?.providerId ||
+      req.query?.id ||
+      req.params?.id ||
+      (req.url?.split("/").slice(-2)[0]);
+    if (!providerId) {
+      return res.status(400).json({ error: "providerId required" });
     }
-    const provider = await prisma.serviceProvider.findUnique({ where: { id }, include: { user: true } });
-    if (!provider) {
+    const existing = await prisma.serviceProvider.findUnique({ where: { id: providerId } });
+    if (!existing) {
       return res.status(404).json({ error: "Provider not found" });
     }
     const updated = await prisma.serviceProvider.update({
-      where: { id },
+      where: { id: providerId },
       data: { verificationStatus: "REJECTED", isVerified: false },
-      include: { user: true }
     });
     return res.status(200).json(updated);
   } catch (e: any) {
