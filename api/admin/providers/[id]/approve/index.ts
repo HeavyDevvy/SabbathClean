@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import { prisma } from "../../../../lib/prisma.js";
+import { prisma } from "../../../../../lib/prisma.js";
 
 export default async function handler(req: any, res: any) {
+  res.setHeader("Content-Type", "application/json");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -22,26 +23,23 @@ export default async function handler(req: any, res: any) {
     if (!decoded || (decoded as any).role !== "ADMIN") {
       return res.status(403).json({ error: "Forbidden" });
     }
-    const id = req.query?.id || req.params?.id || (req.url?.split("/").slice(-2)[0]);
+    const id = req.query?.id || req.params?.id || (req.url?.split("/").slice(-3)[0]);
     if (!id) {
       return res.status(400).json({ error: "provider id required" });
     }
-    const provider = await prisma.serviceProvider.findUnique({ where: { id } });
+    const provider = await prisma.serviceProvider.findUnique({ where: { id }, include: { user: true } });
     if (!provider) {
       return res.status(404).json({ error: "Provider not found" });
     }
     const updated = await prisma.serviceProvider.update({
       where: { id },
-      data: { verificationStatus: "REJECTED", isVerified: false }
+      data: { verificationStatus: "APPROVED", isVerified: true },
+      include: { user: true }
     });
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ message: "Provider declined", provider: updated }));
+    return res.status(200).json(updated);
   } catch (e: any) {
-    console.error("Provider decline error:", e?.message || e);
-    res.statusCode = 500;
-    res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ error: "Internal server error" }));
+    console.error("Provider approve error:", e?.message || e);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 

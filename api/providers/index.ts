@@ -49,7 +49,7 @@ export default async function handler(req: any, res: any) {
 
       await prisma.user.update({
         where: { id: userId },
-        data: { role: "PROVIDER" },
+        data: { role: "PROVIDER", phoneNumber: phone || undefined },
       });
 
       return res.status(201).json(provider);

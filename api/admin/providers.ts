@@ -1,13 +1,6 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma.js";
 
-function toLowerStatus(status: string | null | undefined): string {
-  const s = (status || "").toString().toUpperCase();
-  if (s === "APPROVED") return "approved";
-  if (s === "REJECTED") return "rejected";
-  return "pending";
-}
-
 export default async function handler(req: any, res: any) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -37,12 +30,24 @@ export default async function handler(req: any, res: any) {
     const providers = await prisma.serviceProvider.findMany({
       orderBy: { createdAt: "desc" },
       skip,
-      take: limit
+      take: limit,
+      include: { user: true }
     });
 
-    const enriched = providers.map((p) => ({
-      ...p,
-      verificationStatus: toLowerStatus((p as any).verificationStatus),
+    const enriched = providers.map((p: any) => ({
+      id: p.id,
+      businessName: p.businessName,
+      description: p.description,
+      category: p.category,
+      hourlyRate: String(p.hourlyRate || "0"),
+      verificationStatus: p.verificationStatus,
+      verificationStatusLabel: String(p.verificationStatus || "").toLowerCase(),
+      isVerified: p.isVerified,
+      createdAt: p.createdAt,
+      userEmail: p.user?.email || null,
+      userPhoneNumber: p.user?.phoneNumber || null,
+      userFirstName: p.user?.firstName || null,
+      userLastName: p.user?.lastName || null
     }));
 
     res.statusCode = 200;
@@ -55,4 +60,3 @@ export default async function handler(req: any, res: any) {
     res.end(JSON.stringify({ error: "Internal server error" }));
   }
 }
-
