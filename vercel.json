@@ -4,14 +4,8 @@
   "outputDirectory": "dist/public",
   "framework": null,
   "routes": [
-    { "handle": "filesystem" }
-  ],
-  "rewrites": [
-    { "source": "/sw.js", "destination": "/sw.js" },
-    { "source": "/manifest.json", "destination": "/manifest.json" },
-    { "source": "/attached_assets/(.*)", "destination": "/attached_assets/$1" },
-    { "source": "/api/providers/by-user/(.*)", "destination": "/api/providers/by-user" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
