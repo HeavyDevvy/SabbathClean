@@ -76,20 +76,30 @@ interface User {
 
 interface Provider {
   id: string;
+  // Legacy/mem fields (kept for compatibility)
   firstName?: string;
   lastName?: string;
   email?: string;
   phone?: string;
   companyName?: string;
   servicesOffered?: string[];
-  verificationStatus: string;
-  rating?: number;
-  totalReviews?: number;
-  createdAt?: string;
   location?: string;
   hourlyRate?: string;
   qualificationCertificate?: string;
   idDocument?: string;
+  rating?: number;
+  totalReviews?: number;
+  // Prisma/Vercel API fields
+  businessName?: string;
+  category?: string;
+  verificationStatus?: string;
+  verificationStatusLabel?: string;
+  isVerified?: boolean;
+  createdAt?: string;
+  userEmail?: string;
+  userPhoneNumber?: string;
+  userFirstName?: string;
+  userLastName?: string;
 }
 
 export default function AdminPortal() {
@@ -138,6 +148,10 @@ export default function AdminPortal() {
     setServiceOverrides(next);
     localStorage.setItem('serviceConfigOverrides', JSON.stringify(next));
     toast({ title: "Services updated", description: "Changes are now active across the app." });
+  };
+
+  const normalizeStatus = (provider: Provider) => {
+    return String(provider.verificationStatus || provider.verificationStatusLabel || "").toUpperCase();
   };
 
   // Real-time data refresh using React Query
@@ -240,7 +254,11 @@ export default function AdminPortal() {
   });
 
   const filteredProviders = (providers || [])
-    .filter((p) => statusFilter === 'all' ? true : (p.verificationStatus === statusFilter))
+    .filter((p) => {
+      if (statusFilter === 'all') return true;
+      const st = normalizeStatus(p);
+      return st === statusFilter.toUpperCase();
+    })
     .sort((a, b) => {
       const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -821,12 +839,14 @@ export default function AdminPortal() {
 
                       <div className="divide-y">
                         {filteredProviders.map((provider) => {
-                          const name = provider.companyName || `${provider.firstName || ''} ${provider.lastName || ''}`.trim();
-                          const email = provider.email || 'Not provided';
-                          const phone = provider.phone || 'Not provided';
-                          const services = provider.servicesOffered && provider.servicesOffered.length > 0 ? provider.servicesOffered.join(', ') : 'Not provided';
+                          const providerName = (provider.businessName && provider.businessName.trim().length > 0)
+                            ? provider.businessName
+                            : `${provider.userFirstName || ''} ${provider.userLastName || ''}`.trim() || provider.userEmail || 'Not provided';
+                          const email = provider.userEmail || 'Not provided';
+                          const phone = provider.userPhoneNumber || 'Not provided';
+                          const services = provider.category || (provider.servicesOffered && provider.servicesOffered.length > 0 ? provider.servicesOffered.join(', ') : '') || 'Not provided';
                           const dateStr = provider.createdAt ? format(new Date(provider.createdAt), 'LLL dd, yyyy') : 'Not provided';
-                          const status = provider.verificationStatus;
+                          const statusUpper = normalizeStatus(provider);
                           return (
                             <div
                               key={provider.id}
@@ -834,24 +854,24 @@ export default function AdminPortal() {
                               onClick={() => setSelectedProvider(provider)}
                               data-testid={`provider-${provider.id}`}
                             >
-                              <div className="font-medium text-gray-900">{name || 'Not provided'}</div>
+                              <div className="font-medium text-gray-900">{providerName || 'Not provided'}</div>
                               <div className="text-gray-700">{email}</div>
                               <div className="text-gray-700">{phone}</div>
                               <div className="text-gray-700">{services}</div>
                               <div>
-                                {status === 'pending' && (
+                                {statusUpper === 'PENDING' && (
                                   <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
                                 )}
-                                {status === 'approved' && (
+                                {statusUpper === 'APPROVED' && (
                                   <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Approved</Badge>
                                 )}
-                                {status === 'rejected' && (
+                                {statusUpper === 'REJECTED' && (
                                   <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">Declined</Badge>
                                 )}
                               </div>
                               <div className="text-gray-700">{dateStr}</div>
                               <div className="flex items-center space-x-2">
-                                {status === 'pending' && (
+                                {statusUpper === 'PENDING' && (
                                   <>
                                     <Button
                                       size="sm"
@@ -871,7 +891,7 @@ export default function AdminPortal() {
                                     </Button>
                                   </>
                                 )}
-                                {status === 'approved' && (
+                                {statusUpper === 'APPROVED' && (
                                   <CheckCircle className="h-5 w-5 text-green-600" />
                                 )}
                               </div>
@@ -1285,13 +1305,13 @@ export default function AdminPortal() {
             <CardContent className="space-y-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  {selectedProvider.verificationStatus === 'pending' && (
+                  {normalizeStatus(selectedProvider) === 'PENDING' && (
                     <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
                   )}
-                  {selectedProvider.verificationStatus === 'approved' && (
+                  {normalizeStatus(selectedProvider) === 'APPROVED' && (
                     <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">Approved</Badge>
                   )}
-                  {selectedProvider.verificationStatus === 'rejected' && (
+                  {normalizeStatus(selectedProvider) === 'REJECTED' && (
                     <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">Declined</Badge>
                   )}
                 </div>
@@ -1302,23 +1322,23 @@ export default function AdminPortal() {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700">Personal Information</h3>
                   <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Full Name: {(selectedProvider.companyName ? '' : `${selectedProvider.firstName || ''} ${selectedProvider.lastName || ''}`.trim()) || 'Not provided'}</div>
-                    <div>Email Address: {selectedProvider.email || 'Not provided'}</div>
-                    <div>Phone Number: {selectedProvider.phone || 'Not provided'}</div>
+                    <div>Full Name: {`${selectedProvider.userFirstName || ''} ${selectedProvider.userLastName || ''}`.trim() || selectedProvider.userEmail || 'Not provided'}</div>
+                    <div>Email Address: {selectedProvider.userEmail || 'Not provided'}</div>
+                    <div>Phone Number: {selectedProvider.userPhoneNumber || 'Not provided'}</div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700">Business Information</h3>
                   <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Business Name: {selectedProvider.companyName || 'Not provided'}</div>
-                    <div>Service Type / Category: {(selectedProvider.servicesOffered && selectedProvider.servicesOffered.length > 0) ? selectedProvider.servicesOffered.join(', ') : 'Not provided'}</div>
+                    <div>Business Name: {selectedProvider.businessName || 'Not provided'}</div>
+                    <div>Service Type / Category: {selectedProvider.category || 'Not provided'}</div>
                     <div>Business Description: {'Not provided'}</div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700">Service Details</h3>
                   <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Services Offered: {(selectedProvider.servicesOffered && selectedProvider.servicesOffered.length > 0) ? selectedProvider.servicesOffered.join(', ') : 'Not provided'}</div>
+                    <div>Services Offered: {selectedProvider.category || 'Not provided'}</div>
                     <div>Service Areas / Locations: {selectedProvider.location || 'Not provided'}</div>
                     <div>Pricing Information: {selectedProvider.hourlyRate ? `R${selectedProvider.hourlyRate}` : 'Not provided'}</div>
                   </div>
@@ -1337,12 +1357,12 @@ export default function AdminPortal() {
                 <h3 className="text-sm font-semibold text-gray-700">Metadata</h3>
                 <div className="mt-2 space-y-1 text-sm text-gray-800">
                   <div>Date Applied: {selectedProvider.createdAt ? format(new Date(selectedProvider.createdAt), 'LLL dd, yyyy') : 'Not provided'}</div>
-                  <div>Current Status: {selectedProvider.verificationStatus}</div>
+                  <div>Current Status: {normalizeStatus(selectedProvider) || 'Not provided'}</div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 pt-2">
-                {selectedProvider.verificationStatus === 'pending' && (
+                {normalizeStatus(selectedProvider) === 'PENDING' && (
                   <>
                     <Button
                       onClick={() => handleProviderApproval.mutate({ providerId: selectedProvider.id, action: 'approve' })}
