@@ -1,12 +1,10 @@
 {
-  "rewrites": [
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/$1"
     }
   ]
 }
