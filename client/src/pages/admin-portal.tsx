@@ -103,7 +103,7 @@ interface Provider {
 }
 
 export default function AdminPortal() {
-  const [, setLocation] = useLocation();
+  const [loc, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -114,6 +114,10 @@ export default function AdminPortal() {
     email: "",
     password: ""
   });
+  const isDev = !!(import.meta as any).env?.DEV;
+  const isDebug = isDev && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debug") === "1";
+  const [providersStatusCode, setProvidersStatusCode] = useState<number | null>(null);
+  const [providersFirstObj, setProvidersFirstObj] = useState<any>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editUserForm, setEditUserForm] = useState({
     firstName: "",
@@ -151,7 +155,50 @@ export default function AdminPortal() {
   };
 
   const normalizeStatus = (provider: Provider) => {
-    return String(provider.verificationStatus || provider.verificationStatusLabel || "").toUpperCase();
+    const vs = (provider as any)?.verificationStatus;
+    if (typeof vs === "string" && vs.length > 0) {
+      const s = vs.toLowerCase();
+      if (s === "approved") return "APPROVED";
+      if (s === "pending") return "PENDING";
+      if (s === "rejected" || s === "declined") return "REJECTED";
+      return s.toUpperCase();
+    }
+    if ((provider as any)?.isVerified === true) return "APPROVED";
+    return "PENDING";
+  };
+
+  const getDisplayName = (p: Provider) => {
+    const company = (p as any)?.companyName;
+    if (company && String(company).trim().length > 0) return String(company).trim();
+    const fn = (p as any)?.firstName || "";
+    const ln = (p as any)?.lastName || "";
+    const full = `${String(fn).trim()} ${String(ln).trim()}`.trim();
+    if (full.length > 0) return full;
+    const email = (p as any)?.email || "";
+    return email || "Not provided";
+  };
+
+  const getEmail = (p: Provider) => {
+    const email = (p as any)?.email;
+    return email ? String(email) : "Not provided";
+  };
+
+  const getPhone = (p: Provider) => {
+    const phone = (p as any)?.phone;
+    const val = typeof phone === "string" ? phone.trim() : phone;
+    return val && String(val).trim().length > 0 ? String(val) : "Not provided";
+  };
+
+  const getServiceType = (p: Provider) => {
+    const servicesOffered = (p as any)?.servicesOffered;
+    if (Array.isArray(servicesOffered)) return servicesOffered.join(", ");
+    if (typeof servicesOffered === "string" && servicesOffered.length > 0) return servicesOffered;
+    return "Not provided";
+  };
+
+  const getDateSubmitted = (p: Provider) => {
+    const d = (p as any)?.createdAt;
+    return d ? format(new Date(d), 'LLL dd, yyyy') : 'Not provided';
   };
 
   // Real-time data refresh using React Query
@@ -224,6 +271,7 @@ export default function AdminPortal() {
     queryKey: ['/api/admin/users'],
     enabled: isAuthenticated,
     queryFn: async () => {
+      try { console.log('📡 Fetching users...'); } catch {}
       const response = await fetch('/api/admin/users', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -232,7 +280,9 @@ export default function AdminPortal() {
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
-      return response.json();
+      const json = await response.json();
+      try { console.log('✅ Users fetched:', Array.isArray(json) ? json.length : 0, 'total'); } catch {}
+      return json;
     }
   });
 
@@ -241,6 +291,7 @@ export default function AdminPortal() {
     queryKey: ['/api/admin/providers'],
     enabled: isAuthenticated,
     queryFn: async () => {
+      try { console.log('📡 Fetching providers...'); } catch {}
       const response = await fetch('/api/admin/providers', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -249,9 +300,45 @@ export default function AdminPortal() {
       if (!response.ok) {
         throw new Error('Failed to fetch providers');
       }
-      return response.json();
+      const json = await response.json();
+      try {
+        console.log('✅ Providers fetched:', Array.isArray(json) ? json.length : 0, 'items');
+        if (Array.isArray(json) && json.length > 0) {
+          console.log('Sample provider:', {
+            firstName: (json[0] as any).firstName,
+            lastName: (json[0] as any).lastName,
+            email: (json[0] as any).email,
+            phone: (json[0] as any).phone
+          });
+        }
+      } catch {}
+      return json;
     }
   });
+
+  useEffect(() => {
+    if (isAuthenticated && isDebug) {
+      (async () => {
+        try {
+          const res = await fetch('/api/admin/providers', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+            }
+          });
+          setProvidersStatusCode(res.status);
+          const j = await res.json().catch(() => null);
+          let arr: any[] = [];
+          if (Array.isArray(j)) arr = j;
+          else if (j?.providers && Array.isArray(j.providers)) arr = j.providers;
+          else if (j?.data?.providers && Array.isArray(j.data.providers)) arr = j.data.providers;
+          setProvidersFirstObj(arr[0] || null);
+        } catch {
+          setProvidersStatusCode(null);
+          setProvidersFirstObj(null);
+        }
+      })();
+    }
+  }, [isAuthenticated, isDebug]);
 
   const filteredProviders = (providers || [])
     .filter((p) => {
@@ -324,6 +411,60 @@ export default function AdminPortal() {
     }
   });
 
+  const handleApprove = async (providerId: string) => {
+    const ok = typeof window !== 'undefined' ? window.confirm('Approve this provider? They will gain access to the Provider Hub.') : true;
+    if (!ok) return;
+    try {
+      console.log('📤 Approving provider:', providerId);
+      const response = await fetch(`/api/admin/providers/${providerId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        let msg = `Approval failed (${response.status})`;
+        try { const err = await response.json(); msg = err?.message || msg; } catch {}
+        throw new Error(msg);
+      }
+      console.log('✅ Provider approved');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/providers'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({ title: "Provider Approved", description: "Provider now has access to the Provider Hub." });
+    } catch (error: any) {
+      console.error('❌ Approval error:', error);
+      toast({ title: "Approval failed", description: error?.message || 'Approval failed', variant: "destructive" });
+    }
+  };
+
+  const handleDecline = async (providerId: string) => {
+    const reason = typeof window !== 'undefined' ? window.prompt('Decline this provider? Optionally enter a reason:') : '';
+    if (reason === null) return;
+    try {
+      console.log('📤 Declining provider:', providerId);
+      const response = await fetch(`/api/admin/providers/${providerId}/decline`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason: reason || 'No reason provided' })
+      });
+      if (!response.ok) {
+        let msg = `Decline failed (${response.status})`;
+        try { const err = await response.json(); msg = err?.message || msg; } catch {}
+        throw new Error(msg);
+      }
+      console.log('✅ Provider declined');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/providers'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/stats'] });
+      toast({ title: "Provider Declined", description: "Provider application has been declined." });
+    } catch (error: any) {
+      console.error('❌ Decline error:', error);
+      toast({ title: "Decline failed", description: error?.message || 'Decline failed', variant: "destructive" });
+    }
+  };
   if (!isAuthenticated) {
     return (
       <div
@@ -402,6 +543,9 @@ export default function AdminPortal() {
   return (
     <div className="min-h-screen bg-gray-50">
       <EnhancedHeader mode="admin" onBookingClick={() => setLocation('/services')} />
+      <div className="px-4 sm:px-6 lg:px-8 py-2 text-xs text-gray-500">
+        Build: {(import.meta as any).env?.MODE} - {new Date().toISOString()}
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -761,41 +905,88 @@ export default function AdminPortal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {users?.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg" data-testid={`user-${user.id}`}>
-                      <div>
-                        <p className="font-medium">{user.firstName} {user.lastName}</p>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                        <p className="text-xs text-gray-500">
-                          {user.isProvider ? 'Provider' : 'Customer'} | 
-                          {user.isVerified ? ' Verified' : ' Unverified'}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingUser(user);
-                            setEditUserForm({
-                              firstName: user.firstName,
-                              lastName: user.lastName,
-                              email: user.email,
-                              isVerified: user.isVerified
-                            });
-                          }}
-                          data-testid={`edit-user-${user.id}`}
-                        >
-                          Edit
-                        </Button>
-                        {user.isVerified ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-600" />
+                  {(() => {
+                    const providerUserIds = new Set(
+                      (providers || [])
+                        .map((p: any) => (p?.user?.id || p?.userId) as string)
+                        .filter((id: any) => typeof id === "string" && id.length > 0)
+                    );
+                    const providerEmails = new Set(
+                      (providers || [])
+                        .map((p: any) => (p?.email || p?.userEmail || "") as string)
+                        .map((e: string) => e ? e.toLowerCase() : "")
+                        .filter((e) => e.length > 0)
+                    );
+                    const customersOnly = (users || []).filter((u) => {
+                      const byUserId = providerUserIds.has(u.id);
+                      const byEmail = providerEmails.has((u.email || "").toLowerCase());
+                      const role = String((u as any).role || "").toLowerCase();
+                      const type = String((u as any).type || "").toLowerCase();
+                      const isProviderFlag = u.isProvider === true || role === "provider" || type === "provider";
+                      return !byUserId && !byEmail && !isProviderFlag;
+                    });
+                    return (
+                      <>
+                        {isDebug && (
+                          <div className="rounded-md border p-3 text-xs space-y-2">
+                            <div>URL: /api/admin/users</div>
+                            <div>Users loaded: {Array.isArray(users) ? users.length : 0}</div>
+                            <div>CustomersOnly: {customersOnly.length}</div>
+                            <div>First user keys: {Array.isArray(users) && users.length > 0 ? Object.keys(users[0] as any).join(', ') : 'none'}</div>
+                          </div>
                         )}
-                      </div>
-                    </div>
-                  ))}
+                        {isDebug && Array.isArray(users) && users.length > 0 && (() => {
+                          try {
+                            users.forEach((u) => {
+                              const byUserId = providerUserIds.has(u.id);
+                              const byEmail = providerEmails.has((u.email || "").toLowerCase());
+                              const role = String((u as any).role || "").toLowerCase();
+                              const type = String((u as any).type || "").toLowerCase();
+                              const isProviderFlag = u.isProvider === true || role === "provider" || type === "provider";
+                              if (byUserId || byEmail || isProviderFlag) {
+                                console.log('🚫 Filtering out provider:', u.email);
+                              }
+                            });
+                            console.log('Provider IDs:', Array.from(providerUserIds));
+                          } catch {}
+                        })()}
+                        {customersOnly.map((user) => (
+                          <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg" data-testid={`user-${user.id}`}>
+                            <div>
+                              <p className="font-medium">{user.firstName} {user.lastName}</p>
+                              <p className="text-sm text-gray-600">{user.email}</p>
+                              <p className="text-xs text-gray-500">
+                                Customer | {user.isVerified ? ' Verified' : ' Unverified'}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  setEditUserForm({
+                                    firstName: user.firstName,
+                                    lastName: user.lastName,
+                                    email: user.email,
+                                    isVerified: user.isVerified
+                                  });
+                                }}
+                                data-testid={`edit-user-${user.id}`}
+                              >
+                                Edit
+                              </Button>
+                              {user.isVerified ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <XCircle className="h-5 w-5 text-red-600" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>
@@ -822,12 +1013,25 @@ export default function AdminPortal() {
                         <option value="approved">Approved</option>
                         <option value="rejected">Declined</option>
                       </select>
-                    </div>
                   </div>
+                </div>
 
-                  <div className="overflow-x-auto">
-                    <div className="min-w-[800px]">
-                      <div className="grid grid-cols-7 gap-4 px-4 py-2 text-xs font-semibold text-gray-600">
+                {isDebug && (
+                  <div className="rounded-md border p-3 text-xs space-y-2">
+                    <div>URL: /api/admin/providers</div>
+                    <div>Status: {providersStatusCode ?? 'n/a'}</div>
+                    <div>Providers loaded: {Array.isArray(providers) ? providers.length : 0}</div>
+                    <div>First provider keys: {Array.isArray(providers) && providers.length > 0 ? Object.keys(providers[0] as any).join(', ') : 'none'}</div>
+                    {Array.isArray(providers) && providers.length > 0 && (
+                      <div>First provider: {(providers[0] as any).firstName}, {(providers[0] as any).email}, {(providers[0] as any).phone}</div>
+                    )}
+                    <pre className="bg-gray-100 p-2 rounded overflow-x-auto">{providersFirstObj ? JSON.stringify(providersFirstObj, null, 2) : 'no provider object'}</pre>
+                  </div>
+                )}
+
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    <div className="grid grid-cols-7 gap-4 px-4 py-2 text-xs font-semibold text-gray-600">
                         <div>Provider / Business</div>
                         <div>Email</div>
                         <div>Phone</div>
@@ -839,14 +1043,13 @@ export default function AdminPortal() {
 
                       <div className="divide-y">
                         {filteredProviders.map((provider) => {
-                          const providerName = (provider.businessName && provider.businessName.trim().length > 0)
-                            ? provider.businessName
-                            : `${provider.userFirstName || ''} ${provider.userLastName || ''}`.trim() || provider.userEmail || 'Not provided';
-                          const email = provider.userEmail || 'Not provided';
-                          const phone = provider.userPhoneNumber || 'Not provided';
-                          const services = provider.category || (provider.servicesOffered && provider.servicesOffered.length > 0 ? provider.servicesOffered.join(', ') : '') || 'Not provided';
-                          const dateStr = provider.createdAt ? format(new Date(provider.createdAt), 'LLL dd, yyyy') : 'Not provided';
+                          const providerName = getDisplayName(provider);
+                          const email = getEmail(provider);
+                          const phone = getPhone(provider);
+                          const services = getServiceType(provider);
+                          const dateStr = getDateSubmitted(provider);
                           const statusUpper = normalizeStatus(provider);
+                          const providerId = provider.id;
                           return (
                             <div
                               key={provider.id}
@@ -868,6 +1071,9 @@ export default function AdminPortal() {
                                 {statusUpper === 'REJECTED' && (
                                   <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200">Declined</Badge>
                                 )}
+                                {!statusUpper && (
+                                  <span className="text-gray-700">Not provided</span>
+                                )}
                               </div>
                               <div className="text-gray-700">{dateStr}</div>
                               <div className="flex items-center space-x-2">
@@ -875,7 +1081,7 @@ export default function AdminPortal() {
                                   <>
                                     <Button
                                       size="sm"
-                                      onClick={(e) => { e.stopPropagation(); handleProviderApproval.mutate({ providerId: provider.id, action: 'approve' }); }}
+                                      onClick={(e) => { e.stopPropagation(); handleApprove(providerId); }}
                                       className="bg-green-600 hover:bg-green-700"
                                       data-testid={`approve-${provider.id}`}
                                     >
@@ -884,7 +1090,7 @@ export default function AdminPortal() {
                                     <Button
                                       size="sm"
                                       variant="destructive"
-                                      onClick={(e) => { e.stopPropagation(); setSelectedProvider(provider); setShowDeclineConfirm(true); }}
+                                      onClick={(e) => { e.stopPropagation(); handleDecline(providerId); }}
                                       data-testid={`decline-${provider.id}`}
                                     >
                                       Decline
@@ -1318,29 +1524,29 @@ export default function AdminPortal() {
                 <Button variant="outline" onClick={() => setSelectedProvider(null)}>Close</Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Personal Information</h3>
-                  <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Full Name: {`${selectedProvider.userFirstName || ''} ${selectedProvider.userLastName || ''}`.trim() || selectedProvider.userEmail || 'Not provided'}</div>
-                    <div>Email Address: {selectedProvider.userEmail || 'Not provided'}</div>
-                    <div>Phone Number: {selectedProvider.userPhoneNumber || 'Not provided'}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">Personal Information</h3>
+                    <div className="mt-2 space-y-1 text-sm text-gray-800">
+                      <div>Full Name: {getDisplayName(selectedProvider)}</div>
+                      <div>Email Address: {getEmail(selectedProvider)}</div>
+                      <div>Phone Number: {getPhone(selectedProvider)}</div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700">Business Information</h3>
-                  <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Business Name: {selectedProvider.businessName || 'Not provided'}</div>
-                    <div>Service Type / Category: {selectedProvider.category || 'Not provided'}</div>
-                    <div>Business Description: {'Not provided'}</div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">Business Information</h3>
+                    <div className="mt-2 space-y-1 text-sm text-gray-800">
+                    <div>Business Name: {(selectedProvider as any).companyName || 'Individual'}</div>
+                    <div>Service Type / Category: {getServiceType(selectedProvider)}</div>
+                    <div>Business Description: {(selectedProvider as any).bio || 'Not provided'}</div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700">Service Details</h3>
                   <div className="mt-2 space-y-1 text-sm text-gray-800">
-                    <div>Services Offered: {selectedProvider.category || 'Not provided'}</div>
-                    <div>Service Areas / Locations: {selectedProvider.location || 'Not provided'}</div>
-                    <div>Pricing Information: {selectedProvider.hourlyRate ? `R${selectedProvider.hourlyRate}` : 'Not provided'}</div>
+                    <div>Services Offered: {Array.isArray((selectedProvider as any)?.servicesOffered) ? (selectedProvider as any).servicesOffered.join(', ') : (selectedProvider as any)?.servicesOffered || 'Not provided'}</div>
+                    <div>Service Areas / Locations: {(selectedProvider as any).location || 'Not provided'}</div>
+                    <div>Pricing Information: {(selectedProvider as any).hourlyRate ? `R${(selectedProvider as any).hourlyRate}` : 'Not provided'}</div>
                   </div>
                 </div>
                 <div>
@@ -1355,8 +1561,8 @@ export default function AdminPortal() {
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-700">Metadata</h3>
-                <div className="mt-2 space-y-1 text-sm text-gray-800">
-                  <div>Date Applied: {selectedProvider.createdAt ? format(new Date(selectedProvider.createdAt), 'LLL dd, yyyy') : 'Not provided'}</div>
+                  <div className="mt-2 space-y-1 text-sm text-gray-800">
+                  <div>Date Applied: {(selectedProvider as any).createdAt ? format(new Date((selectedProvider as any).createdAt), 'LLL dd, yyyy') : 'Not provided'}</div>
                   <div>Current Status: {normalizeStatus(selectedProvider) || 'Not provided'}</div>
                 </div>
               </div>
@@ -1365,7 +1571,7 @@ export default function AdminPortal() {
                 {normalizeStatus(selectedProvider) === 'PENDING' && (
                   <>
                     <Button
-                      onClick={() => handleProviderApproval.mutate({ providerId: selectedProvider.id, action: 'approve' })}
+                      onClick={() => handleApprove(selectedProvider.id)}
                       className="bg-green-600 hover:bg-green-700"
                       data-testid={`approve-detail-${selectedProvider.id}`}
                     >
@@ -1373,7 +1579,7 @@ export default function AdminPortal() {
                     </Button>
                     <Button
                       variant="destructive"
-                      onClick={() => setShowDeclineConfirm(true)}
+                      onClick={() => handleDecline(selectedProvider.id)}
                       data-testid={`decline-detail-${selectedProvider.id}`}
                     >
                       Decline

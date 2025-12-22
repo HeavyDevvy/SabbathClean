@@ -1,6 +1,35 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+async function ensureDevAdminEnv() {
+  if (process.env.NODE_ENV === "production") return;
+  const targetEmail = "admin@berryevents.co.za";
+  const targetPassword = "BerryAdmin@25";
+  const currentEmail = process.env.ADMIN_EMAIL || "";
+  const currentPassword = process.env.ADMIN_PASSWORD || "";
+  if (!currentEmail || currentEmail.toLowerCase() !== targetEmail.toLowerCase()) {
+    process.env.ADMIN_EMAIL = targetEmail;
+  }
+  if (!currentPassword) {
+    process.env.ADMIN_PASSWORD = await bcrypt.hash(targetPassword, 10);
+    return;
+  }
+  const isHash = currentPassword.startsWith("$2a$") || currentPassword.startsWith("$2b$") || currentPassword.startsWith("$2y$");
+  let matches = false;
+  if (isHash) {
+    try {
+      matches = await bcrypt.compare(targetPassword, currentPassword);
+    } catch {
+      matches = false;
+    }
+  } else {
+    matches = currentPassword === targetPassword;
+  }
+  if (!matches) {
+    process.env.ADMIN_PASSWORD = await bcrypt.hash(targetPassword, 10);
+  }
+}
+
 export default async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
   console.log("[AdminLogin] method:", req.method);
@@ -13,6 +42,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    await ensureDevAdminEnv();
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { email, password } = body || {};
 

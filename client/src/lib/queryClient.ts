@@ -4,7 +4,12 @@ function getApiBaseUrl(): string {
   const env = (import.meta as any).env || {};
   const loc = typeof window !== "undefined" ? window.location.origin : "";
   const isDev = !!env.DEV;
-  if (isDev || (loc && loc.includes("localhost"))) return "";
+  if (
+    isDev ||
+    (loc && (loc.includes("localhost") || loc.includes("127.0.0.1") || loc.includes("0.0.0.0")))
+  ) {
+    return "";
+  }
   const v = env.NEXT_PUBLIC_API_BASE_URL || env.VITE_API_BASE_URL || env.APP_BASE_URL;
   return v && typeof v === "string" && v.length > 0 ? v : "";
 }
@@ -57,7 +62,7 @@ export async function apiRequest(
     return res;
   } catch (err) {
     const msg = String((err as any)?.message || "");
-    if (/Failed to fetch|ERR_ABORTED/i.test(msg)) {
+    if (/Failed to fetch|ERR_ABORTED|ERR_FAILED/i.test(msg)) {
       // brief retry to tolerate transient preview reloads
       await new Promise((r) => setTimeout(r, 250));
       const retryRes = await fetch(fullUrl, {
@@ -113,7 +118,7 @@ export const getQueryFn: <T>(options: {
     } catch (err: any) {
       // Swallow aborted fetches for cart route to avoid noisy console errors
       const msg = String(err?.message || "");
-      if (key === "/api/cart" && /Abort|ERR_ABORTED|Failed to fetch/i.test(msg)) {
+      if (key === "/api/cart" && /Abort|ERR_ABORTED|Failed to fetch|ERR_FAILED/i.test(msg)) {
         return { id: "guest-cart", status: "active", items: [] } as any;
       }
       if (key.startsWith("/api") && base) {

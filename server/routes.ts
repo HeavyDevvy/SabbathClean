@@ -623,7 +623,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Booking routes
   app.post("/api/bookings", async (req, res) => {
     try {
-      const bookingData = insertBookingSchema.parse(req.body);
+      const raw = req.body || {};
+      const providerId = String(raw.providerId || "").trim();
+      if (!providerId) {
+        return res.status(400).json({ message: "providerId required" });
+      }
+      const bookingNumber =
+        typeof raw.bookingNumber === "string" && raw.bookingNumber.trim().length > 0
+          ? raw.bookingNumber.trim()
+          : `BE-${Date.now().toString(36).toUpperCase()}`;
+      const normalized = {
+        ...raw,
+        providerId,
+        bookingNumber,
+        status: raw.status && typeof raw.status === "string" ? raw.status : "pending-provider",
+      };
+      const bookingData = insertBookingSchema.parse(normalized);
       const booking = await storage.createBooking(bookingData);
       res.json(booking);
     } catch (error: any) {

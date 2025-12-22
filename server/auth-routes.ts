@@ -6,6 +6,10 @@ import { storage } from "./storage";
 import { z } from "zod";
 import sgMail from "@sendgrid/mail";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+const __dirname2 = path.dirname(fileURLToPath(import.meta.url));
 
 const JWT_SECRET = appEnv.jwtSecret || "your-super-secret-jwt-key";
 const REMEMBER_TOKEN_EXPIRES = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -1252,42 +1256,46 @@ export function registerAuthRoutes(app: Express) {
   app.post('/api/admin/login', async (req, res) => {
     try {
       const { email, password } = req.body;
-      
-      // Get admin credentials from environment variables (with fallback for development)
-      const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@berryevents.co.za';
-      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '123456';
-      
-      // Debug: Admin login attempt (credentials removed for security)
-      console.log('Admin login attempt:', { 
-        emailMatch: email === ADMIN_EMAIL,
-        passwordMatch: password === ADMIN_PASSWORD
-      });
-      
-      // Ensure admin password is available
-      if (!ADMIN_PASSWORD) {
-        console.error('ADMIN_PASSWORD environment variable not set');
-        return res.status(500).json({ message: 'Admin authentication not configured' });
+      res.setHeader('Content-Type', 'application/json');
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
       }
-      
-      // Check admin credentials
-      if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      const adminFilePath = path.resolve(__dirname2, 'data/admins.json');
+      if (!fs.existsSync(adminFilePath)) {
+        console.log('❌ Admin file not found');
         return res.status(401).json({ message: 'Invalid admin credentials' });
       }
-
-      // Generate admin token
+      let admins: any[] = [];
+      try {
+        admins = JSON.parse(fs.readFileSync(adminFilePath, 'utf8'));
+      } catch {
+        admins = [];
+      }
+      const admin = admins.find(a => String(a.email || '').toLowerCase() === String(email || '').toLowerCase());
+      if (!admin) {
+        console.log('❌ Admin not found');
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+      }
+      const isValidPassword = await bcrypt.compare(String(password), String(admin.password || ''));
+      console.log('🔐 Password check:', isValidPassword ? '✅' : '❌');
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Invalid admin credentials' });
+      }
       const adminToken = jwt.sign(
-        { userId: 'admin', type: 'admin', role: 'admin' },
+        { userId: admin.id, type: 'admin', role: 'admin' },
         JWT_SECRET,
         { expiresIn: '8h' }
       );
-
+      console.log('✅ Login successful');
       res.json({
         message: 'Admin login successful',
         token: adminToken,
         user: {
-          id: 'admin',
-          email: ADMIN_EMAIL,
-          role: 'admin'
+          id: admin.id,
+          email: admin.email,
+          role: 'admin',
+          firstName: admin.firstName,
+          lastName: admin.lastName
         }
       });
     } catch (error) {
@@ -1296,6 +1304,11 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
+  // Admin health check
+  app.get('/api/admin/health', async (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({ ok: true });
+  });
   // Admin middleware
   const authenticateAdmin = async (req: any, res: any, next: any) => {
     const authHeader = req.headers['authorization'];
@@ -1380,8 +1393,26 @@ export function registerAuthRoutes(app: Express) {
   // Admin users endpoint
   app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+      res.setHeader('ETag', '');
       const users = await storage.getAllUsers();
-      res.json(users);
+      const providers = await storage.getAllProviders();
+      const providerUserIds = new Set(
+        providers
+          .map((p: any) => p.userId)
+          .filter((id: any) => typeof id === 'string' && id.length > 0)
+      );
+      const customersOnly = users.filter((u: any) => {
+        const role = String(u.role || '').toUpperCase();
+        const isProviderFlag = !!(u.isProvider === true || u.isServiceProvider === true);
+        const linkedProvider = providerUserIds.has(u.id);
+        const looksCustomerRole = role === 'USER' || role === '' || role === 'CUSTOMER';
+        return looksCustomerRole && !isProviderFlag && !linkedProvider;
+      });
+      res.status(200).json(customersOnly);
     } catch (error) {
       console.error('Admin users error:', error);
       res.status(500).json({ message: 'Failed to fetch users' });
@@ -1391,20 +1422,50 @@ export function registerAuthRoutes(app: Express) {
   // Admin providers endpoint
   app.get('/api/admin/providers', authenticateAdmin, async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+      res.setHeader('ETag', '');
       const providers = await storage.getAllProviders();
       const users = await storage.getAllUsers();
       const userById = new Map(users.map(u => [u.id, u]));
       const enriched = providers.map(p => {
-        const u = userById.get(p.userId!);
+        const u = p.userId ? userById.get(p.userId) : undefined;
+        const fullName = `${(p.firstName || u?.firstName || '').trim()} ${(p.lastName || u?.lastName || '').trim()}`.trim();
+        const category = (p as any).category || (Array.isArray((p as any).servicesOffered) ? (p as any).servicesOffered.join(', ') : undefined);
+        const verificationStatus = (p as any).verificationStatus || ((p as any).isVerified ? 'approved' : 'pending');
         return {
-          ...p,
-          email: p.email || u?.email || p.email,
-          firstName: p.firstName || u?.firstName || p.firstName,
-          lastName: p.lastName || u?.lastName || p.lastName,
-          phone: p.phone || u?.phone || p.phone,
+          id: p.id,
+          createdAt: (p as any).createdAt || null,
+          businessName: (p as any).businessName || null,
+          category: category || null,
+          verificationStatus,
+          isVerified: (p as any).isVerified === true,
+          hourlyRate: (p as any).hourlyRate || null,
+          location: (p as any).location || null,
+          servicesOffered: (p as any).servicesOffered || null,
+          email: p.email || u?.email || null,
+          firstName: p.firstName || u?.firstName || null,
+          lastName: p.lastName || u?.lastName || null,
+          phone: (p as any).phone || u?.phone || null,
+          userEmail: u?.email || null,
+          userPhoneNumber: (u as any)?.phone || null,
+          userFirstName: u?.firstName || null,
+          userLastName: u?.lastName || null,
+          user: u
+            ? {
+                id: u.id,
+                email: u.email,
+                firstName: u.firstName,
+                lastName: u.lastName,
+                phoneNumber: (u as any).phone || null,
+              }
+            : null,
+          displayName: fullName || (p as any).businessName || u?.email || null,
         };
       });
-      res.json(enriched);
+      res.status(200).json(enriched);
     } catch (error) {
       console.error('Admin providers error:', error);
       res.status(500).json({ message: 'Failed to fetch providers' });

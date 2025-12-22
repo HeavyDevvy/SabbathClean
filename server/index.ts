@@ -5,6 +5,9 @@ import { fileURLToPath } from "url";
 import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import { createServer as createNetServer } from "net";
+import bcrypt from "bcryptjs";
+import fs from "fs";
+import webhookRoutes from "./routes/webhooks";
 
 // Load environment variables from .env file
 config();
@@ -116,8 +119,85 @@ app.use((req, res, next) => {
     }
   }
 
+  const ensureDevAdminEnv = async () => {
+    if (process.env.NODE_ENV === "production") return;
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length === 0) {
+      process.env.JWT_SECRET = "dev-secret-berryevents";
+    }
+    const targetEmail = "admin@berryevents.co.za";
+    const targetPassword = "BerryAdmin@25";
+    const currentEmail = process.env.ADMIN_EMAIL || "";
+    const currentPassword = process.env.ADMIN_PASSWORD || "";
+    if (!currentEmail || currentEmail.toLowerCase() !== targetEmail.toLowerCase()) {
+      process.env.ADMIN_EMAIL = targetEmail;
+    }
+    if (!currentPassword) {
+      process.env.ADMIN_PASSWORD = await bcrypt.hash(targetPassword, 10);
+    } else {
+      const isHash = currentPassword.startsWith("$2a$") || currentPassword.startsWith("$2b$") || currentPassword.startsWith("$2y$");
+      let matches = false;
+      if (isHash) {
+        try {
+          matches = await bcrypt.compare(targetPassword, currentPassword);
+        } catch {
+          matches = false;
+        }
+      } else {
+        matches = currentPassword === targetPassword;
+      }
+      if (!matches) {
+        process.env.ADMIN_PASSWORD = await bcrypt.hash(targetPassword, 10);
+      }
+    }
+  };
+
+  await ensureDevAdminEnv();
+  const bootstrapAdminFile = async () => {
+    if (process.env.NODE_ENV === "production") return;
+    const adminFilePath = path.resolve(__dirname, "data/admins.json");
+    const dir = path.dirname(adminFilePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    let admins: any[] = [];
+    if (fs.existsSync(adminFilePath)) {
+      try {
+        admins = JSON.parse(fs.readFileSync(adminFilePath, "utf8"));
+      } catch {
+        admins = [];
+      }
+    }
+    const ADMIN_EMAIL = "admin@berryevents.co.za";
+    const ADMIN_PASSWORD = "BerryAdmin@25";
+    const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    const adminIndex = admins.findIndex(
+      (a) => String(a.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase()
+    );
+    const adminUser = {
+      id: "admin-1",
+      email: ADMIN_EMAIL,
+      password: hashedPassword,
+      role: "admin",
+      firstName: "Berry",
+      lastName: "Admin",
+      createdAt: new Date().toISOString(),
+    };
+    if (adminIndex === -1) {
+      admins.push(adminUser);
+      console.log("✅ Admin user created");
+    } else {
+      admins[adminIndex] = adminUser;
+      console.log("✅ Admin user updated");
+    }
+    fs.writeFileSync(adminFilePath, JSON.stringify(admins, null, 2));
+    const isValid = await bcrypt.compare(ADMIN_PASSWORD, hashedPassword);
+    console.log("🔐 Password test:", isValid ? "✅ VALID" : "❌ INVALID");
+  };
+  await bootstrapAdminFile();
+
   const { registerRoutes } = await import("./routes");
   const server = await registerRoutes(app);
+  app.use("/api/webhooks", webhookRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
