@@ -1472,34 +1472,33 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  // Provider approval endpoints
-  app.post('/api/admin/providers/:providerId/approve', authenticateAdmin, async (req, res) => {
+  app.post('/api/admin/providers/:providerId', authenticateAdmin, async (req, res) => {
     try {
       const { providerId } = req.params;
-      await storage.updateProviderVerificationStatus(providerId, 'approved');
-      const provider = await storage.getServiceProvider(providerId);
-      if (provider?.userId) {
-        await storage.updateUser(provider.userId, { isProvider: true, isVerified: true });
-      }
-      res.json({ message: 'Provider approved successfully' });
-    } catch (error) {
-      console.error('Provider approval error:', error);
-      res.status(500).json({ message: 'Failed to approve provider' });
-    }
-  });
+      const { action } = req.body || {};
 
-  app.post('/api/admin/providers/:providerId/decline', authenticateAdmin, async (req, res) => {
-    try {
-      const { providerId } = req.params;
+      if (action !== 'approve' && action !== 'decline') {
+        return res.status(400).json({ message: "Invalid action. Must be 'approve' or 'decline'" });
+      }
+
+      if (action === 'approve') {
+        await storage.updateProviderVerificationStatus(providerId, 'approved');
+        const provider = await storage.getServiceProvider(providerId);
+        if (provider?.userId) {
+          await storage.updateUser(provider.userId, { isProvider: true, isVerified: true });
+        }
+        return res.json({ message: 'Provider approved successfully' });
+      }
+
       await storage.updateProviderVerificationStatus(providerId, 'rejected');
       const provider = await storage.getServiceProvider(providerId);
       if (provider?.userId) {
         await storage.updateUser(provider.userId, { isProvider: true });
       }
-      res.json({ message: 'Provider declined successfully' });
+      return res.json({ message: 'Provider declined successfully' });
     } catch (error) {
-      console.error('Provider decline error:', error);
-      res.status(500).json({ message: 'Failed to decline provider' });
+      console.error('Provider action error:', error);
+      res.status(500).json({ message: 'Failed to process provider action' });
     }
   });
 

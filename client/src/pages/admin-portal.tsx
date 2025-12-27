@@ -170,10 +170,12 @@ export default function AdminPortal() {
   const getDisplayName = (p: Provider) => {
     const company = (p as any)?.companyName || (p as any)?.businessName;
     if (company && String(company).trim().length > 0) return String(company).trim();
+
     const fn = (p as any)?.firstName || (p as any)?.userFirstName || "";
     const ln = (p as any)?.lastName || (p as any)?.userLastName || "";
     const full = `${String(fn).trim()} ${String(ln).trim()}`.trim();
     if (full.length > 0) return full;
+
     const email = (p as any)?.userEmail || (p as any)?.email || "";
     return email || "Not provided";
   };
@@ -383,20 +385,20 @@ export default function AdminPortal() {
 
   // Provider approval mutation  
   const handleProviderApproval = useMutation({
-    mutationFn: async ({ providerId, action }: { providerId: string; action: 'approve' | 'decline' }) => {
+    mutationFn: async ({ providerId, action }: { providerId: string; action: "approve" | "decline" }) => {
       const response = await fetch(`/api/admin/providers/${providerId}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ action }),
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to process application');
+        throw new Error("Failed to process application");
       }
-      
+
       return await response.json();
     },
     onSuccess: (data, variables) => {
@@ -417,13 +419,14 @@ export default function AdminPortal() {
     if (!ok) return;
     try {
       console.log('📤 Approving provider:', providerId);
+      const action = "approve";
       const response = await fetch(`/api/admin/providers/${providerId}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: 'approve' })
+        body: JSON.stringify({ action }),
       });
       if (!response.ok) {
         let msg = `Approval failed (${response.status})`;
@@ -445,13 +448,14 @@ export default function AdminPortal() {
     if (reason === null) return;
     try {
       console.log('📤 Declining provider:', providerId);
+      const action = "decline";
       const response = await fetch(`/api/admin/providers/${providerId}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: 'decline' })
+        body: JSON.stringify({ action }),
       });
       if (!response.ok) {
         let msg = `Decline failed (${response.status})`;

@@ -19,7 +19,7 @@
   const provider = await req('POST','/api/providers',{ userId: provUser.id, firstName:'Fix9', lastName:'Provider', email:'provider_fix9@example.com', phone:'0000000000', hourlyRate:'350', servicesOffered:['gardening'], location:'Cape Town', providerType:'individual', rating:'4.8', totalReviews:120 });
   // 3) Admin approve
   const adminLogin = await req('POST','/api/admin/login',{ email:'admin@berryevents.co.za', password:'123456' });
-  await req('POST',`/api/admin/providers/${provider.id}/approve`,{},adminLogin.token);
+  await req('POST',`/api/admin/providers/${provider.id}`,{ action:'approve' },adminLogin.token);
   // 4) Register customer user
   let custReg;
   try {
