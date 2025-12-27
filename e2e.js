@@ -30,7 +30,7 @@ import WebSocket from 'ws';
   // 3) Admin login and approve provider
   const adminLogin = await fetchJson('POST','/api/admin/login',{ email:'admin@berryevents.co.za', password:'123456' });
   const adminToken = adminLogin.token;
-  await fetchJson('POST',`/api/admin/providers/${provider.id}`,{ action:'approve' },adminToken);
+  await fetchJson('POST',`/api/admin/providers/${provider.id}`,{ action: "approve" },adminToken);
   console.log('Provider approved');
   // 4) Register customer user
   const custReg = await fetchJson('POST','/api/auth/register',{ email: custEmail, password:'testpass', firstName:'Cust', lastName:'User', phone:'0000000000' });

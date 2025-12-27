@@ -1472,33 +1472,35 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.post('/api/admin/providers/:providerId', authenticateAdmin, async (req, res) => {
+  // Provider approval endpoints (single action endpoint)
+  app.post("/api/admin/providers/:providerId", authenticateAdmin, async (req, res) => {
     try {
       const { providerId } = req.params;
       const { action } = req.body || {};
 
-      if (action !== 'approve' && action !== 'decline') {
+      if (action !== "approve" && action !== "decline") {
         return res.status(400).json({ message: "Invalid action. Must be 'approve' or 'decline'" });
       }
 
-      if (action === 'approve') {
-        await storage.updateProviderVerificationStatus(providerId, 'approved');
+      if (action === "approve") {
+        await storage.updateProviderVerificationStatus(providerId, "approved");
         const provider = await storage.getServiceProvider(providerId);
         if (provider?.userId) {
           await storage.updateUser(provider.userId, { isProvider: true, isVerified: true });
         }
-        return res.json({ message: 'Provider approved successfully' });
+        return res.json({ message: "Provider approved successfully" });
       }
 
-      await storage.updateProviderVerificationStatus(providerId, 'rejected');
+      // action === "decline"
+      await storage.updateProviderVerificationStatus(providerId, "rejected");
       const provider = await storage.getServiceProvider(providerId);
       if (provider?.userId) {
         await storage.updateUser(provider.userId, { isProvider: true });
       }
-      return res.json({ message: 'Provider declined successfully' });
+      return res.json({ message: "Provider declined successfully" });
     } catch (error) {
-      console.error('Provider action error:', error);
-      res.status(500).json({ message: 'Failed to process provider action' });
+      console.error("Provider action error:", error);
+      return res.status(500).json({ message: "Failed to process provider action" });
     }
   });
 
