@@ -168,23 +168,23 @@ export default function AdminPortal() {
   };
 
   const getDisplayName = (p: Provider) => {
-    const company = (p as any)?.companyName;
+    const company = (p as any)?.companyName || (p as any)?.businessName;
     if (company && String(company).trim().length > 0) return String(company).trim();
-    const fn = (p as any)?.firstName || "";
-    const ln = (p as any)?.lastName || "";
+    const fn = (p as any)?.firstName || (p as any)?.userFirstName || "";
+    const ln = (p as any)?.lastName || (p as any)?.userLastName || "";
     const full = `${String(fn).trim()} ${String(ln).trim()}`.trim();
     if (full.length > 0) return full;
-    const email = (p as any)?.email || "";
+    const email = (p as any)?.userEmail || (p as any)?.email || "";
     return email || "Not provided";
   };
 
   const getEmail = (p: Provider) => {
-    const email = (p as any)?.email;
+    const email = (p as any)?.userEmail || (p as any)?.email;
     return email ? String(email) : "Not provided";
   };
 
   const getPhone = (p: Provider) => {
-    const phone = (p as any)?.phone;
+    const phone = (p as any)?.userPhoneNumber || (p as any)?.phone;
     const val = typeof phone === "string" ? phone.trim() : phone;
     return val && String(val).trim().length > 0 ? String(val) : "Not provided";
   };
@@ -384,12 +384,13 @@ export default function AdminPortal() {
   // Provider approval mutation  
   const handleProviderApproval = useMutation({
     mutationFn: async ({ providerId, action }: { providerId: string; action: 'approve' | 'decline' }) => {
-      const response = await fetch(`/api/admin/providers/${providerId}/${action}`, {
+      const response = await fetch(`/api/admin/providers/${providerId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ action })
       });
       
       if (!response.ok) {
@@ -416,12 +417,13 @@ export default function AdminPortal() {
     if (!ok) return;
     try {
       console.log('📤 Approving provider:', providerId);
-      const response = await fetch(`/api/admin/providers/${providerId}/approve`, {
+      const response = await fetch(`/api/admin/providers/${providerId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ action: 'approve' })
       });
       if (!response.ok) {
         let msg = `Approval failed (${response.status})`;
@@ -443,13 +445,13 @@ export default function AdminPortal() {
     if (reason === null) return;
     try {
       console.log('📤 Declining provider:', providerId);
-      const response = await fetch(`/api/admin/providers/${providerId}/decline`, {
+      const response = await fetch(`/api/admin/providers/${providerId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ reason: reason || 'No reason provided' })
+        body: JSON.stringify({ action: 'decline' })
       });
       if (!response.ok) {
         let msg = `Decline failed (${response.status})`;
