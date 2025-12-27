@@ -125,31 +125,21 @@ export default function ProviderOnboarding({ isOpen, onClose }: ProviderOnboardi
   });
 
   const handleFileUpload = async (file: File, documentType: string) => {
-    // In a real implementation, this would upload to object storage
-    // For now, we'll simulate the upload
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', documentType);
-    
-    try {
-      // Simulate upload success
-      const mockUrl = `https://storage.berry-events.com/documents/${documentType}-${Date.now()}.jpg`;
+    // Convert file to base64 for now
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const imageData = e.target?.result as string;
       setUploadedDocuments(prev => ({
         ...prev,
-        [documentType]: mockUrl
+        [documentType]: imageData
       }));
       
       toast({
         title: "Document Uploaded",
         description: `${documentType} uploaded successfully`,
       });
-    } catch (error) {
-      toast({
-        title: "Upload Failed",
-        description: "Please try uploading again",
-        variant: "destructive",
-      });
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   const triggerCamera = (documentType: string) => {

@@ -317,6 +317,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update provider profile image
+  app.post("/api/providers/:id/profile-image", authenticateToken, async (req, res) => {
+    try {
+      const providerId = req.params.id;
+      const { imageData } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      // Check authorization - only the provider themselves or admin can update
+      const provider = await storage.getServiceProvider(providerId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+
+      if ((req as any).user.id !== provider.userId && !(req as any).user.isAdmin) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updatedProvider = await storage.updateServiceProvider(providerId, {
+        profileImage: imageData
+      });
+
+      // Also update the linked user's profile image
+      await storage.updateUser(provider.userId, {
+        profileImage: imageData
+      });
+
+      res.json(updatedProvider);
+    } catch (error: any) {
+      console.error("Profile image upload error:", error);
+      res.status(500).json({ message: "Failed to update profile image" });
+    }
+  });
+
   app.get("/api/providers/:id", async (req, res) => {
     try {
       const provider = await storage.getServiceProvider(req.params.id);

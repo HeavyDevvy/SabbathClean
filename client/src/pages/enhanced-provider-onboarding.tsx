@@ -151,18 +151,45 @@ export default function EnhancedProviderOnboarding() {
     "Sasfin Bank"
   ];
 
-  const handleFileUpload = (field: keyof typeof fileInputRefs, file: File | null) => {
-    if (field === 'certificates' && file) {
-      setProviderData({
-        ...providerData,
-        certificates: [...providerData.certificates, file]
+  const handleFileUpload = async (field: keyof ProviderData, file: File | null) => {
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload a file smaller than 5MB",
+        variant: "destructive"
       });
-    } else {
-      setProviderData({
-        ...providerData,
-        [field]: file
-      });
+      return;
     }
+
+    // Convert file to base64
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const imageData = e.target?.result as string;
+      
+      if (field === 'certificates') {
+        setProviderData(prev => ({
+          ...prev,
+          certificates: [...prev.certificates, file]
+        }));
+      } else {
+        // Store the file object for display/metadata if needed
+        // But crucially, we need to store the base64 data for submission
+        setProviderData(prev => ({
+          ...prev,
+          [field]: file,
+          [`${field}Data`]: imageData // Store base64 data in a separate field
+        }));
+      }
+
+      toast({
+        title: "File uploaded",
+        description: `${file.name} has been uploaded successfully`,
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const openCamera = async (field: keyof typeof fileInputRefs) => {
@@ -341,6 +368,8 @@ export default function EnhancedProviderOnboarding() {
         category: servicesMapped[0] || "general",
         experience: providerData.experience,
         location: locationStr,
+        profileImage: (providerData as any).profilePictureData || null, // Send base64 image
+        idDocument: (providerData as any).idDocumentData || null,
         bankingDetails: {
           bankName: providerData.bankName,
           accountHolder: accountHolderClean,
@@ -356,6 +385,18 @@ export default function EnhancedProviderOnboarding() {
 
       const createRes = await apiRequest("POST", "/api/providers", providerPayload);
       await createRes.json();
+      
+      // Also update the user profile image if provided
+      if ((providerData as any).profilePictureData) {
+        try {
+          // This might fail if the user is not fully logged in yet, but we'll try
+          await apiRequest('PUT', '/api/user/profile', {
+            profileImage: (providerData as any).profilePictureData
+          });
+        } catch (e) {
+          console.warn("Could not update user profile image immediately:", e);
+        }
+      }
 
       // Step 1: Document verification
       toast({

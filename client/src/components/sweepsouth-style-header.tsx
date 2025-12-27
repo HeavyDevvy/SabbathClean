@@ -115,7 +115,8 @@ export default function SweepSouthStyleHeader({ onBookingClick, onProviderSignup
                       data-testid="button-user-menu"
                     >
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.profileImage} alt={user?.firstName} />
+                        {/* Ensure profile image source is properly handled */}
+                        <AvatarImage src={user?.profileImage || undefined} alt={user?.firstName} />
                         <AvatarFallback className="text-sm font-semibold text-white" style={{ backgroundColor: '#C56B86' }}>
                           {getUserInitials()}
                         </AvatarFallback>
