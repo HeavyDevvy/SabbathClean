@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
     if (!decoded || (decoded as any).role !== "ADMIN") {
       return res.status(403).json({ error: "Forbidden" });
     }
-    const providerId = req.query?.providerId;
+    const providerId = req.query?.providerId || req.url?.split('/').filter(Boolean)[3];
     if (!providerId) {
       return res.status(400).json({ error: "providerId required" });
     }
