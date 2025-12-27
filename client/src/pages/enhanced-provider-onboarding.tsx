@@ -370,6 +370,8 @@ export default function EnhancedProviderOnboarding() {
         location: locationStr,
         profileImage: (providerData as any).profilePictureData || null, // Send base64 image
         idDocument: (providerData as any).idDocumentData || null,
+        proofOfAddress: (providerData as any).proofOfAddressData || null,
+        qualificationCertificate: (providerData as any).certificatesData || (providerData as any).qualificationCertificateData || null,
         bankingDetails: {
           bankName: providerData.bankName,
           accountHolder: accountHolderClean,
@@ -397,6 +399,23 @@ export default function EnhancedProviderOnboarding() {
           console.warn("Could not update user profile image immediately:", e);
         }
       }
+
+      // If there are other documents (proofOfAddress, qualificationCertificate), we should upload them now
+      // Since the provider is created, we can get the ID from the response if we had it, 
+      // but here we are in a void function from mutation. 
+      // However, the mutation invalidates queries, so we rely on the main payload for initial creation.
+      // The main payload already includes idDocument. 
+      // If we need to upload other docs separately or if they are large, we would do it here.
+      // For now, we included idDocument in the initial payload. 
+      
+      // Let's handle proofOfAddress and certificates if they are present and not in the main payload (which they aren't currently fully mapped)
+      // Actually, schema has proofOfAddress and qualificationCertificate fields now.
+      // We should include them in the initial payload if possible, OR upload them sequentially here.
+      // Since we don't have the new provider ID easily here without refactoring the mutation,
+      // we'll rely on the fact that we can add them to the payload above if we update the interface.
+      
+      // For now, let's assume the backend createServiceProvider handles extra fields if we pass them.
+      // We need to update the payload construction above to include them.
 
       // Step 1: Document verification
       toast({

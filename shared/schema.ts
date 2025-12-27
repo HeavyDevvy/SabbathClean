@@ -77,6 +77,7 @@ export const serviceProviders = pgTable("service_providers", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   idDocument: text("id_document"),
+  proofOfAddress: text("proof_of_address"),
   qualificationCertificate: text("qualification_certificate"),
   bankingDetails: jsonb("banking_details"), // For payment distribution
   providerType: text("provider_type").default("individual"), // individual, company

@@ -7,11 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users, BookCheck, Banknote, TrendingUp, Settings, Mail, FileText, CheckCircle, XCircle, 
          Activity, Calendar, Clock, ArrowUp, ArrowDown, Star, Target, Zap, BarChart3, PieChart, 
-         Globe, Smartphone, MessageCircle, AlertTriangle, Award, Coins, Briefcase } from "lucide-react";
+         Globe, Smartphone, MessageCircle, AlertTriangle, Award, Coins, Briefcase, Eye } from "lucide-react";
 import { useLocation } from "wouter";
 import EnhancedHeader from "@/components/enhanced-header";
 import logo from "@assets/Untitled (Logo) (2)_1763529143099.png";
@@ -87,6 +89,10 @@ interface Provider {
   hourlyRate?: string;
   qualificationCertificate?: string;
   idDocument?: string;
+  proofOfAddress?: string;
+  bio?: string;
+  experience?: string;
+  profileImage?: string;
   rating?: number;
   totalReviews?: number;
   // Prisma/Vercel API fields
@@ -100,6 +106,12 @@ interface Provider {
   userPhoneNumber?: string;
   userFirstName?: string;
   userLastName?: string;
+  bankingDetails?: {
+    bankName?: string;
+    accountType?: string;
+    accountNumber?: string;
+    branchCode?: string;
+  };
 }
 
 export default function AdminPortal() {
@@ -201,6 +213,10 @@ export default function AdminPortal() {
   const getDateSubmitted = (p: Provider) => {
     const d = (p as any)?.createdAt;
     return d ? format(new Date(d), 'LLL dd, yyyy') : 'Not provided';
+  };
+
+  const getProfileImage = (p: Provider) => {
+    return p.profileImage || undefined;
   };
 
   // Real-time data refresh using React Query
@@ -552,6 +568,173 @@ export default function AdminPortal() {
       <div className="px-4 sm:px-6 lg:px-8 py-2 text-xs text-gray-500">
         Build: {(import.meta as any).env?.MODE} - {new Date().toISOString()}
       </div>
+
+      <Dialog open={!!selectedProvider} onOpenChange={(open) => !open && setSelectedProvider(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Provider Details</DialogTitle>
+          </DialogHeader>
+          
+          {selectedProvider && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-semibold text-lg mb-4">Personal Information</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={getProfileImage(selectedProvider)} />
+                      <AvatarFallback>{selectedProvider.firstName?.[0]}{selectedProvider.lastName?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-lg">{getDisplayName(selectedProvider)}</div>
+                      <div className="text-gray-500">{getEmail(selectedProvider)}</div>
+                      <div className="text-gray-500">{getPhone(selectedProvider)}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <div className="text-sm font-medium text-gray-500">Address</div>
+                    <div>{selectedProvider.location}</div>
+                  </div>
+
+                  <div className="pt-2">
+                    <div className="text-sm font-medium text-gray-500">Bio</div>
+                    <div className="text-sm">{selectedProvider.bio || "No bio provided"}</div>
+                  </div>
+
+                  <div className="pt-2">
+                    <div className="text-sm font-medium text-gray-500">Experience</div>
+                    <div className="text-sm">{selectedProvider.experience || "Not specified"}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-lg mb-4">Documents & Verification</h3>
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">ID Document</span>
+                      {selectedProvider.idDocument ? (
+                         <Badge className="bg-green-100 text-green-800">Uploaded</Badge>
+                      ) : (
+                         <Badge variant="outline" className="text-yellow-600 border-yellow-200">Missing</Badge>
+                      )}
+                    </div>
+                    {selectedProvider.idDocument && (
+                       selectedProvider.idDocument.startsWith('data:image') ? (
+                        <div className="mt-2">
+                          <img src={selectedProvider.idDocument} alt="ID Document" className="max-h-40 rounded border" />
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => window.open(selectedProvider.idDocument, '_blank')}>
+                          <Eye className="h-4 w-4 mr-2" /> View Document
+                        </Button>
+                      )
+                    )}
+                  </div>
+
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Proof of Address</span>
+                      {selectedProvider.proofOfAddress ? (
+                         <Badge className="bg-green-100 text-green-800">Uploaded</Badge>
+                      ) : (
+                         <Badge variant="outline" className="text-yellow-600 border-yellow-200">Missing</Badge>
+                      )}
+                    </div>
+                    {selectedProvider.proofOfAddress && (
+                       selectedProvider.proofOfAddress.startsWith('data:image') ? (
+                        <div className="mt-2">
+                          <img src={selectedProvider.proofOfAddress} alt="Proof of Address" className="max-h-40 rounded border" />
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => window.open(selectedProvider.proofOfAddress, '_blank')}>
+                          <Eye className="h-4 w-4 mr-2" /> View Document
+                        </Button>
+                      )
+                    )}
+                  </div>
+
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Qualification / Certificate</span>
+                      {selectedProvider.qualificationCertificate ? (
+                         <Badge className="bg-green-100 text-green-800">Uploaded</Badge>
+                      ) : (
+                         <Badge variant="outline" className="text-yellow-600 border-yellow-200">Missing</Badge>
+                      )}
+                    </div>
+                    {selectedProvider.qualificationCertificate && (
+                       selectedProvider.qualificationCertificate.startsWith('data:image') ? (
+                        <div className="mt-2">
+                          <img src={selectedProvider.qualificationCertificate} alt="Certificate" className="max-h-40 rounded border" />
+                        </div>
+                      ) : (
+                        <Button size="sm" variant="outline" className="w-full mt-2" onClick={() => window.open(selectedProvider.qualificationCertificate, '_blank')}>
+                          <Eye className="h-4 w-4 mr-2" /> View Document
+                        </Button>
+                      )
+                    )}
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                     <h4 className="font-medium mb-2">Banking Details</h4>
+                     {selectedProvider.bankingDetails ? (
+                       <div className="text-sm space-y-1">
+                         <div className="grid grid-cols-2">
+                           <span className="text-gray-500">Bank:</span>
+                           <span>{selectedProvider.bankingDetails.bankName}</span>
+                         </div>
+                         <div className="grid grid-cols-2">
+                           <span className="text-gray-500">Account Type:</span>
+                           <span>{selectedProvider.bankingDetails.accountType}</span>
+                         </div>
+                         <div className="grid grid-cols-2">
+                           <span className="text-gray-500">Account Number:</span>
+                           <span>{selectedProvider.bankingDetails.accountNumber}</span>
+                         </div>
+                         <div className="grid grid-cols-2">
+                           <span className="text-gray-500">Branch Code:</span>
+                           <span>{selectedProvider.bankingDetails.branchCode}</span>
+                         </div>
+                       </div>
+                     ) : (
+                       <div className="text-sm text-gray-500 italic">No banking details provided</div>
+                     )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="outline" onClick={() => setSelectedProvider(null)}>Close</Button>
+            {selectedProvider && normalizeStatus(selectedProvider) === 'PENDING' && (
+              <>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => { 
+                    handleDecline(selectedProvider.id);
+                    setSelectedProvider(null);
+                  }}
+                >
+                  Decline Application
+                </Button>
+                <Button 
+                  className="bg-green-600 hover:bg-green-700"
+                  onClick={() => { 
+                    handleApprove(selectedProvider.id);
+                    setSelectedProvider(null);
+                  }}
+                >
+                  Approve Application
+                </Button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -1081,44 +1264,57 @@ export default function AdminPortal() {
                                   <span className="text-gray-700">Not provided</span>
                                 )}
                               </div>
-                              <div className="text-gray-700">{dateStr}</div>
-                              <div className="flex items-center space-x-2">
-                                {statusUpper === 'PENDING' && (
-                                  <>
-                                    <Button
-                                      size="sm"
-                                      onClick={(e) => { e.stopPropagation(); handleApprove(providerId); }}
-                                      className="bg-green-600 hover:bg-green-700"
-                                      data-testid={`approve-${provider.id}`}
-                                    >
-                                      Approve
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={(e) => { e.stopPropagation(); handleDecline(providerId); }}
-                                      data-testid={`decline-${provider.id}`}
-                                    >
-                                      Decline
-                                    </Button>
-                                  </>
-                                )}
-                                {statusUpper === 'APPROVED' && (
-                                  <CheckCircle className="h-5 w-5 text-green-600" />
-                                )}
-                              </div>
+                            <div className="text-gray-700">{dateStr}</div>
+                            <div className="flex items-center space-x-2">
+                              {/* Document View Button */}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedProvider(provider);
+                                }}
+                                data-testid={`view-docs-${provider.id}`}
+                              >
+                                View Details & Docs
+                              </Button>
+                              
+                              {statusUpper === 'PENDING' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); handleApprove(providerId); }}
+                                    className="bg-green-600 hover:bg-green-700"
+                                    data-testid={`approve-${provider.id}`}
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={(e) => { e.stopPropagation(); handleDecline(providerId); }}
+                                    data-testid={`decline-${provider.id}`}
+                                  >
+                                    Decline
+                                  </Button>
+                                </>
+                              )}
+                              {statusUpper === 'APPROVED' && (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="bookings" className="space-y-6">
+        <TabsContent value="bookings" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Booking Management</CardTitle>

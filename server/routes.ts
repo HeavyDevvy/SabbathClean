@@ -353,6 +353,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update provider documents
+  app.post("/api/providers/:id/documents", authenticateToken, async (req, res) => {
+    try {
+      const providerId = req.params.id;
+      const { documentType, documentData } = req.body;
+      
+      if (!documentType || !documentData) {
+        return res.status(400).json({ message: "Document type and data are required" });
+      }
+
+      const validTypes = ['idDocument', 'proofOfAddress', 'qualificationCertificate'];
+      if (!validTypes.includes(documentType)) {
+        return res.status(400).json({ message: "Invalid document type" });
+      }
+
+      // Check authorization
+      const provider = await storage.getServiceProvider(providerId);
+      if (!provider) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+
+      if ((req as any).user.id !== provider.userId && !(req as any).user.isAdmin) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updatedProvider = await storage.updateServiceProvider(providerId, {
+        [documentType]: documentData
+      });
+
+      res.json(updatedProvider);
+    } catch (error: any) {
+      console.error("Document upload error:", error);
+      res.status(500).json({ message: "Failed to upload document" });
+    }
+  });
+
   app.get("/api/providers/:id", async (req, res) => {
     try {
       const provider = await storage.getServiceProvider(req.params.id);
