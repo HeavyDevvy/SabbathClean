@@ -116,8 +116,9 @@ export interface IStorage {
   getWalletTransactions(userId: string, limit?: number, offset?: number): Promise<WalletTransaction[]>;
   updateAutoReloadSettings(userId: string, settings: { enabled: boolean; threshold: number; amount: number; paymentMethodId?: string }): Promise<void>;
   
-  // Service Provider operations
+  // Provider operations
   getServiceProvider(id: string): Promise<ServiceProvider | undefined>;
+  getServiceProviderByUserId(userId: string): Promise<ServiceProvider | undefined>;
   getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]>;
   createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
   updateServiceProviderRating(id: string, rating: number, totalReviews: number): Promise<ServiceProvider>;
@@ -600,6 +601,11 @@ export class DatabaseStorage implements IStorage {
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
     const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.id, id));
+    return provider || undefined;
+  }
+
+  async getServiceProviderByUserId(userId: string): Promise<ServiceProvider | undefined> {
+    const [provider] = await db.select().from(serviceProviders).where(eq(serviceProviders.userId, userId));
     return provider || undefined;
   }
 
@@ -2264,6 +2270,12 @@ export class MemStorage implements IStorage {
 
   async getServiceProvider(id: string): Promise<ServiceProvider | undefined> {
     return this.serviceProviders.get(id);
+  }
+
+  async getServiceProviderByUserId(userId: string): Promise<ServiceProvider | undefined> {
+    return Array.from(this.serviceProviders.values()).find(
+      (provider) => provider.userId === userId,
+    );
   }
 
   async getServiceProvidersByService(serviceCategory: string): Promise<ServiceProvider[]> {

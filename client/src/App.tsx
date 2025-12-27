@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { lazy, Suspense } from "react";
 import React from "react";
 import { queryClient } from "./lib/queryClient";
@@ -6,7 +6,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/theme-provider";
 
 // Eagerly load critical pages
@@ -57,6 +57,27 @@ const PageLoader = () => (
   </div>
 );
 
+function ProviderRoute({ component: Component }: { component: React.ComponentType<any> }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  React.useEffect(() => {
+    if (!isLoading) {
+       if (!user) {
+         setLocation("/auth");
+       } else if (!user.isApprovedProvider) {
+         setLocation("/provider-onboarding");
+       }
+    }
+  }, [user, isLoading, setLocation]);
+
+  if (isLoading || !user || !user.isApprovedProvider) {
+    return <PageLoader />;
+  }
+
+  return <Component />;
+}
+
 function Router() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -80,7 +101,9 @@ function Router() {
         <Route path="/providers" component={Providers} />
         <Route path="/provider-onboarding" component={EnhancedProviderOnboarding} />
         <Route path="/provider-training" component={ProviderTraining} />
-        <Route path="/provider-dashboard" component={ProviderDashboard} />
+        <Route path="/provider-dashboard">
+          <ProviderRoute component={ProviderDashboard} />
+        </Route>
         <Route path="/profile" component={Profile} />
         <Route path="/wallet" component={Wallet} />
         <Route path="/notifications" component={NotificationSettings} />

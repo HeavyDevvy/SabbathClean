@@ -327,6 +327,8 @@ export default function EnhancedProviderOnboarding() {
         return;
       }
 
+      const servicesMapped = providerData.services.map(s => canonicalServiceMap[s] || s.toLowerCase().replace(/\s+/g, '-'));
+      
       const providerPayload: any = {
         userId: newUserId,
         firstName: providerData.firstName,
@@ -335,7 +337,8 @@ export default function EnhancedProviderOnboarding() {
         phone: providerData.phone,
         bio: providerData.description || "",
         hourlyRate: "250.00",
-        servicesOffered: providerData.services.map(s => canonicalServiceMap[s] || s.toLowerCase().replace(/\s+/g, '-')),
+        servicesOffered: servicesMapped,
+        category: servicesMapped[0] || "general",
         experience: providerData.experience,
         location: locationStr,
         bankingDetails: {

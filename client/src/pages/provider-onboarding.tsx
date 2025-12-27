@@ -243,7 +243,8 @@ export default function ProviderOnboarding() {
       profileImage: uploadedFiles.profileImage,
       idDocument: uploadedFiles.idDocument,
       qualificationCertificate: uploadedFiles.qualificationCertificate,
-      verificationStatus: 'pending'
+      verificationStatus: 'pending',
+      category: data.servicesOffered[0] || "general"
     };
 
     createProviderMutation.mutate(providerData);

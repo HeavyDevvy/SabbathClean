@@ -62,6 +62,7 @@ export const serviceProviders = pgTable("service_providers", {
   profileImage: text("profile_image"),
   hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }).notNull(),
   servicesOffered: text("services_offered").array().notNull(),
+  category: text("category"),
   experience: text("experience"),
   availability: jsonb("availability"), // JSON object for schedule
   isVerified: boolean("is_verified").default(false),

@@ -98,7 +98,14 @@ export default function ProviderOnboarding({ isOpen, onClose }: ProviderOnboardi
 
   const submitApplication = useMutation({
     mutationFn: async (data: ProviderApplicationForm & { documents: typeof uploadedDocuments }) => {
-      return apiRequest("POST", "/api/provider-applications", data);
+      const payload = {
+        ...data,
+        category: data.servicesOffered[0] || "general",
+        // Map fields to match API expectation if needed
+        verificationStatus: "pending",
+        isVerified: false,
+      };
+      return apiRequest("POST", "/api/providers", payload);
     },
     onSuccess: () => {
       setIsSubmitted(true);

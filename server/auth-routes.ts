@@ -483,6 +483,20 @@ export function registerAuthRoutes(app: Express) {
 
   // Get current user endpoint
   app.get('/api/auth/user', authenticateToken, async (req: any, res) => {
+    // Get provider details if user is a provider
+    let providerStatus = null;
+    let isApprovedProvider = false;
+    let providerId = null;
+
+    if (req.user.isProvider) {
+      const provider = await storage.getServiceProviderByUserId(req.user.id);
+      if (provider) {
+        providerId = provider.id;
+        providerStatus = (provider as any).verificationStatus || 'pending';
+        isApprovedProvider = providerStatus === 'approved' && provider.isVerified === true;
+      }
+    }
+
     res.json({
       id: req.user.id,
       email: req.user.email,
@@ -495,7 +509,10 @@ export function registerAuthRoutes(app: Express) {
       profileImage: req.user.profileImage,
       isProvider: req.user.isProvider,
       preferences: req.user.preferences,
-      notificationSettings: req.user.notificationSettings
+      notificationSettings: req.user.notificationSettings,
+      providerStatus,
+      isApprovedProvider,
+      providerId
     });
   });
 

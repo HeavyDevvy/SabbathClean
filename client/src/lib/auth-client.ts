@@ -30,6 +30,9 @@ export interface User {
   isProvider: boolean;
   preferences?: any;
   notificationSettings?: any;
+  isApprovedProvider?: boolean;
+  providerStatus?: string;
+  providerId?: string;
 }
 
 export interface AuthResponse {
