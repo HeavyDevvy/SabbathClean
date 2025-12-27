@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/admin/providers/:id", "destination": "/api/admin/providers?id=:id" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
