@@ -13,11 +13,11 @@ import { ChatDialog } from "@/components/chat-dialog";
 import ModernServiceModal from "@/components/modern-service-modal";
 import WhatsAppShareButton from "@/components/whatsapp-share-button";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import type { Booking } from "@shared/schema";
 import { mapBookingToReceiptData, generateCompletedBookingReceipt } from "@/lib/pdfGenerator";
-import { useToast } from "@/hooks/use-toast";
 import { 
   Calendar,
   Clock,
@@ -119,6 +119,7 @@ export default function BookingsPage() {
   const [shareBooking, setShareBooking] = useState<any>(null);
   const [chatBooking, setChatBooking] = useState<any>(null);
   const [reviewBooking, setReviewBooking] = useState<any>(null);
+  const [payingBookingId, setPayingBookingId] = useState<string | null>(null);
   
   // EXACT same state management as Profile page for "Book Now"
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -198,6 +199,37 @@ export default function BookingsPage() {
     const status = String(b.status || '').toLowerCase();
     return isBookingInPast(b) || pastStatuses.has(status);
   });
+
+  const handlePayNow = async (booking: any) => {
+    try {
+      setPayingBookingId(booking.id);
+      const res = await fetch("/api/payments/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id }),
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `Failed to create checkout (${res.status})`);
+      }
+      const data = await res.json();
+      const redirectUrl = data?.redirectUrl;
+      const checkoutId = data?.checkoutId;
+      if (!redirectUrl) {
+        throw new Error("Missing redirectUrl from checkout creation");
+      }
+      window.location.href = redirectUrl;
+    } catch (e: any) {
+      toast({
+        title: "Payment error",
+        description: e?.message || "Unable to start payment",
+        variant: "destructive",
+      } as any);
+    } finally {
+      setPayingBookingId(null);
+    }
+  };
 
   const renderBookingCard = (booking: any) => {
     const scheduledDate = format(new Date(booking.scheduledDate), "yyyy-MM-dd");
@@ -348,6 +380,20 @@ export default function BookingsPage() {
                   >
                     <Share2 className="h-4 w-4 mr-1" />
                     Share
+                  </Button>
+                  <Button
+                    className="bg-green-600 text-white hover:bg-green-700"
+                    size="sm"
+                    onClick={() => handlePayNow(booking)}
+                    disabled={payingBookingId === booking.id}
+                    data-testid={`button-pay-${booking.id}`}
+                  >
+                    {payingBookingId === booking.id ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-4 w-4 mr-2" />
+                    )}
+                    Pay now
                   </Button>
                   <WhatsAppShareButton
                     bookingDetails={{

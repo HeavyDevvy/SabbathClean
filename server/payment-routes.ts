@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { storage } from "./storage";
 import { authenticateToken } from "./auth-routes";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 
 // Validation schemas
 const currentYear = new Date().getFullYear();
@@ -38,6 +39,39 @@ export function registerPaymentRoutes(app: Express) {
     } catch (error) {
       console.error('Error fetching payment methods:', error);
       res.status(500).json({ message: 'Failed to fetch payment methods' });
+    }
+  });
+
+  // Create checkout for a booking (redirect-based flow)
+  app.post('/api/payments/create-checkout', authenticateToken, async (req: any, res) => {
+    try {
+      const { bookingId } = req.body || {};
+      if (!bookingId || typeof bookingId !== 'string') {
+        return res.status(400).json({ message: 'bookingId is required' });
+      }
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      if (booking.customerId !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized to pay for this booking' });
+      }
+      // Build a client-side payment page redirect with booking context
+      const params = new URLSearchParams({
+        bookingId: booking.id,
+        service: String(booking.serviceType || 'Service'),
+        date: new Date(booking.scheduledDate as any).toISOString().slice(0, 10),
+        time: String(booking.scheduledTime || ''),
+        location: String(booking.address || ''),
+        basePrice: String(booking.totalPrice || '0'),
+        total: String(booking.totalPrice || '0'),
+      });
+      const redirectUrl = `/payment?${params.toString()}`;
+      const checkoutId = `chk_${randomUUID()}`;
+      res.json({ redirectUrl, checkoutId });
+    } catch (error: any) {
+      console.error('Error creating checkout:', error);
+      res.status(500).json({ message: error.message || 'Failed to create checkout' });
     }
   });
 
