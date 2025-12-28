@@ -101,22 +101,21 @@ export default async function handler(req: any, res: any) {
         description: description || "",
         category: mappedCategory as any,
         hourlyRate: rate,
-        servicesOffered: Array.isArray(servicesOffered) ? servicesOffered : [],
-        location: location || "",
-        experience: experience || "",
-        providerType: providerType || "individual",
+        servicesOffered: Array.isArray(servicesOffered) ? servicesOffered : [mappedCategory],
+        location: location || null,
+        experience: experience || null,
+        // providerType: providerType || "individual",  // Not in schema
         // Handle images: if they are base64 strings or URLs
-        // For now, assuming they are strings. If null, use null.
-        profileImage: profileImage || null, // Vercel limit might hit here if not compressed client-side
+        profileImage: profileImage || null, 
         idDocument: idDocument || null,
         proofOfAddress: proofOfAddress || null,
         qualificationCertificate: qualificationCertificate || null,
-        bankingDetails: bankingDetails || {},
+        bankName: bankingDetails?.bankName || null,
+        accountNumber: bankingDetails?.accountNumber || null,
+        accountHolderName: bankingDetails?.accountHolder || null,
+        branchCode: bankingDetails?.branchCode || null,
         verificationStatus: verificationStatus || "PENDING",
         isVerified: isVerified === true,
-        // We don't store userFirstName/etc on ServiceProvider model based on schema I read earlier
-        // The schema has: user User @relation...
-        // So we just link userId.
       },
     });
 

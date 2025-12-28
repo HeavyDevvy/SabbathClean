@@ -79,7 +79,14 @@ model ServiceProvider {
   businessName        String
   description         String              @db.Text
   category            ServiceCategory
+  servicesOffered     String[]            @default([])
   hourlyRate          Decimal             @db.Decimal(10, 2)
+  experience          String?
+  location            String?
+  profileImage        String?
+  idDocument          String?
+  proofOfAddress      String?
+  qualificationCertificate String?
   availabilityCalendar Json?
   portfolioImages     String[]
   rating              Decimal             @default(0) @db.Decimal(3, 2)
