@@ -46,14 +46,22 @@ export default async function handler(req: any, res: any) {
       "OTHER"
     ]);
 
+    console.log('🔍 CATEGORY DEBUG:');
+    console.log('Raw body.category:', category);
+    console.log('Raw body.servicesOffered:', servicesOffered);
+
     const rawCat = category || (Array.isArray(servicesOffered) ? servicesOffered[0] : undefined);
+    console.log('rawCat:', rawCat);
     
     // Normalize: convert to uppercase and replace spaces/hyphens with underscores
     const normalized = typeof rawCat === "string" 
       ? rawCat.toUpperCase().replace(/[-\s&]+/g, "_") 
       : "OTHER";
+    console.log('normalized:', normalized);
       
     const mappedCategory = validCategories.has(normalized) ? normalized : "OTHER";
+    console.log('mappedCategory:', mappedCategory);
+    console.log('Was in valid set?', validCategories.has(normalized));
 
       const provider = await prisma.serviceProvider.create({
         data: {

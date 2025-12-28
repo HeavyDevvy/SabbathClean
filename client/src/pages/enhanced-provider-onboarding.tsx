@@ -26,6 +26,45 @@ import berryLogo from "@assets/berry-logo.png";
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/queryClient";
 
+const compressImage = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Resize if too large
+        const maxDimension = 800;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height / width) * maxDimension;
+            width = maxDimension;
+          } else {
+            width = (width / height) * maxDimension;
+            height = maxDimension;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Compress to 70% quality JPEG
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(compressed);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 interface ProviderData {
   // Basic Information
   applicationType: 'individual' | 'company';
@@ -168,32 +207,79 @@ export default function EnhancedProviderOnboarding() {
       return;
     }
 
-    // Convert file to base64
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const imageData = e.target?.result as string;
-      
-      if (field === 'certificates') {
-        setProviderData(prev => ({
-          ...prev,
-          certificates: [...prev.certificates, file]
-        }));
-      } else {
-        // Store the file object for display/metadata if needed
-        // But crucially, we need to store the base64 data for submission
-        setProviderData(prev => ({
-          ...prev,
-          [field]: file,
-          [`${field}Data`]: imageData // Store base64 data in a separate field
-        }));
+    // Convert file to base64 with compression for images
+    if (file.type.startsWith('image/')) {
+      try {
+        const compressedDataUrl = await compressImage(file);
+        
+        if (field === 'certificates') {
+          // For certificates array, we might need a different handling or just store file
+          // Assuming certificates is just File[] for now, but we need base64 for API
+          // Let's store the base64 in a parallel array if needed, or just keep File for now
+          // If the API expects base64 for certificates, we need to handle it.
+          // Currently, handleSubmit logic for certificates uses certificatesData if it exists
+          
+          setProviderData(prev => ({
+            ...prev,
+            certificates: [...prev.certificates, file],
+             // We'll handle certificate compression in bulk at submit time if needed, 
+             // or add a 'certificatesData' array. For now, let's just add the file.
+             // If we need immediate base64, we'd add it to a parallel array.
+          }));
+        } else {
+          setProviderData(prev => ({
+            ...prev,
+            [field]: file,
+            [`${field}Data`]: compressedDataUrl 
+          }));
+        }
+        
+        toast({
+          title: "Image uploaded & compressed",
+          description: `${file.name} processed successfully`,
+        });
+      } catch (err) {
+        console.error("Compression failed", err);
+        // Fallback to original if compression fails
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageData = e.target?.result as string;
+          if (field !== 'certificates') {
+             setProviderData(prev => ({
+              ...prev,
+              [field]: file,
+              [`${field}Data`]: imageData
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
       }
-
-      toast({
-        title: "File uploaded",
-        description: `${file.name} has been uploaded successfully`,
-      });
-    };
-    reader.readAsDataURL(file);
+    } else {
+      // Non-image files (PDFs etc) - no compression
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const fileData = e.target?.result as string;
+        
+        if (field === 'certificates') {
+          setProviderData(prev => ({
+            ...prev,
+            certificates: [...prev.certificates, file]
+          }));
+        } else {
+          setProviderData(prev => ({
+            ...prev,
+            [field]: file,
+            [`${field}Data`]: fileData 
+          }));
+        }
+  
+        toast({
+          title: "File uploaded",
+          description: `${file.name} has been uploaded successfully`,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const openCamera = async (field: keyof typeof fileInputRefs) => {
