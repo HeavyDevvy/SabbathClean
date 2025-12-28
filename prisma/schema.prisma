@@ -88,13 +88,14 @@ model ServiceProvider {
   proofOfAddress      String?
   qualificationCertificate String?
   availabilityCalendar Json?
-  portfolioImages     String[]
+  portfolioImages     String[]            @default([])
   rating              Decimal             @default(0) @db.Decimal(3, 2)
   totalReviews        Int                 @default(0)
   bankName            String?
   accountNumber       String?
   accountHolderName   String?
   branchCode          String?
+  accountType         String?
   isVerified          Boolean             @default(false)
   verificationStatus  VerificationStatus  @default(PENDING)
   createdAt           DateTime            @default(now())
@@ -106,6 +107,7 @@ model ServiceProvider {
   reviews   Review[]
 
   @@index([category, rating])
+  @@index([verificationStatus])
   @@map("service_providers")
 }
 
