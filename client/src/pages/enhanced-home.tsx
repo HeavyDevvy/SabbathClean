@@ -95,7 +95,7 @@ export default function EnhancedHome() {
   const handleAuthSuccess = () => {
     // Phase 5.2: After successful authentication, restore both service AND provider selection
     setIsBookingAuthModalOpen(false);
-    setSelectedService(pendingBookingService || "house-cleaning");
+    setSelectedService(pendingBookingService || "HOUSE_CLEANING");
     setSelectedProviderId(pendingProviderId);
     setSelectedProviderName(pendingProviderName);
     setIsBookingModalOpen(true);
@@ -177,7 +177,7 @@ export default function EnhancedHome() {
             setSelectedProviderId("");
             setSelectedProviderName("");
           }}
-          serviceId={selectedService || "house-cleaning"}
+          serviceId={selectedService || "HOUSE_CLEANING"}
           preSelectedProviderId={selectedProviderId}
           preSelectedProviderName={selectedProviderName}
           editBookingData={completedBookingData}

@@ -18,19 +18,7 @@ export default function Booking() {
 
   const services = [
     {
-      id: "chef-catering",
-      name: "Chef & Catering",
-      icon: <ChefHat className="h-8 w-8" />,
-      description: "Professional chef services for any occasion",
-      price: "R550",
-      priceUnit: "starting from",
-      badge: "Premium Service",
-      badgeVariant: "secondary" as const,
-      color: "border-orange-500 hover:bg-orange-50",
-      iconColor: "text-orange-500"
-    },
-    {
-      id: "house-cleaning",
+      id: "HOUSE_CLEANING",
       name: "House Cleaning",
       icon: <Sparkles className="h-8 w-8" />,
       description: "Eco-friendly cleaning solutions",
@@ -42,7 +30,7 @@ export default function Booking() {
       iconColor: "text-blue-500"
     },
     {
-      id: "plumbing",
+      id: "PLUMBING_SERVICES",
       name: "Plumbing",
       icon: <Wrench className="h-8 w-8" />,
       description: "Certified plumbers available 24/7",
@@ -54,7 +42,7 @@ export default function Booking() {
       iconColor: "text-green-500"
     },
     {
-      id: "electrical",
+      id: "ELECTRICAL_SERVICES",
       name: "Electrical",
       icon: <Zap className="h-8 w-8" />,
       description: "Safety-certified electrical repairs",
@@ -66,7 +54,7 @@ export default function Booking() {
       iconColor: "text-yellow-500"
     },
     {
-      id: "gardening",
+      id: "GARDEN_CARE",
       name: "Garden Care",
       icon: <Scissors className="h-8 w-8" />,
       description: "Sustainable garden maintenance",
@@ -78,8 +66,44 @@ export default function Booking() {
       iconColor: "text-emerald-500"
     },
     {
-      id: "home-moving",
-      name: "Home Moving",
+      id: "POOL_CLEANING_MAINTENANCE",
+      name: "Pool Cleaning",
+      icon: <Clock className="h-8 w-8" />,
+      description: "Complete pool maintenance",
+      price: "R350",
+      priceUnit: "per hour",
+      badge: "Seasonal",
+      badgeVariant: "secondary" as const,
+      color: "border-cyan-500 hover:bg-cyan-50",
+      iconColor: "text-cyan-500"
+    },
+    {
+      id: "CHEF_CATERING",
+      name: "Chef & Catering",
+      icon: <ChefHat className="h-8 w-8" />,
+      description: "Professional chef services for any occasion",
+      price: "R550",
+      priceUnit: "starting from",
+      badge: "Premium Service",
+      badgeVariant: "secondary" as const,
+      color: "border-orange-500 hover:bg-orange-50",
+      iconColor: "text-orange-500"
+    },
+    {
+      id: "WAITERING_SERVICES",
+      name: "Waitering Services",
+      icon: <ChefHat className="h-8 w-8" />,
+      description: "Professional event staff",
+      price: "R180",
+      priceUnit: "per hour",
+      badge: "Events",
+      badgeVariant: "secondary" as const,
+      color: "border-indigo-500 hover:bg-indigo-50",
+      iconColor: "text-indigo-500"
+    },
+    {
+      id: "MOVING_SERVICES",
+      name: "Moving Services",
       icon: <Truck className="h-8 w-8" />,
       description: "Complete relocation solutions",
       price: "R450",
@@ -88,6 +112,30 @@ export default function Booking() {
       badgeVariant: "secondary" as const,
       color: "border-purple-500 hover:bg-purple-50",
       iconColor: "text-purple-500"
+    },
+    {
+      id: "AU_PAIR_SERVICES",
+      name: "Au Pair Services",
+      icon: <CheckCircle className="h-8 w-8" />,
+      description: "Trusted childcare providers",
+      price: "R150",
+      priceUnit: "per hour",
+      badge: "Vetted",
+      badgeVariant: "secondary" as const,
+      color: "border-pink-500 hover:bg-pink-50",
+      iconColor: "text-pink-500"
+    },
+    {
+      id: "LOCKSMITH_SERVICES",
+      name: "Locksmith Services",
+      icon: <Wrench className="h-8 w-8" />,
+      description: "Emergency lockout & repairs",
+      price: "R450",
+      priceUnit: "call out",
+      badge: "Emergency",
+      badgeVariant: "destructive" as const,
+      color: "border-gray-500 hover:bg-gray-50",
+      iconColor: "text-gray-500"
     }
   ];
 
@@ -211,7 +259,7 @@ export default function Booking() {
       <ModernServiceModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        serviceId={selectedService || "house-cleaning"}
+        serviceId={selectedService || "HOUSE_CLEANING"}
         onBookingComplete={(bookingData) => {
           console.log("Booking completed:", bookingData);
           setIsBookingOpen(false);
