@@ -4,6 +4,7 @@ export default async function handler(req: any, res: any) {
   if (req.method === "POST") {
     try {
       const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+      console.log("Received provider create body:", body);
       const {
         userId,
         firstName,
@@ -19,6 +20,7 @@ export default async function handler(req: any, res: any) {
         providerType,
         companyName,
         companyRegistration,
+        category,
       } = body || {};
 
       if (!userId || !email || !firstName || !lastName) {
@@ -30,12 +32,35 @@ export default async function handler(req: any, res: any) {
         return res.status(200).json(existing);
       }
 
+      const validCategories = new Set([
+      "HOUSE_CLEANING",
+      "PLUMBING_SERVICES",
+      "ELECTRICAL_SERVICES",
+      "GARDEN_CARE",
+      "POOL_CLEANING_MAINTENANCE",
+      "CHEF_CATERING",
+      "WAITERING_SERVICES",
+      "MOVING_SERVICES",
+      "AU_PAIR_SERVICES",
+      "LOCKSMITH_SERVICES",
+      "OTHER"
+    ]);
+
+    const rawCat = category || (Array.isArray(servicesOffered) ? servicesOffered[0] : undefined);
+    
+    // Normalize: convert to uppercase and replace spaces/hyphens with underscores
+    const normalized = typeof rawCat === "string" 
+      ? rawCat.toUpperCase().replace(/[-\s&]+/g, "_") 
+      : "OTHER";
+      
+    const mappedCategory = validCategories.has(normalized) ? normalized : "OTHER";
+
       const provider = await prisma.serviceProvider.create({
         data: {
           userId,
           businessName: companyName || `${firstName} ${lastName}`,
           description: bio || "",
-          category: "OTHER",
+          category: mappedCategory as any,
           hourlyRate: (hourlyRate && typeof hourlyRate === "string") ? (hourlyRate as any) : ("250.00" as any),
           portfolioImages: [],
           isVerified: false,

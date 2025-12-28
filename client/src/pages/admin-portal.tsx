@@ -203,7 +203,27 @@ export default function AdminPortal() {
     return val && String(val).trim().length > 0 ? String(val) : "Not provided";
   };
 
+  const formatCategory = (category: string) => {
+    const categoryMap: Record<string, string> = {
+      'HOUSE_CLEANING': 'House Cleaning',
+      'PLUMBING_SERVICES': 'Plumbing Services',
+      'ELECTRICAL_SERVICES': 'Electrical Services',
+      'GARDEN_CARE': 'Garden Care',
+      'POOL_CLEANING_MAINTENANCE': 'Pool Cleaning & Maintenance',
+      'CHEF_CATERING': 'Chef & Catering',
+      'WAITERING_SERVICES': 'Waitering Services',
+      'MOVING_SERVICES': 'Moving Services',
+      'AU_PAIR_SERVICES': 'Au Pair Services',
+      'LOCKSMITH_SERVICES': 'Locksmith Services',
+      'OTHER': 'Other'
+    };
+    return categoryMap[category] || category;
+  };
+
   const getServiceType = (p: Provider) => {
+    if (p.category) {
+      return formatCategory(p.category);
+    }
     const servicesOffered = (p as any)?.servicesOffered;
     if (Array.isArray(servicesOffered)) return servicesOffered.join(", ");
     if (typeof servicesOffered === "string" && servicesOffered.length > 0) return servicesOffered;

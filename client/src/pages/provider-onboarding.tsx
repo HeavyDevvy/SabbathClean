@@ -60,30 +60,28 @@ type ProviderFormData = z.infer<typeof providerSchema>;
 
 const serviceCategories = [
   {
-    category: "Cleaning Services",
+    category: "Indoor Services",
     services: [
-      { id: "house-cleaning", name: "House Cleaning" },
-      { id: "deep-cleaning", name: "Deep Cleaning" },
-    ]
-  },
-  {
-    category: "Maintenance & Repairs",
-    services: [
-      { id: "plumbing", name: "Plumbing Services" },
-      { id: "electrical", name: "Electrical Services" },
-    ]
-  },
-  {
-    category: "Food & Event Services",
-    services: [
-      { id: "chef-catering", name: "Chef & Catering" },
-      { id: "waitering", name: "Waitering Services" },
+      { id: "HOUSE_CLEANING", name: "House Cleaning" },
+      { id: "PLUMBING_SERVICES", name: "Plumbing Services" },
+      { id: "ELECTRICAL_SERVICES", name: "Electrical Services" },
     ]
   },
   {
     category: "Outdoor Services",
     services: [
-      { id: "gardening", name: "Garden Care" },
+      { id: "GARDEN_CARE", name: "Garden Care" },
+      { id: "POOL_CLEANING_MAINTENANCE", name: "Pool Cleaning & Maintenance" },
+    ]
+  },
+  {
+    category: "Specialized Services",
+    services: [
+      { id: "CHEF_CATERING", name: "Chef & Catering" },
+      { id: "WAITERING_SERVICES", name: "Waitering Services" },
+      { id: "MOVING_SERVICES", name: "Moving Services" },
+      { id: "AU_PAIR_SERVICES", name: "Au Pair Services" },
+      { id: "LOCKSMITH_SERVICES", name: "Locksmith Services" },
     ]
   }
 ];
@@ -246,6 +244,8 @@ export default function ProviderOnboarding() {
       verificationStatus: 'pending',
       category: data.servicesOffered[0] || "general"
     };
+
+    console.log("Provider onboarding payload:", providerData);
 
     createProviderMutation.mutate(providerData);
   };

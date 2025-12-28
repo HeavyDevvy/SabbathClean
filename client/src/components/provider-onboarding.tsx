@@ -88,26 +88,31 @@ export default function ProviderOnboarding({ isOpen, onClose }: ProviderOnboardi
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const services = [
-    { id: "house-cleaning", name: "House Cleaning", rate: "R280/hour" },
-    { id: "chef-catering", name: "Chef & Catering", rate: "R550/event" },
-    { id: "waitering", name: "Waitering Services", rate: "R180/hour" },
-    { id: "plumbing", name: "Plumbing", rate: "R380/hour" },
-    { id: "electrical", name: "Electrical", rate: "R420/hour" },
-    { id: "garden-care", name: "Garden Care", rate: "R320/hour" },
+    { id: "HOUSE_CLEANING", name: "House Cleaning", rate: "R280/hour" },
+    { id: "PLUMBING_SERVICES", name: "Plumbing", rate: "R380/hour" },
+    { id: "ELECTRICAL_SERVICES", name: "Electrical", rate: "R420/hour" },
+    { id: "GARDEN_CARE", name: "Garden Care", rate: "R320/hour" },
+    { id: "POOL_CLEANING_MAINTENANCE", name: "Pool Maintenance", rate: "R350/hour" },
+    { id: "CHEF_CATERING", name: "Chef & Catering", rate: "R550/event" },
+    { id: "WAITERING_SERVICES", name: "Waitering Services", rate: "R180/hour" },
+    { id: "MOVING_SERVICES", name: "Moving Services", rate: "R600/hour" },
+    { id: "AU_PAIR_SERVICES", name: "Au Pair", rate: "R150/hour" },
+    { id: "LOCKSMITH_SERVICES", name: "Locksmith", rate: "R450/call" },
   ];
 
-  const submitApplication = useMutation({
-    mutationFn: async (data: ProviderApplicationForm & { documents: typeof uploadedDocuments }) => {
-      const payload = {
-        ...data,
-        category: data.servicesOffered[0] || "general",
-        // Map fields to match API expectation if needed
-        verificationStatus: "pending",
-        isVerified: false,
-      };
-      return apiRequest("POST", "/api/providers", payload);
-    },
-    onSuccess: () => {
+   const submitApplication = useMutation({
+     mutationFn: async (data: ProviderApplicationForm & { documents: typeof uploadedDocuments }) => {
+       const payload = {
+         ...data,
+         category: data.servicesOffered[0] || "general",
+         // Map fields to match API expectation if needed
+         verificationStatus: "pending",
+         isVerified: false,
+       };
+       console.log("Provider application payload:", payload);
+       return apiRequest("POST", "/api/providers", payload);
+     },
+     onSuccess: () => {
       setIsSubmitted(true);
       queryClient.invalidateQueries({ queryKey: ["/api/providers"] });
       toast({

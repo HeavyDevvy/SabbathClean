@@ -64,7 +64,7 @@ interface ComprehensiveServicesProps {
 const indoorServices: Service[] = [
   // HOUSE CLEANING SERVICES
   {
-    id: "cleaning",
+    id: "HOUSE_CLEANING",
     category: "Indoor Services",
     title: "House Cleaning",
     description: "Complete cleaning services from regular maintenance to deep cleaning with professional-grade equipment",
@@ -88,7 +88,7 @@ const indoorServices: Service[] = [
 
   // PLUMBING SERVICES
   {
-    id: "plumbing",
+    id: "PLUMBING_SERVICES",
     category: "Indoor Services",
     title: "Plumbing Services",
     description: "Professional plumbing solutions from emergency repairs to complete installations with certified plumbers",
@@ -112,7 +112,7 @@ const indoorServices: Service[] = [
 
   // ELECTRICAL SERVICES
   {
-    id: "electrical",
+    id: "ELECTRICAL_SERVICES",
     category: "Indoor Services",
     title: "Electrical Services",
     description: "Safe and certified electrical work including installations, repairs, and compliance certificates",
@@ -138,7 +138,7 @@ const indoorServices: Service[] = [
 const outdoorServices: Service[] = [
   // GARDEN CARE
   {
-    id: "garden-care",
+    id: "GARDEN_CARE",
     category: "Outdoor Services",
     title: "Garden Care",
     description: "Professional garden maintenance and landscaping services to keep your outdoor spaces beautiful",
@@ -161,7 +161,7 @@ const outdoorServices: Service[] = [
 
   // POOL CLEANING & MAINTENANCE
   {
-    id: "pool-cleaning",
+    id: "POOL_CLEANING_MAINTENANCE",
     category: "Outdoor Services",
     title: "Pool Cleaning & Maintenance",
     description: "Professional pool cleaning, chemical balancing, and maintenance services to keep your pool crystal clear and safe",
@@ -186,7 +186,7 @@ const outdoorServices: Service[] = [
 const specializedServices: Service[] = [
   // CHEF & CATERING SERVICES
   {
-    id: "chef-catering",
+    id: "CHEF_CATERING",
     category: "Specialized Services",
     title: "Chef & Catering",
     description: "Professional chefs specializing in authentic African cuisine and international dishes for events and daily meals with complete dietary accommodation",
@@ -216,7 +216,7 @@ const specializedServices: Service[] = [
 
   // WAITERING SERVICES
   {
-    id: "waitering",
+    id: "WAITERING_SERVICES",
     category: "Specialized Services", 
     title: "Waitering Services",
     description: "Professional event staff and waitering services for parties, corporate events, and special occasions",
@@ -239,7 +239,7 @@ const specializedServices: Service[] = [
 
   // MOVING SERVICES
   {
-    id: "moving",
+    id: "MOVING_SERVICES",
     category: "Specialized Services",
     title: "Moving Services",
     description: "Complete moving solutions from local relocations to long-distance moves with professional teams",
@@ -262,7 +262,7 @@ const specializedServices: Service[] = [
 
   // AU PAIR SERVICES
   {
-    id: "au-pair",
+    id: "AU_PAIR_SERVICES",
     category: "Specialized Services",
     title: "Au Pair Services",
     description: "Trusted childcare providers offering flexible care solutions from occasional babysitting to live-in arrangements",
@@ -280,6 +280,30 @@ const specializedServices: Service[] = [
     features: ["Background checked", "Experienced caregivers", "Flexible schedules", "Educational support"],
     icon: Baby,
     gradient: "from-pink-500 to-rose-500",
+    bookingSteps: 4
+  },
+
+  // LOCKSMITH SERVICES
+  {
+    id: "LOCKSMITH_SERVICES",
+    category: "Specialized Services",
+    title: "Locksmith Services",
+    description: "Professional locksmith services for residential, commercial, and automotive needs",
+    price: "From R450/call-out",
+    duration: "1-3 hours",
+    urgent: true,
+    serviceTypes: [
+      "Emergency Lockout Service",
+      "Lock Installation & Repair",
+      "Key Duplication",
+      "Car Key Programming",
+      "Security System Installation",
+      "Safe Opening",
+      "Master Key Systems"
+    ],
+    features: ["24/7 Emergency Service", "Certified Locksmiths", "Quick Response Time", "All Lock Types"],
+    icon: Wrench,
+    gradient: "from-gray-600 to-slate-600",
     bookingSteps: 4
   }
 ];

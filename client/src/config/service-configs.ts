@@ -461,6 +461,36 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { id: "meal-prep", name: "Meal Preparation for Children", price: 60 },
       { id: "overnight", name: "Overnight Care Available", price: 150 }
     ]
+  },
+  "locksmith": {
+    title: "Locksmith Services",
+    icon: Wrench,
+    basePrice: 450,
+    steps: 4,
+    propertyTypes: [
+      { value: "apartment", label: "Apartment", multiplier: 1.0 },
+      { value: "house", label: "House", multiplier: 1.1 },
+      { value: "commercial", label: "Commercial Property", multiplier: 1.3 },
+      { value: "vehicle", label: "Vehicle", multiplier: 1.0 }
+    ],
+    serviceTypes: [
+      { value: "lockout", label: "Emergency Lockout", price: 450 },
+      { value: "installation", label: "Lock Installation", price: 350 },
+      { value: "repair", label: "Lock Repair", price: 280 },
+      { value: "rekey", label: "Rekeying", price: 250 },
+      { value: "key-duplication", label: "Key Duplication", price: 150 },
+      { value: "safe", label: "Safe Opening/Repair", price: 650 }
+    ],
+    urgencyLevels: [
+      { value: "emergency", label: "Emergency (Immediate)", multiplier: 2.0 },
+      { value: "urgent", label: "Urgent (Within 2 hours)", multiplier: 1.5 },
+      { value: "standard", label: "Standard (Scheduled)", multiplier: 1.0 }
+    ],
+    addOns: [
+      { id: "high-security", name: "High Security Lock Upgrade", price: 850 },
+      { id: "keypad", name: "Electronic Keypad Installation", price: 1200 },
+      { id: "master-key", name: "Master Key System", price: 1500 }
+    ]
   }
 };
 
@@ -495,19 +525,30 @@ export const serviceConfigs: Record<string, ServiceConfig> = mergedServiceConfig
 export const serviceIdMapping: Record<string, string> = {
   "cleaning": "cleaning",
   "house-cleaning": "cleaning",
+  "HOUSE_CLEANING": "cleaning",
   "gardening": "garden-care",
   "garden-care": "garden-care",
+  "GARDEN_CARE": "garden-care",
   "garden-maintenance": "garden-care",
   "pool-cleaning": "pool-cleaning",
+  "POOL_CLEANING_MAINTENANCE": "pool-cleaning",
   "plumbing": "plumbing",
   "plumbing-services": "plumbing",
+  "PLUMBING_SERVICES": "plumbing",
   "electrical": "electrical",
   "electrical-services": "electrical",
+  "ELECTRICAL_SERVICES": "electrical",
   "chef-catering": "chef-catering",
+  "CHEF_CATERING": "chef-catering",
   "waitering": "event-staff",
   "event-staff": "event-staff",
   "event-staffing": "event-staff",
+  "WAITERING_SERVICES": "event-staff",
   "beauty-wellness": "beauty-wellness",
   "moving": "moving",
-  "au-pair": "au-pair"
+  "MOVING_SERVICES": "moving",
+  "au-pair": "au-pair",
+  "AU_PAIR_SERVICES": "au-pair",
+  "locksmith": "locksmith",
+  "LOCKSMITH_SERVICES": "locksmith"
 };

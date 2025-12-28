@@ -120,22 +120,26 @@ export default function EnhancedProviderOnboarding() {
   const availableServices = [
     "House Cleaning",
     "Plumbing Services",
-    "Electrical Work",
+    "Electrical Services",
+    "Garden Care",
+    "Pool Cleaning & Maintenance",
     "Chef & Catering",
     "Waitering Services",
-    "Garden Care",
-    "Home Moving",
-    "Au Pair Services"
+    "Moving Services",
+    "Au Pair Services",
+    "Locksmith Services"
   ];
   const canonicalServiceMap: Record<string, string> = {
-    "House Cleaning": "house-cleaning",
-    "Plumbing Services": "plumbing",
-    "Electrical Work": "electrical",
-    "Chef & Catering": "chef-catering",
-    "Waitering Services": "event-staff",
-    "Garden Care": "gardening",
-    "Home Moving": "moving",
-    "Au Pair Services": "au-pair",
+    "House Cleaning": "HOUSE_CLEANING",
+    "Plumbing Services": "PLUMBING_SERVICES",
+    "Electrical Services": "ELECTRICAL_SERVICES",
+    "Garden Care": "GARDEN_CARE",
+    "Pool Cleaning & Maintenance": "POOL_CLEANING_MAINTENANCE",
+    "Chef & Catering": "CHEF_CATERING",
+    "Waitering Services": "WAITERING_SERVICES",
+    "Moving Services": "MOVING_SERVICES",
+    "Au Pair Services": "AU_PAIR_SERVICES",
+    "Locksmith Services": "LOCKSMITH_SERVICES"
   };
 
   const southAfricanBanks = [
@@ -356,37 +360,38 @@ export default function EnhancedProviderOnboarding() {
 
       const servicesMapped = providerData.services.map(s => canonicalServiceMap[s] || s.toLowerCase().replace(/\s+/g, '-'));
       
-      const providerPayload: any = {
-        userId: newUserId,
-        firstName: providerData.firstName,
-        lastName: providerData.lastName,
-        email: providerData.email,
-        phone: providerData.phone,
-        bio: providerData.description || "",
-        hourlyRate: "250.00",
-        servicesOffered: servicesMapped,
-        category: servicesMapped[0] || "general",
-        experience: providerData.experience,
-        location: locationStr,
-        profileImage: (providerData as any).profilePictureData || null, // Send base64 image
-        idDocument: (providerData as any).idDocumentData || null,
-        proofOfAddress: (providerData as any).proofOfAddressData || null,
-        qualificationCertificate: (providerData as any).certificatesData || (providerData as any).qualificationCertificateData || null,
-        bankingDetails: {
-          bankName: providerData.bankName,
-          accountHolder: accountHolderClean,
-          accountNumber: accountNumberClean,
-          branchCode: branchCodeClean,
-          accountType: providerData.accountType,
-        },
-        providerType: providerData.applicationType,
-        companyName: providerData.companyName || null,
-        companyRegistration: providerData.companyRegistration || null,
-        verificationStatus: 'pending'
-      };
+       const providerPayload: any = {
+         userId: newUserId,
+         firstName: providerData.firstName,
+         lastName: providerData.lastName,
+         email: providerData.email,
+         phone: providerData.phone,
+         bio: providerData.description || "",
+         hourlyRate: "250.00",
+         servicesOffered: servicesMapped,
+         category: servicesMapped[0] || "general",
+         experience: providerData.experience,
+         location: locationStr,
+         profileImage: (providerData as any).profilePictureData || null, // Send base64 image
+         idDocument: (providerData as any).idDocumentData || null,
+         proofOfAddress: (providerData as any).proofOfAddressData || null,
+         qualificationCertificate: (providerData as any).certificatesData || (providerData as any).qualificationCertificateData || null,
+         bankingDetails: {
+           bankName: providerData.bankName,
+           accountHolder: accountHolderClean,
+           accountNumber: accountNumberClean,
+           branchCode: branchCodeClean,
+           accountType: providerData.accountType,
+         },
+         providerType: 'individual',
+         verificationStatus: 'pending',
+         isVerified: false
+       };
 
-      const createRes = await apiRequest("POST", "/api/providers", providerPayload);
-      await createRes.json();
+       console.log("Provider registration payload:", providerPayload);
+
+       const createRes = await apiRequest("POST", "/api/providers", providerPayload);
+       await createRes.json();
       
       // Also update the user profile image if provided
       if ((providerData as any).profilePictureData) {
