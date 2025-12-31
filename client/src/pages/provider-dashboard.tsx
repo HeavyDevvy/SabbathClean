@@ -27,7 +27,7 @@ export default function ProviderDashboard() {
     ],
     enabled: !!userId && isProvider,
   });
-  const isApproved = (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
+  const isApproved = user?.isApprovedProvider || (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
   const providerId = provider?.id || '';
   // Read provider type from user profile (assuming it's stored there)
   const providerType: 'individual' | 'company' = (user as any)?.providerType || 'individual';
