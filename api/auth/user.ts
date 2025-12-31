@@ -25,11 +25,17 @@ export default async function handler(req: any, res: any) {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+      include: { serviceProvider: true }
     });
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
+
+    // Check if approved provider
+    const isApprovedProvider = 
+      user.serviceProvider?.verificationStatus === 'APPROVED' && 
+      user.serviceProvider?.isVerified === true;
 
     return res.status(200).json({
       id: user.id,
@@ -38,7 +44,11 @@ export default async function handler(req: any, res: any) {
       lastName: user.lastName,
       phone: (user as any).phoneNumber || undefined,
       profileImage: (user as any).profilePictureUrl || undefined,
-      isProvider: user.role === "PROVIDER",
+      role: user.role,
+      isActive: user.isActive,
+      isProvider: !!user.serviceProvider,
+      isApprovedProvider,
+      providerId: user.serviceProvider?.id || null,
     });
   } catch (error) {
     console.error("User fetch error:", error);
