@@ -61,13 +61,6 @@ function ProviderRoute({ component: Component }: { component: React.ComponentTyp
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
-  console.log('🔍 ROUTE GUARD CHECK:', JSON.stringify({ 
-    user, 
-    isApprovedProvider: user?.isApprovedProvider, 
-    role: user?.role, 
-    isProvider: user?.isProvider 
-  }, null, 2));
-
   React.useEffect(() => {
     if (!isLoading) {
        if (!user) {

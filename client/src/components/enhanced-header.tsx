@@ -47,7 +47,7 @@ const EnhancedHeader = memo(function EnhancedHeader({
     queryKey: user?.isProvider && user?.id ? ["/api/providers/by-user/" + user.id] : ["/api/providers/by-user/idle"],
     enabled: !!user?.isProvider && !!user?.id,
   });
-  const isApproved = (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
+  const isApproved = user?.isApprovedProvider || (provider?.verificationStatus === 'approved') || !!provider?.isVerified;
   const [showPendingModal, setShowPendingModal] = useState(false);
 
   const handleProviderHubClick = (e?: React.MouseEvent) => {
