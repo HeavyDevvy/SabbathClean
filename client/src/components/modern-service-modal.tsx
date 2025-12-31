@@ -323,10 +323,15 @@ export default function ModernServiceModal({
   }, [serviceId]);
 
   const { data: fetchedProviders = [] } = useQuery<any[]>({
-    queryKey: dbServiceId ? ["/api/providers/service/" + dbServiceId] : ["/api/providers/service/idle"],
+    queryKey: dbServiceId ? ["/api/providers", dbServiceId] : ["/api/providers/idle"],
     enabled: !!dbServiceId,
     queryFn: async () => {
-      const res = await apiRequest("GET", `/api/providers/service/${dbServiceId}`);
+      // Map kebab-case to SCREAMING_SNAKE_CASE for backend Enum match
+      // e.g., 'house-cleaning' -> 'HOUSE_CLEANING'
+      const apiCategory = dbServiceId.toUpperCase().replace(/-/g, '_');
+      console.log(`Fetching providers for category: ${apiCategory} (from ${dbServiceId})`);
+      
+      const res = await apiRequest("GET", `/api/providers?category=${apiCategory}`);
       const raw = await res.json();
       return Array.isArray(raw) ? raw : [];
     }
