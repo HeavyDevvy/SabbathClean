@@ -7,8 +7,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { category } = req.query;
       
       const where: any = {
-        verificationStatus: 'APPROVED',
-        isVerified: true
+        OR: [
+          { verificationStatus: 'APPROVED' },
+          { isVerified: true }
+        ]
       };
       
       if (category && category !== 'all') {
