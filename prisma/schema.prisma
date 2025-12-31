@@ -28,7 +28,7 @@ model User {
   reviews           Review[]
   sentMessages      Message[]  @relation("SentMessages")
   receivedMessages  Message[]  @relation("ReceivedMessages")
-  provider          ServiceProvider?
+  serviceProvider   ServiceProvider?
   sessions          Session[]
   accounts          Account[]
 
