@@ -242,7 +242,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Service Provider routes with location-based matching
   app.get("/api/providers", async (req, res) => {
     try {
-      const serviceCategory = req.query.service as string;
+      let serviceCategory = (req.query.service || req.query.category) as string;
+      
+      // Handle category mapping
+      if (serviceCategory) {
+        const categoryMap: Record<string, string> = {
+          'PLUMBING_SERVICES': 'plumbing',
+          'plumbing-services': 'plumbing',
+          'GARDEN_CARE': 'gardening',
+          'garden-care': 'gardening',
+          'HOUSE_CLEANING': 'house-cleaning',
+          'house-cleaning': 'house-cleaning'
+        };
+        serviceCategory = categoryMap[serviceCategory] || serviceCategory;
+      }
+
       const latitude = req.query.latitude ? parseFloat(req.query.latitude as string) : null;
       const longitude = req.query.longitude ? parseFloat(req.query.longitude as string) : null;
       const maxRadius = req.query.radius ? parseInt(req.query.radius as string) : 20;

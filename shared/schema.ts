@@ -19,6 +19,7 @@ export const users = pgTable("users", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   profileImage: text("profile_image"),
+  role: text("role").default("CLIENT"),
   isProvider: boolean("is_provider").default(false),
   isVerified: boolean("is_verified").default(false),
   // Social authentication providers

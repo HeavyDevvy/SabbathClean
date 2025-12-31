@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const totalUsers = await prisma.user.count();
+    const totalUsers = await prisma.user.count({ where: { serviceProvider: null } });
     const totalProviders = await prisma.serviceProvider.count();
     const activeBookings = await prisma.booking.count({ where: { status: "CONFIRMED" } as any });
     const totalRevenueAgg = await prisma.payment.aggregate({ _sum: { amount: true } });

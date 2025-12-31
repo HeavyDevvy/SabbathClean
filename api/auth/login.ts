@@ -19,7 +19,10 @@ export default async function handler(req: any, res: any) {
         .json({ error: "Email and password are required" });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { serviceProvider: true }
+    });
     if (!user || !user.password) {
       return res
         .status(401)
@@ -33,6 +36,20 @@ export default async function handler(req: any, res: any) {
         .json({ error: "Invalid email or password" });
     }
 
+    // Check if user is an approved provider
+    if (user.serviceProvider?.isVerified && 
+        user.serviceProvider?.verificationStatus === 'APPROVED') {
+      
+      // Update user role to PROVIDER if not already set
+      if (user.role !== 'PROVIDER') {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { role: 'PROVIDER' }
+        });
+        user.role = 'PROVIDER';
+      }
+    }
+
     const secret = process.env.JWT_SECRET || "";
     if (!secret) {
       console.error("Missing JWT_SECRET in environment");
@@ -40,7 +57,16 @@ export default async function handler(req: any, res: any) {
     }
 
     const accessToken = jwt.sign(
-      { userId: user.id, type: "access" },
+      { 
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        isProvider: !!user.serviceProvider,
+        isApprovedProvider: user.serviceProvider?.verificationStatus === 'APPROVED',
+        providerId: user.serviceProvider?.id || null,
+        userId: user.id, // Keeping backward compatibility
+        type: "access"
+      },
       secret,
       { expiresIn: "24h" },
     );

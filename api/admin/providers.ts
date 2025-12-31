@@ -32,7 +32,18 @@ export default async function handler(req: any, res: any) {
         orderBy: { createdAt: "desc" },
         skip,
         take: limit,
-        include: { user: true }
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phoneNumber: true,
+              role: true
+            }
+          }
+        }
       });
 
       const enriched = providers.map((p: any) => ({
@@ -45,10 +56,10 @@ export default async function handler(req: any, res: any) {
         verificationStatusLabel: String(p.verificationStatus || "").toLowerCase(),
         isVerified: p.isVerified,
         createdAt: p.createdAt,
-        userEmail: p.user?.email || null,
-        userPhoneNumber: p.user?.phoneNumber || null,
-        userFirstName: p.user?.firstName || null,
-        userLastName: p.user?.lastName || null
+        email: p.user?.email || null,
+        firstName: p.user?.firstName || null,
+        lastName: p.user?.lastName || null,
+        phoneNumber: p.user?.phoneNumber || null
       }));
 
       res.statusCode = 200;

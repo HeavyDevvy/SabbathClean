@@ -1427,7 +1427,7 @@ export class MemStorage implements IStorage {
           lastName: "Santos",
           phone: "+27123456789",
           address: "Cape Town, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1466,7 +1466,7 @@ export class MemStorage implements IStorage {
           lastName: "Mitchell",
           phone: "+27123456790",
           address: "Johannesburg, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1505,7 +1505,7 @@ export class MemStorage implements IStorage {
           lastName: "Johnson",
           phone: "+27123456791",
           address: "Durban, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1544,7 +1544,7 @@ export class MemStorage implements IStorage {
           lastName: "Chen",
           phone: "+27123456792",
           address: "Cape Town, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1583,7 +1583,7 @@ export class MemStorage implements IStorage {
           lastName: "Thompson",
           phone: "+27123456793",
           address: "Pretoria, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1622,7 +1622,7 @@ export class MemStorage implements IStorage {
           lastName: "Patel",
           phone: "+27123456794",
           address: "Cape Town, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1661,7 +1661,7 @@ export class MemStorage implements IStorage {
           lastName: "Mbeki",
           phone: "+27123456795",
           address: "Johannesburg, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1700,7 +1700,7 @@ export class MemStorage implements IStorage {
           lastName: "Tanaka",
           phone: "+27123456796",
           address: "Durban, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1739,7 +1739,7 @@ export class MemStorage implements IStorage {
           lastName: "Konstantinou",
           phone: "+27123456797",
           address: "Cape Town, South Africa",
-          isProvider: true,
+          isProvider: true, role: "PROVIDER",
           createdAt: new Date(),
         },
         provider: {
@@ -1893,6 +1893,7 @@ export class MemStorage implements IStorage {
       longitude: (insertUser as any).longitude ?? null,
       profileImage: (insertUser as any).profileImage ?? null,
       isProvider: insertUser.isProvider ?? false,
+      role: (insertUser as any).role ?? 'CLIENT',
       isVerified: (insertUser as any).isVerified ?? false,
       googleId: (insertUser as any).googleId ?? null,
       appleId: (insertUser as any).appleId ?? null,

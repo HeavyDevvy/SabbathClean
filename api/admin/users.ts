@@ -28,6 +28,9 @@ export default async function handler(req: any, res: any) {
     const skip = (page - 1) * limit;
 
     const users = await prisma.user.findMany({
+      where: {
+        serviceProvider: null
+      },
       orderBy: { createdAt: "desc" },
       skip,
       take: limit

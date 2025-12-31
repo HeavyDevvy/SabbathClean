@@ -54,15 +54,26 @@ const passwordResetSchema = z.object({
 });
 
 // JWT token generation
-const generateTokens = (userId: string, rememberMe: boolean = false) => {
+const generateTokens = (user: any, providerStatus?: string, providerId?: string, rememberMe: boolean = false) => {
+  const isApprovedProvider = providerStatus === 'approved';
+  
   const accessToken = jwt.sign(
-    { userId, type: 'access' },
+    { 
+      id: user.id,
+      userId: user.id, // Backward compatibility
+      email: user.email,
+      role: user.role,
+      isProvider: !!user.isProvider,
+      isApprovedProvider,
+      providerId: providerId || null,
+      type: 'access' 
+    },
     JWT_SECRET,
     { expiresIn: '24h' }
   );
 
   const refreshToken = rememberMe ? jwt.sign(
-    { userId, type: 'refresh' },
+    { userId: user.id, type: 'refresh' },
     JWT_SECRET,
     { expiresIn: '30d' }
   ) : null;
@@ -300,7 +311,7 @@ export function registerAuthRoutes(app: Express) {
       }
 
       // Generate tokens
-      const { accessToken, refreshToken } = generateTokens(newUser.id, false);
+      const { accessToken, refreshToken } = generateTokens(newUser, undefined, undefined, false);
 
       // Update last login (non-blocking in dev)
       try {
@@ -398,6 +409,8 @@ export function registerAuthRoutes(app: Express) {
 
       // Providers may be pending; do not block login. Include status for client redirects.
       let providerStatus: string | undefined = undefined;
+      let providerId: string | undefined = undefined;
+
       if (user.isProvider) {
         const providers = await storage.getAllProviders();
         let provider = providers.find(p => p.userId === user.id);
@@ -409,14 +422,23 @@ export function registerAuthRoutes(app: Express) {
           }
         }
         if (provider) {
+          providerId = provider.id;
           providerStatus = (provider as any).verificationStatus || (provider.isVerified ? 'approved' : 'pending');
         } else {
           providerStatus = 'pending';
         }
       }
 
+      // Check if user is an approved provider and update role
+      if (providerStatus === 'approved') {
+         if (user.role !== 'PROVIDER') {
+            await storage.updateUser(user.id, { role: 'PROVIDER' });
+            user.role = 'PROVIDER';
+         }
+      }
+
       // Generate tokens
-      const { accessToken, refreshToken } = generateTokens(user.id, validatedData.rememberMe);
+      const { accessToken, refreshToken } = generateTokens(user, providerStatus, providerId, validatedData.rememberMe);
 
       // Update last login and remember token if needed
       await storage.updateUserLastLogin(user.id);
@@ -473,7 +495,7 @@ export function registerAuthRoutes(app: Express) {
       }
 
       // Generate new access token
-      const { accessToken } = generateTokens(user.id, false);
+      const { accessToken } = generateTokens(user, undefined, undefined, false);
 
       res.json({ accessToken });
     } catch (error) {
@@ -581,7 +603,7 @@ export function registerAuthRoutes(app: Express) {
       }
       
       // Generate tokens
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       
       // Update last login
       await storage.updateUserLastLogin(user.id);
@@ -671,7 +693,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(appleUserData);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {
@@ -758,7 +780,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(twitterUserData);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {
@@ -845,7 +867,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(instagramUserData);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {
@@ -931,7 +953,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(mockAppleUser);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {
@@ -1017,7 +1039,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(mockTwitterUser);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {
@@ -1103,7 +1125,7 @@ export function registerAuthRoutes(app: Express) {
         user = await storage.createUser(mockInstagramUser);
       }
       
-      const { accessToken, refreshToken } = generateTokens(user.id, true);
+      const { accessToken, refreshToken } = generateTokens(user, undefined, undefined, true);
       await storage.updateUserLastLogin(user.id);
       
       const responseData = {

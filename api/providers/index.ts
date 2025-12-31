@@ -2,6 +2,55 @@ import { prisma } from "../../lib/prisma.js";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "GET") {
+    try {
+      const { category } = req.query;
+      
+      const where: any = {
+        verificationStatus: 'APPROVED',
+        isVerified: true
+      };
+      
+      if (category && category !== 'all') {
+        where.category = category;
+      }
+      
+      const providers = await prisma.serviceProvider.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              profilePictureUrl: true,
+              email: true
+            }
+          }
+        },
+        orderBy: { rating: 'desc' }
+      });
+      
+      const formatted = providers.map(p => ({
+        id: p.id,
+        businessName: p.businessName,
+        category: p.category,
+        description: p.description,
+        hourlyRate: p.hourlyRate.toString(),
+        rating: p.rating.toString(),
+        totalReviews: p.totalReviews,
+        firstName: p.user.firstName,
+        lastName: p.user.lastName,
+        profileImage: p.user.profilePictureUrl,
+      }));
+      
+      return res.status(200).json(formatted);
+    } catch (error) {
+      console.error('Get providers error:', error);
+      return res.status(500).json({ error: 'Failed to fetch providers' });
+    }
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
