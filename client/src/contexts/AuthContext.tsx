@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryKey: ['auth', 'user'],
     queryFn: async () => {
       const currentUser = await authClient.getCurrentUser();
+      console.log('👤 USER DATA FROM API:', currentUser);
       setIsInitialized(true);
       return currentUser;
     },

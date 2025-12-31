@@ -28,6 +28,7 @@ export interface User {
   province?: string;
   profileImage?: string;
   isProvider: boolean;
+  role?: string;
   preferences?: any;
   notificationSettings?: any;
   isApprovedProvider?: boolean;
