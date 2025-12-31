@@ -17,6 +17,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         where.category = category;
       }
       
+      console.log('🔍 PROVIDER SEARCH:', { 
+        requestedCategory: category, 
+        whereClause: where 
+      });
+
       const providers = await prisma.serviceProvider.findMany({
         where,
         include: {
@@ -32,6 +37,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         orderBy: { rating: 'desc' }
       });
+      
+      console.log('📊 FOUND PROVIDERS:', providers.length); 
+      console.log('First provider category:', providers[0]?.category);
       
       const formatted = providers.map(p => ({
         id: p.id,
