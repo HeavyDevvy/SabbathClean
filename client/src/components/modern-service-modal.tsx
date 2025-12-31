@@ -333,26 +333,14 @@ export default function ModernServiceModal({
       
       const res = await apiRequest("GET", `/api/providers?category=${apiCategory}`);
       const raw = await res.json();
-      
-      console.log('🎯 PROVIDERS RECEIVED:', JSON.stringify(raw, null, 2));
-
       return Array.isArray(raw) ? raw : [];
     }
   });
 
   const providers = useMemo(() => {
-    console.log('Processing fetched providers for display:', fetchedProviders);
-    
-    // Log filtering results
-    const filtered = fetchedProviders.filter(p => (p?.isVerified === true) || ((p?.verificationStatus || 'pending') === 'approved'));
-    
-    console.log('✅ FILTERED PROVIDERS:', { 
-      totalReceived: fetchedProviders.length, 
-      afterFilter: filtered.length, 
-      firstProvider: filtered[0] 
-    });
-
-    return filtered.map(p => ({
+    return fetchedProviders
+      .filter(p => (p?.isVerified === true) || ((p?.verificationStatus || 'pending') === 'approved'))
+      .map(p => ({
         id: p.id,
         name: (p.companyName || `${p.firstName || ''} ${p.lastName || ''}`).trim() || 'Service Provider',
         rating: Number(p.rating) || 0,
