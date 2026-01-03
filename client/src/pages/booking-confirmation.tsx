@@ -1,33 +1,87 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, Share2, MessageCircle } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { CheckCircle, Calendar, MapPin, Phone, Mail, ArrowLeft, Download, MessageCircle, Loader2 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import jsPDF from 'jspdf';
 import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
+import { formatCurrency } from "@/lib/currency";
 
 export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Get order_id from URL query params
+  const [orderId, setOrderId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("order_id") || params.get("ref");
+    if (id) setOrderId(id);
+  }, []);
 
-  // In a real app, this would come from the booking data
+  // Fetch order details
+  const { data: order, isLoading, error } = useQuery({
+    queryKey: [`/api/orders/${orderId}`],
+    enabled: !!orderId,
+    queryFn: async () => {
+      const res = await fetch(`/api/orders/${orderId}`);
+      if (!res.ok) throw new Error("Failed to fetch order");
+      return res.json();
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-gray-600">Loading booking details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <CheckCircle className="h-10 w-10 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-semibold mb-4">Booking Not Found</h2>
+          <p className="text-gray-600 mb-6">We couldn't find the booking details you're looking for.</p>
+          <Button onClick={() => setLocation("/")}>
+            Return Home
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  // Map order data to display format
+  // Note: API order items structure might vary, taking first item for main display
+  const mainItem = order.items?.[0] || {};
+  
   const bookingDetails = {
-    bookingId: "BE-" + Date.now().toString().slice(-6),
-    service: "House Cleaning",
-    date: new Date(Date.now() + 86400000).toLocaleDateString('en-ZA', { 
+    bookingId: order.orderNumber || order.id,
+    service: mainItem.serviceName || "Service",
+    date: mainItem.scheduledDate ? new Date(mainItem.scheduledDate).toLocaleDateString('en-ZA', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
-    }),
-    time: "10:00 AM",
-    duration: "2 hours",
-    address: "123 Main Street, Cape Town, 8001",
-    amount: 560,
-    providerName: "Sarah Johnson",
-    providerPhone: "+27 82 123 4567",
-    customerEmail: "john.doe@example.com",
-    customerPhone: "+27 123 456 7890"
+    }) : "Date not set",
+    time: mainItem.scheduledTime || "Time not set",
+    duration: mainItem.duration ? `${mainItem.duration} hours` : "Duration not set",
+    address: mainItem.serviceDetails?.address || order.eventLocation || "Location pending",
+    amount: order.totalAmount,
+    providerName: order.providerName || "Assigned Provider", // API might need to return this
+    providerPhone: order.providerPhone || "Contact via App",
+    customerEmail: order.userEmail || "your email", // API might need to return this
+    customerPhone: order.userPhone || "your phone"
   };
 
   // Generate PDF receipt
@@ -44,16 +98,18 @@ export default function BookingConfirmation() {
     img.onload = function() {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx?.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+      if (ctx) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Add logo to PDF (centered, 30x30 size)
+        const logoSize = 30;
+        pdf.addImage(dataURL, 'JPEG', (pageWidth - logoSize) / 2, currentY, logoSize, logoSize);
+      }
       
-      // Add logo to PDF (centered, 40x40 size)
-      const logoSize = 30;
-      pdf.addImage(dataURL, 'JPEG', (pageWidth - logoSize) / 2, currentY, logoSize, logoSize);
-      
-      currentY += logoSize + 15;
+      currentY += 45; // logoSize + 15
       
       // Header - Berry Events branding
       pdf.setFontSize(20);
@@ -125,7 +181,7 @@ export default function BookingConfirmation() {
     currentY += 15;
     pdf.setFontSize(16);
     pdf.setTextColor(5, 150, 105); // Green color
-    pdf.text(`Total Paid: R${bookingDetails.amount}`, pageWidth / 2, currentY, { align: 'center' });
+    pdf.text(`Total Paid: ${formatCurrency(bookingDetails.amount)}`, pageWidth / 2, currentY, { align: 'center' });
     
     currentY += 10;
     pdf.setFontSize(10);
@@ -165,7 +221,7 @@ export default function BookingConfirmation() {
 ⏰ Time: ${bookingDetails.time}
 📍 Location: ${bookingDetails.address}
 👤 Provider: ${bookingDetails.providerName}
-💰 Amount: R${bookingDetails.amount}
+💰 Amount: ${formatCurrency(bookingDetails.amount)}
 
 ✅ Booking confirmed and payment processed securely!`;
     
@@ -190,7 +246,7 @@ Service: ${bookingDetails.service}
 Date & Time: ${bookingDetails.date} at ${bookingDetails.time}
 Location: ${bookingDetails.address}
 Provider: ${bookingDetails.providerName}
-Amount Paid: R${bookingDetails.amount}
+Amount Paid: ${formatCurrency(bookingDetails.amount)}
 
 Berry Events made it so easy to book reliable home services!
 
@@ -274,7 +330,7 @@ Best regards`;
                 <p className="font-medium text-gray-900">Total Paid</p>
                 <p className="text-xs text-green-700">✓ Secured by Berry Events Bank</p>
               </div>
-              <p className="text-2xl font-bold text-green-600">R{bookingDetails.amount}</p>
+              <p className="text-2xl font-bold text-green-600">{formatCurrency(bookingDetails.amount)}</p>
             </div>
           </div>
 

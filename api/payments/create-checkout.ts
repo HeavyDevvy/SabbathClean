@@ -39,6 +39,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: "Payment configuration missing" });
     }
 
+    const successUrl = body?.successUrl || `https://www.berryevents.co.za/booking-confirmation?order_id=${bookingId}`;
+    const cancelUrl = body?.cancelUrl || `https://www.berryevents.co.za/checkout?cancelled=true`;
+    const failureUrl = body?.failureUrl || `https://www.berryevents.co.za/checkout?failed=true`;
+
     console.log(`[CreateCheckout] Creating Yoco checkout for booking ${bookingId}, amount: ${totalCents}`);
 
     const r = await fetch("https://payments.yoco.com/api/checkouts", {
@@ -51,6 +55,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: JSON.stringify({
         amount: totalCents,
         currency: "ZAR",
+        successUrl,
+        cancelUrl,
+        failureUrl,
         metadata: {
           bookingId,
           environment: process.env.NODE_ENV || "production",

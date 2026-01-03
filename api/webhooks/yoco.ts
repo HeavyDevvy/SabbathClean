@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
 import { prisma } from '../../lib/prisma.js';
+import sgMail from '@sendgrid/mail';
 
 function readRawBody(req: VercelRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -73,6 +74,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               payoutDate: newStatus === 'REFUNDED' ? new Date() : payment.payoutDate,
             },
           });
+
+          // Send confirmation email if payment succeeded
+          if (newStatus === 'COMPLETED') {
+            try {
+              const booking = await prisma.booking.findUnique({
+                where: { id: bookingId },
+                include: { user: true }
+              });
+
+              if (booking && booking.user && booking.user.email) {
+                const apiKey = process.env.SENDGRID_API_KEY;
+                if (apiKey) {
+                  sgMail.setApiKey(apiKey);
+                  const msg = {
+                    to: booking.user.email,
+                    from: 'bookings@berryevents.co.za', // Verified sender
+                    subject: `Berry Events Booking Confirmation - ${booking.id}`,
+                    text: `Your booking (Ref: ${booking.id}) has been confirmed. Service: ${booking.eventType}. Date: ${new Date(booking.eventDate).toLocaleDateString()}. Amount: R${booking.totalAmount}.`,
+                    html: `
+                      <div style="font-family: Arial, sans-serif; color: #333;">
+                        <h1 style="color: #7c3aed;">Booking Confirmed!</h1>
+                        <p>Hi ${booking.user.firstName},</p>
+                        <p>Your payment was successful and your booking has been confirmed.</p>
+                        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                          <p><strong>Reference:</strong> ${booking.id}</p>
+                          <p><strong>Service:</strong> ${booking.eventType}</p>
+                          <p><strong>Date:</strong> ${new Date(booking.eventDate).toLocaleDateString()}</p>
+                          <p><strong>Time:</strong> ${booking.eventTime}</p>
+                          <p><strong>Amount Paid:</strong> R${booking.totalAmount}</p>
+                        </div>
+                        <p>We've attached your receipt to this email.</p>
+                        <p>If you have any questions, please reply to this email.</p>
+                        <p>Best regards,<br>The Berry Events Team</p>
+                      </div>
+                    `,
+                  };
+                  await sgMail.send(msg);
+                  console.log(`Confirmation email sent to ${booking.user.email}`);
+                } else {
+                  console.warn("SENDGRID_API_KEY not configured, skipping email");
+                }
+              }
+            } catch (emailError) {
+              console.error("Failed to send confirmation email:", emailError);
+            }
+          }
         }
       }
     } else {
