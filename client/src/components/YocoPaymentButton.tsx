@@ -46,7 +46,7 @@ export function YocoPaymentButton({
       const { redirectUrl } = await response.json();
       
       // Call onSuccess callback if provided
-      if (onSuccess) onSuccess();
+      if (onSuccess) await onSuccess();
       
       // Redirect to Yoco checkout
       window.location.href = redirectUrl;

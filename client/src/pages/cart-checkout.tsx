@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { YocoPaymentButton } from "@/components/YocoPaymentButton";
 
 export default function CartCheckout() {
-  const { cart, isLoading, checkout, isCheckingOut } = useCart();
+  const { cart, isLoading, checkout, isCheckingOut, clearCart } = useCart();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
@@ -47,7 +47,7 @@ export default function CartCheckout() {
     );
   }
   
-  if (!cart || cart.items.length === 0) {
+  if ((!cart || cart.items.length === 0) && !createdOrder) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full p-8 text-center">
@@ -61,21 +61,26 @@ export default function CartCheckout() {
     );
   }
   
+  // Use cart items or order items
+  const displayItems = createdOrder ? createdOrder.items : (cart?.items || []);
+  
   // Calculate detailed breakdown
-  const baseServicesTotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.basePrice), 0);
-  const totalAddOns = cart.items.reduce((sum, item) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
-  const servicesSubtotal = cart.items.reduce((sum, item) => sum + parseDecimal(item.subtotal), 0); // Base + Add-ons - Discounts
-  // Calculate total discounts: (basePrice + addOns) - subtotal for each item
-  const totalDiscounts = cart.items.reduce((sum, item) => {
+  const baseServicesTotal = displayItems.reduce((sum: number, item: any) => sum + parseDecimal(item.basePrice), 0);
+  const totalAddOns = displayItems.reduce((sum: number, item: any) => sum + parseDecimal(item.addOnsPrice || "0"), 0);
+  const servicesSubtotal = displayItems.reduce((sum: number, item: any) => sum + parseDecimal(item.subtotal), 0);
+  
+  // Calculate total discounts
+  const totalDiscounts = displayItems.reduce((sum: number, item: any) => {
     const itemBeforeDiscount = parseDecimal(item.basePrice) + parseDecimal(item.addOnsPrice || "0");
     const itemAfterDiscount = parseDecimal(item.subtotal);
     return sum + (itemBeforeDiscount - itemAfterDiscount);
   }, 0);
-  const totalTips = cart.items.reduce((sum, item) => sum + parseDecimal(item.tipAmount || "0"), 0);
-  const platformFee = servicesSubtotal * 0.15; // Platform fee only on services subtotal, NOT on tips
+  
+  const totalTips = displayItems.reduce((sum: number, item: any) => sum + parseDecimal(item.tipAmount || "0"), 0);
+  const platformFee = servicesSubtotal * 0.15;
   const total = servicesSubtotal + totalTips + platformFee;
   
-  const handleCheckout = async () => {
+  const handleProceedToPayment = async () => {
     setIsProcessing(true);
     
     try {
@@ -125,7 +130,7 @@ export default function CartCheckout() {
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               <div className="space-y-6">
-                {cart.items.map((item: CartItem, idx: number) => {
+                {displayItems.map((item: any, idx: number) => {
                   const serviceDetails = item.serviceDetails ? 
                     (typeof item.serviceDetails === 'string' ? JSON.parse(item.serviceDetails) : item.serviceDetails) 
                     : {};
@@ -220,7 +225,7 @@ export default function CartCheckout() {
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Base Services ({cart.items.length} {cart.items.length === 1 ? 'service' : 'services'})</span>
+                  <span>Base Services ({displayItems.length} {displayItems.length === 1 ? 'service' : 'services'})</span>
                   <span className="font-medium" data-testid="summary-base-services">{formatCurrency(baseServicesTotal)}</span>
                 </div>
                 {totalAddOns > 0 && (
@@ -267,13 +272,19 @@ export default function CartCheckout() {
                     bookingRef={createdOrder.id}
                     amount={total}
                     description={`Berry Events Order ${createdOrder.orderNumber || createdOrder.id.slice(0, 8)}`}
+                    onSuccess={async () => {
+                      // Clear cart only after payment redirect
+                      await clearCart();
+                      localStorage.removeItem('cart');
+                      window.location.href = '/bookings/success';
+                    }}
                   />
                 </div>
               ) : (
                 <Button
                   className="w-full bg-primary hover:bg-accent text-primary-foreground mb-4"
                   size="lg"
-                  onClick={handleCheckout}
+                  onClick={handleProceedToPayment}
                   disabled={isProcessing || isCheckingOut}
                   data-testid="button-complete-checkout"
                 >

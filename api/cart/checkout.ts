@@ -117,8 +117,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       confirmations.push({ bookingId: booking.id, paymentId: payment.id });
     }
 
-    await prisma.cart.update({ where: { id: cart.id }, data: { status: "checked_out" } });
-    await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+    // await prisma.cart.update({ where: { id: cart.id }, data: { status: "checked_out" } });
+    // await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
 
     const first = confirmations[0];
     const booking = first ? await prisma.booking.findUnique({ where: { id: first.bookingId } }) : null;
