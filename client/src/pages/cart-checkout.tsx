@@ -272,12 +272,6 @@ export default function CartCheckout() {
                     bookingRef={createdOrder.id}
                     amount={total}
                     description={`Berry Events Order ${createdOrder.orderNumber || createdOrder.id.slice(0, 8)}`}
-                    onSuccess={async () => {
-                      // Clear cart only after payment redirect
-                      await clearCart();
-                      localStorage.removeItem('cart');
-                      window.location.href = '/bookings/success';
-                    }}
                   />
                 </div>
               ) : (

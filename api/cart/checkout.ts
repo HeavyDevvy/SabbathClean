@@ -79,6 +79,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       return;
     }
 
+    // Ensure cart is linked to user for later clearing in webhook
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: { userId }
+    });
+
     const confirmations: Array<{ bookingId: string; paymentId: string }> = [];
 
     for (const item of items) {

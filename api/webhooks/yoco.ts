@@ -82,6 +82,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               data: { status: 'CONFIRMED' }
             });
 
+            // Clear the user's cart now that payment is confirmed
+            try {
+              const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+              if (booking && booking.userId) {
+                // Find active carts for this user
+                const activeCarts = await prisma.cart.findMany({
+                  where: { userId: booking.userId, status: 'active' }
+                });
+                
+                for (const cart of activeCarts) {
+                  // Mark as checked out
+                  await prisma.cart.update({
+                    where: { id: cart.id },
+                    data: { status: 'checked_out' }
+                  });
+                  // Remove items
+                  await prisma.cartItem.deleteMany({
+                    where: { cartId: cart.id }
+                  });
+                }
+                console.log(`[Webhook] Cleared carts for user ${booking.userId}`);
+              }
+            } catch (cartError) {
+              console.error("[Webhook] Failed to clear cart:", cartError);
+              // Don't fail the webhook just because cart clearing failed
+            }
+
             try {
               const booking = await prisma.booking.findUnique({
                 where: { id: bookingId },
