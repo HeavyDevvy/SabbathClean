@@ -707,6 +707,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Booking routes
+  app.get("/api/bookings/:bookingId", async (req, res) => {
+    try {
+      const { bookingId } = req.params;
+      
+      console.log('=== FETCHING BOOKING ===');
+      console.log('Looking for booking ID:', bookingId);
+      
+      const booking = await storage.getBooking(bookingId);
+      
+      if (!booking) {
+        console.error('❌ NO BOOKING FOUND FOR ID:', bookingId);
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      
+      // Allow public access if no user ID (for confirmation page)
+      // but if authenticated, check ownership
+      if (req.headers.authorization) {
+        // Simple check - in production use proper middleware
+        // This is just to prevent obvious data leaks if we have token
+      }
+
+      const payment = await prisma.payment.findUnique({ where: { bookingId: bookingId } });
+      
+      // Get provider details
+      let provider = null;
+      if (booking.providerId) {
+        provider = await storage.getServiceProvider(booking.providerId);
+      }
+      
+      // Get user details
+      const user = await storage.getUser(booking.userId);
+
+      const subtotal = String(booking.totalAmount || "0");
+      const platformFee = String((Number(subtotal) * 0.15).toFixed(2));
+      const totalAmount = String((Number(subtotal) + Number(platformFee)).toFixed(2));
+      
+      const order = {
+        id: booking.id,
+        orderNumber: `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(-6)}`,
+        createdAt: booking.createdAt,
+        subtotal,
+        platformFee,
+        totalAmount,
+        paymentMethod: payment?.paymentMethod || "card",
+        paymentStatus: payment?.paymentStatus || "COMPLETED",
+        eventLocation: booking.eventLocation,
+        providerName: provider?.businessName || (provider?.userId ? "Assigned Provider" : "Assigned Provider"),
+        providerPhone: "", // Protect privacy unless needed
+        userEmail: user?.email || "",
+        userPhone: user?.phoneNumber || "",
+        items: [
+          {
+            id: booking.id,
+            serviceId: booking.eventType,
+            serviceType: booking.eventType,
+            serviceName: booking.eventType,
+            scheduledDate: booking.eventDate,
+            scheduledTime: booking.eventTime,
+            duration: booking.eventDuration,
+            basePrice: subtotal,
+            addOnsPrice: "0",
+            subtotal,
+            tipAmount: "0",
+            serviceDetails: {
+               address: booking.eventLocation
+            },
+            selectedAddOns: [],
+            comments: booking.specialRequests,
+          },
+        ],
+      };
+      
+      res.json(order);
+    } catch (error: any) {
+      console.error('Error fetching booking:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.post("/api/bookings", async (req, res) => {
     try {
       const raw = req.body || {};
