@@ -94,7 +94,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           eventLocation: "unspecified",
           numberOfGuests: null,
           specialRequests: item.comments || null,
-          status: "CONFIRMED",
+          status: "PENDING",
           totalAmount: String(item.subtotal || "0"),
         }
       });

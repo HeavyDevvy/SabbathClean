@@ -30,6 +30,10 @@ export default function BookingConfirmation() {
       const res = await fetch(`/api/orders/${orderId}`);
       if (!res.ok) throw new Error("Failed to fetch order");
       return res.json();
+    },
+    refetchInterval: (data) => {
+      // Poll if booking is not yet confirmed (e.g. webhook delay)
+      return data?.state?.status === 'PENDING' ? 2000 : false;
     }
   });
 

@@ -75,8 +75,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
           });
 
-          // Send confirmation email if payment succeeded
+          // Update booking status if payment succeeded
           if (newStatus === 'COMPLETED') {
+            await prisma.booking.update({
+              where: { id: bookingId },
+              data: { status: 'CONFIRMED' }
+            });
+
             try {
               const booking = await prisma.booking.findUnique({
                 where: { id: bookingId },
