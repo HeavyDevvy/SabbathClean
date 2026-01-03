@@ -26,12 +26,18 @@ export default function BookingConfirmation() {
 
   // Fetch order details
   const { data: order, isLoading, error } = useQuery({
-    queryKey: [`/api/orders/${orderId}`],
+    queryKey: [`/api/bookings/${orderId}`],
     enabled: !!orderId,
     queryFn: async () => {
-      const res = await fetch(`/api/orders/${orderId}`);
-      if (!res.ok) throw new Error("Failed to fetch order");
-      return res.json();
+      console.log('🔍 FETCHING BOOKING:', orderId);
+      const res = await fetch(`/api/bookings/${orderId}`);
+      if (!res.ok) {
+        console.error('❌ BOOKING FETCH FAILED:', res.status);
+        throw new Error("Failed to fetch order");
+      }
+      const data = await res.json();
+      console.log('✓ BOOKING FETCHED:', data);
+      return data;
     },
     refetchInterval: (data) => {
       // Poll if booking is not yet confirmed (e.g. webhook delay)
