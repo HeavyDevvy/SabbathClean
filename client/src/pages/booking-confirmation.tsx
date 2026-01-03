@@ -18,9 +18,17 @@ export default function BookingConfirmation() {
   
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    
+    console.log('=== BOOKING CONFIRMATION DEBUG ===');
+    console.log('Full URL:', window.location.href);
+    console.log('Search params:', window.location.search);
+    console.log('booking_id param:', params.get('booking_id'));
+    console.log('order_id param:', params.get('order_id'));
+    console.log('ref param:', params.get('ref'));
+    
     // Support both booking_id (new standard) and order_id/ref (legacy)
     const id = params.get("booking_id") || params.get("order_id") || params.get("ref");
-    console.log('📄 CONFIRMATION PAGE - BOOKING ID FROM URL:', id);
+    console.log('📄 FINAL BOOKING ID TO USE:', id);
     if (id) setOrderId(id);
   }, []);
 
