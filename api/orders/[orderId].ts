@@ -28,12 +28,30 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       } catch {}
     }
     const booking = await prisma.booking.findUnique({ where: { id: orderId } });
-    if (!booking || (userId && booking.userId !== userId)) {
+    if (!booking) {
       res.statusCode = 404;
       res.end(JSON.stringify({ message: "Order not found" }));
       return;
     }
+    
+    // Allow public access if no user ID (for confirmation page) but limit details if needed
+    if (userId && booking.userId !== userId) {
+      res.statusCode = 403;
+      res.end(JSON.stringify({ message: "Forbidden" }));
+      return;
+    }
+
     const payment = await prisma.payment.findUnique({ where: { bookingId: orderId } });
+    
+    // Get provider details
+    const provider = await prisma.serviceProvider.findUnique({ 
+      where: { id: booking.providerId },
+      include: { user: true }
+    });
+    
+    // Get user details
+    const user = await prisma.user.findUnique({ where: { id: booking.userId } });
+
     const subtotal = String(booking.totalAmount || "0");
     const platformFee = String((Number(subtotal) * 0.15).toFixed(2));
     const totalAmount = String((Number(subtotal) + Number(platformFee)).toFixed(2));
@@ -46,6 +64,11 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       totalAmount,
       paymentMethod: payment?.paymentMethod || "card",
       paymentStatus: payment?.paymentStatus || "COMPLETED",
+      eventLocation: booking.eventLocation,
+      providerName: provider?.businessName || (provider?.user ? `${provider.user.firstName} ${provider.user.lastName}` : "Assigned Provider"),
+      providerPhone: provider?.user?.phoneNumber || "",
+      userEmail: user?.email || "",
+      userPhone: user?.phoneNumber || "",
       items: [
         {
           id: booking.id,
@@ -59,9 +82,11 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           addOnsPrice: "0",
           subtotal,
           tipAmount: "0",
-          serviceDetails: null,
+          serviceDetails: {
+             address: booking.eventLocation
+          },
           selectedAddOns: [],
-          comments: null,
+          comments: booking.specialRequests,
         },
       ],
     };
