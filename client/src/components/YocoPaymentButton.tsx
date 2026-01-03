@@ -33,7 +33,7 @@ export function YocoPaymentButton({
           bookingId: bookingRef,
           amount: Math.round(amount * 100), // Convert to cents
           description,
-          successUrl: `${window.location.origin}/booking-confirmation?order_id=${bookingRef}`,
+          successUrl: `${window.location.origin}/booking-confirmation?booking_id=${bookingRef}`,
           cancelUrl: `${window.location.origin}/cart-checkout?cancelled=true`,
           failureUrl: `${window.location.origin}/cart-checkout?failed=true`,
         }),
