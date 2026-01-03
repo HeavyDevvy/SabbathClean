@@ -108,9 +108,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
           platformCommission: "0",
           providerPayout: String(item.subtotal || "0"),
           paymentMethod: paymentMethod,
-          paymentStatus: "COMPLETED",
-          transactionId: Math.random().toString(36).slice(2),
-          paymentDate: new Date(),
+          paymentStatus: "PENDING",
+          transactionId: null,
+          paymentDate: null,
         }
       });
 

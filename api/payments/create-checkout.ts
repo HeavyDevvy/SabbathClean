@@ -19,8 +19,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const existingPayment = await prisma.payment.findUnique({ where: { bookingId } });
     if (existingPayment && existingPayment.paymentStatus === "COMPLETED") {
-      return res.status(409).json({ error: "Booking already paid" });
+      console.warn(`[CreateCheckout] Conflict: Booking ${bookingId} already paid`);
+      return res.status(409).json({ error: "Booking already paid", code: "BOOKING_PAID" });
     }
+
+    // Clear any previous pending payment state or invalid transaction IDs
+    if (existingPayment && existingPayment.paymentStatus !== "COMPLETED") {
+       console.log(`[CreateCheckout] Resetting previous payment attempt for booking ${bookingId}`);
+    }
+
     const subtotalRands = Number(booking.totalAmount || 0);
     const platformFeeCents = Math.round(subtotalRands * 100 * 0.15);
     const totalCents = Math.round(subtotalRands * 100) + platformFeeCents;
@@ -28,13 +35,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? process.env.YOCO_SECRET_KEY_LIVE
       : process.env.YOCO_SECRET_KEY_TEST) || "";
     if (!yocoSecretKey) {
+      console.error("[CreateCheckout] Yoco secret key missing");
       return res.status(500).json({ error: "Payment configuration missing" });
     }
+
+    console.log(`[CreateCheckout] Creating Yoco checkout for booking ${bookingId}, amount: ${totalCents}`);
+
     const r = await fetch("https://payments.yoco.com/api/checkouts", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${yocoSecretKey}`,
         "Content-Type": "application/json",
+        "Idempotency-Key": `checkout_${bookingId}_${Math.floor(Date.now() / (1000 * 60 * 60))}` // Idempotent for 1 hour
       },
       body: JSON.stringify({
         amount: totalCents,

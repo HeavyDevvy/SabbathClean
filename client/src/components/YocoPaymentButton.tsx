@@ -39,11 +39,22 @@ export function YocoPaymentButton({
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        if (response.status === 409 && data.code === "BOOKING_PAID") {
+          toast({
+            title: "Booking Already Paid",
+            description: "This booking has already been paid. Redirecting...",
+          });
+          if (onSuccess) await onSuccess();
+          window.location.href = `/bookings/success?ref=${bookingRef}`;
+          return;
+        }
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      const { redirectUrl } = await response.json();
+      const { redirectUrl } = data;
       
       // Call onSuccess callback if provided
       if (onSuccess) await onSuccess();
