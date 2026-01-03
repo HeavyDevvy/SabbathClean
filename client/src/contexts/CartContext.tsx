@@ -225,6 +225,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const order = await checkoutMutation.mutateAsync(paymentData);
       
+      console.log('CHECKOUT ID FROM API:', order?.id);
+      
       toast({
         title: "Order confirmed!",
         description: "Your booking has been confirmed successfully",

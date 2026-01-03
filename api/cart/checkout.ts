@@ -173,7 +173,15 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     res.statusCode = 201;
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify({ message: "Checkout completed", confirmations, order }));
+    // Ensure we return the checkoutId which is the booking ID
+    const responseData = { 
+      message: "Checkout completed", 
+      confirmations, 
+      order,
+      checkoutId: booking?.id || first.bookingId // This is critical
+    };
+    console.log('✓ RETURNING CHECKOUT RESPONSE:', JSON.stringify(responseData));
+    res.end(JSON.stringify(responseData));
     return;
   } catch (e: any) {
     console.error('❌ CHECKOUT FAILED:', e);
