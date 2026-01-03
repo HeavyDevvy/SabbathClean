@@ -41,6 +41,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     return;
   }
 
+  console.log('=== CHECKOUT STARTED ===');
+
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const paymentMethod = body?.paymentMethod || "card";
@@ -105,6 +107,13 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         }
       });
 
+      console.log('✓ BOOKING CREATED:', {
+        id: booking.id,
+        userId: booking.userId,
+        status: booking.status,
+        totalAmount: booking.totalAmount,
+      });
+
       const payment = await prisma.payment.create({
         data: {
           bookingId: booking.id,
@@ -167,6 +176,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     res.end(JSON.stringify({ message: "Checkout completed", confirmations, order }));
     return;
   } catch (e: any) {
+    console.error('❌ CHECKOUT FAILED:', e);
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify({ message: e?.message || "Checkout failed" }));

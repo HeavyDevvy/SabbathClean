@@ -13,6 +13,9 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     const url = req.url || "";
     const parts = url.split("/").filter(Boolean);
     const orderId = parts[parts.length - 1];
+    console.log('=== FETCHING BOOKING ===');
+    console.log('Looking for booking ID:', orderId);
+    
     if (!orderId) {
       res.statusCode = 400;
       res.end(JSON.stringify({ message: "orderId required" }));
@@ -28,6 +31,14 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       } catch {}
     }
     const booking = await prisma.booking.findUnique({ where: { id: orderId } });
+    
+    console.log('BOOKING FOUND:', booking ? 'YES' : 'NO');
+    if (booking) {
+      console.log('BOOKING DATA:', JSON.stringify({ id: booking.id, status: booking.status }, null, 2));
+    } else {
+      console.error('❌ NO BOOKING FOUND FOR ID:', orderId);
+    }
+
     if (!booking) {
       res.statusCode = 404;
       res.end(JSON.stringify({ message: "Order not found" }));
