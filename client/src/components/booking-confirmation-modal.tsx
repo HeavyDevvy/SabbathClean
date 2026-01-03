@@ -22,6 +22,7 @@ import berryLogoPath from "@assets/Untitled (Logo) (2)_1763529143099.png";
 import { generateBookingReceipt } from "@/lib/pdfGenerator";
 import { downloadCalendarInvite } from "@/lib/calendarGenerator";
 import { useToast } from "@/hooks/use-toast";
+import { YocoPaymentButton } from "./YocoPaymentButton";
 
 interface BookingConfirmationModalProps {
   isOpen: boolean;
@@ -361,6 +362,17 @@ export default function BookingConfirmationModal({
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-3 pt-6">
+          <div className="w-full mb-2">
+            <YocoPaymentButton 
+              bookingRef={bookingRef} 
+              amount={totalCost} 
+              description={`Booking: ${isMultiService ? bookings.length + ' services' : primaryBooking.serviceName}`} 
+              onSuccess={() => { 
+                console.log('Payment initiated'); 
+              }} 
+            />
+          </div>
+          
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               variant="outline" 
