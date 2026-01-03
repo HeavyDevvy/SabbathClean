@@ -173,12 +173,13 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     res.statusCode = 201;
     res.setHeader("Content-Type", "application/json");
-    // Ensure we return the checkoutId which is the booking ID
+    // Ensure we return the bookingId explicitly
+    const bookingId = booking?.id || first.bookingId;
     const responseData = { 
-      message: "Checkout completed", 
-      confirmations, 
-      order,
-      checkoutId: booking?.id || first.bookingId // This is critical
+      success: true,
+      bookingId: bookingId, // Use bookingId, not checkoutId
+      booking: order,
+      message: "Checkout completed"
     };
     console.log('✓ RETURNING CHECKOUT RESPONSE:', JSON.stringify(responseData));
     res.end(JSON.stringify(responseData));

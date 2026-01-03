@@ -10,13 +10,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const bookingId = String(body?.bookingId || "");
+    
+    console.log('💳 PAYMENT CREATE - RECEIVED BOOKING ID:', bookingId);
+
     if (!bookingId) {
+      console.error('❌ NO BOOKING ID PROVIDED TO PAYMENT');
       return res.status(400).json({ error: "bookingId required" });
     }
     const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) {
+      console.error('❌ BOOKING NOT FOUND IN DATABASE:', bookingId);
       return res.status(404).json({ error: "Booking not found" });
     }
+
+    console.log('✓ BOOKING VERIFIED:', { 
+      id: booking.id, 
+      status: booking.status, 
+      amount: booking.totalAmount 
+    });
     const existingPayment = await prisma.payment.findUnique({ where: { bookingId } });
     if (existingPayment && existingPayment.paymentStatus === "COMPLETED") {
       console.warn(`[CreateCheckout] Conflict: Booking ${bookingId} already paid`);
@@ -39,9 +50,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: "Payment configuration missing" });
     }
 
-    const successUrl = body?.successUrl || `https://www.berryevents.co.za/booking-confirmation?order_id=${bookingId}`;
-    console.log('YOCO REDIRECT URL:', successUrl);
-    console.log('BOOKING ID IN METADATA:', bookingId);
+    const successUrl = body?.successUrl || `https://www.berryevents.co.za/booking-confirmation?booking_id=${bookingId}`;
+    console.log('🔗 YOCO SUCCESS URL:', successUrl);
     const cancelUrl = body?.cancelUrl || `https://www.berryevents.co.za/checkout?cancelled=true`;
     const failureUrl = body?.failureUrl || `https://www.berryevents.co.za/checkout?failed=true`;
 

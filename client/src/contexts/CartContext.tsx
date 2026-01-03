@@ -190,7 +190,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Checkout mutation
+  // Checkout mutation - removed, handled directly in checkout function now
+  /*
   const checkoutMutation = useMutation({
     mutationFn: async (paymentData: any) => {
       const response = await apiRequest('POST', '/api/cart/checkout', paymentData);
@@ -202,6 +203,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
     },
   });
+  */
 
   // Context methods
   const addToCart = async (item: Partial<CartItem>) => {
@@ -223,15 +225,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const checkout = async (paymentData: any): Promise<Order | null> => {
     setIsCheckingOut(true);
     try {
-      const order = await checkoutMutation.mutateAsync(paymentData);
+      const response = await apiRequest('POST', '/api/cart/checkout', paymentData);
+      const data = await response.json();
+      const order = data.booking || data.order; // Handle new structure
       
-      console.log('CHECKOUT ID FROM API:', order?.id);
+      console.log('📦 CHECKOUT RESPONSE:', data);
+      console.log('🎯 BOOKING ID TO USE:', data.bookingId || order?.id);
       
-      toast({
-        title: "Order confirmed!",
-        description: "Your booking has been confirmed successfully",
-      });
-      
+      // Ensure we have an order object with the correct ID
+      if (data.bookingId && order) {
+        order.id = data.bookingId;
+      }
+
       return order;
     } catch (error: any) {
       toast({
@@ -242,6 +247,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return null;
     } finally {
       setIsCheckingOut(false);
+      // Invalidate queries after checkout attempt
+      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
     }
   };
 
