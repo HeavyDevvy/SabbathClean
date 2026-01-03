@@ -711,10 +711,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { bookingId } = req.params;
       
-      console.log('=== FETCHING BOOKING ===');
-      console.log('Looking for booking ID:', bookingId);
+      console.log('=== EXPRESS BOOKING ROUTE ===');
+      console.log('Requested booking ID:', bookingId);
       
       const booking = await storage.getBooking(bookingId);
+      console.log('Database result:', booking ? 'FOUND' : 'NOT FOUND');
       
       if (!booking) {
         console.error('❌ NO BOOKING FOUND FOR ID:', bookingId);
@@ -779,6 +780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
       };
       
+      console.log('Returning booking data');
       res.json(order);
     } catch (error: any) {
       console.error('Error fetching booking:', error);
