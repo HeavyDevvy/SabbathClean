@@ -12,6 +12,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const bookingId = String(body?.bookingId || "");
     
     console.log('💳 PAYMENT CREATE - RECEIVED BOOKING ID:', bookingId);
+    console.log('=== PAYMENT RECEIVED ===');
+    console.log('bookingId:', bookingId);
+    console.log('bookingId length:', bookingId.length);
+    console.log('bookingId characters:', bookingId.split(''));
 
     if (!bookingId) {
       console.error('❌ NO BOOKING ID PROVIDED TO PAYMENT');

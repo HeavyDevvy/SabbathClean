@@ -113,6 +113,10 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         status: booking.status,
         totalAmount: booking.totalAmount,
       });
+      console.log('=== BOOKING ID CREATED ===');
+      console.log('ID as string:', booking.id);
+      console.log('ID length:', booking.id.length);
+      console.log('ID characters:', booking.id.split(''));
 
       const payment = await prisma.payment.create({
         data: {

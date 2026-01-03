@@ -230,6 +230,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const order = data.booking || data.order; // Handle new structure
       
       console.log('📦 CHECKOUT RESPONSE:', data);
+      console.log('=== FRONTEND RECEIVED ===');
+      console.log('bookingId:', data.bookingId);
+      console.log('bookingId length:', data.bookingId?.length);
+      console.log('bookingId characters:', data.bookingId?.split(''));
       console.log('🎯 BOOKING ID TO USE:', data.bookingId || order?.id);
       
       // Ensure we have an order object with the correct ID
