@@ -29,6 +29,7 @@ import { createHash } from "crypto";
 import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  console.log('=== ROUTES FILE LOADING ===');
   function generateReferralCode(providerId: string) {
     return createHash("sha256").update(providerId).digest("hex").slice(0, 8).toUpperCase();
   }
@@ -707,6 +708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Booking routes
+  console.log('=== REGISTERING BOOKING ROUTE ===');
   app.get("/api/bookings/:bookingId", async (req, res) => {
     try {
       const { bookingId } = req.params;
