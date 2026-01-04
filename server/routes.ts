@@ -504,18 +504,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get all completed bookings for this provider
       const allBookings = await storage.getBookingsByProvider(providerId);
-      const completedBookings = allBookings.filter(booking => booking.status === 'completed');
+      const completedBookings = allBookings.filter((b: any) => b.status === 'completed');
+      const pendingBookings = allBookings.filter((b: any) => b.status === 'pending');
       
       // Calculate total earnings (total amount - platform commission)
-      const totalRevenue = completedBookings.reduce((sum, booking) => sum + (Number((booking as any).totalAmount || 0)), 0);
+      const totalRevenue = completedBookings.reduce((sum: number, booking: any) => sum + (Number(booking.totalPrice || booking.totalAmount || 0)), 0);
       const platformCommission = totalRevenue * 0.15; // 15% commission
       const totalEarnings = totalRevenue - platformCommission;
       
       // Calculate pending payouts (completed but not yet paid)
-      const pendingBookings = allBookings.filter(booking => 
-        booking.status === 'completed' && booking.paymentStatus !== 'paid'
-      );
-      const pendingPayouts = pendingBookings.reduce((sum, booking) => sum + (Number((booking as any).totalAmount || 0)), 0) * 0.85;
+      const pendingPayouts = pendingBookings.reduce((sum: number, booking: any) => sum + (Number(booking.totalPrice || booking.totalAmount || 0)), 0) * 0.85;
       
       res.json({
         totalEarnings: Math.round(totalEarnings * 100) / 100,
@@ -622,10 +620,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Booking not found" });
       }
       
+      // Validate providerId before use
       if (!booking.providerId) {
         return res.json({ message: "No provider assigned yet", tracking: null });
       }
       
+      // Safe to use providerId now
       const providerLocation = await LocationService.getProviderLocation(booking.providerId);
       const provider = await storage.getServiceProvider(booking.providerId);
       
@@ -734,25 +734,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get user details
-      const user = await storage.getUser(booking.userId);
+      const user = await storage.getUser(booking.customerId);
 
       // Map fields safely
       // Booking has totalPrice, but frontend might look for totalAmount or subtotal
-      const subtotal = String(booking.totalPrice || booking.totalAmount || "0");
+      const subtotal = String(booking.totalPrice || "0");
       const platformFee = String(booking.platformFee || (Number(subtotal) * 0.15).toFixed(2));
-      const totalAmount = String(booking.totalPrice || booking.totalAmount || subtotal);
+      const totalAmount = String(booking.totalPrice || subtotal);
       
       const order = {
         id: booking.id,
-        orderNumber: booking.bookingNumber || `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(0, 6)}`,
+        orderNumber: booking.bookingNumber || `BE-${new Date(booking.createdAt || Date.now()).getFullYear()}-${booking.id.slice(0, 6)}`,
         createdAt: booking.createdAt,
         subtotal,
         platformFee,
         totalAmount,
-        paymentMethod: booking.paymentMethod || "card",
+        paymentMethod: (booking as any).paymentMethod || "card",
         paymentStatus: booking.paymentStatus || "COMPLETED",
-        eventLocation: booking.address || booking.eventLocation,
-        providerName: provider?.businessName || (provider?.firstName ? `${provider.firstName} ${provider.lastName}` : "Assigned Provider"),
+        eventLocation: booking.address,
+        providerName: provider?.companyName || (provider?.firstName ? `${provider.firstName} ${provider.lastName}` : "Assigned Provider"),
         providerPhone: provider?.phone || "", 
         userEmail: user?.email || "",
         userPhone: user?.phone || "",
@@ -760,21 +760,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [
           {
             id: booking.id,
-            serviceId: booking.serviceId || booking.eventType,
-            serviceType: booking.serviceType || booking.eventType,
-            serviceName: booking.serviceType || booking.eventType || "Service",
-            scheduledDate: booking.scheduledDate || booking.eventDate,
-            scheduledTime: booking.scheduledTime || booking.eventTime,
-            duration: booking.duration || booking.eventDuration,
+            serviceId: booking.serviceId,
+            serviceType: booking.serviceType,
+            serviceName: booking.serviceType || "Service",
+            scheduledDate: booking.scheduledDate,
+            scheduledTime: booking.scheduledTime,
+            duration: booking.duration,
             basePrice: subtotal,
             addOnsPrice: "0",
             subtotal,
             tipAmount: booking.tipAmount || "0",
             serviceDetails: {
-               address: booking.address || booking.eventLocation
+               address: booking.address
             },
             selectedAddOns: [],
-            comments: booking.specialInstructions || booking.specialRequests,
+            comments: booking.specialInstructions,
           },
         ],
       };

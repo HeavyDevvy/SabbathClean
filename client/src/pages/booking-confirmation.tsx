@@ -47,9 +47,9 @@ export default function BookingConfirmation() {
       console.log('✓ BOOKING FETCHED:', data);
       return data;
     },
-    refetchInterval: (data) => {
+    refetchInterval: (data: any) => {
       // Poll if booking is not yet confirmed (e.g. webhook delay)
-      return data?.state?.status === 'PENDING' ? 2000 : false;
+      return data?.status === 'pending' ? 2000 : false;
     }
   });
 
