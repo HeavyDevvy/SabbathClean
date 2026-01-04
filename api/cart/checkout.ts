@@ -1,7 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import { storage } from "../../server/storage";
 import jwt from "jsonwebtoken";
-import { randomUUID } from "crypto";
 
 function readCookie(req: any, name: string): string | undefined {
   const header = req.headers["cookie"] as string | undefined;
@@ -14,7 +13,7 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
-function generateBookingReference() {
+export function generateBookingReference() {
   const year = new Date().getFullYear();
   const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `BE-${year}-${randomChars}`;
@@ -28,7 +27,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     return;
   }
 
-  console.log('=== CHECKOUT STARTED (Vercel Function) ===');
+  console.log('=== CHECKOUT STARTED ===');
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
@@ -41,9 +40,11 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     if (token) {
       try {
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "");
-        userId = decoded?.userId || decoded?.id; // Support both standard JWT payload and custom
+        userId = decoded?.userId || decoded?.id;
       } catch {}
     }
+
+    console.log('User ID:', userId);
 
     if (!userId) {
       res.statusCode = 401;
@@ -54,13 +55,10 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // 2. Get Cart
     const sessionToken = readCookie(req, "cart_session");
-    
-    // Get cart for authenticated user
     const cart = await storage.getOrCreateCart(userId, undefined);
     let cartData = await storage.getCartWithItems(cart.id);
     let usingGuestCart = false;
 
-    // Attempt merge if user cart is empty
     if (!cartData || cartData.items.length === 0) {
       if (sessionToken) {
         try {
@@ -73,8 +71,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       }
     }
 
-    // Fallback to guest cart if still empty
     if (!cartData || cartData.items.length === 0) {
+      // Fallback check
       if (sessionToken) {
         const guestCart = await storage.getOrCreateCart(undefined, sessionToken);
         const guestData = await storage.getCartWithItems(guestCart.id);
@@ -86,6 +84,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     }
 
     if (!cartData || cartData.items.length === 0) {
+      console.error('❌ Cart is empty');
       res.statusCode = 400;
       res.setHeader("Content-Type", "application/json");
       res.end(JSON.stringify({ message: "Cart is empty" }));
@@ -113,9 +112,8 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       platformFee: platformFee.toString(),
       totalAmount: totalAmount.toString(),
       paymentMethod,
-      paymentStatus: paymentMethod === "wallet" ? "pending" : "paid", // Assume paid for external (mock)
+      paymentStatus: paymentMethod === "wallet" ? "pending" : "paid",
       status: paymentMethod === "wallet" ? "pending_payment" : "confirmed",
-      // Payment metadata
       ...(paymentMethod === "card" ? { cardLast4, cardBrand, cardholderName } : {}),
       ...(paymentMethod === "bank" ? { accountLast4, bankName, accountHolder } : {})
     } as any;
@@ -143,7 +141,10 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       clearCart: paymentMethod !== "wallet"
     });
 
-    // 5. Create Bookings (The user requested fix for booking reference)
+    // 5. Create Bookings with ONE Reference
+    const bookingRef = generateBookingReference();
+    console.log('📋 Generated Reference:', bookingRef);
+
     const completeOrder = await storage.getOrderWithItems(order.id);
     const createdBookings: any[] = [];
 
@@ -158,31 +159,20 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         const perItemPlatformFee = Math.round(itemSubtotal * 0.15 * 100) / 100;
         
         const bookingNumber = `${order.orderNumber}-${idx + 1}`;
-        const bookingReference = generateBookingReference(); // Generate unique reference
         
-        // Find a provider if one wasn't selected (Auto-assign logic placeholder)
-        // For now, if no provider, we leave it null (pending-provider)
-        const providerIdForBooking = item.providerId || (details?.provider?.id ?? null);
-
-        // Ensure serviceId is present (Required by DB)
-        // If item.serviceId is null (custom cart item), we need a fallback or lookup
-        // We will assume item.serviceId is populated from cart. If not, we might fail.
-        // As a fallback, we can try to find a service by category.
+        // Find service ID fallback
         let serviceId = item.serviceId;
         if (!serviceId) {
            const services = await storage.getServicesByCategory(item.serviceType);
            if (services.length > 0) serviceId = services[0].id;
         }
-        
-        // If still no serviceId, we have a problem. But let's try to proceed.
-        // Ideally we should have a "Custom Service" record.
 
         const bookingData: any = {
           customerId: userId,
-          providerId: providerIdForBooking,
-          serviceId: serviceId, 
+          providerId: item.providerId || (details?.provider?.id ?? null),
+          serviceId: serviceId || "unknown",
           bookingNumber,
-          bookingReference, // <--- Added booking reference
+          bookingReference: bookingRef, // Shared reference
           scheduledDate: item.scheduledDate,
           scheduledTime: item.scheduledTime,
           duration: item.duration || 2,
@@ -204,24 +194,34 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
         try {
           const booking = await storage.createBooking(bookingData);
           createdBookings.push(booking);
-          console.log(`✓ Booking created: ${booking.id} (Ref: ${bookingReference})`);
+          console.log(`✅ BOOKING CREATED: ${booking.id} (Ref: ${bookingRef})`);
         } catch (err) {
           console.error(`Failed to create booking for item ${idx}:`, err);
         }
       }
     }
 
-    // 6. Response
-    // Construct response matching what frontend expects (from previous logs)
+    // Verify booking was saved (check the first one)
+    if (createdBookings.length > 0) {
+        const firstId = createdBookings[0].id;
+        const verifyBooking = await storage.getBooking(firstId);
+        if (!verifyBooking) {
+            console.error('❌ CRITICAL: Booking not found immediately after creation!');
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Failed to save booking' }));
+            return;
+        }
+        console.log('✅ Booking verified in database');
+    } else {
+        console.error('❌ No bookings created from order items');
+    }
+
     const firstBooking = createdBookings[0];
-    
-    // If no bookings created (e.g. error), fallback to order ID
     const bookingId = firstBooking?.id || order.id;
 
-    // Construct the "booking" object the frontend expects
-    // It seems to expect an Order-like object but calls it "booking"
     const responseOrder = {
-      id: bookingId, // Frontend uses this
+      id: bookingId,
+      bookingReference: bookingRef,
       orderNumber: order.orderNumber,
       createdAt: order.createdAt,
       subtotal: order.subtotal,
@@ -231,24 +231,23 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       paymentStatus: order.paymentStatus,
       items: completeOrder?.items.map(i => ({
         ...i,
-        // Ensure fields expected by frontend are present
         serviceName: i.serviceName,
         scheduledDate: i.scheduledDate,
         scheduledTime: i.scheduledTime
       })) || []
     };
 
-    res.statusCode = 201;
-    res.setHeader("Content-Type", "application/json");
-    
     const responseData = { 
       success: true,
       bookingId: bookingId,
+      bookingReference: bookingRef,
       booking: responseOrder,
       message: "Checkout completed successfully"
     };
     
-    console.log('✓ RETURNING CHECKOUT RESPONSE:', JSON.stringify(responseData, null, 2));
+    console.log('✓ RETURNING CHECKOUT RESPONSE');
+    res.statusCode = 201;
+    res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify(responseData));
 
   } catch (e: any) {

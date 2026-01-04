@@ -709,20 +709,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Booking routes
   console.log('=== REGISTERING BOOKING ROUTE ===');
-  app.get("/api/bookings/:bookingId", async (req, res) => {
+  app.get("/api/bookings/:identifier", async (req, res) => {
     try {
-      const { bookingId } = req.params;
+      const { identifier } = req.params;
       
-      console.log('=== EXPRESS BOOKING ROUTE ===');
-      console.log('Requested booking ID:', bookingId);
+      console.log('=== BOOKING LOOKUP ===');
+      console.log('🔍 Looking for:', identifier);
+      console.log('  - Type:', identifier.startsWith('BE-') ? 'Reference' : 'ID');
       
-      const booking = await storage.getBooking(bookingId);
-      console.log('Database result:', booking ? 'FOUND' : 'NOT FOUND');
+      let booking;
+      
+      if (identifier.startsWith('BE-')) {
+        console.log('📋 Searching by reference...');
+        booking = await storage.getBookingByReference(identifier);
+      } else {
+        console.log('🆔 Searching by ID...');
+        booking = await storage.getBooking(identifier);
+      }
       
       if (!booking) {
-        console.error('❌ NO BOOKING FOUND FOR ID:', bookingId);
+        console.error('❌ BOOKING NOT FOUND');
+        console.error('  - Searched for:', identifier);
         return res.status(404).json({ message: "Booking not found" });
       }
+      
+      console.log('✅ BOOKING FOUND:', booking.id);
       
       // Reconstruct the order object to match frontend expectations
       // This ensures compatibility with the confirmation page which expects 'items' array
@@ -744,6 +755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const order = {
         id: booking.id,
+        bookingReference: booking.bookingReference,
         orderNumber: booking.bookingReference || booking.bookingNumber || `BE-${new Date(booking.createdAt || Date.now()).getFullYear()}-${booking.id.slice(0, 6)}`,
         createdAt: booking.createdAt,
         subtotal,
@@ -751,6 +763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalAmount,
         paymentMethod: (booking as any).paymentMethod || "card",
         paymentStatus: booking.paymentStatus || "COMPLETED",
+        status: booking.status,
         eventLocation: booking.address,
         providerName: provider?.companyName || (provider?.firstName ? `${provider.firstName} ${provider.lastName}` : "Assigned Provider"),
         providerPhone: provider?.phone || "", 

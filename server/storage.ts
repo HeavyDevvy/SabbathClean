@@ -2889,12 +2889,23 @@ export class MemStorage implements IStorage {
 }
 
 // Switch to in-memory storage for development, or when explicitly requested
-const useMemStorage = process.env.USE_MEM_STORAGE === '1' || process.env.NODE_ENV !== 'production';
+const usePersistentStorage = process.env.USE_MEM_STORAGE === '0' || 
+                            process.env.NODE_ENV === 'production';
+
 let storageImpl: IStorage;
-try {
-  storageImpl = useMemStorage ? (new MemStorage() as unknown as IStorage) : new DatabaseStorage();
-} catch (e) {
-  // Fallback to memory if database storage fails to initialize
+
+if (usePersistentStorage && process.env.DATABASE_URL) {
+  try {
+    storageImpl = new DatabaseStorage();
+    console.log('✅ Using PostgreSQL Database Storage');
+  } catch (error) {
+    console.error('❌ Failed to initialize DatabaseStorage:', error);
+    storageImpl = new MemStorage() as unknown as IStorage;
+    console.log('⚠️ Fallback to In-Memory Storage due to initialization error');
+  }
+} else {
   storageImpl = new MemStorage() as unknown as IStorage;
+  console.log('⚠️ Using In-Memory Storage - Data will be lost on restart');
 }
+
 export const storage: IStorage = storageImpl;

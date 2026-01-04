@@ -13,38 +13,58 @@ export default function BookingConfirmation() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
-  // Get order_id from URL query params
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const [identifier, setIdentifier] = useState<string | null>(null);
   
   useEffect(() => {
+    console.log('=== BOOKING CONFIRMATION PAGE ===');
+    console.log('📄 Full URL:', window.location.href);
+    
     const params = new URLSearchParams(window.location.search);
+    console.log('📋 URL Parameters:');
+    console.log('  - ref:', params.get('ref'));
+    console.log('  - id:', params.get('id'));
+    console.log('  - booking_id:', params.get('booking_id'));
+    console.log('  - order_id:', params.get('order_id'));
     
-    console.log('=== BOOKING CONFIRMATION DEBUG ===');
-    console.log('Full URL:', window.location.href);
-    console.log('Search params:', window.location.search);
-    console.log('booking_id param:', params.get('booking_id'));
-    console.log('order_id param:', params.get('order_id'));
-    console.log('ref param:', params.get('ref'));
+    // Get identifier (prefer reference, fallback to ID)
+    const ref = params.get('ref');
+    const id = params.get('id') || 
+               params.get('booking_id') || 
+               params.get('order_id');
     
-    // Support both booking_id (new standard) and order_id/ref (legacy)
-    const id = params.get("ref") || params.get("booking_id") || params.get("order_id");
-    console.log('📄 FINAL BOOKING ID/REF TO USE:', id);
-    if (id) setOrderId(id);
+    const finalIdentifier = ref || id;
+    console.log('🎯 Using identifier:', finalIdentifier);
+    
+    if (finalIdentifier) {
+      setIdentifier(finalIdentifier);
+    } else {
+      console.error('❌ No booking identifier in URL');
+    }
   }, []);
 
   // Fetch order details
   const { data: order, isLoading, error } = useQuery({
-    queryKey: [`/api/bookings/${orderId}`],
-    enabled: !!orderId,
+    queryKey: [`/api/bookings/${identifier}`],
+    enabled: !!identifier,
     queryFn: async () => {
-      console.log('🔍 FETCHING BOOKING:', orderId);
-      const res = await fetch(`/api/bookings/${orderId}`);
+      console.log('🔍 Fetching booking from: /api/bookings/' + identifier);
+      
+      const res = await fetch(`/api/bookings/${identifier}`);
+      console.log('📡 API Response Status:', res.status);
+      
       if (!res.ok) {
-        console.error('❌ BOOKING FETCH FAILED:', res.status);
-        throw new Error("Failed to fetch order");
+        const errorText = await res.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
       }
+      
       const data = await res.json();
-      console.log('✓ BOOKING FETCHED:', data);
+      console.log('✅ Booking Data Received:');
+      console.log('  - ID:', data.id);
+      console.log('  - Reference:', data.bookingReference);
+      console.log('  - Status:', data.status);
+      console.log('  - Total:', data.totalAmount);
+      
       return data;
     },
     refetchInterval: (data: any) => {
@@ -72,7 +92,10 @@ export default function BookingConfirmation() {
             <CheckCircle className="h-10 w-10 text-red-600" />
           </div>
           <h2 className="text-2xl font-semibold mb-4">Booking Not Found</h2>
-          <p className="text-gray-600 mb-6">We couldn't find the booking details you're looking for.</p>
+          <p className="text-gray-600 mb-6">
+            We couldn't find the booking details you're looking for.
+            {error && <span className="block text-xs text-red-500 mt-2">Error: {error.message}</span>}
+          </p>
           <Button onClick={() => setLocation("/")}>
             Return Home
           </Button>
@@ -82,11 +105,10 @@ export default function BookingConfirmation() {
   }
 
   // Map order data to display format
-  // Note: API order items structure might vary, taking first item for main display
   const mainItem = order.items?.[0] || {};
   
   const bookingDetails = {
-    bookingId: order.orderNumber || order.id,
+    bookingId: order.bookingReference || order.orderNumber || order.id,
     service: mainItem.serviceName || "Service",
     date: mainItem.scheduledDate ? new Date(mainItem.scheduledDate).toLocaleDateString('en-ZA', { 
       weekday: 'long', 
@@ -98,9 +120,9 @@ export default function BookingConfirmation() {
     duration: mainItem.duration ? `${mainItem.duration} hours` : "Duration not set",
     address: mainItem.serviceDetails?.address || order.eventLocation || "Location pending",
     amount: order.totalAmount,
-    providerName: order.providerName || "Assigned Provider", // API might need to return this
+    providerName: order.providerName || "Assigned Provider",
     providerPhone: order.providerPhone || "Contact via App",
-    customerEmail: order.userEmail || "your email", // API might need to return this
+    customerEmail: order.userEmail || "your email",
     customerPhone: order.userPhone || "your phone"
   };
 

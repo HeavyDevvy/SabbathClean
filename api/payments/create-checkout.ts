@@ -1,126 +1,107 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../../lib/prisma.js";
+import type { IncomingMessage, ServerResponse } from "http";
+import { storage } from "../../server/storage";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader("Content-Type", "application/json");
+export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "POST") {
+    res.statusCode = 405;
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Method Not Allowed" });
+    res.end(JSON.stringify({ error: "Method Not Allowed" }));
+    return;
   }
+
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-    const bookingId = String(body?.bookingId || "");
-    const bookingReference = String(body?.bookingReference || "");
+    const { bookingId, bookingReference } = body;
     
-    console.log('💳 PAYMENT CREATE - RECEIVED BOOKING ID:', bookingId);
-    console.log('💳 PAYMENT CREATE - RECEIVED REFERENCE:', bookingReference);
-    console.log('=== PAYMENT RECEIVED ===');
-    console.log('bookingId:', bookingId);
-    console.log('bookingId length:', bookingId.length);
-    console.log('bookingId characters:', bookingId.split(''));
-
-    if (!bookingId) {
-      console.error('❌ NO BOOKING ID PROVIDED TO PAYMENT');
-      return res.status(400).json({ error: "bookingId required" });
+    console.log('=== PAYMENT CREATION ===');
+    console.log('💳 Booking ID:', bookingId);
+    console.log('📋 Booking Reference:', bookingReference);
+    
+    // Verify booking exists BEFORE creating payment
+    // Try by ID first, then Reference
+    let booking: any = await storage.getBooking(bookingId);
+    if (!booking && bookingReference) {
+        booking = await storage.getBookingByReference(bookingReference);
     }
-    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+
     if (!booking) {
-      console.error('❌ BOOKING NOT FOUND IN DATABASE:', bookingId);
-      return res.status(404).json({ error: "Booking not found" });
+      console.error('❌ Booking not found:', bookingId);
+      res.statusCode = 404;
+      res.end(JSON.stringify({ error: 'Booking not found' }));
+      return;
     }
-
-    console.log('✓ BOOKING VERIFIED:', { 
-      id: booking.id, 
-      status: booking.status, 
-      amount: booking.totalAmount 
-    });
-    const existingPayment = await prisma.payment.findUnique({ where: { bookingId } });
-    if (existingPayment && existingPayment.paymentStatus === "COMPLETED") {
-      console.warn(`[CreateCheckout] Conflict: Booking ${bookingId} already paid`);
-      return res.status(409).json({ error: "Booking already paid", code: "BOOKING_PAID" });
-    }
-
-    // Clear any previous pending payment state or invalid transaction IDs
-    if (existingPayment && existingPayment.paymentStatus !== "COMPLETED") {
-       console.log(`[CreateCheckout] Resetting previous payment attempt for booking ${bookingId}`);
-    }
-
-    const subtotalRands = Number(booking.totalAmount || 0);
-    const platformFeeCents = Math.round(subtotalRands * 100 * 0.15);
-    const totalCents = Math.round(subtotalRands * 100) + platformFeeCents;
+    
+    console.log('✅ Booking verified:');
+    console.log('  - Reference:', booking.bookingReference);
+    console.log('  - Amount:', booking.totalPrice);
+    console.log('  - User:', booking.customerId);
+    
+    // Yoco configuration
     const yocoSecretKey = (process.env.YOCO_MODE === 'live'
       ? process.env.YOCO_SECRET_KEY_LIVE
-      : process.env.YOCO_SECRET_KEY_TEST) || "";
+      : process.env.YOCO_SECRET_KEY_TEST) || process.env.YOCO_SECRET_KEY || "";
+
     if (!yocoSecretKey) {
-      console.error("[CreateCheckout] Yoco secret key missing");
-      return res.status(500).json({ error: "Payment configuration missing" });
+        console.error('❌ Yoco secret key missing');
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Payment configuration missing' }));
+        return;
     }
 
-    const successUrl = body?.successUrl || `https://www.berryevents.co.za/booking-confirmation?booking_id=${bookingId}`;
-    console.log('🔗 YOCO SUCCESS URL:', successUrl);
-    const cancelUrl = body?.cancelUrl || `https://www.berryevents.co.za/checkout?cancelled=true`;
-    const failureUrl = body?.failureUrl || `https://www.berryevents.co.za/checkout?failed=true`;
+    // Create Yoco payment
+    // IMPORTANT: Ensure URL params match what frontend expects
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.berryevents.co.za";
+    const successUrl = `${appUrl}/booking-confirmation?ref=${bookingReference || booking.bookingReference}&id=${booking.id}`;
+    console.log('🔗 Success URL:', successUrl);
+    
+    const amountInCents = Math.round(parseFloat(String(booking.totalPrice)) * 100);
 
-    console.log(`[CreateCheckout] Creating Yoco checkout for booking ${bookingId}, amount: ${totalCents}`);
-
-    const r = await fetch("https://payments.yoco.com/api/checkouts", {
+    const yocoResponse = await fetch("https://payments.yoco.com/api/checkouts", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${yocoSecretKey}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": `checkout_${bookingId}_${Math.floor(Date.now() / (1000 * 60 * 60))}` // Idempotent for 1 hour
+        "Idempotency-Key": `checkout_${booking.id}_${Math.floor(Date.now() / (1000 * 60 * 60))}` // Idempotent for 1 hour
       },
       body: JSON.stringify({
-        amount: totalCents,
-        currency: "ZAR",
-        successUrl,
-        cancelUrl,
-        failureUrl,
+        amount: amountInCents,
+        currency: 'ZAR',
+        successUrl: successUrl,
+        cancelUrl: `${appUrl}/cart-checkout`,
+        failureUrl: `${appUrl}/cart-checkout?failed=true`,
         metadata: {
-          bookingId,
-          bookingReference: finalBookingReference,
-          environment: process.env.NODE_ENV || "production",
-        },
-      }),
+          booking_id: booking.id,
+          booking_reference: bookingReference || booking.bookingReference,
+          user_id: booking.customerId
+        }
+      })
     });
-    const data: any = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      return res.status(502).json({ error: "Failed to create checkout", details: data });
+
+    if (!yocoResponse.ok) {
+        const errorText = await yocoResponse.text();
+        console.error('❌ Yoco API Error:', errorText);
+        throw new Error(`Yoco API failed: ${errorText}`);
     }
-    const checkoutId = data?.id || data?.checkoutId || "";
-    const redirectUrl = data?.url || data?.redirectUrl || "";
-    const platformFeeRands = (platformFeeCents / 100).toFixed(2);
-    const subtotalRandsStr = subtotalRands.toFixed(2);
-    const totalRandsStr = ((totalCents || 0) / 100).toFixed(2);
-    if (existingPayment) {
-      await prisma.payment.update({
-        where: { id: existingPayment.id },
-        data: {
-          amount: totalRandsStr,
-          platformCommission: platformFeeRands,
-          providerPayout: subtotalRandsStr,
-          paymentMethod: "yoco",
-          paymentStatus: "PENDING",
-          transactionId: checkoutId || existingPayment.transactionId || null,
-        },
-      });
-    } else {
-      await prisma.payment.create({
-        data: {
-          bookingId,
-          userId: booking.userId,
-          providerId: booking.providerId,
-          amount: totalRandsStr,
-          platformCommission: platformFeeRands,
-          providerPayout: subtotalRandsStr,
-          paymentMethod: "yoco",
-          paymentStatus: "PENDING",
-          transactionId: checkoutId || null,
-        },
-      });
-    }
-    return res.status(200).json({ redirectUrl, checkoutId });
-  } catch (err: any) {
-    return res.status(500).json({ error: err?.message || "Internal Server Error" });
+
+    const yocoCheckout = await yocoResponse.json();
+    
+    console.log('✅ Yoco checkout created');
+    console.log('  - Redirect URL:', yocoCheckout.redirectUrl);
+    
+    // Update booking with payment intent ID (checkout ID) if possible
+    // Note: storage.updateBookingStatus doesn't support adding paymentIntentId directly in IStorage interface
+    // But we can assume it's pending until webhook callback
+    
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ 
+      redirectUrl: yocoCheckout.redirectUrl 
+    }));
+    
+  } catch (error: any) {
+    console.error('❌ PAYMENT CREATION FAILED:', error);
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: 'Payment creation failed', details: error.message }));
   }
 }
