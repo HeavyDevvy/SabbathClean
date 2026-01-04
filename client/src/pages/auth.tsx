@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ export default function Auth() {
   });
 
   const [acceptTcs, setAcceptTcs] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,6 +276,13 @@ export default function Auth() {
                       data-testid="input-signin-password"
                     />
                   </div>
+                </div>
+
+                <div className="flex justify-center my-4">
+                  <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // Fallback or env
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
                 </div>
 
                 <Button 

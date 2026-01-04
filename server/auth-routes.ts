@@ -37,7 +37,8 @@ const registerSchema = z.object({
   address: z.string().optional(),
   city: z.string().optional(),
   province: z.string().optional(),
-  isProvider: z.boolean().optional()
+  isProvider: z.boolean().optional(),
+  captchaToken: z.string().optional()
 });
 
 const emailVerificationSchema = z.object({
@@ -52,6 +53,28 @@ const passwordResetSchema = z.object({
   token: z.string(),
   newPassword: z.string().min(6)
 });
+
+// ReCAPTCHA Verification Helper
+export async function verifyCaptcha(token: string): Promise<boolean> {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secretKey) {
+    console.warn("RECAPTCHA_SECRET_KEY not set, skipping verification");
+    return true;
+  }
+
+  try {
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${secretKey}&response=${token}`
+    });
+    const data = await response.json() as any;
+    return data.success;
+  } catch (error) {
+    console.error('ReCAPTCHA verification error:', error);
+    return false;
+  }
+}
 
 // JWT token generation
 const generateTokens = (user: any, providerStatus?: string, providerId?: string, rememberMe: boolean = false) => {
@@ -268,9 +291,21 @@ export function registerAuthRoutes(app: Express) {
         city: body.city ?? undefined,
         province: body.province ?? undefined,
         isProvider: Boolean(body.isProvider === true || body.role === 'provider') || undefined,
+        captchaToken: body.captchaToken
       };
       const validatedData = registerSchema.parse(normalized);
       
+      // Verify CAPTCHA if configured
+      if (process.env.RECAPTCHA_SECRET_KEY) {
+        if (!validatedData.captchaToken) {
+          return res.status(400).json({ message: 'CAPTCHA verification required' });
+        }
+        const isHuman = await verifyCaptcha(validatedData.captchaToken);
+        if (!isHuman) {
+          return res.status(400).json({ message: 'CAPTCHA verification failed' });
+        }
+      }
+
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {

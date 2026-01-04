@@ -15,6 +15,7 @@ export interface RegisterData {
   address?: string;
   city?: string;
   province?: string;
+  captchaToken?: string;
 }
 
 export interface User {

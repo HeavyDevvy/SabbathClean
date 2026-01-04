@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -114,6 +115,7 @@ export default function EnhancedProviderOnboarding() {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const fileInputRefs = {
     idDocument: useRef<HTMLInputElement>(null),
     proofOfAddress: useRef<HTMLInputElement>(null),
@@ -421,6 +423,16 @@ export default function EnhancedProviderOnboarding() {
         return;
       }
 
+      if (!captchaToken) {
+        toast({
+          title: "Verification Required",
+          description: "Please complete the CAPTCHA check.",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const registerRes = await authClient.register({
         email: providerData.email,
         password: providerData.password,
@@ -430,6 +442,7 @@ export default function EnhancedProviderOnboarding() {
         address: providerData.address,
         city: providerData.city,
         province: providerData.province,
+        captchaToken: captchaToken
       });
 
       const newUserId = registerRes.user.id;
@@ -1192,6 +1205,13 @@ export default function EnhancedProviderOnboarding() {
                   data-testid="input-branch-code"
                 />
               </div>
+            </div>
+
+            <div className="flex justify-center mt-6">
+               <ReCAPTCHA
+                 sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                 onChange={(token) => setCaptchaToken(token)}
+               />
             </div>
           </div>
         );

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { registerTrainingRoutes } from "./training-routes";
-import { registerAuthRoutes, authenticateToken, authorizeProviderAccess } from "./auth-routes";
+import { registerAuthRoutes, authenticateToken, authorizeProviderAccess, verifyCaptcha } from "./auth-routes";
 import { registerPaymentRoutes } from "./payment-routes";
 import { registerPushNotificationRoutes } from "./push-notification-routes";
 import { registerCustomerReviewRoutes } from "./customer-review-routes";
