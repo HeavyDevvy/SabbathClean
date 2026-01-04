@@ -709,34 +709,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Booking routes
   console.log('=== REGISTERING BOOKING ROUTE ===');
-  app.get("/api/bookings/:identifier", async (req, res) => {
+  // Booking confirmation endpoint - handles both ID and Reference
+  app.get('/api/bookings/:bookingId', async (req, res) => {
+    const { bookingId } = req.params;
+    
+    console.log('=== BOOKING LOOKUP ===');
+    console.log('🔍 Looking for:', bookingId);
+    
     try {
-      const { identifier } = req.params;
-      
-      console.log('=== BOOKING LOOKUP ===');
-      console.log('🔍 Looking for:', identifier);
-      console.log('  - Type:', identifier.startsWith('BE-') ? 'Reference' : 'ID');
-      
       let booking;
       
-      if (identifier.startsWith('BE-')) {
+      if (bookingId.startsWith('BE-')) {
         console.log('📋 Searching by reference...');
-        booking = await storage.getBookingByReference(identifier);
+        booking = await storage.getBookingByReference(bookingId);
       } else {
         console.log('🆔 Searching by ID...');
-        booking = await storage.getBooking(identifier);
+        booking = await storage.getBooking(bookingId);
       }
       
       if (!booking) {
         console.error('❌ BOOKING NOT FOUND');
-        console.error('  - Searched for:', identifier);
-        return res.status(404).json({ message: "Booking not found" });
+        return res.status(404).json({ error: 'Booking not found' });
       }
       
       console.log('✅ BOOKING FOUND:', booking.id);
-      
-      // Reconstruct the order object to match frontend expectations
-      // This ensures compatibility with the confirmation page which expects 'items' array
       
       // Get provider details if assigned
       let provider = null;
@@ -748,7 +744,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(booking.customerId);
 
       // Map fields safely
-      // Booking has totalPrice, but frontend might look for totalAmount or subtotal
       const subtotal = String(booking.totalPrice || "0");
       const platformFee = String(booking.platformFee || (Number(subtotal) * 0.15).toFixed(2));
       const totalAmount = String(booking.totalPrice || subtotal);
@@ -769,7 +764,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         providerPhone: provider?.phone || "", 
         userEmail: user?.email || "",
         userPhone: user?.phone || "",
-        // Construct the items array that frontend expects
         items: [
           {
             id: booking.id,
@@ -790,13 +784,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             comments: booking.specialInstructions,
           },
         ],
+        userId: booking.customerId
       };
       
-      console.log('Returning constructed booking data');
-      res.json(order);
+      return res.json(order);
+      
     } catch (error: any) {
       console.error('Error fetching booking:', error);
-      res.status(500).json({ message: error.message });
+      return res.status(500).json({ error: 'Server error', details: error.message });
     }
   });
 
