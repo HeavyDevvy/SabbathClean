@@ -10,7 +10,7 @@ import { registerSupportRoutes } from "./support-routes";
 import { registerCartRoutes } from "./cart-routes";
 import { registerChatRoutes } from "./chat-routes";
 import { registerNotificationRoutes } from "./notification-routes";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { LocationService } from "./location-service";
 import { 
   insertUserSchema, 

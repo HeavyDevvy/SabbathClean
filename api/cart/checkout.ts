@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { storage } from "../../server/storage";
+import { storage } from "../../server/storage.js";
 import jwt from "jsonwebtoken";
 
 function readCookie(req: any, name: string): string | undefined {
