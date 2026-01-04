@@ -10,8 +10,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const bookingId = String(body?.bookingId || "");
+    const bookingReference = String(body?.bookingReference || "");
     
     console.log('💳 PAYMENT CREATE - RECEIVED BOOKING ID:', bookingId);
+    console.log('💳 PAYMENT CREATE - RECEIVED REFERENCE:', bookingReference);
     console.log('=== PAYMENT RECEIVED ===');
     console.log('bookingId:', bookingId);
     console.log('bookingId length:', bookingId.length);
@@ -76,6 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         failureUrl,
         metadata: {
           bookingId,
+          bookingReference: finalBookingReference,
           environment: process.env.NODE_ENV || "production",
         },
       }),

@@ -33,6 +33,12 @@ async function getOrCreateProviderForUser(uId: string): Promise<string> {
   return provider.id;
 }
 
+function generateBookingReference() {
+  const year = new Date().getFullYear();
+  const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `BE-${year}-${randomChars}`;
+}
+
 export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "POST") {
     res.statusCode = 405;
@@ -148,7 +154,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     const order = booking ? {
       id: booking.id,
-      orderNumber: `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(-6)}`,
+      orderNumber: booking.bookingReference || `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(-6)}`,
       createdAt: booking.createdAt,
       subtotal,
       platformFee,

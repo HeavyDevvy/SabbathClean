@@ -27,8 +27,8 @@ export default function BookingConfirmation() {
     console.log('ref param:', params.get('ref'));
     
     // Support both booking_id (new standard) and order_id/ref (legacy)
-    const id = params.get("booking_id") || params.get("order_id") || params.get("ref");
-    console.log('📄 FINAL BOOKING ID TO USE:', id);
+    const id = params.get("ref") || params.get("booking_id") || params.get("order_id");
+    console.log('📄 FINAL BOOKING ID/REF TO USE:', id);
     if (id) setOrderId(id);
   }, []);
 

@@ -744,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const order = {
         id: booking.id,
-        orderNumber: booking.bookingNumber || `BE-${new Date(booking.createdAt || Date.now()).getFullYear()}-${booking.id.slice(0, 6)}`,
+        orderNumber: booking.bookingReference || booking.bookingNumber || `BE-${new Date(booking.createdAt || Date.now()).getFullYear()}-${booking.id.slice(0, 6)}`,
         createdAt: booking.createdAt,
         subtotal,
         platformFee,

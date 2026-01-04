@@ -130,6 +130,7 @@ export interface IStorage {
   
   // Booking operations
   getBooking(id: string): Promise<Booking | undefined>;
+  getBookingByReference(reference: string): Promise<Booking | undefined>;
   getBookingsByCustomer(customerId: string): Promise<Booking[]>;
   getBookingsByProvider(providerId: string): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
@@ -2419,6 +2420,7 @@ export class MemStorage implements IStorage {
       providerId: insertBooking.providerId ?? null,
       serviceId: insertBooking.serviceId,
       bookingNumber: insertBooking.bookingNumber,
+      bookingReference: insertBooking.bookingReference ?? null,
       scheduledDate: insertBooking.scheduledDate as any,
       scheduledTime: insertBooking.scheduledTime,
       duration: insertBooking.duration,
