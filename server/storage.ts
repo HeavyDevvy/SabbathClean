@@ -130,7 +130,7 @@ export interface IStorage {
   
   // Booking operations
   getBooking(id: string): Promise<Booking | undefined>;
-  getBookingByReference(reference: string): Promise<Booking | undefined>;
+  getBookingByReference(reference: string): Promise<Booking | null>;
   getBookingsByCustomer(customerId: string): Promise<Booking[]>;
   getBookingsByProvider(providerId: string): Promise<Booking[]>;
   createBooking(booking: InsertBooking): Promise<Booking>;
@@ -713,6 +713,11 @@ export class DatabaseStorage implements IStorage {
   async getBooking(id: string): Promise<Booking | undefined> {
     const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
     return booking || undefined;
+  }
+
+  async getBookingByReference(reference: string): Promise<Booking | null> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.bookingReference, reference));
+    return booking || null;
   }
 
   async getBookingsByCustomer(customerId: string): Promise<Booking[]> {
@@ -2398,6 +2403,22 @@ export class MemStorage implements IStorage {
 
   async getBooking(id: string): Promise<Booking | undefined> {
     return this.bookings.get(id);
+  }
+
+  async getBookingByReference(reference: string): Promise<Booking | null> { 
+    console.log('📋 MemStorage: Looking up booking by reference:', reference); 
+    
+    const booking = Array.from(this.bookings.values()).find( 
+      b => b.bookingReference === reference 
+    ); 
+    
+    if (!booking) { 
+      console.log('❌ No booking found with reference:', reference); 
+      return null; 
+    } 
+    
+    console.log('✅ Found booking:', booking.id); 
+    return booking; 
   }
 
   async getBookingsByCustomer(customerId: string): Promise<Booking[]> {
