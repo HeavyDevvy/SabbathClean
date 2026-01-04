@@ -724,16 +724,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Booking not found" });
       }
       
-      // Allow public access if no user ID (for confirmation page)
-      // but if authenticated, check ownership
-      if (req.headers.authorization) {
-        // Simple check - in production use proper middleware
-        // This is just to prevent obvious data leaks if we have token
-      }
-
-      const payment = await prisma.payment.findUnique({ where: { bookingId: bookingId } });
+      // Reconstruct the order object to match frontend expectations
+      // This ensures compatibility with the confirmation page which expects 'items' array
       
-      // Get provider details
+      // Get provider details if assigned
       let provider = null;
       if (booking.providerId) {
         provider = await storage.getServiceProvider(booking.providerId);
@@ -742,47 +736,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user details
       const user = await storage.getUser(booking.userId);
 
-      const subtotal = String(booking.totalAmount || "0");
-      const platformFee = String((Number(subtotal) * 0.15).toFixed(2));
-      const totalAmount = String((Number(subtotal) + Number(platformFee)).toFixed(2));
+      // Map fields safely
+      // Booking has totalPrice, but frontend might look for totalAmount or subtotal
+      const subtotal = String(booking.totalPrice || booking.totalAmount || "0");
+      const platformFee = String(booking.platformFee || (Number(subtotal) * 0.15).toFixed(2));
+      const totalAmount = String(booking.totalPrice || booking.totalAmount || subtotal);
       
       const order = {
         id: booking.id,
-        orderNumber: `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(-6)}`,
+        orderNumber: booking.bookingNumber || `BE-${new Date(booking.createdAt).getFullYear()}-${booking.id.slice(0, 6)}`,
         createdAt: booking.createdAt,
         subtotal,
         platformFee,
         totalAmount,
-        paymentMethod: payment?.paymentMethod || "card",
-        paymentStatus: payment?.paymentStatus || "COMPLETED",
-        eventLocation: booking.eventLocation,
-        providerName: provider?.businessName || (provider?.userId ? "Assigned Provider" : "Assigned Provider"),
-        providerPhone: "", // Protect privacy unless needed
+        paymentMethod: booking.paymentMethod || "card",
+        paymentStatus: booking.paymentStatus || "COMPLETED",
+        eventLocation: booking.address || booking.eventLocation,
+        providerName: provider?.businessName || (provider?.firstName ? `${provider.firstName} ${provider.lastName}` : "Assigned Provider"),
+        providerPhone: provider?.phone || "", 
         userEmail: user?.email || "",
-        userPhone: user?.phoneNumber || "",
+        userPhone: user?.phone || "",
+        // Construct the items array that frontend expects
         items: [
           {
             id: booking.id,
-            serviceId: booking.eventType,
-            serviceType: booking.eventType,
-            serviceName: booking.eventType,
-            scheduledDate: booking.eventDate,
-            scheduledTime: booking.eventTime,
-            duration: booking.eventDuration,
+            serviceId: booking.serviceId || booking.eventType,
+            serviceType: booking.serviceType || booking.eventType,
+            serviceName: booking.serviceType || booking.eventType || "Service",
+            scheduledDate: booking.scheduledDate || booking.eventDate,
+            scheduledTime: booking.scheduledTime || booking.eventTime,
+            duration: booking.duration || booking.eventDuration,
             basePrice: subtotal,
             addOnsPrice: "0",
             subtotal,
-            tipAmount: "0",
+            tipAmount: booking.tipAmount || "0",
             serviceDetails: {
-               address: booking.eventLocation
+               address: booking.address || booking.eventLocation
             },
             selectedAddOns: [],
-            comments: booking.specialRequests,
+            comments: booking.specialInstructions || booking.specialRequests,
           },
         ],
       };
       
-      console.log('Returning booking data');
+      console.log('Returning constructed booking data');
       res.json(order);
     } catch (error: any) {
       console.error('Error fetching booking:', error);
