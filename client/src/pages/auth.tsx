@@ -428,6 +428,13 @@ export default function Auth() {
                   </div>
                 </div>
 
+                <div className="flex justify-center my-4">
+                  <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // Fallback or env
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                </div>
+
                 <Button 
                   type="submit" 
                   className="w-full bg-primary hover:bg-accent text-primary-foreground" 
