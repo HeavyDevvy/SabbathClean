@@ -7,3 +7,4 @@ vite.config.ts.*
 /generated/prisma
 .env
 .env.*
+server/data/admins.json
