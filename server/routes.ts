@@ -104,6 +104,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Booking routes
+  app.get("/api/bookings/:id", async (req, res) => {
+    try {
+      const bookingId = req.params.id;
+      // Try finding by ID first
+      let booking = await storage.getBooking(bookingId);
+      
+      // If not found, try by Reference
+      if (!booking) {
+        booking = await storage.getBookingByReference(bookingId);
+      }
+
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      res.json(booking);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   // Update user profile
   app.put("/api/users/:id", async (req, res) => {
     try {

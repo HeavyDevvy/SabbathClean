@@ -2,10 +2,10 @@
   {
     "id": "admin-1",
     "email": "admin@berryevents.co.za",
-    "password": "$2b$10$1haNxHEpqQYrTT4qQvo33OUgzIwA.c3FOiySD0LbeeYrTBfE89MU2",
+    "password": "$2b$10$vDkRf7FFAW02WNVTpkqJQOiHKEOiVDmIOrlUlX6nCuelz.Ic8K3vC",
     "role": "admin",
     "firstName": "Berry",
     "lastName": "Admin",
-    "createdAt": "2025-12-31T06:47:41.528Z"
+    "createdAt": "2026-01-07T16:24:15.653Z"
   }
 ]

@@ -77,10 +77,10 @@ import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 // Import domain storage modules
-import { WalletStorage, type IWalletStorage } from "./storage/wallet-storage";
-import { CartStorage, type ICartStorage } from "./storage/cart-storage";
-import { ChatStorage, type IChatStorage } from "./storage/chat-storage";
-import { NotificationStorage, type INotificationStorage } from "./storage/notification-storage";
+import { WalletStorage, type IWalletStorage } from "./storage/wallet-storage.js";
+import { CartStorage, type ICartStorage } from "./storage/cart-storage.js";
+import { ChatStorage, type IChatStorage } from "./storage/chat-storage.js";
+import { NotificationStorage, type INotificationStorage } from "./storage/notification-storage.js";
 
 export interface IStorage {
   // User operations
