@@ -1,8 +1,8 @@
 import type { Express } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { resolveAppBaseUrl, env as appEnv } from "../config/env";
-import { storage } from "./storage";
+import { resolveAppBaseUrl, env as appEnv } from "../config/env.js";
+import { storage } from "./storage.js";
 import { z } from "zod";
 import sgMail from "@sendgrid/mail";
 import crypto from "crypto";

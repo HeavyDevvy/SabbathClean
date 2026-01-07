@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../auth/[...nextauth]/route"
-import { storage } from "../../../server/storage"
+import { storage } from "../../../server/storage.js"
 
 function generateBookingReference() {
   const year = new Date().getFullYear();

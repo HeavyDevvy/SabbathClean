@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { createInsertSchema } from "drizzle-zod";
 import { supportTickets } from "@shared/schema";
 import { z } from "zod";

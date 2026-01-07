@@ -1,6 +1,6 @@
 import type { Express } from "express";
-import { storage } from "./storage";
-import { authenticateToken } from "./auth-routes";
+import { storage } from "./storage.js";
+import { authenticateToken } from "./auth-routes.js";
 
 // Training module data - would typically come from database
 const trainingModules = [

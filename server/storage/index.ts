@@ -11,7 +11,7 @@
  * - Clear separation of concerns by business domain
  */
 
-export { WalletStorage, type IWalletStorage } from './wallet-storage';
-export { CartStorage, type ICartStorage } from './cart-storage';
-export { ChatStorage, type IChatStorage } from './chat-storage';
-export { NotificationStorage, type INotificationStorage } from './notification-storage';
+export { WalletStorage, type IWalletStorage } from './wallet-storage.js';
+export { CartStorage, type ICartStorage } from './cart-storage.js';
+export { ChatStorage, type IChatStorage } from './chat-storage.js';
+export { NotificationStorage, type INotificationStorage } from './notification-storage.js';

@@ -1,10 +1,10 @@
 import type { Express, Request, Response } from "express";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema, type InsertCartItem } from "@shared/schema";
 import { z } from "zod";
 import { randomUUID } from "crypto";
-import { encryptGateCode } from "./encryption";
-import { authenticateToken, optionalAuth } from "./auth-routes";
+import { encryptGateCode } from "./encryption.js";
+import { authenticateToken, optionalAuth } from "./auth-routes.js";
 
 // Helper to get or create cart ID from session/user
 function getCartIdentifier(req: Request, res: Response): { userId?: string; sessionToken?: string } {

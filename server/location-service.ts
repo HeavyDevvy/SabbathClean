@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { storage } from "./storage";
+import { db } from "./db.js";
+import { storage } from "./storage.js";
 import { serviceProviders, providerLocations, jobQueue, bookings } from "../shared/schema";
 import { eq, and, sql, asc, desc } from "drizzle-orm";
 

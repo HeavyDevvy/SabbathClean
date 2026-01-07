@@ -1,17 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { registerTrainingRoutes } from "./training-routes";
-import { registerAuthRoutes, authenticateToken, authorizeProviderAccess, verifyCaptcha } from "./auth-routes";
-import { registerPaymentRoutes } from "./payment-routes";
-import { registerPushNotificationRoutes } from "./push-notification-routes";
-import { registerCustomerReviewRoutes } from "./customer-review-routes";
-import { registerSupportRoutes } from "./support-routes";
-import { registerCartRoutes } from "./cart-routes";
-import { registerChatRoutes } from "./chat-routes";
-import { registerNotificationRoutes } from "./notification-routes";
+import { registerTrainingRoutes } from "./training-routes.js";
+import { registerAuthRoutes, authenticateToken, authorizeProviderAccess, verifyCaptcha } from "./auth-routes.js";
+import { registerPaymentRoutes } from "./payment-routes.js";
+import { registerPushNotificationRoutes } from "./push-notification-routes.js";
+import { registerCustomerReviewRoutes } from "./customer-review-routes.js";
+import { registerSupportRoutes } from "./support-routes.js";
+import { registerCartRoutes } from "./cart-routes.js";
+import { registerChatRoutes } from "./chat-routes.js";
+import { registerNotificationRoutes } from "./notification-routes.js";
 import { storage } from "./storage.js";
-import { LocationService } from "./location-service";
+import { LocationService } from "./location-service.js";
 import { 
   insertUserSchema, 
   insertServiceProviderSchema, 
@@ -26,7 +26,7 @@ import {
   insertProviderAssessmentResultSchema
 } from "@shared/schema";
 import { createHash } from "crypto";
-import { pool } from "./db";
+import { pool } from "./db.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log('=== ROUTES FILE LOADING ===');

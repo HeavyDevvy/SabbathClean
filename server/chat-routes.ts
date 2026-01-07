@@ -1,8 +1,8 @@
 import type { Express, Request, Response } from "express";
-import type { IStorage } from "./storage";
+import type { IStorage } from "./storage.js";
 import { insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
-import { authenticateToken } from "./auth-routes";
+import { authenticateToken } from "./auth-routes.js";
 
 export function registerChatRoutes(app: Express, storage: IStorage) {
   
