@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import Header from "@/components/header";
+import EnhancedHeader from "@/components/enhanced-header";
 import Footer from "@/components/footer";
 import ModernServiceModal from "@/components/modern-service-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -435,7 +435,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onBookingClick={openBooking} />
+      <EnhancedHeader onBookingClick={openBooking} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">My Profile</h1>

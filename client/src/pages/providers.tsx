@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/header";
+import EnhancedHeader from "@/components/enhanced-header";
 import Footer from "@/components/footer";
 import BookingModal from "@/components/booking-modal";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export default function Providers() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+        <EnhancedHeader onBookingClick={() => {}} />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
@@ -40,7 +40,7 @@ export default function Providers() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onBookingClick={() => openBooking()} />
+      <EnhancedHeader onBookingClick={() => openBooking()} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Verified Professionals</h1>

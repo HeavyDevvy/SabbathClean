@@ -28,14 +28,14 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
     // Try finding by ID first
     let booking = await prisma.booking.findUnique({ 
       where: { id: identifier },
-      include: { user: true } 
+      include: { user: true, payment: true } 
     });
 
     // If not found, try by Reference
     if (!booking) {
       booking = await prisma.booking.findFirst({ 
         where: { bookingReference: identifier },
-        include: { user: true }
+        include: { user: true, payment: true }
       });
     }
 
@@ -68,19 +68,21 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
       });
     }
 
-    const subtotal = String(booking.totalPrice || "0"); // Booking model uses totalPrice
+    const subtotal = String(booking.totalAmount || "0"); // Booking model uses totalAmount
     // Platform fee might be stored or calculated. Using stored if available.
-    const platformFee = String(booking.platformFee || "0");
+    const platformFee = String(booking.payment?.platformCommission || "0");
     // If totalPrice includes fee, fine.
     
     // Construct response matching what frontend expects (Order interface)
     // Simplified to avoid TypeScript errors with non-existent properties
     const order = {
       ...booking,
-      providerName: provider?.companyName || (provider?.user ? `${provider.user.firstName} ${provider.user.lastName}` : "Assigned Provider"),
-      providerPhone: provider?.phone || (provider?.user as any)?.phoneNumber || "",
-      userEmail: (booking.user as any)?.email || "",
-      userPhone: (booking.user as any)?.phoneNumber || "",
+      totalPrice: booking.totalAmount, // Map totalAmount to totalPrice for frontend compatibility if needed
+      platformFee: booking.payment?.platformCommission || 0,
+      providerName: provider?.businessName || (provider?.user ? `${provider.user.firstName} ${provider.user.lastName}` : "Assigned Provider"),
+      providerPhone: provider?.user?.phoneNumber || "",
+      userEmail: booking.user?.email || "",
+      userPhone: booking.user?.phoneNumber || "",
     };
 
     res.statusCode = 200;

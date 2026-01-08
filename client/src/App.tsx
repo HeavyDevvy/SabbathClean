@@ -18,7 +18,6 @@ import OrderConfirmation from "@/pages/order-confirmation";
 import NotFound from "@/pages/not-found";
 
 // Lazy load less frequently accessed pages
-const Home = lazy(() => import("@/pages/home"));
 const MinimalistHome = lazy(() => import("@/pages/minimalist-home"));
 const Booking = lazy(() => import("@/pages/booking"));
 const BookingConfirmation = lazy(() => import("@/pages/booking-confirmation"));
@@ -29,7 +28,6 @@ import ProviderDashboard from "@/pages/provider-dashboard";
 const Offline = lazy(() => import("@/pages/offline"));
 const Bookings = lazy(() => import("@/pages/bookings"));
 const NotificationSettings = lazy(() => import("@/components/notification-settings"));
-const ServicesPage = lazy(() => import("@/pages/services"));
 const PaymentPage = lazy(() => import("@/pages/payment"));
 const MobileApp = lazy(() => import("@/pages/mobile-app"));
 const TrackingPage = lazy(() => import("@/pages/tracking"));
@@ -86,12 +84,10 @@ function Router() {
         <Route path="/minimalist" component={MinimalistHome} />
         <Route path="/cart-checkout" component={CartCheckout} />
         <Route path="/order-confirmation/:orderId" component={OrderConfirmation} />
-        <Route path="/old-home" component={Home} />
         <Route path="/auth" component={Auth} />
         <Route path="/booking" component={Booking} />
         <Route path="/booking-confirmation" component={BookingConfirmation} />
         <Route path="/bookings" component={Bookings} />
-        <Route path="/services" component={ServicesPage} />
         <Route path="/quote" component={Quote} />
         <Route path="/payment" component={PaymentPage} />
         <Route path="/admin" component={AdminPortal} />
