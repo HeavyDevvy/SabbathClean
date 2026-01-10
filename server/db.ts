@@ -30,7 +30,17 @@ if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && !useMem) {
 export const pool = useMem
   ? null
   : new Pool({
-      connectionString: normalizeConnectionString(process.env.POSTGRES_URL || process.env.DATABASE_URL!),
+      connectionString: (() => {
+        const url = process.env.POSTGRES_URL || process.env.DATABASE_URL!;
+        if (url) {
+          const masked = url.replace(/(:[^:@]+@)/, ':****@');
+          console.log(`[DB] Initializing pool with URL from ${process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'}: ${masked}`);
+          if (url.includes('prisma-data.net')) {
+             console.warn('[DB] WARNING: Using Prisma Accelerate URL for Drizzle/PG connection. This may fail.');
+          }
+        }
+        return normalizeConnectionString(url);
+      })(),
       max: 20,
       idleTimeoutMillis: 60000,
       connectionTimeoutMillis: 10000,

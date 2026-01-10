@@ -101,20 +101,9 @@ app.use((req, res, next) => {
     if (isDev) {
       process.env.USE_MEM_STORAGE = "1";
       useMem = true;
-      log("DATABASE_URL not set; using in-memory storage for development");
+      log("DATABASE_URL/POSTGRES_URL not set or invalid; using in-memory storage for development");
     } else {
-      log("DATABASE_URL must be set or USE_MEM_STORAGE=1");
-      process.exit(1);
-    }
-  }
-
-  if (!useMem && hasDbUrl && !isDbUrlValid) {
-    if (isDev) {
-      process.env.USE_MEM_STORAGE = "1";
-      useMem = true;
-      log("DATABASE_URL invalid; using in-memory storage for development");
-    } else {
-      log("DATABASE_URL invalid");
+      log("DATABASE_URL or POSTGRES_URL must be set and valid, or USE_MEM_STORAGE=1");
       process.exit(1);
     }
   }
