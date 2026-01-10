@@ -21,16 +21,16 @@ function normalizeConnectionString(url: string) {
   }
 }
 
-if (!process.env.DATABASE_URL && !useMem) {
+if (!process.env.DATABASE_URL && !process.env.POSTGRES_URL && !useMem) {
   throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL or POSTGRES_URL must be set. Did you forget to provision a database?",
   );
 }
 
 export const pool = useMem
   ? null
   : new Pool({
-      connectionString: normalizeConnectionString(process.env.DATABASE_URL!),
+      connectionString: normalizeConnectionString(process.env.POSTGRES_URL || process.env.DATABASE_URL!),
       max: 20,
       idleTimeoutMillis: 60000,
       connectionTimeoutMillis: 10000,

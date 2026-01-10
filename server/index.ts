@@ -87,17 +87,17 @@ app.use((req, res, next) => {
 (async () => {
   const isDev = app.get("env") === "development";
   let useMem = process.env.USE_MEM_STORAGE === "1";
-  const hasDbUrl = !!process.env.DATABASE_URL;
   const isDbUrlValid = (() => {
     try {
-      if (!hasDbUrl) return false;
-      new URL(process.env.DATABASE_URL as string);
+      const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+      if (!url) return false;
+      new URL(url);
       return true;
     } catch {
       return false;
     }
   })();
-  if (!useMem && !hasDbUrl) {
+  if (!useMem && !isDbUrlValid) {
     if (isDev) {
       process.env.USE_MEM_STORAGE = "1";
       useMem = true;
