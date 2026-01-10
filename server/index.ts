@@ -1,4 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
+
+// Manual Environment Override for Vercel
+if (process.env.POSTGRES_URL) {
+  process.env.DATABASE_URL = process.env.POSTGRES_URL;
+  process.env.POSTGRES_PRISMA_DATABASE_URL = process.env.POSTGRES_URL;
+}
+
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";

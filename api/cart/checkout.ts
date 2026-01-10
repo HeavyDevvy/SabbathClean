@@ -30,6 +30,11 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   console.log('=== CHECKOUT STARTED ===');
   console.log('Environment Check:');
   console.log('POSTGRES_URL set:', !!process.env.POSTGRES_URL);
+  
+  const dbUrl = process.env.DATABASE_URL || "";
+  const maskedDbUrl = dbUrl.replace(/(:[^:@]+@)/, ':****@');
+  console.log('DATABASE_URL value:', maskedDbUrl);
+  
   console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
   if (process.env.DATABASE_URL?.includes('prisma')) {
     console.log('DATABASE_URL is Prisma Accelerate URL');
