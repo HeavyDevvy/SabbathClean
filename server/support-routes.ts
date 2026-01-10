@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { storage } from "./storage.js";
 import { createInsertSchema } from "drizzle-zod";
-import { supportTickets } from "@shared/schema";
+import { supportTickets } from "../shared/schema.js";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import sgMail from "@sendgrid/mail";

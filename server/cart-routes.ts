@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "./storage.js";
-import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema, type InsertCartItem } from "@shared/schema";
+import { insertCartItemSchema, insertOrderSchema, insertOrderItemSchema, type InsertCartItem } from "../shared/schema.js";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { encryptGateCode } from "./encryption.js";

@@ -71,8 +71,8 @@ import {
   type InsertWallet,
   type WalletTransaction,
   type InsertWalletTransaction
-} from "@shared/schema";
-import { db } from "./db";
+} from "../shared/schema.js";
+import { db } from "./db.js";
 import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -1242,27 +1242,27 @@ export class DatabaseStorage implements IStorage {
 
   // Support ticket operations
   async createSupportTicket(ticket: any): Promise<any> {
-    const { supportTickets } = await import("@shared/schema");
+    const { supportTickets } = await import("../shared/schema.js");
     const [newTicket] = await db.insert(supportTickets).values(ticket).returning();
     return newTicket;
   }
 
   async getSupportTicket(ticketNumber: string): Promise<any> {
-    const { supportTickets } = await import("@shared/schema");
+    const { supportTickets } = await import("../shared/schema.js");
     const [ticket] = await db.select().from(supportTickets)
       .where(eq(supportTickets.ticketNumber, ticketNumber));
     return ticket || undefined;
   }
 
   async getUserSupportTickets(userId: string): Promise<any[]> {
-    const { supportTickets } = await import("@shared/schema");
+    const { supportTickets } = await import("../shared/schema.js");
     return await db.select().from(supportTickets)
       .where(eq(supportTickets.userId, userId))
       .orderBy(desc(supportTickets.createdAt));
   }
 
   async updateSupportTicketStatus(ticketNumber: string, status: string): Promise<any> {
-    const { supportTickets } = await import("@shared/schema");
+    const { supportTickets } = await import("../shared/schema.js");
     const [ticket] = await db.update(supportTickets)
       .set({ status, updatedAt: new Date() })
       .where(eq(supportTickets.ticketNumber, ticketNumber))

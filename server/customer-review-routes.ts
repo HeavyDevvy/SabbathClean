@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { customerReviews, bookings, users, serviceProviders, insertCustomerReviewSchema } from "@shared/schema";
+import { customerReviews, bookings, users, serviceProviders, insertCustomerReviewSchema } from "../shared/schema.js";
 import { authenticateToken } from "./auth-routes.js";
 import { db } from "./db.js";
 import { eq, and, desc } from "drizzle-orm";

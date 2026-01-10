@@ -5,8 +5,8 @@ import {
   type InsertWalletTransaction,
   wallets,
   walletTransactions
-} from "@shared/schema";
-import { db } from "../db";
+} from "../../shared/schema.js";
+import { db } from "../db.js";
 import { eq, desc, sql, and } from "drizzle-orm";
 
 export interface IWalletStorage {

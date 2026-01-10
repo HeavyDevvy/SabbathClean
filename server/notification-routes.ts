@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "./storage.js";
-import { insertNotificationSchema } from "@shared/schema";
+import { insertNotificationSchema } from "../shared/schema.js";
 import { authenticateToken } from "./auth-routes.js";
 
 export function registerNotificationRoutes(app: Express, storage: IStorage) {

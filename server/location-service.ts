@@ -1,6 +1,6 @@
 import { db } from "./db.js";
 import { storage } from "./storage.js";
-import { serviceProviders, providerLocations, jobQueue, bookings } from "../shared/schema";
+import { serviceProviders, providerLocations, jobQueue, bookings } from "../shared/schema.js";
 import { eq, and, sql, asc, desc } from "drizzle-orm";
 
 interface LocationPoint {

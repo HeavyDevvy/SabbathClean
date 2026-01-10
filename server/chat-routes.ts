@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "./storage.js";
-import { insertMessageSchema } from "@shared/schema";
+import { insertMessageSchema } from "../shared/schema.js";
 import { z } from "zod";
 import { authenticateToken } from "./auth-routes.js";
 

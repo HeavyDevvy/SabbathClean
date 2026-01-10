@@ -1,5 +1,5 @@
-import type { IStorage } from "./storage";
-import type { InsertNotification } from "@shared/schema";
+import type { IStorage } from "./storage.js";
+import type { InsertNotification } from "../shared/schema.js";
 
 export class NotificationHelper {
   constructor(private storage: IStorage) {}

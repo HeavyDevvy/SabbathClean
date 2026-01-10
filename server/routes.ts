@@ -24,7 +24,7 @@ import {
   insertProviderCertificationSchema,
   insertSkillAssessmentSchema,
   insertProviderAssessmentResultSchema
-} from "@shared/schema";
+} from "../shared/schema.js";
 import { createHash } from "crypto";
 import { pool } from "./db.js";
 
@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If not found, try by Reference
       if (!booking) {
-        booking = await storage.getBookingByReference(bookingId);
+        booking = (await storage.getBookingByReference(bookingId)) ?? undefined;
       }
 
       if (!booking) {

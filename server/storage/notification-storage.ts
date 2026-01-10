@@ -2,8 +2,8 @@ import {
   type Notification,
   type InsertNotification,
   notifications
-} from "@shared/schema";
-import { db } from "../db";
+} from "../../shared/schema.js";
+import { db } from "../db.js";
 import { eq, and, desc, sql } from "drizzle-orm";
 
 export interface INotificationStorage {
