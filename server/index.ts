@@ -4,6 +4,8 @@ import express, { type Request, Response, NextFunction } from "express";
 if (process.env.POSTGRES_URL) {
   process.env.DATABASE_URL = process.env.POSTGRES_URL;
   process.env.POSTGRES_PRISMA_DATABASE_URL = process.env.POSTGRES_URL;
+  process.env.PRISMA_DISABLE_WS_PROXY = 'true';
+  process.env.PRISMA_CLIENT_ENGINE_TYPE = 'library';
 }
 
 import { setupVite, serveStatic, log } from "./vite";
