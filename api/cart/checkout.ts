@@ -61,6 +61,7 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
 
     // 2. Get Cart
     const sessionToken = readCookie(req, "cart_session");
+    console.log("[CHECKOUT] Database connection attempt...");
     const cart = await storage.getOrCreateCart(userId, undefined);
     let cartData = await storage.getCartWithItems(cart.id);
     let usingGuestCart = false;

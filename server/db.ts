@@ -44,6 +44,7 @@ export const pool = useMem
       max: 20,
       idleTimeoutMillis: 60000,
       connectionTimeoutMillis: 10000,
+      ssl: { rejectUnauthorized: false },
     });
 
 export const db = useMem ? ({} as any) : drizzle({ client: pool as any, schema });
