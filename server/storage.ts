@@ -2894,7 +2894,7 @@ const usePersistentStorage = process.env.USE_MEM_STORAGE === '0' ||
 
 let storageImpl: IStorage;
 
-if (usePersistentStorage && process.env.DATABASE_URL) {
+if (usePersistentStorage && (process.env.DATABASE_URL || process.env.POSTGRES_URL)) {
   try {
     storageImpl = new DatabaseStorage();
     console.log('✅ Using PostgreSQL Database Storage');

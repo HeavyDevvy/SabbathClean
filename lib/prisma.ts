@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client/index.js'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 
@@ -11,7 +11,17 @@ export const prisma =
   new PrismaClient({
     log: ['warn', 'error'],
     adapter: new PrismaPg(new Pool({ 
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL 
+      connectionString: (() => {
+        const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+        if (url) {
+           const masked = url.replace(/(:[^:@]+@)/, ':****@');
+           console.log(`[PRISMA] Initializing client with URL from ${process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'}: ${masked}`);
+           if (url.includes('prisma-data.net')) {
+             console.warn('[PRISMA] WARNING: Using Prisma Accelerate URL with pg adapter. This WILL fail.');
+           }
+        }
+        return url;
+      })()
     }))
   })
 

@@ -28,6 +28,12 @@ export default async function handler(req: IncomingMessage & any, res: ServerRes
   }
 
   console.log('=== CHECKOUT STARTED ===');
+  console.log('Environment Check:');
+  console.log('POSTGRES_URL set:', !!process.env.POSTGRES_URL);
+  console.log('DATABASE_URL set:', !!process.env.DATABASE_URL);
+  if (process.env.DATABASE_URL?.includes('prisma')) {
+    console.log('DATABASE_URL is Prisma Accelerate URL');
+  }
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
