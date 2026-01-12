@@ -43,6 +43,18 @@ export interface ServiceConfig {
   careTypes?: Array<{ value: string; label: string; price: number; description: string }>;
   childrenCount?: Array<{ value: string; label: string; multiplier: number }>;
   childrenAges?: Array<{ value: string; label: string; multiplier: number }>;
+  eventTypes?: Array<{
+    value: string;
+    label: string;
+    multiplier: number;
+    description?: string;
+    customFields?: Array<{
+      name: string;
+      label: string;
+      type: 'text' | 'number' | 'date' | 'datetime-local' | 'textarea';
+      required: boolean;
+    }>;
+  }>;
   addOns: Array<{ id: string; name: string; price: number; description?: string }>;
   description?: string;
   enabled?: boolean;
@@ -370,25 +382,101 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { value: "apartment", label: "Apartment Visit", multiplier: 1.0 },
       { value: "house", label: "House Visit", multiplier: 1.1 },
       { value: "townhouse", label: "Townhouse Visit", multiplier: 1.05 },
-      { value: "villa", label: "Villa Visit", multiplier: 1.2 }
+      { value: "villa", label: "Villa Visit", multiplier: 1.2 },
+      { value: "venue", label: "Event Venue", multiplier: 1.3 },
+      { value: "office", label: "Corporate Office", multiplier: 1.2 },
+      { value: "studio", label: "Studio/Set", multiplier: 1.1 }
+    ],
+    eventTypes: [
+      { 
+        value: "wedding", 
+        label: "Wedding Service", 
+        multiplier: 2.0,
+        description: "Complete bridal party styling and preparation",
+        customFields: [
+          { name: "brides", label: "Number of Brides", type: "number", required: true },
+          { name: "bridesmaids", label: "Number of Bridesmaids", type: "number", required: true },
+          { name: "mothers", label: "Number of Mothers", type: "number", required: true },
+          { name: "venue", label: "Venue Location", type: "text", required: true },
+          { name: "date", label: "Wedding Date", type: "date", required: true }
+        ]
+      },
+      { 
+        value: "matric-dance", 
+        label: "Matric Dance/Prom", 
+        multiplier: 1.5,
+        description: "Glamorous styling for your special night",
+        customFields: [
+          { name: "people", label: "Number of People", type: "number", required: true },
+          { name: "venue", label: "Venue Location", type: "text", required: true },
+          { name: "date", label: "Event Date", type: "date", required: true },
+          { name: "style", label: "Style Preferences", type: "textarea", required: false }
+        ]
+      },
+      { 
+        value: "corporate-wellness", 
+        label: "Corporate Wellness Day", 
+        multiplier: 1.8,
+        description: "On-site wellness services for employees",
+        customFields: [
+          { name: "employees", label: "Number of Employees", type: "number", required: true },
+          { name: "company_location", label: "Company Location", type: "text", required: true },
+          { name: "services_needed", label: "Services Needed", type: "textarea", required: true }
+        ]
+      },
+      { 
+        value: "photo-shoot", 
+        label: "Photo Shoot", 
+        multiplier: 1.6,
+        description: "Professional styling for editorial or commercial shoots",
+        customFields: [
+          { name: "models", label: "Number of Models", type: "number", required: true },
+          { name: "shoot_type", label: "Shoot Type", type: "text", required: true },
+          { name: "duration", label: "Shoot Duration (hours)", type: "number", required: true }
+        ]
+      },
+      { 
+        value: "birthday", 
+        label: "Birthday/Celebration", 
+        multiplier: 1.4,
+        description: "Pampering for birthdays and special occasions",
+        customFields: [
+          { name: "people", label: "Number of People", type: "number", required: true },
+          { name: "venue", label: "Venue Location", type: "text", required: true },
+          { name: "occasion", label: "Occasion Type", type: "text", required: true }
+        ]
+      },
+      { 
+        value: "personal", 
+        label: "Personal Appointment", 
+        multiplier: 1.0,
+        description: "Individual beauty and wellness treatments",
+        customFields: [
+          { name: "services", label: "Services Needed", type: "textarea", required: true },
+          { name: "preferred_time", label: "Preferred Date/Time", type: "datetime-local", required: true }
+        ]
+      }
     ],
     serviceTypes: [
-      { value: "hair-styling", label: "Hair Styling & Cut", price: 280 },
-      { value: "manicure-pedicure", label: "Manicure & Pedicure", price: 220 },
-      { value: "massage-therapy", label: "Massage Therapy", price: 400 },
-      { value: "makeup-artistry", label: "Makeup Artistry", price: 350 }
+      { value: "hair-styling", label: "Hair Styling (Cuts, Color, Updos)", price: 350 },
+      { value: "makeup-artistry", label: "Makeup Artistry (Bridal, Occasion)", price: 450 },
+      { value: "nail-services", label: "Nail Services (Manicure, Pedicure, Gel)", price: 250 },
+      { value: "massage-therapy", label: "Massage Therapy (Swedish, Deep Tissue)", price: 550 },
+      { value: "esthetician", label: "Esthetician (Facials, Waxing, Skincare)", price: 400 },
+      { value: "spa-treatments", label: "Spa Treatments (Body Wraps, Scrubs)", price: 600 }
     ],
     sessionDuration: [
       { value: "quick", label: "Quick Session (30-60 min)", multiplier: 1.0 },
       { value: "standard", label: "Standard Session (1-2 hours)", multiplier: 1.5 },
       { value: "extended", label: "Extended Session (2-3 hours)", multiplier: 2.2 },
-      { value: "full-day", label: "Full Day Package", multiplier: 4.0 }
+      { value: "half-day", label: "Half Day Package (4 hours)", multiplier: 3.0 },
+      { value: "full-day", label: "Full Day Package (8 hours)", multiplier: 5.0 }
     ],
     addOns: [
       { id: "premium-products", name: "Premium Product Upgrade", price: 150 },
       { id: "group-discount", name: "Group Service (2+ people)", price: -50 },
       { id: "travel-kit", name: "Professional Travel Kit", price: 100 },
-      { id: "follow-up-care", name: "Follow-up Care Package", price: 80 }
+      { id: "trial-session", name: "Trial Session (Bridal/Event)", price: 300 }
     ]
   },
   "moving": {
@@ -545,6 +633,7 @@ export const serviceIdMapping: Record<string, string> = {
   "event-staffing": "event-staff",
   "WAITERING_SERVICES": "event-staff",
   "beauty-wellness": "beauty-wellness",
+  "BEAUTY_WELLNESS": "beauty-wellness",
   "moving": "moving",
   "MOVING_SERVICES": "moving",
   "au-pair": "au-pair",

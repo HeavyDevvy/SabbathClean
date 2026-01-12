@@ -48,6 +48,7 @@ import PlumbingServiceForm from "./booking-forms/PlumbingServiceForm";
 import ElectricalServiceForm from "./booking-forms/ElectricalServiceForm";
 import EventStaffForm from "./booking-forms/EventStaffForm";
 import ChefCateringForm from "./booking-forms/ChefCateringForm";
+import BeautyWellnessForm from "./booking-forms/BeautyWellnessForm";
 import { LocationStep } from "./booking-steps/LocationStep";
 import ScheduleStep from "./booking-steps/ScheduleStep";
 import AddOnsStep from "./booking-steps/AddOnsStep";
@@ -167,6 +168,11 @@ export default function ModernServiceModal({
     dietaryRequirements: editBookingData?.dietaryRequirements || [] as string[],
     eventSize: editBookingData?.eventSize || "",
     
+    // Beauty & Wellness specific
+    eventType: editBookingData?.eventType || "",
+    beautyServices: editBookingData?.beautyServices || [] as string[],
+    serviceQuantities: editBookingData?.serviceQuantities || {} as Record<string, number>,
+
     // Selections
     selectedAddOns: editBookingData?.selectedAddOns || [] as string[],
     selectedProvider: editBookingData?.selectedProvider || (preSelectedProviderId ? { 
@@ -416,13 +422,19 @@ export default function ModernServiceModal({
     serviceId === "au-pair" || mappedServiceId === "au-pair", 
     [serviceId, mappedServiceId]
   );
+
+  // BEAUTY & WELLNESS SERVICE: Service-specific feature flag
+  const isBeautyWellness = useMemo(() => 
+    serviceId === "beauty-wellness" || mappedServiceId === "beauty-wellness", 
+    [serviceId, mappedServiceId]
+  );
   
   // Show enhanced provider details with tip section and 2-button layout
   const showEnhancedProviderDetails = useMemo(() => 
     isHouseCleaning || isPlumbing || isElectrical || isGardenService || isPoolService || 
-    isChefCatering || isEventStaff || isMoving || isAuPair,
+    isChefCatering || isEventStaff || isMoving || isAuPair || isBeautyWellness,
     [isHouseCleaning, isPlumbing, isElectrical, isGardenService, isPoolService,
-     isChefCatering, isEventStaff, isMoving, isAuPair]
+     isChefCatering, isEventStaff, isMoving, isAuPair, isBeautyWellness]
   );
   
   // Check if plumbing service has urgent priority requiring one-time booking
@@ -526,6 +538,12 @@ export default function ModernServiceModal({
       selectedMenu: (isEditing || isPrefilling) ? (dataSource.selectedMenu || "") : "",
       customMenuItems: (isEditing || isPrefilling) && Array.isArray(dataSource.customMenuItems) ? [...dataSource.customMenuItems] : [],
       dietaryRequirements: (isEditing || isPrefilling) && Array.isArray(dataSource.dietaryRequirements) ? [...dataSource.dietaryRequirements] : [],
+      
+      // Beauty & Wellness specific
+      eventType: (isEditing || isPrefilling) ? (dataSource.eventType || "") : "",
+      beautyServices: (isEditing || isPrefilling) && Array.isArray(dataSource.beautyServices) ? [...dataSource.beautyServices] : [],
+      serviceQuantities: (isEditing || isPrefilling) && dataSource.serviceQuantities ? {...dataSource.serviceQuantities} : {},
+
       eventSize: (isEditing || isPrefilling) ? (dataSource.eventSize || "") : "",
       selectedAddOns: (isEditing || isPrefilling) && Array.isArray(dataSource.selectedAddOns) ? [...dataSource.selectedAddOns] : [],
       selectedProvider: (isEditing || isPrefilling) && dataSource.provider ? {...dataSource.provider} : null,
@@ -1073,6 +1091,12 @@ export default function ModernServiceModal({
         selectedMenu: "",
         customMenuItems: [],
         dietaryRequirements: [],
+        
+        // Beauty & Wellness specific
+        eventType: "",
+        beautyServices: [],
+        serviceQuantities: {},
+
         eventSize: "",
         selectedAddOns: [],
         specialRequests: "",
@@ -1323,6 +1347,12 @@ export default function ModernServiceModal({
       electricalIssue: "",
       cuisineType: "",
       eventSize: "",
+
+      // Beauty & Wellness specific
+      eventType: "",
+      beautyServices: [],
+      serviceQuantities: {},
+
       menuSelection: "popular",
       selectedMenu: "",
       customMenuItems: [],
@@ -1723,6 +1753,14 @@ export default function ModernServiceModal({
 
         {isChefCatering && (
           <ChefCateringForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
+        )}
+
+        {isBeautyWellness && (
+          <BeautyWellnessForm
             formData={formData}
             setFormData={setFormData}
             currentConfig={currentConfig}

@@ -32,6 +32,11 @@ export interface BookingFormData {
   materials?: string;
   recurringSchedule?: string;
   timePreference?: string;
+  
+  // Beauty & Wellness
+  eventType?: string;
+  beautyServices?: string[];
+  serviceQuantities?: Record<string, number>;
 }
 
 /**
@@ -154,11 +159,40 @@ export function usePriceEstimation(
     }
 
     if (mappedServiceId === "beauty-wellness") {
-      const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
-      if (serviceType) basePrice = serviceType.price;
+      // 1. Calculate base sum from selected services and their quantities
+      let servicesTotal = 0;
+      if (formData.beautyServices && Array.isArray(formData.beautyServices)) {
+        formData.beautyServices.forEach(serviceVal => {
+          const serviceConfig = config.serviceTypes?.find((s: any) => s.value === serviceVal);
+          if (serviceConfig) {
+            const qty = formData.serviceQuantities?.[serviceVal] || 1;
+            servicesTotal += serviceConfig.price * qty;
+          }
+        });
+      }
+      // If no services selected yet, use basePrice from config as fallback or 0
+      basePrice = servicesTotal > 0 ? servicesTotal : config.basePrice;
+
+      // 2. Apply Event Type Multiplier
+      const eventType = config.eventTypes?.find((e: any) => e.value === formData.eventType);
+      if (eventType) {
+        basePrice *= eventType.multiplier;
+      }
       
-      const duration = config.sessionDuration?.find((d: any) => d.value === formData.propertySize);
-      if (duration) basePrice *= duration.multiplier;
+      // 3. Property/Location Type Multiplier is already applied above (lines 69-72)
+      // but we might want to ensure it's not double-counted if basePrice was reset.
+      // The code above (lines 69-72) applies it to `config.basePrice`.
+      // Since we overwrote basePrice with `servicesTotal`, we should re-apply property multiplier if needed.
+      // However, usually property multiplier applies to the whole service.
+      // Let's re-apply it here to be safe if we replaced basePrice.
+      if (propertyType && servicesTotal > 0) {
+        // The previous application was `basePrice *= propertyType.multiplier` where basePrice was `config.basePrice`.
+        // Now basePrice is `servicesTotal`. We need to apply the multiplier to this new base.
+        // But wait, line 71 already multiplied `basePrice` (initially config.basePrice).
+        // If we overwrite basePrice, we lose that.
+        // So yes, we should apply it.
+        basePrice *= propertyType.multiplier;
+      }
     }
 
     if (mappedServiceId === "moving") {

@@ -20,7 +20,8 @@ import {
   CreditCard, 
   FileText,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles
 } from "lucide-react";
 import { useLocation } from "wouter";
 import berryLogo from "@assets/berry-logo.png";
@@ -87,6 +88,9 @@ interface ProviderData {
   services: string[];
   experience: string;
   description: string;
+  specializations: string;
+  baseRate: string;
+  availability: Record<string, any>;
   
   // Banking Details
   bankName: string;
@@ -101,6 +105,7 @@ interface ProviderData {
   businessRegistration: File | null;
   bankStatement: File | null;
   certificates: File[];
+  portfolio: File[];
   profilePicture: File | null;
   
   // Verification
@@ -122,6 +127,7 @@ export default function EnhancedProviderOnboarding() {
     businessRegistration: useRef<HTMLInputElement>(null),
     bankStatement: useRef<HTMLInputElement>(null),
     certificates: useRef<HTMLInputElement>(null),
+    portfolio: useRef<HTMLInputElement>(null),
     profilePicture: useRef<HTMLInputElement>(null)
   };
 
@@ -141,6 +147,9 @@ export default function EnhancedProviderOnboarding() {
     services: [],
     experience: "",
     description: "",
+    specializations: "",
+    baseRate: "",
+    availability: {},
     bankName: "",
     accountHolder: "",
     accountNumber: "",
@@ -151,6 +160,7 @@ export default function EnhancedProviderOnboarding() {
     businessRegistration: null,
     bankStatement: null,
     certificates: [],
+    portfolio: [],
     profilePicture: null,
     kycStatus: 'pending',
     kybStatus: 'pending',
@@ -168,7 +178,13 @@ export default function EnhancedProviderOnboarding() {
     "Waitering Services",
     "Moving Services",
     "Au Pair Services",
-    "Locksmith Services"
+    "Locksmith Services",
+    "Hair Stylist",
+    "Makeup Artist",
+    "Nail Technician",
+    "Massage Therapist",
+    "Esthetician/Beautician",
+    "Spa Therapist"
   ];
   const canonicalServiceMap: Record<string, string> = {
     "House Cleaning": "HOUSE_CLEANING",
@@ -180,7 +196,13 @@ export default function EnhancedProviderOnboarding() {
     "Waitering Services": "WAITERING_SERVICES",
     "Moving Services": "MOVING_SERVICES",
     "Au Pair Services": "AU_PAIR_SERVICES",
-    "Locksmith Services": "LOCKSMITH_SERVICES"
+    "Locksmith Services": "LOCKSMITH_SERVICES",
+    "Hair Stylist": "HAIR_STYLIST",
+    "Makeup Artist": "MAKEUP_ARTIST",
+    "Nail Technician": "NAIL_TECHNICIAN",
+    "Massage Therapist": "MASSAGE_THERAPIST",
+    "Esthetician/Beautician": "ESTHETICIAN",
+    "Spa Therapist": "SPA_THERAPIST"
   };
 
   const southAfricanBanks = [
@@ -262,10 +284,10 @@ export default function EnhancedProviderOnboarding() {
       reader.onload = async (e) => {
         const fileData = e.target?.result as string;
         
-        if (field === 'certificates') {
+        if (field === 'certificates' || field === 'portfolio') {
           setProviderData(prev => ({
             ...prev,
-            certificates: [...prev.certificates, file]
+            [field]: [...(prev[field] as File[]), file]
           }));
         } else {
           setProviderData(prev => ({
@@ -459,6 +481,11 @@ export default function EnhancedProviderOnboarding() {
 
       const servicesMapped = providerData.services.map(s => canonicalServiceMap[s] || s.toLowerCase().replace(/\s+/g, '-'));
       
+      // Process portfolio images
+      const portfolioData = await Promise.all(
+        providerData.portfolio.map(file => compressImage(file))
+      );
+
        const providerPayload: any = {
          userId: newUserId,
          firstName: providerData.firstName,
@@ -466,10 +493,13 @@ export default function EnhancedProviderOnboarding() {
          email: providerData.email,
          phone: providerData.phone,
          bio: providerData.description || "",
-         hourlyRate: "250.00",
+         hourlyRate: providerData.baseRate || "250.00",
          servicesOffered: servicesMapped,
          category: servicesMapped[0] || "general",
          experience: providerData.experience,
+         specializations: providerData.specializations,
+         availability: providerData.availability,
+         portfolio: portfolioData,
          location: locationStr,
          profileImage: (providerData as any).profilePictureData || null, // Send base64 image
          idDocument: (providerData as any).idDocumentData || null,
@@ -858,6 +888,100 @@ export default function EnhancedProviderOnboarding() {
                 </SelectContent>
               </Select>
             </div>
+
+            {providerData.services.some(s => [
+              "Hair Stylist", "Makeup Artist", "Nail Technician", 
+              "Massage Therapist", "Esthetician/Beautician", "Spa Therapist"
+            ].includes(s)) && (
+              <div className="space-y-6 border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Beauty & Wellness Details</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="specializations">Specializations</Label>
+                    <Input
+                      id="specializations"
+                      placeholder="e.g. Bridal makeup, Deep tissue massage"
+                      value={providerData.specializations}
+                      onChange={(e) => setProviderData({...providerData, specializations: e.target.value})}
+                      data-testid="input-specializations"
+                    />
+                    <p className="text-xs text-muted-foreground">Separate with commas</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="baseRate">Base Hourly Rate (R)</Label>
+                    <Input
+                      id="baseRate"
+                      type="number"
+                      placeholder="e.g. 450"
+                      value={providerData.baseRate}
+                      onChange={(e) => setProviderData({...providerData, baseRate: e.target.value})}
+                      data-testid="input-base-rate"
+                    />
+                  </div>
+                </div>
+
+                {/* Portfolio Upload */}
+                <div className="space-y-2">
+                  <Label>Portfolio (Upload photos of your work)</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                       onClick={() => fileInputRefs.portfolio.current?.click()}>
+                    <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm font-medium">Click to upload photos</p>
+                    <p className="text-xs text-muted-foreground">Max 5MB per file</p>
+                  </div>
+                  <input
+                    ref={fileInputRefs.portfolio}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => handleFileUpload('portfolio', file));
+                    }}
+                  />
+                  {providerData.portfolio.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {providerData.portfolio.map((file, idx) => (
+                        <div key={idx} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded flex items-center">
+                          {file.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Simple Availability Grid */}
+                <div className="space-y-2">
+                  <Label>Weekly Availability</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                       <div key={day} className="flex items-center space-x-2">
+                         <Checkbox 
+                           id={`avail-${day}`}
+                           checked={!!providerData.availability[day]}
+                           onCheckedChange={(checked) => {
+                             const newAvail = {...providerData.availability};
+                             if (checked) {
+                               newAvail[day] = ['09:00-17:00']; // Default hours
+                             } else {
+                               delete newAvail[day];
+                             }
+                             setProviderData({...providerData, availability: newAvail});
+                           }}
+                         />
+                         <Label htmlFor={`avail-${day}`}>{day}</Label>
+                       </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="description">Service Description</Label>

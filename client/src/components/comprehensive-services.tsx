@@ -14,6 +14,7 @@ import {
   Zap, 
   ChefHat, 
   Coffee,
+  Scissors,
   Car,
   Heart,
   Baby,
@@ -234,6 +235,35 @@ const specializedServices: Service[] = [
     features: ["Trained professionals", "Event specialists", "Bar service", "Setup assistance"],
     icon: Users,
     gradient: "from-indigo-500 to-purple-500",
+    bookingSteps: 4
+  },
+
+  // BEAUTY & WELLNESS SERVICES
+  {
+    id: "BEAUTY_WELLNESS",
+    category: "Specialized Services",
+    title: "Beauty & Wellness",
+    description: "Comprehensive beauty services including hair, makeup, nails, massage, and spa treatments for weddings, events, and personal care",
+    price: "From R280/session",
+    duration: "1-8 hours",
+    popular: true,
+    serviceTypes: [
+      "💇‍♀️ Hair Styling (Cuts, Color, Updos)",
+      "💄 Makeup Artistry (Bridal, Editorial)",
+      "💅 Nail Services (Manicure, Pedicure)",
+      "💆‍♀️ Massage Therapy & Spa Treatments",
+      "🧖‍♀️ Esthetician Services (Facials, Skincare)",
+      "👰 Wedding & Event Packages",
+      "🏢 Corporate Wellness Days"
+    ],
+    features: [
+      "✨ Professional Beauty Team",
+      "🏠 Mobile Service (Home/Venue/Office)",
+      "🗓️ Specialized Event Packages",
+      "🌿 Premium & Organic Products Available"
+    ],
+    icon: Scissors,
+    gradient: "from-pink-500 to-rose-500",
     bookingSteps: 4
   },
 
