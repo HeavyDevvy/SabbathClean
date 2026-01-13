@@ -113,6 +113,14 @@ interface ProviderData {
   kybStatus: 'pending' | 'verified' | 'failed';
   password: string;
   confirmPassword: string;
+
+  // Locksmith Specific
+  locksmithSpecializations: string[];
+  mobileService: boolean;
+  serviceRadius: string;
+  availability247: boolean;
+  responseTime: string;
+  certifications: string;
 }
 
 export default function EnhancedProviderOnboarding() {
@@ -165,7 +173,13 @@ export default function EnhancedProviderOnboarding() {
     kycStatus: 'pending',
     kybStatus: 'pending',
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    locksmithSpecializations: [],
+    mobileService: false,
+    serviceRadius: "10km",
+    availability247: false,
+    responseTime: "Scheduled",
+    certifications: ""
   });
 
   const availableServices = [
@@ -186,6 +200,18 @@ export default function EnhancedProviderOnboarding() {
     "Esthetician/Beautician",
     "Spa Therapist"
   ];
+
+  const locksmithSpecializations = [ 
+    { id: 'automotive', label: 'Automotive Specialist', description: 'Car lockouts, key programming' }, 
+    { id: 'residential', label: 'Residential Specialist', description: 'Home locks, security' }, 
+    { id: 'commercial', label: 'Commercial Specialist', description: 'Business, access control' }, 
+    { id: 'emergency', label: '24/7 Emergency Services', description: 'Urgent lockouts, break-ins' }, 
+    { id: 'safe', label: 'Safe Technician', description: 'Safe opening, repair' }, 
+    { id: 'smart', label: 'Smart Lock Expert', description: 'Electronic, smart locks' }, 
+    { id: 'master', label: 'Master Key Systems', description: 'Complex key systems' }, 
+    { id: 'access', label: 'Access Control', description: 'Security systems' } 
+  ];
+
   const canonicalServiceMap: Record<string, string> = {
     "House Cleaning": "HOUSE_CLEANING",
     "Plumbing Services": "PLUMBING_SERVICES",
@@ -497,7 +523,18 @@ export default function EnhancedProviderOnboarding() {
          servicesOffered: servicesMapped,
          category: servicesMapped[0] || "general",
          experience: providerData.experience,
-         specializations: providerData.specializations,
+         specializations: [
+           providerData.specializations,
+           providerData.locksmithSpecializations.map(id => locksmithSpecializations.find(s => s.id === id)?.label).join(", ")
+         ].filter(Boolean).join(", "),
+         
+         // Locksmith specific fields
+         mobileService: providerData.mobileService,
+         serviceRadius: providerData.serviceRadius,
+         availability247: providerData.availability247,
+         responseTime: providerData.responseTime,
+         certifications: providerData.certifications,
+
          availability: providerData.availability,
          portfolio: portfolioData,
          location: locationStr,
@@ -700,6 +737,124 @@ export default function EnhancedProviderOnboarding() {
                   required
                   data-testid="input-company-name"
                 />
+              </div>
+            )}
+
+            {providerData.services.includes("Locksmith Services") && (
+              <div className="space-y-6 border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Locksmith Details</h4>
+                </div>
+
+                {/* Specializations */}
+                <div className="space-y-4">
+                  <Label>Specializations</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {locksmithSpecializations.map((spec) => (
+                      <div key={spec.id} className="flex items-start space-x-2 border p-3 rounded-md hover:bg-gray-50">
+                        <Checkbox
+                          id={`spec-${spec.id}`}
+                          checked={providerData.locksmithSpecializations.includes(spec.id)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.locksmithSpecializations;
+                            const updated = checked
+                              ? [...current, spec.id]
+                              : current.filter(id => id !== spec.id);
+                            setProviderData({ ...providerData, locksmithSpecializations: updated });
+                          }}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                          <Label
+                            htmlFor={`spec-${spec.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {spec.label}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {spec.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {/* Mobile Service & 24/7 Availability */}
+                   <div className="space-y-4">
+                      <div className="flex items-center justify-between border p-3 rounded-md">
+                        <Label htmlFor="mobileService" className="cursor-pointer">Mobile Service Available</Label>
+                         <Checkbox 
+                           id="mobileService"
+                           checked={providerData.mobileService}
+                           onCheckedChange={(checked) => setProviderData({...providerData, mobileService: !!checked})}
+                         />
+                      </div>
+                      <div className="flex items-center justify-between border p-3 rounded-md">
+                        <Label htmlFor="availability247" className="cursor-pointer">24/7 Availability</Label>
+                         <Checkbox 
+                           id="availability247"
+                           checked={providerData.availability247}
+                           onCheckedChange={(checked) => setProviderData({...providerData, availability247: !!checked})}
+                         />
+                      </div>
+                   </div>
+
+                   {/* Service Radius & Response Time */}
+                   <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="serviceRadius">Service Radius</Label>
+                        <Select 
+                          value={providerData.serviceRadius} 
+                          onValueChange={(value) => setProviderData({...providerData, serviceRadius: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select radius" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5km">5km</SelectItem>
+                            <SelectItem value="10km">10km</SelectItem>
+                            <SelectItem value="20km">20km</SelectItem>
+                            <SelectItem value="30km">30km</SelectItem>
+                            <SelectItem value="50km+">50km+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="responseTime">Typical Response Time</Label>
+                        <Select 
+                          value={providerData.responseTime} 
+                          onValueChange={(value) => setProviderData({...providerData, responseTime: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select response time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Under 30min">Under 30min</SelectItem>
+                            <SelectItem value="Within 1hr">Within 1hr</SelectItem>
+                            <SelectItem value="Within 2hrs">Within 2hrs</SelectItem>
+                            <SelectItem value="Scheduled">Scheduled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Certifications */}
+                <div className="space-y-2">
+                  <Label htmlFor="certifications">Certifications & Qualifications</Label>
+                  <Textarea
+                    id="certifications"
+                    placeholder="List your locksmith certifications, registration numbers, etc."
+                    value={providerData.certifications}
+                    onChange={(e) => setProviderData({...providerData, certifications: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
               </div>
             )}
 
@@ -980,6 +1135,124 @@ export default function EnhancedProviderOnboarding() {
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {providerData.services.includes("Locksmith Services") && (
+              <div className="space-y-6 border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Locksmith Details</h4>
+                </div>
+
+                {/* Specializations */}
+                <div className="space-y-4">
+                  <Label>Specializations</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {locksmithSpecializations.map((spec) => (
+                      <div key={spec.id} className="flex items-start space-x-2 border p-3 rounded-md hover:bg-gray-50">
+                        <Checkbox
+                          id={`spec-${spec.id}`}
+                          checked={providerData.locksmithSpecializations.includes(spec.id)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.locksmithSpecializations;
+                            const updated = checked
+                              ? [...current, spec.id]
+                              : current.filter(id => id !== spec.id);
+                            setProviderData({ ...providerData, locksmithSpecializations: updated });
+                          }}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                          <Label
+                            htmlFor={`spec-${spec.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {spec.label}
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {spec.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {/* Mobile Service & 24/7 Availability */}
+                   <div className="space-y-4">
+                      <div className="flex items-center justify-between border p-3 rounded-md">
+                        <Label htmlFor="mobileService" className="cursor-pointer">Mobile Service Available</Label>
+                         <Checkbox 
+                           id="mobileService"
+                           checked={providerData.mobileService}
+                           onCheckedChange={(checked) => setProviderData({...providerData, mobileService: !!checked})}
+                         />
+                      </div>
+                      <div className="flex items-center justify-between border p-3 rounded-md">
+                        <Label htmlFor="availability247" className="cursor-pointer">24/7 Availability</Label>
+                         <Checkbox 
+                           id="availability247"
+                           checked={providerData.availability247}
+                           onCheckedChange={(checked) => setProviderData({...providerData, availability247: !!checked})}
+                         />
+                      </div>
+                   </div>
+
+                   {/* Service Radius & Response Time */}
+                   <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="serviceRadius">Service Radius</Label>
+                        <Select 
+                          value={providerData.serviceRadius} 
+                          onValueChange={(value) => setProviderData({...providerData, serviceRadius: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select radius" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5km">5km</SelectItem>
+                            <SelectItem value="10km">10km</SelectItem>
+                            <SelectItem value="20km">20km</SelectItem>
+                            <SelectItem value="30km">30km</SelectItem>
+                            <SelectItem value="50km+">50km+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="responseTime">Typical Response Time</Label>
+                        <Select 
+                          value={providerData.responseTime} 
+                          onValueChange={(value) => setProviderData({...providerData, responseTime: value})}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select response time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Under 30min">Under 30min</SelectItem>
+                            <SelectItem value="Within 1hr">Within 1hr</SelectItem>
+                            <SelectItem value="Within 2hrs">Within 2hrs</SelectItem>
+                            <SelectItem value="Scheduled">Scheduled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Certifications */}
+                <div className="space-y-2">
+                  <Label htmlFor="certifications">Certifications & Qualifications</Label>
+                  <Textarea
+                    id="certifications"
+                    placeholder="List your locksmith certifications, registration numbers, etc."
+                    value={providerData.certifications}
+                    onChange={(e) => setProviderData({...providerData, certifications: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+
               </div>
             )}
 

@@ -115,28 +115,65 @@ export function usePriceEstimation(
     }
 
     if (mappedServiceId === "locksmith") {
-      const serviceCategory = formData.locksmithCategory || formData.serviceCategory || "residential";
+      const category = formData.locksmithCategory || formData.serviceCategory || "residential";
+      const serviceType = formData.locksmithServiceType || "";
       
-      // Add Service Type Price (this logic replaces basePrice entirely usually)
-      if (config.serviceTypes && !Array.isArray(config.serviceTypes) && config.serviceTypes[serviceCategory]) {
-        const type = config.serviceTypes[serviceCategory].find((t: any) => t.value === (formData.locksmithServiceType || formData.cleaningType));
-        if (type) basePrice = type.price; 
+      // Base prices by service type
+      basePrice = 450;
+      
+      if (category === 'automotive') {
+        if (serviceType === 'lockout' || serviceType?.includes('Locked keys')) basePrice = 650;
+        else if (serviceType === 'lost-keys' || serviceType?.includes('Lost keys')) basePrice = 850;
+        else if (serviceType === 'duplication' || serviceType?.includes('duplication')) basePrice = 150;
+        else if (serviceType === 'transponder' || serviceType?.includes('Transponder')) basePrice = 1200;
+        // Fallback to config price if no match
+        else if (config.serviceTypes?.automotive) {
+           const type = config.serviceTypes.automotive.find((t: any) => t.value === serviceType);
+           if (type) basePrice = type.price;
+        }
       }
       
-      // Apply Urgency Multiplier
-      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
-      if (urgency) basePrice *= urgency.multiplier;
-      
-      // Add Property Type Multiplier (if applicable and not vehicle)
-      if (serviceCategory !== 'automotive') {
-         // Fallback to propertySize for backward compatibility
-         const propertyVal = serviceCategory === 'commercial' 
-           ? (formData.businessType || formData.propertySize) 
-           : (formData.propertyType || formData.propertySize);
-         
-         const property = (serviceCategory === 'commercial' ? config.businessTypes : config.propertyTypes)?.find((p: any) => p.value === propertyVal);
-         if (property && property.multiplier) basePrice *= property.multiplier;
+      if (category === 'residential') {
+        const numLocks = formData.numberOfLocks || 1;
+        if (serviceType === 'lockout') basePrice = 450;
+        else if (serviceType === 'install' || serviceType === 'replace' || serviceType?.includes('Installation')) basePrice = 350 * numLocks;
+        else if (serviceType === 'repair' || serviceType?.includes('Repair')) basePrice = 280 * numLocks;
+        else if (serviceType === 'rekey' || serviceType?.includes('Rekey')) basePrice = 250 * numLocks;
+        else if (serviceType === 'smart-lock' || serviceType?.includes('Smart lock')) basePrice = 800;
+        // Fallback
+        else if (config.serviceTypes?.residential) {
+           const type = config.serviceTypes.residential.find((t: any) => t.value === serviceType);
+           if (type) basePrice = type.price;
+        }
       }
+      
+      if (category === 'commercial') {
+        if (serviceType === 'lockout') basePrice = 550;
+        else if (serviceType === 'master-key' || serviceType?.includes('Master key')) basePrice = 2500;
+        else if (serviceType === 'access-control' || serviceType?.includes('Access control')) basePrice = 3500;
+        // Fallback
+        else if (config.serviceTypes?.commercial) {
+           const type = config.serviceTypes.commercial.find((t: any) => t.value === serviceType);
+           if (type) basePrice = type.price;
+        }
+      }
+      
+      // Emergency multiplier
+      if (category === 'emergency') {
+        // If specific service selected, use its price, otherwise apply multiplier to base
+        if (config.serviceTypes?.emergency) {
+            const type = config.serviceTypes.emergency.find((t: any) => t.value === serviceType);
+            if (type) basePrice = type.price;
+            else basePrice *= 1.5;
+        } else {
+            basePrice *= 1.5;
+        }
+      }
+      
+      // Urgency multipliers
+      if (formData.urgency === 'immediate' || formData.urgency === 'emergency') basePrice *= 2.0;
+      else if (formData.urgency === '1_hour' || formData.urgency === 'urgent') basePrice *= 1.5;
+      else if (formData.urgency === '2_hours') basePrice *= 1.2;
     }
 
     if (mappedServiceId === "plumbing") {
@@ -300,15 +337,15 @@ export function usePriceEstimation(
     );
 
     return {
-      basePrice: Math.round(basePrice),
+      basePrice,
       addOnsPrice,
       materialsDiscount,
       recurringDiscount,
       timeDiscount,
-      totalPrice: Math.round(totalPrice),
+      totalPrice,
       estimatedHours
     };
-  }, [formData, mappedServiceId, serviceConfigs]);
+  }, [mappedServiceId, serviceConfigs, formData]);
 
   return pricing;
 }

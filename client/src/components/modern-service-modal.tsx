@@ -1768,6 +1768,14 @@ export default function ModernServiceModal({
           />
         )}
 
+        {serviceId === "locksmith" && (
+          <LocksmithServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
+        )}
+
         {serviceId === "event-staff" && (
           <EventStaffForm
             formData={formData}

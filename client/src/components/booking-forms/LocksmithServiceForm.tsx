@@ -311,25 +311,46 @@ export default function LocksmithServiceForm({
                 <AlertCircle className="h-5 w-5 mr-2" />
                 <h4 className="font-semibold">Emergency Priority</h4>
               </div>
-              <p className="text-sm">
+              <p className="text-sm mb-4">
                 Our nearest locksmith will be dispatched immediately. Typical response time is 20-45 minutes depending on traffic.
               </p>
-              <div className="mt-4">
-                 <Label className="text-red-900">Is anyone locked inside or in danger?</Label>
-                 <RadioGroup 
-                   value={formData.isDanger ? "yes" : "no"} 
-                   onValueChange={(val) => setFormData((prev: any) => ({ ...prev, isDanger: val === "yes" }))}
-                   className="flex space-x-4 mt-2"
-                 >
-                   <div className="flex items-center space-x-2">
-                     <RadioGroupItem value="yes" id="danger-yes" className="border-red-600 text-red-600" />
-                     <Label htmlFor="danger-yes">Yes</Label>
-                   </div>
-                   <div className="flex items-center space-x-2">
-                     <RadioGroupItem value="no" id="danger-no" className="border-red-600 text-red-600" />
-                     <Label htmlFor="danger-no">No</Label>
-                   </div>
-                 </RadioGroup>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-red-900">How urgent is this?</Label>
+                  <Select 
+                    value={formData.urgency || "immediate"} 
+                    onValueChange={(value) => setFormData((prev: any) => ({ ...prev, urgency: value }))}
+                  >
+                    <SelectTrigger className="bg-white border-red-200 text-red-900">
+                      <SelectValue placeholder="Select Urgency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="immediate">Immediate (under 30min)</SelectItem>
+                      <SelectItem value="1_hour">Within 1 hour</SelectItem>
+                      <SelectItem value="2_hours">Within 2 hours</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="pt-2">
+                   <Label className="text-red-900 block mb-2">Is anyone locked inside or in danger?</Label>
+                   <RadioGroup 
+                     value={formData.isDanger ? "yes" : "no"} 
+                     onValueChange={(val) => setFormData((prev: any) => ({ ...prev, isDanger: val === "yes" }))}
+                     className="flex space-x-4"
+                   >
+                     <div className="flex items-center space-x-2">
+                       <RadioGroupItem value="yes" id="danger-yes" className="border-red-600 text-red-600" />
+                       <Label htmlFor="danger-yes" className="text-red-900">Yes</Label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                       <RadioGroupItem value="no" id="danger-no" className="border-red-600 text-red-600" />
+                       <Label htmlFor="danger-no" className="text-red-900">No</Label>
+                     </div>
+                   </RadioGroup>
+                </div>
               </div>
             </div>
           )}
