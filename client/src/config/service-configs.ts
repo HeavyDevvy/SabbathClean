@@ -36,7 +36,12 @@ export interface ServiceConfig {
   dietaryRequirements?: Array<{ value: string; label: string; description: string }>;
   eventSizes?: Array<{ value: string; label: string; multiplier: number }>;
   staffTypes?: Array<{ value: string; label: string; price: number }>;
-  serviceTypes?: Array<{ value: string; label: string; price: number }>;
+  serviceTypes?: Array<{ value: string; label: string; price: number }> | Record<string, Array<{ value: string; label: string; price: number }>>;
+  serviceCategories?: Array<{ value: string; label: string }>;
+  vehicleMakes?: string[];
+  keyTypes?: Array<{ value: string; label: string }>;
+  lockTypes?: Array<{ value: string; label: string }>;
+  businessTypes?: Array<{ value: string; label: string }>;
   sessionDuration?: Array<{ value: string; label: string; multiplier: number }>;
   movingTypes?: Array<{ value: string; label: string; price: number; description: string }>;
   movingDistance?: Array<{ value: string; label: string; multiplier: number }>;
@@ -555,19 +560,74 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
     icon: Wrench,
     basePrice: 450,
     steps: 4,
-    propertyTypes: [
-      { value: "apartment", label: "Apartment", multiplier: 1.0 },
-      { value: "house", label: "House", multiplier: 1.1 },
-      { value: "commercial", label: "Commercial Property", multiplier: 1.3 },
-      { value: "vehicle", label: "Vehicle", multiplier: 1.0 }
+    serviceCategories: [
+      { value: "automotive", label: "Automotive Locksmith" },
+      { value: "residential", label: "Residential Locksmith" },
+      { value: "commercial", label: "Commercial Locksmith" },
+      { value: "emergency", label: "Emergency Services" }
     ],
-    serviceTypes: [
-      { value: "lockout", label: "Emergency Lockout", price: 450 },
-      { value: "installation", label: "Lock Installation", price: 350 },
-      { value: "repair", label: "Lock Repair", price: 280 },
-      { value: "rekey", label: "Rekeying", price: 250 },
-      { value: "key-duplication", label: "Key Duplication", price: 150 },
-      { value: "safe", label: "Safe Opening/Repair", price: 650 }
+    serviceTypes: {
+      automotive: [
+        { value: "lockout", label: "Locked Keys in Car", price: 450 },
+        { value: "lost-keys", label: "Lost Car Keys", price: 850 },
+        { value: "broken-key", label: "Broken Key Extraction", price: 550 },
+        { value: "transponder", label: "Transponder Key Programming", price: 950 },
+        { value: "duplication", label: "Car Key Duplication", price: 350 },
+        { value: "ignition", label: "Ignition Repair/Replacement", price: 1200 }
+      ],
+      residential: [
+        { value: "lockout", label: "Home Lockout", price: 450 },
+        { value: "install", label: "New Lock Installation", price: 350 },
+        { value: "repair", label: "Lock Repair", price: 280 },
+        { value: "replace", label: "Lock Replacement", price: 350 },
+        { value: "rekey", label: "Rekey Existing Locks", price: 250 },
+        { value: "high-security", label: "High-Security Lock Install", price: 850 },
+        { value: "smart-lock", label: "Smart Lock Installation", price: 650 },
+        { value: "safe", label: "Safe Opening/Repair", price: 950 }
+      ],
+      commercial: [
+        { value: "lockout", label: "Office Lockout", price: 550 },
+        { value: "master-key", label: "Master Key System", price: 1500 },
+        { value: "access-control", label: "Access Control Systems", price: 2500 },
+        { value: "electronic", label: "Electronic Lock Install", price: 1200 },
+        { value: "panic-bar", label: "Panic Bar Installation", price: 1800 },
+        { value: "file-cabinet", label: "File Cabinet Locks", price: 250 }
+      ],
+      emergency: [
+        { value: "247-lockout", label: "24/7 Emergency Lockout", price: 650 },
+        { value: "break-in", label: "Break-in Repair", price: 850 },
+        { value: "security-check", label: "Post-Burglary Assessment", price: 450 }
+      ]
+    },
+    vehicleMakes: [
+      "Toyota", "Volkswagen", "Ford", "Hyundai", "Nissan", "BMW", "Mercedes-Benz", 
+      "Audi", "Honda", "Kia", "Mazda", "Suzuki", "Renault", "Chevrolet", "Isuzu", "Other"
+    ],
+    keyTypes: [
+      { value: "traditional", label: "Traditional Metal Key" },
+      { value: "transponder", label: "Transponder Chip Key" },
+      { value: "smart", label: "Smart Key / Fob" },
+      { value: "remote", label: "Remote Head Key" }
+    ],
+    propertyTypes: [
+      { value: "house", label: "House", multiplier: 1.0 },
+      { value: "apartment", label: "Apartment/Flat", multiplier: 1.0 },
+      { value: "townhouse", label: "Townhouse/Cluster", multiplier: 1.0 },
+      { value: "other", label: "Other", multiplier: 1.0 }
+    ],
+    lockTypes: [
+      { value: "deadbolt", label: "Deadbolt" },
+      { value: "knob", label: "Knob Lock" },
+      { value: "lever", label: "Lever Handle" },
+      { value: "smart", label: "Smart Lock" },
+      { value: "padlock", label: "Padlock" }
+    ],
+    businessTypes: [
+      { value: "office", label: "Office Building" },
+      { value: "retail", label: "Retail Store" },
+      { value: "warehouse", label: "Warehouse/Industrial" },
+      { value: "restaurant", label: "Restaurant/Hospitality" },
+      { value: "other", label: "Other" }
     ],
     urgencyLevels: [
       { value: "emergency", label: "Emergency (Immediate)", multiplier: 2.0 },
@@ -575,9 +635,9 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { value: "standard", label: "Standard (Scheduled)", multiplier: 1.0 }
     ],
     addOns: [
-      { id: "high-security", name: "High Security Lock Upgrade", price: 850 },
-      { id: "keypad", name: "Electronic Keypad Installation", price: 1200 },
-      { id: "master-key", name: "Master Key System", price: 1500 }
+      { id: "extra-key", name: "Additional Key Copy", price: 150 },
+      { id: "lube", name: "Lock Lubrication Service", price: 120 },
+      { id: "security-audit", name: "Full Security Audit", price: 450 }
     ]
   }
 };

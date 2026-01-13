@@ -29,6 +29,23 @@ export interface BookingFormData {
   plumbingIssue: string;
   electricalIssue: string;
   
+  // Locksmith specific
+  locksmithCategory: string;
+  locksmithServiceType: string;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleYear: string;
+  keyType: string;
+  isKeyInIgnition: boolean;
+  lockType: string;
+  numberOfLocks: number;
+  rekeyAll: boolean;
+  businessType: string;
+  numberOfDoors: number;
+  accessControl: boolean;
+  masterKey: boolean;
+  isDanger: boolean;
+  
   // Chef & Catering specific
   cuisineType: string;
   menuSelection: string;
@@ -139,6 +156,23 @@ function createDefaultFormData(): BookingFormData {
     plumbingIssue: "",
     electricalIssue: "",
     
+    // Locksmith specific
+    locksmithCategory: "",
+    locksmithServiceType: "",
+    vehicleMake: "",
+    vehicleModel: "",
+    vehicleYear: "",
+    keyType: "",
+    isKeyInIgnition: false,
+    lockType: "",
+    numberOfLocks: 0,
+    rekeyAll: false,
+    businessType: "",
+    numberOfDoors: 0,
+    accessControl: false,
+    masterKey: false,
+    isDanger: false,
+    
     // Chef & Catering specific
     cuisineType: "",
     menuSelection: "popular",
@@ -217,6 +251,23 @@ export function useBookingFlow(options: BookingFlowOptions = {}) {
       urgency: (isEditing || isPrefilling) ? (dataSource.urgency || "standard") : "standard",
       plumbingIssue: (isEditing || isPrefilling) ? (dataSource.plumbingIssue || "") : "",
       electricalIssue: (isEditing || isPrefilling) ? (dataSource.electricalIssue || "") : "",
+      
+      // Locksmith specific
+      locksmithCategory: (isEditing || isPrefilling) ? (dataSource.locksmithCategory || "") : "",
+      locksmithServiceType: (isEditing || isPrefilling) ? (dataSource.locksmithServiceType || "") : "",
+      vehicleMake: (isEditing || isPrefilling) ? (dataSource.vehicleMake || "") : "",
+      vehicleModel: (isEditing || isPrefilling) ? (dataSource.vehicleModel || "") : "",
+      vehicleYear: (isEditing || isPrefilling) ? (dataSource.vehicleYear || "") : "",
+      keyType: (isEditing || isPrefilling) ? (dataSource.keyType || "") : "",
+      isKeyInIgnition: (isEditing || isPrefilling) ? (dataSource.isKeyInIgnition || false) : false,
+      lockType: (isEditing || isPrefilling) ? (dataSource.lockType || "") : "",
+      numberOfLocks: (isEditing || isPrefilling) ? (dataSource.numberOfLocks || 0) : 0,
+      rekeyAll: (isEditing || isPrefilling) ? (dataSource.rekeyAll || false) : false,
+      businessType: (isEditing || isPrefilling) ? (dataSource.businessType || "") : "",
+      numberOfDoors: (isEditing || isPrefilling) ? (dataSource.numberOfDoors || 0) : 0,
+      accessControl: (isEditing || isPrefilling) ? (dataSource.accessControl || false) : false,
+      masterKey: (isEditing || isPrefilling) ? (dataSource.masterKey || false) : false,
+      isDanger: (isEditing || isPrefilling) ? (dataSource.isDanger || false) : false,
       
       // Chef & Catering specific
       cuisineType: (isEditing || isPrefilling) ? (dataSource.cuisineType || "") : "",

@@ -2476,6 +2476,17 @@ export class MemStorage implements IStorage {
       providerRating: insertBooking.providerRating ?? null,
       providerRatingBreakdown: insertBooking.providerRatingBreakdown ?? null,
       notes: insertBooking.notes ?? null,
+      // Locksmith fields
+      locksmithCategory: insertBooking.locksmithCategory ?? null,
+      locksmithServiceType: insertBooking.locksmithServiceType ?? null,
+      vehicleMake: insertBooking.vehicleMake ?? null,
+      vehicleModel: insertBooking.vehicleModel ?? null,
+      vehicleYear: insertBooking.vehicleYear ?? null,
+      keyType: insertBooking.keyType ?? null,
+      lockType: insertBooking.lockType ?? null,
+      numberOfLocks: insertBooking.numberOfLocks ?? null,
+      businessType: insertBooking.businessType ?? null,
+      numberOfDoors: insertBooking.numberOfDoors ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     } as Booking;

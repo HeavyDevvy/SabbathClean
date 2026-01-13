@@ -136,7 +136,7 @@ export default function BeautyWellnessForm({ formData, setFormData, currentConfi
           </div>
 
           <div className="space-y-3">
-            {currentConfig?.serviceTypes?.map((service) => {
+            {Array.isArray(currentConfig?.serviceTypes) && currentConfig?.serviceTypes?.map((service) => {
               const isSelected = formData.beautyServices?.includes(service.value);
               const qty = formData.serviceQuantities?.[service.value] || 1;
               

@@ -148,6 +148,19 @@ export const bookings = pgTable("bookings", {
   providerRating: integer("provider_rating"), // 1-5 stars given by provider
   providerRatingBreakdown: jsonb("provider_rating_breakdown"), // detailed ratings from provider
   notes: text("notes"), // internal notes
+
+  // Locksmith specific fields
+  locksmithCategory: text("locksmith_category"),
+  locksmithServiceType: text("locksmith_service_type"),
+  vehicleMake: text("vehicle_make"),
+  vehicleModel: text("vehicle_model"),
+  vehicleYear: text("vehicle_year"),
+  keyType: text("key_type"),
+  lockType: text("lock_type"),
+  numberOfLocks: integer("number_of_locks"),
+  businessType: text("business_type"),
+  numberOfDoors: integer("number_of_doors"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

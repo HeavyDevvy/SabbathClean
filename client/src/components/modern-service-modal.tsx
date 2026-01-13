@@ -46,6 +46,7 @@ import GardenServiceForm from "./booking-forms/GardenServiceForm";
 import PoolServiceForm from "./booking-forms/PoolServiceForm";
 import PlumbingServiceForm from "./booking-forms/PlumbingServiceForm";
 import ElectricalServiceForm from "./booking-forms/ElectricalServiceForm";
+import LocksmithServiceForm from "./booking-forms/LocksmithServiceForm";
 import EventStaffForm from "./booking-forms/EventStaffForm";
 import ChefCateringForm from "./booking-forms/ChefCateringForm";
 import BeautyWellnessForm from "./booking-forms/BeautyWellnessForm";
@@ -172,6 +173,24 @@ export default function ModernServiceModal({
     eventType: editBookingData?.eventType || "",
     beautyServices: editBookingData?.beautyServices || [] as string[],
     serviceQuantities: editBookingData?.serviceQuantities || {} as Record<string, number>,
+
+    // Locksmith specific
+    serviceCategory: editBookingData?.serviceCategory || "",
+    locksmithCategory: editBookingData?.locksmithCategory || "",
+    locksmithServiceType: editBookingData?.locksmithServiceType || "",
+    vehicleMake: editBookingData?.vehicleMake || "",
+    vehicleModel: editBookingData?.vehicleModel || "",
+    vehicleYear: editBookingData?.vehicleYear || "",
+    keyType: editBookingData?.keyType || "",
+    isKeyInIgnition: editBookingData?.isKeyInIgnition || false,
+    lockType: editBookingData?.lockType || "",
+    numberOfLocks: editBookingData?.numberOfLocks || 0,
+    rekeyAll: editBookingData?.rekeyAll || false,
+    businessType: editBookingData?.businessType || "",
+    numberOfDoors: editBookingData?.numberOfDoors || 0,
+    accessControl: editBookingData?.accessControl || false,
+    masterKey: editBookingData?.masterKey || false,
+    isDanger: editBookingData?.isDanger || false,
 
     // Selections
     selectedAddOns: editBookingData?.selectedAddOns || [] as string[],
@@ -544,6 +563,24 @@ export default function ModernServiceModal({
       beautyServices: (isEditing || isPrefilling) && Array.isArray(dataSource.beautyServices) ? [...dataSource.beautyServices] : [],
       serviceQuantities: (isEditing || isPrefilling) && dataSource.serviceQuantities ? {...dataSource.serviceQuantities} : {},
 
+      // Locksmith specific
+      serviceCategory: (isEditing || isPrefilling) ? (dataSource.serviceCategory || "") : "",
+      locksmithCategory: (isEditing || isPrefilling) ? (dataSource.locksmithCategory || "") : "",
+      locksmithServiceType: (isEditing || isPrefilling) ? (dataSource.locksmithServiceType || "") : "",
+      vehicleMake: (isEditing || isPrefilling) ? (dataSource.vehicleMake || "") : "",
+      vehicleModel: (isEditing || isPrefilling) ? (dataSource.vehicleModel || "") : "",
+      vehicleYear: (isEditing || isPrefilling) ? (dataSource.vehicleYear || "") : "",
+      keyType: (isEditing || isPrefilling) ? (dataSource.keyType || "") : "",
+      lockType: (isEditing || isPrefilling) ? (dataSource.lockType || "") : "",
+      numberOfLocks: (isEditing || isPrefilling) ? (dataSource.numberOfLocks || 0) : 0,
+      businessType: (isEditing || isPrefilling) ? (dataSource.businessType || "") : "",
+      numberOfDoors: (isEditing || isPrefilling) ? (dataSource.numberOfDoors || 0) : 0,
+      isKeyInIgnition: (isEditing || isPrefilling) ? (dataSource.isKeyInIgnition || false) : false,
+      rekeyAll: (isEditing || isPrefilling) ? (dataSource.rekeyAll || false) : false,
+      accessControl: (isEditing || isPrefilling) ? (dataSource.accessControl || false) : false,
+      masterKey: (isEditing || isPrefilling) ? (dataSource.masterKey || false) : false,
+      isDanger: (isEditing || isPrefilling) ? (dataSource.isDanger || false) : false,
+
       eventSize: (isEditing || isPrefilling) ? (dataSource.eventSize || "") : "",
       selectedAddOns: (isEditing || isPrefilling) && Array.isArray(dataSource.selectedAddOns) ? [...dataSource.selectedAddOns] : [],
       selectedProvider: (isEditing || isPrefilling) && dataSource.provider ? {...dataSource.provider} : null,
@@ -768,7 +805,9 @@ export default function ModernServiceModal({
     }
 
     if (mappedServiceId === "beauty-wellness") {
-      const serviceType = config.serviceTypes?.find((s: any) => s.value === formData.cleaningType);
+      const serviceType = Array.isArray(config.serviceTypes) 
+        ? config.serviceTypes.find((s: any) => s.value === formData.cleaningType)
+        : undefined;
       if (serviceType) basePrice = serviceType.price;
       
       const duration = config.sessionDuration?.find((d: any) => d.value === formData.propertySize);
@@ -792,6 +831,29 @@ export default function ModernServiceModal({
       
       const childrenAge = config.childrenAges?.find((a: any) => a.value === formData.gardenSize);
       if (childrenAge) basePrice *= childrenAge.multiplier;
+    }
+
+    if (mappedServiceId === "locksmith") {
+      // Base price is usually 0, driven by service type
+      basePrice = config.basePrice || 450;
+      
+      const serviceCategory = formData.serviceCategory || "residential";
+      
+      // Add Service Type Price
+      if (config.serviceTypes && !Array.isArray(config.serviceTypes) && config.serviceTypes[serviceCategory]) {
+        const type = config.serviceTypes[serviceCategory].find((t: any) => t.value === formData.cleaningType);
+        if (type) basePrice = type.price; // Replaces base price
+      }
+      
+      // Apply Urgency Multiplier
+      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
+      if (urgency) basePrice *= urgency.multiplier;
+      
+      // Add Property Type Multiplier (if applicable and not vehicle)
+      if (serviceCategory !== 'automotive') {
+         const property = config.propertyTypes?.find((p: any) => p.value === formData.propertySize);
+         if (property && property.multiplier) basePrice *= property.multiplier;
+      }
     }
 
     // Add-ons pricing - FIXED: Use serviceAddOns from config/addons.ts instead of hardcoded config.addOns
@@ -901,9 +963,32 @@ export default function ModernServiceModal({
       customMenuItems: formData.customMenuItems,
       dietaryRequirements: formData.dietaryRequirements,
       eventSize: formData.eventSize,
+      
+      // Locksmith fields
+      locksmithCategory: formData.locksmithCategory,
+      locksmithServiceType: formData.locksmithServiceType,
+      vehicleMake: formData.vehicleMake,
+      vehicleModel: formData.vehicleModel,
+      vehicleYear: formData.vehicleYear,
+      keyType: formData.keyType,
+      lockType: formData.lockType,
+      numberOfLocks: formData.numberOfLocks,
+      businessType: formData.businessType,
+      numberOfDoors: formData.numberOfDoors,
+
       selectedAddOns: formData.selectedAddOns,
       specialRequests: formData.specialRequests,
       
+      // Service Details (JSON) for extra fields
+      serviceDetails: {
+        isKeyInIgnition: formData.isKeyInIgnition,
+        rekeyAll: formData.rekeyAll,
+        accessControl: formData.accessControl,
+        masterKey: formData.masterKey,
+        isDanger: formData.isDanger,
+        // Any other dynamic fields
+      },
+
       // Include masked payment info only
       payment: maskedPaymentInfo,
       
@@ -1096,6 +1181,24 @@ export default function ModernServiceModal({
         eventType: "",
         beautyServices: [],
         serviceQuantities: {},
+
+        // Locksmith specific
+        serviceCategory: "",
+        locksmithCategory: "",
+        locksmithServiceType: "",
+        vehicleMake: "",
+        vehicleModel: "",
+        vehicleYear: "",
+        keyType: "",
+        isKeyInIgnition: false,
+        lockType: "",
+        numberOfLocks: 0,
+        rekeyAll: false,
+        businessType: "",
+        numberOfDoors: 0,
+        accessControl: false,
+        masterKey: false,
+        isDanger: false,
 
         eventSize: "",
         selectedAddOns: [],
@@ -1352,6 +1455,24 @@ export default function ModernServiceModal({
       eventType: "",
       beautyServices: [],
       serviceQuantities: {},
+
+      // Locksmith specific
+      serviceCategory: "",
+      locksmithCategory: "",
+      locksmithServiceType: "",
+      vehicleMake: "",
+      vehicleModel: "",
+      vehicleYear: "",
+      keyType: "",
+      isKeyInIgnition: false,
+      lockType: "",
+      numberOfLocks: 0,
+      rekeyAll: false,
+      businessType: "",
+      numberOfDoors: 0,
+      accessControl: false,
+      masterKey: false,
+      isDanger: false,
 
       menuSelection: "popular",
       selectedMenu: "",
@@ -1617,6 +1738,14 @@ export default function ModernServiceModal({
 
         {isPoolService && (
           <PoolServiceForm
+            formData={formData}
+            setFormData={setFormData}
+            currentConfig={currentConfig}
+          />
+        )}
+
+        {serviceId === "locksmith" && (
+          <LocksmithServiceForm
             formData={formData}
             setFormData={setFormData}
             currentConfig={currentConfig}

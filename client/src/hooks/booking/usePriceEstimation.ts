@@ -37,6 +37,19 @@ export interface BookingFormData {
   eventType?: string;
   beautyServices?: string[];
   serviceQuantities?: Record<string, number>;
+
+  // Locksmith
+  serviceCategory?: string;
+  locksmithCategory?: string;
+  locksmithServiceType?: string;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  vehicleYear?: string;
+  keyType?: string;
+  lockType?: string;
+  numberOfLocks?: number;
+  businessType?: string;
+  numberOfDoors?: number;
 }
 
 /**
@@ -99,6 +112,31 @@ export function usePriceEstimation(
       
       const condition = config.poolConditions?.find((c: any) => c.value === formData.poolCondition);
       if (condition) basePrice *= condition.multiplier;
+    }
+
+    if (mappedServiceId === "locksmith") {
+      const serviceCategory = formData.locksmithCategory || formData.serviceCategory || "residential";
+      
+      // Add Service Type Price (this logic replaces basePrice entirely usually)
+      if (config.serviceTypes && !Array.isArray(config.serviceTypes) && config.serviceTypes[serviceCategory]) {
+        const type = config.serviceTypes[serviceCategory].find((t: any) => t.value === (formData.locksmithServiceType || formData.cleaningType));
+        if (type) basePrice = type.price; 
+      }
+      
+      // Apply Urgency Multiplier
+      const urgency = config.urgencyLevels?.find((u: any) => u.value === formData.urgency);
+      if (urgency) basePrice *= urgency.multiplier;
+      
+      // Add Property Type Multiplier (if applicable and not vehicle)
+      if (serviceCategory !== 'automotive') {
+         // Fallback to propertySize for backward compatibility
+         const propertyVal = serviceCategory === 'commercial' 
+           ? (formData.businessType || formData.propertySize) 
+           : (formData.propertyType || formData.propertySize);
+         
+         const property = (serviceCategory === 'commercial' ? config.businessTypes : config.propertyTypes)?.find((p: any) => p.value === propertyVal);
+         if (property && property.multiplier) basePrice *= property.multiplier;
+      }
     }
 
     if (mappedServiceId === "plumbing") {

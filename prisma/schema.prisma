@@ -142,6 +142,19 @@ model Booking {
   eventLocation   String
   numberOfGuests  Int?
   specialRequests String?       @db.Text
+  
+  // Locksmith specific fields
+  locksmithCategory   String?
+  locksmithServiceType String?
+  vehicleMake         String?
+  vehicleModel        String?
+  vehicleYear         String?
+  keyType             String?
+  lockType            String?
+  numberOfLocks       Int?
+  businessType        String?
+  numberOfDoors       Int?
+
   bookingReference String?      @unique
   status          BookingStatus @default(PENDING)
   totalAmount     Decimal       @db.Decimal(10, 2)
