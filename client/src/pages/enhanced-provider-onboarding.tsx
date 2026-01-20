@@ -21,7 +21,8 @@ import {
   FileText,
   Shield,
   AlertTriangle,
-  Sparkles
+  Sparkles,
+  Truck
 } from "lucide-react";
 import { useLocation } from "wouter";
 import berryLogo from "@assets/berry-logo.png";
@@ -121,6 +122,77 @@ interface ProviderData {
   availability247: boolean;
   responseTime: string;
   certifications: string;
+
+  // Au Pair Specific
+  auPairExperience: string[];
+  auPairCertifications: string[];
+  auPairServices: string[];
+  childcareExperienceYears: string;
+  agePreference: string;
+  maxChildren: string;
+  languages: string[];
+  startDate: Date | undefined;
+  hasReferences: string; // "yes" | "no"
+  referenceDocument: File | null;
+  policeClearance: File | null;
+
+  // Event Staff Specific
+  eventStaffType: string;
+  eventStaffSpecializations: string[];
+  eventStaffCertifications: string[];
+  eventExperienceYears: string;
+  eventTypesExperienced: string[];
+  typicalEventSize: string;
+  maxGuests: string;
+  eventAvailabilityDays: string[];
+  eventAvailabilityTimes: string[];
+  weekendAvailable: boolean;
+  travelDistance: string;
+  ownTransport: boolean;
+  ownUniform: boolean;
+  uniformDescription: string;
+  physicalStand: boolean;
+  physicalLift: boolean;
+  physicalCarry: boolean;
+  referencesCV: File | null;
+  previousEmployers: string;
+  referenceContacts: string;
+
+  // Moving Service Specific
+  movingProviderTypes: string[];
+  movingFleet: string[];
+  movingSpecializations: string[];
+  movingCertifications: string[];
+  movingServiceCoverage: string[]; // Cities/Regions
+  movingMaxDistance: string;
+  movingCrossBorder: boolean;
+  movingInterstate: boolean;
+  movingTeamSize: string;
+  movingTeamExperienceLevel: string;
+  movingAvgTeamExperience: string;
+  movingSupervisors: boolean;
+  movingSecurityClearance: boolean;
+  movingStorageLocation: string;
+  movingStorageCapacity: string;
+  movingClimateControl: boolean;
+  moving247Access: boolean;
+  movingSecurityFeatures: string;
+  movingAdditionalServices: string[];
+  movingAvailabilityDays: string[];
+  movingWeekendAvailable: boolean;
+  movingPublicHolidayAvailable: boolean;
+  movingNoticePeriod: string;
+  movingPeakSeasonAvailable: boolean;
+  movingHourlyRate: string;
+  movingMinCharge: string;
+  movingAfterHoursRate: string;
+  movingWeekendRate: string;
+  movingLongDistanceRate: string;
+  movingCompanyRegDoc: File | null;
+  movingInsuranceCert: File | null;
+  movingVehicleRegDoc: File | null;
+  movingPortfolio: File[];
+  movingClientReferences: string;
 }
 
 export default function EnhancedProviderOnboarding() {
@@ -136,7 +208,14 @@ export default function EnhancedProviderOnboarding() {
     bankStatement: useRef<HTMLInputElement>(null),
     certificates: useRef<HTMLInputElement>(null),
     portfolio: useRef<HTMLInputElement>(null),
-    profilePicture: useRef<HTMLInputElement>(null)
+    profilePicture: useRef<HTMLInputElement>(null),
+    policeClearance: useRef<HTMLInputElement>(null),
+    referenceDocument: useRef<HTMLInputElement>(null),
+    referencesCV: useRef<HTMLInputElement>(null),
+    movingCompanyRegDoc: useRef<HTMLInputElement>(null),
+    movingInsuranceCert: useRef<HTMLInputElement>(null),
+    movingVehicleRegDoc: useRef<HTMLInputElement>(null),
+    movingPortfolio: useRef<HTMLInputElement>(null)
   };
 
   const [providerData, setProviderData] = useState<ProviderData>({
@@ -179,7 +258,78 @@ export default function EnhancedProviderOnboarding() {
     serviceRadius: "10km",
     availability247: false,
     responseTime: "Scheduled",
-    certifications: ""
+    certifications: "",
+    
+    // Au Pair Defaults
+    auPairExperience: [],
+    auPairCertifications: [],
+    auPairServices: [],
+    childcareExperienceYears: "",
+    agePreference: "No preference",
+    maxChildren: "1",
+    languages: [],
+    startDate: undefined,
+    hasReferences: "no",
+    referenceDocument: null,
+    policeClearance: null,
+
+    // Event Staff Defaults
+    eventStaffType: "",
+    eventStaffSpecializations: [],
+    eventStaffCertifications: [],
+    eventExperienceYears: "",
+    eventTypesExperienced: [],
+    typicalEventSize: "",
+    maxGuests: "",
+    eventAvailabilityDays: [],
+    eventAvailabilityTimes: [],
+    weekendAvailable: false,
+    travelDistance: "",
+    ownTransport: false,
+    ownUniform: false,
+    uniformDescription: "",
+    physicalStand: false,
+    physicalLift: false,
+    physicalCarry: false,
+    referencesCV: null,
+    previousEmployers: "",
+    referenceContacts: "",
+
+    // Moving Service Defaults
+    movingProviderTypes: [],
+    movingFleet: [],
+    movingSpecializations: [],
+    movingCertifications: [],
+    movingServiceCoverage: [],
+    movingMaxDistance: "",
+    movingCrossBorder: false,
+    movingInterstate: false,
+    movingTeamSize: "",
+    movingTeamExperienceLevel: "",
+    movingAvgTeamExperience: "",
+    movingSupervisors: false,
+    movingSecurityClearance: false,
+    movingStorageLocation: "",
+    movingStorageCapacity: "",
+    movingClimateControl: false,
+    moving247Access: false,
+    movingSecurityFeatures: "",
+    movingAdditionalServices: [],
+    movingAvailabilityDays: [],
+    movingWeekendAvailable: false,
+    movingPublicHolidayAvailable: false,
+    movingNoticePeriod: "",
+    movingPeakSeasonAvailable: false,
+    movingHourlyRate: "",
+    movingMinCharge: "",
+    movingAfterHoursRate: "",
+    movingWeekendRate: "",
+    movingLongDistanceRate: "",
+    movingCompanyRegDoc: null,
+    movingInsuranceCert: null,
+    movingVehicleRegDoc: null,
+    movingPortfolio: [],
+    movingClientReferences: ""
   });
 
   const availableServices = [
@@ -211,6 +361,158 @@ export default function EnhancedProviderOnboarding() {
     { id: 'master', label: 'Master Key Systems', description: 'Complex key systems' }, 
     { id: 'access', label: 'Access Control', description: 'Security systems' } 
   ];
+
+  const auPairExperienceOptions = [
+    "Newborn/Infant Care (0-12 months)",
+    "Toddler Care (1-3 years)",
+    "Preschool Age (3-5 years)",
+    "School Age (6-12 years)",
+    "Teenagers (13-18 years)",
+    "Special Needs Children",
+    "Multiple Children (3+)",
+    "Twins/Multiples"
+  ];
+
+  const auPairCertificationOptions = [
+    "First Aid certified",
+    "CPR certified",
+    "Early Childhood Development (ECD) qualification",
+    "Special needs training",
+    "Montessori training",
+    "Valid driver's license",
+    "Swimming instructor",
+    "Teaching qualification"
+  ];
+
+  const auPairServiceOptions = [
+    "Live-in arrangement",
+    "Part-time only",
+    "After-school care",
+    "Weekend availability",
+    "Overnight care",
+    "Emergency/short-term",
+    "Tutoring/homework help",
+    "Meal preparation"
+  ];
+
+  // Event Staff Constants
+  const eventStaffTypes = [
+    { id: 'waiter', label: 'Professional Waiter' },
+    { id: 'bartender', label: 'Bartender/Mixologist' },
+    { id: 'assistant', label: 'Catering Assistant' },
+    { id: 'coordinator', label: 'Event Coordinator/Manager' },
+    { id: 'multiskilled', label: 'Multi-skilled (can do multiple roles)' }
+  ];
+
+  const eventStaffSpecializations = [
+    "Silver service trained",
+    "Fine dining experience",
+    "Wedding specialist",
+    "Corporate events",
+    "Cocktail party service",
+    "Wine service & sommelier",
+    "Mixology/Flair bartending",
+    "Event coordination",
+    "Food safety certified",
+    "Responsible Service of Alcohol (RSA)"
+  ];
+
+  const eventStaffCertifications = [
+    "Food Handler's Certificate",
+    "First Aid certification",
+    "RSA/Alcohol service license",
+    "Event management qualification",
+    "Hospitality diploma/degree",
+    "Wine certification (WSET, etc.)",
+    "Mixology certification"
+  ];
+
+  const eventTypesExperienced = [
+    "Wedding",
+    "Corporate",
+    "Private parties",
+    "Fine dining",
+    "Casual events",
+    "Festival/outdoor"
+  ];
+  
+  // Moving Service Constants
+  const movingProviderTypes = [
+    "General furniture movers",
+    "Office/Commercial movers",
+    "Long-distance specialists",
+    "Piano/Specialty item movers",
+    "Packing/Unpacking specialists",
+    "Storage services"
+  ];
+
+  const movingFleetOptions = [
+    "Bakkie/Small truck (<2 tons)",
+    "Medium truck (4-6 tons)",
+    "Large truck (8-10 tons)",
+    "Extra-large truck (12+ tons)",
+    "Multiple vehicles available",
+    "Furniture blankets/padding",
+    "Dollies and hand trucks",
+    "Lifting straps",
+    "Furniture sliders",
+    "Packing materials",
+    "Special equipment (hoists, cranes)"
+  ];
+
+  const movingSpecializations = [
+    "Piano moving certified",
+    "Antique handling trained",
+    "Art transport specialist",
+    "Heavy machinery moving",
+    "IT/Server relocation",
+    "Medical equipment moving",
+    "White glove service",
+    "International moves",
+    "Vehicle transport",
+    "Pet relocation"
+  ];
+
+  const movingCertifications = [
+    "Professional moving license",
+    "Goods in transit insurance",
+    "Public liability insurance",
+    "SABS certification",
+    "Occupational health & safety training",
+    "Forklift license",
+    "Crane operator license",
+    "Driver's license (Code 10/14)"
+  ];
+
+  const movingDistances = [
+    "50km", "100km", "200km", "500km", "National", "International"
+  ];
+
+  const movingTeamSizes = [
+    "2", "3", "4-6", "7-10", "10+"
+  ];
+
+  const movingExperienceLevels = [
+    "Entry", "Intermediate", "Experienced", "Expert"
+  ];
+
+  const movingAdditionalServices = [
+    "Packing service",
+    "Unpacking service",
+    "Furniture assembly/disassembly",
+    "Appliance installation",
+    "Cleaning services",
+    "Junk removal",
+    "Packing materials sales",
+    "Storage solutions",
+    "Temporary accommodation assistance"
+  ];
+
+  const movingNoticePeriods = [
+    "Same day", "24hrs", "48hrs", "1 week"
+  ];
+
+  const languageOptions = ["English", "Afrikaans", "Zulu", "Xhosa", "Sotho", "Other"];
 
   const canonicalServiceMap: Record<string, string> = {
     "House Cleaning": "HOUSE_CLEANING",
@@ -310,7 +612,7 @@ export default function EnhancedProviderOnboarding() {
       reader.onload = async (e) => {
         const fileData = e.target?.result as string;
         
-        if (field === 'certificates' || field === 'portfolio') {
+        if (field === 'certificates' || field === 'portfolio' || field === 'movingPortfolio') {
           setProviderData(prev => ({
             ...prev,
             [field]: [...(prev[field] as File[]), file]
@@ -511,6 +813,92 @@ export default function EnhancedProviderOnboarding() {
       const portfolioData = await Promise.all(
         providerData.portfolio.map(file => compressImage(file))
       );
+      
+      const movingPortfolioData = await Promise.all(
+        providerData.movingPortfolio.map(file => compressImage(file))
+      );
+
+      // Construct Au Pair Specializations String
+      const auPairSpecs: string[] = [];
+      if (providerData.services.includes("Au Pair Services") || providerData.services.includes("Childcare Provider")) {
+         if (providerData.auPairExperience.length) auPairSpecs.push(`Experience: ${providerData.auPairExperience.join(', ')}`);
+         if (providerData.auPairCertifications.length) auPairSpecs.push(`Certs: ${providerData.auPairCertifications.join(', ')}`);
+         if (providerData.auPairServices.length) auPairSpecs.push(`Services: ${providerData.auPairServices.join(', ')}`);
+         if (providerData.languages.length) auPairSpecs.push(`Languages: ${providerData.languages.join(', ')}`);
+         if (providerData.childcareExperienceYears) auPairSpecs.push(`Years Exp: ${providerData.childcareExperienceYears}`);
+         if (providerData.agePreference) auPairSpecs.push(`Age Pref: ${providerData.agePreference}`);
+         if (providerData.maxChildren) auPairSpecs.push(`Max Children: ${providerData.maxChildren}`);
+         if (providerData.startDate) auPairSpecs.push(`Start Date: ${new Date(providerData.startDate).toLocaleDateString()}`);
+         if (providerData.hasReferences === 'yes') auPairSpecs.push(`References Available`);
+      }
+
+      // Construct Event Staff Specializations String
+      const eventStaffSpecs: string[] = [];
+      if (providerData.services.includes("Waitering Services") || providerData.services.includes("Event Staff")) {
+         const roleLabel = eventStaffTypes.find(t => t.id === providerData.eventStaffType)?.label;
+         if (roleLabel) eventStaffSpecs.push(`Role: ${roleLabel}`);
+         if (providerData.eventStaffSpecializations.length) eventStaffSpecs.push(`Specs: ${providerData.eventStaffSpecializations.join(', ')}`);
+         if (providerData.eventStaffCertifications.length) eventStaffSpecs.push(`Certs: ${providerData.eventStaffCertifications.join(', ')}`);
+         if (providerData.eventExperienceYears) eventStaffSpecs.push(`Exp: ${providerData.eventExperienceYears}`);
+         if (providerData.eventTypesExperienced.length) eventStaffSpecs.push(`Events: ${providerData.eventTypesExperienced.join(', ')}`);
+         if (providerData.typicalEventSize) eventStaffSpecs.push(`Typical Size: ${providerData.typicalEventSize}`);
+         if (providerData.maxGuests) eventStaffSpecs.push(`Max Guests: ${providerData.maxGuests}`);
+         
+         const avail = [];
+         if (providerData.eventAvailabilityDays.length) avail.push(providerData.eventAvailabilityDays.join(', '));
+         if (providerData.eventAvailabilityTimes.length) avail.push(providerData.eventAvailabilityTimes.join(', '));
+         if (avail.length) eventStaffSpecs.push(`Avail: ${avail.join(' - ')}`);
+         
+         if (providerData.travelDistance) eventStaffSpecs.push(`Travel: ${providerData.travelDistance}`);
+         if (providerData.languages.length) eventStaffSpecs.push(`Lang: ${providerData.languages.join(', ')}`);
+         if (providerData.ownTransport) eventStaffSpecs.push("Own Transport");
+         if (providerData.ownUniform) eventStaffSpecs.push("Own Uniform");
+
+         const physical = [];
+         if (providerData.physicalStand) physical.push("Stand 4h+");
+         if (providerData.physicalLift) physical.push("Lift 10kg+");
+         if (providerData.physicalCarry) physical.push("Carry Trays");
+         if (physical.length) eventStaffSpecs.push(`Physical: ${physical.join(', ')}`);
+      }
+
+      // Construct Moving Service Specializations String
+      const movingSpecs: string[] = [];
+      if (providerData.services.includes("Moving Services")) {
+         if (providerData.movingProviderTypes.length) movingSpecs.push(`Types: ${providerData.movingProviderTypes.join(', ')}`);
+         if (providerData.movingFleet.length) movingSpecs.push(`Fleet: ${providerData.movingFleet.join(', ')}`);
+         if (providerData.movingSpecializations.length) movingSpecs.push(`Specs: ${providerData.movingSpecializations.join(', ')}`);
+         if (providerData.movingCertifications.length) movingSpecs.push(`Certs: ${providerData.movingCertifications.join(', ')}`);
+         if (providerData.movingServiceCoverage.length) movingSpecs.push(`Coverage: ${providerData.movingServiceCoverage.join(', ')}`);
+         if (providerData.movingMaxDistance) movingSpecs.push(`Max Dist: ${providerData.movingMaxDistance}`);
+         if (providerData.movingCrossBorder) movingSpecs.push("Cross Border");
+         if (providerData.movingInterstate) movingSpecs.push("Interstate");
+         
+         if (providerData.movingTeamSize) movingSpecs.push(`Team Size: ${providerData.movingTeamSize}`);
+         if (providerData.movingTeamExperienceLevel) movingSpecs.push(`Team Level: ${providerData.movingTeamExperienceLevel}`);
+         if (providerData.movingAvgTeamExperience) movingSpecs.push(`Avg Exp: ${providerData.movingAvgTeamExperience} yrs`);
+         if (providerData.movingSupervisors) movingSpecs.push("Supervisors Avail");
+         if (providerData.movingSecurityClearance) movingSpecs.push("Security Cleared");
+         
+         if (providerData.movingProviderTypes.includes("Storage services")) {
+            const storage = [];
+            if (providerData.movingStorageLocation) storage.push(providerData.movingStorageLocation);
+            if (providerData.movingStorageCapacity) storage.push(`${providerData.movingStorageCapacity} m³`);
+            if (providerData.movingClimateControl) storage.push("Climate Ctrl");
+            if (providerData.moving247Access) storage.push("24/7 Access");
+            if (storage.length) movingSpecs.push(`Storage: ${storage.join(', ')}`);
+         }
+         
+         if (providerData.movingAdditionalServices.length) movingSpecs.push(`Add. Svcs: ${providerData.movingAdditionalServices.join(', ')}`);
+         
+         if (providerData.movingAvailabilityDays.length) movingSpecs.push(`Avail Days: ${providerData.movingAvailabilityDays.join(', ')}`);
+         if (providerData.movingNoticePeriod) movingSpecs.push(`Notice: ${providerData.movingNoticePeriod}`);
+         if (providerData.movingWeekendAvailable) movingSpecs.push("Wknd Avail");
+         if (providerData.movingPublicHolidayAvailable) movingSpecs.push("Hol Avail");
+         if (providerData.movingPeakSeasonAvailable) movingSpecs.push("Peak Season Avail");
+         
+         if (providerData.movingHourlyRate) movingSpecs.push(`Rate: R${providerData.movingHourlyRate}/hr`);
+         if (providerData.movingMinCharge) movingSpecs.push(`Min: R${providerData.movingMinCharge}`);
+      }
 
        const providerPayload: any = {
          userId: newUserId,
@@ -519,13 +907,21 @@ export default function EnhancedProviderOnboarding() {
          email: providerData.email,
          phone: providerData.phone,
          bio: providerData.description || "",
-         hourlyRate: providerData.baseRate || "250.00",
+         hourlyRate: providerData.baseRate || providerData.movingHourlyRate || "250.00",
          servicesOffered: servicesMapped,
          category: servicesMapped[0] || "general",
-         experience: providerData.experience,
+         experience: [
+           providerData.experience,
+           providerData.previousEmployers ? `Previous Employers: ${providerData.previousEmployers}` : null,
+           providerData.referenceContacts ? `References: ${providerData.referenceContacts}` : null,
+           providerData.movingClientReferences ? `Moving Refs: ${providerData.movingClientReferences}` : null
+         ].filter(Boolean).join("\n\n"),
          specializations: [
            providerData.specializations,
-           providerData.locksmithSpecializations.map(id => locksmithSpecializations.find(s => s.id === id)?.label).join(", ")
+           providerData.locksmithSpecializations.map(id => locksmithSpecializations.find(s => s.id === id)?.label).join(", "),
+           auPairSpecs.join(" | "),
+           eventStaffSpecs.join(" | "),
+           movingSpecs.join(" | ")
          ].filter(Boolean).join(", "),
          
          // Locksmith specific fields
@@ -534,6 +930,41 @@ export default function EnhancedProviderOnboarding() {
          availability247: providerData.availability247,
          responseTime: providerData.responseTime,
          certifications: providerData.certifications,
+         
+         // Au Pair specific fields (Documents)
+         policeClearance: (providerData as any).policeClearanceData || null,
+         referenceDocument: (providerData as any).referenceDocumentData || (providerData as any).referencesCVData || null,
+         
+         // Moving Service Specific Fields
+         movingProviderTypes: providerData.movingProviderTypes,
+         movingFleet: providerData.movingFleet,
+         movingSpecializations: providerData.movingSpecializations,
+         movingCertifications: providerData.movingCertifications,
+         movingServiceCoverage: providerData.movingServiceCoverage,
+         movingMaxDistance: providerData.movingMaxDistance,
+         movingCrossBorder: providerData.movingCrossBorder,
+         movingInterstate: providerData.movingInterstate,
+         movingTeamSize: providerData.movingTeamSize,
+         movingTeamExperienceLevel: providerData.movingTeamExperienceLevel,
+         movingAvgTeamExperience: providerData.movingAvgTeamExperience,
+         movingSupervisors: providerData.movingSupervisors,
+         movingSecurityClearance: providerData.movingSecurityClearance,
+         movingStorageLocation: providerData.movingStorageLocation,
+         movingStorageCapacity: providerData.movingStorageCapacity,
+         movingClimateControl: providerData.movingClimateControl,
+         moving247Access: providerData.moving247Access,
+         movingSecurityFeatures: providerData.movingSecurityFeatures,
+         movingAdditionalServices: providerData.movingAdditionalServices,
+         movingAvailabilityDays: providerData.movingAvailabilityDays,
+         movingNoticePeriod: providerData.movingNoticePeriod,
+         movingHourlyRate: providerData.movingHourlyRate,
+         movingMinCharge: providerData.movingMinCharge,
+         movingPortfolio: movingPortfolioData,
+         
+         // Moving Documents
+         movingCompanyRegDoc: (providerData as any).movingCompanyRegDocData || null,
+         movingInsuranceCert: (providerData as any).movingInsuranceCertData || null,
+         movingVehicleRegDoc: (providerData as any).movingVehicleRegDocData || null,
 
          availability: providerData.availability,
          portfolio: portfolioData,
@@ -740,121 +1171,1037 @@ export default function EnhancedProviderOnboarding() {
               </div>
             )}
 
-            {providerData.services.includes("Locksmith Services") && (
+
+
+            {(providerData.services.includes("Au Pair Services") || providerData.services.includes("Childcare Provider")) && (
               <div className="space-y-6 border-t pt-6 mt-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <Shield className="h-5 w-5 text-[#44062D]" />
-                  <h4 className="font-semibold text-lg text-[#44062D]">Locksmith Details</h4>
+                  <Sparkles className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Au Pair / Childcare Details</h4>
+                </div>
+
+                {/* Experience Categories */}
+                <div className="space-y-4">
+                  <Label>Experience Categories</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {auPairExperienceOptions.map((exp) => (
+                      <div key={exp} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`exp-${exp}`}
+                          checked={providerData.auPairExperience.includes(exp)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.auPairExperience;
+                            const updated = checked
+                              ? [...current, exp]
+                              : current.filter(e => e !== exp);
+                            setProviderData({ ...providerData, auPairExperience: updated });
+                          }}
+                        />
+                        <Label htmlFor={`exp-${exp}`} className="text-sm font-medium cursor-pointer">
+                          {exp}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Certifications */}
+                <div className="space-y-4">
+                  <Label>Certifications & Training</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {auPairCertificationOptions.map((cert) => (
+                      <div key={cert} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`cert-${cert}`}
+                          checked={providerData.auPairCertifications.includes(cert)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.auPairCertifications;
+                            const updated = checked
+                              ? [...current, cert]
+                              : current.filter(c => c !== cert);
+                            setProviderData({ ...providerData, auPairCertifications: updated });
+                          }}
+                        />
+                        <Label htmlFor={`cert-${cert}`} className="text-sm font-medium cursor-pointer">
+                          {cert}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Services Offered */}
+                <div className="space-y-4">
+                  <Label>Services Offered</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {auPairServiceOptions.map((service) => (
+                      <div key={service} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`svc-${service}`}
+                          checked={providerData.auPairServices.includes(service)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.auPairServices;
+                            const updated = checked
+                              ? [...current, service]
+                              : current.filter(s => s !== service);
+                            setProviderData({ ...providerData, auPairServices: updated });
+                          }}
+                        />
+                        <Label htmlFor={`svc-${service}`} className="text-sm font-medium cursor-pointer">
+                          {service}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Fields Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label htmlFor="childcareExperienceYears">Years of Childcare Experience</Label>
+                     <Select
+                       value={providerData.childcareExperienceYears}
+                       onValueChange={(value) => setProviderData({...providerData, childcareExperienceYears: value})}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder="Select years" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="0-1">0-1 years</SelectItem>
+                         <SelectItem value="1-3">1-3 years</SelectItem>
+                         <SelectItem value="3-5">3-5 years</SelectItem>
+                         <SelectItem value="5-10">5-10 years</SelectItem>
+                         <SelectItem value="10+">10+ years</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="agePreference">Age Preference</Label>
+                     <Select
+                       value={providerData.agePreference}
+                       onValueChange={(value) => setProviderData({...providerData, agePreference: value})}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder="Select preference" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="Infants">Infants</SelectItem>
+                         <SelectItem value="Toddlers">Toddlers</SelectItem>
+                         <SelectItem value="School age">School age</SelectItem>
+                         <SelectItem value="Teens">Teens</SelectItem>
+                         <SelectItem value="No preference">No preference</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="maxChildren">Max Children</Label>
+                     <Select
+                       value={providerData.maxChildren}
+                       onValueChange={(value) => setProviderData({...providerData, maxChildren: value})}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder="Select max children" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="1">1</SelectItem>
+                         <SelectItem value="2">2</SelectItem>
+                         <SelectItem value="3">3</SelectItem>
+                         <SelectItem value="4">4</SelectItem>
+                         <SelectItem value="5+">5+</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="startDate">Available Start Date</Label>
+                     <Input
+                       id="startDate"
+                       type="date"
+                       value={providerData.startDate ? new Date(providerData.startDate).toISOString().split('T')[0] : ''}
+                       onChange={(e) => setProviderData({...providerData, startDate: e.target.value ? new Date(e.target.value) : undefined})}
+                     />
+                   </div>
+                </div>
+
+                {/* Languages */}
+                <div className="space-y-4">
+                  <Label>Languages Spoken</Label>
+                  <div className="flex flex-wrap gap-4">
+                    {languageOptions.map((lang) => (
+                      <div key={lang} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`lang-${lang}`}
+                          checked={providerData.languages.includes(lang)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.languages;
+                            const updated = checked
+                              ? [...current, lang]
+                              : current.filter(l => l !== lang);
+                            setProviderData({ ...providerData, languages: updated });
+                          }}
+                        />
+                        <Label htmlFor={`lang-${lang}`} className="text-sm font-medium cursor-pointer">
+                          {lang}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* References Toggle */}
+                <div className="space-y-4 border p-4 rounded-md">
+                   <div className="flex items-center justify-between">
+                     <div className="space-y-0.5">
+                       <Label className="text-base">References Available</Label>
+                       <p className="text-sm text-muted-foreground">
+                         Do you have written references from previous families?
+                       </p>
+                     </div>
+                     <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                            <Checkbox 
+                                id="hasReferences"
+                                checked={providerData.hasReferences === "yes"}
+                                onCheckedChange={(checked) => setProviderData({...providerData, hasReferences: checked ? "yes" : "no"})}
+                            />
+                            <Label htmlFor="hasReferences">Yes</Label>
+                        </div>
+                     </div>
+                   </div>
+                   
+                   {providerData.hasReferences === "yes" && (
+                     <div className="pt-2">
+                        <Label>Upload Reference (Optional)</Label>
+                        <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                            onClick={() => fileInputRefs.referenceDocument.current?.click()}>
+                            <Upload className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+                            <p className="text-sm font-medium">Click to upload reference document</p>
+                        </div>
+                        <input
+                            ref={fileInputRefs.referenceDocument}
+                            type="file"
+                            accept=".pdf,image/*"
+                            className="hidden"
+                            onChange={(e) => handleFileUpload('referenceDocument', e.target.files?.[0] || null)}
+                        />
+                        {providerData.referenceDocument && (
+                            <p className="mt-2 text-sm text-green-600 flex items-center justify-center">
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                {providerData.referenceDocument.name}
+                            </p>
+                        )}
+                     </div>
+                   )}
+                </div>
+              </div>
+            )}
+
+            {providerData.services.includes("Moving Services") && (
+              <div className="space-y-6 border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Truck className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Moving Service Details</h4>
+                </div>
+
+                {/* Provider Types */}
+                <div className="space-y-4">
+                  <Label>Provider Types</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {movingProviderTypes.map((type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`mtype-${type}`}
+                          checked={providerData.movingProviderTypes.includes(type)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.movingProviderTypes;
+                            const updated = checked
+                              ? [...current, type]
+                              : current.filter(t => t !== type);
+                            setProviderData({ ...providerData, movingProviderTypes: updated });
+                          }}
+                        />
+                        <Label htmlFor={`mtype-${type}`} className="text-sm font-medium cursor-pointer">
+                          {type}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Fleet & Equipment */}
+                <div className="space-y-4">
+                  <Label>Fleet & Equipment</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {movingFleetOptions.map((item) => (
+                      <div key={item} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`mfleet-${item}`}
+                          checked={providerData.movingFleet.includes(item)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.movingFleet;
+                            const updated = checked
+                              ? [...current, item]
+                              : current.filter(i => i !== item);
+                            setProviderData({ ...providerData, movingFleet: updated });
+                          }}
+                        />
+                        <Label htmlFor={`mfleet-${item}`} className="text-sm font-medium cursor-pointer">
+                          {item}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Specializations */}
                 <div className="space-y-4">
                   <Label>Specializations</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {locksmithSpecializations.map((spec) => (
-                      <div key={spec.id} className="flex items-start space-x-2 border p-3 rounded-md hover:bg-gray-50">
+                    {movingSpecializations.map((spec) => (
+                      <div key={spec} className="flex items-center space-x-2">
                         <Checkbox
-                          id={`spec-${spec.id}`}
-                          checked={providerData.locksmithSpecializations.includes(spec.id)}
+                          id={`mspec-${spec}`}
+                          checked={providerData.movingSpecializations.includes(spec)}
                           onCheckedChange={(checked) => {
-                            const current = providerData.locksmithSpecializations;
+                            const current = providerData.movingSpecializations;
                             const updated = checked
-                              ? [...current, spec.id]
-                              : current.filter(id => id !== spec.id);
-                            setProviderData({ ...providerData, locksmithSpecializations: updated });
+                              ? [...current, spec]
+                              : current.filter(s => s !== spec);
+                            setProviderData({ ...providerData, movingSpecializations: updated });
                           }}
                         />
-                        <div className="grid gap-1.5 leading-none">
-                          <Label
-                            htmlFor={`spec-${spec.id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {spec.label}
-                          </Label>
-                          <p className="text-xs text-muted-foreground">
-                            {spec.description}
-                          </p>
-                        </div>
+                        <Label htmlFor={`mspec-${spec}`} className="text-sm font-medium cursor-pointer">
+                          {spec}
+                        </Label>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Additional Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   {/* Mobile Service & 24/7 Availability */}
-                   <div className="space-y-4">
-                      <div className="flex items-center justify-between border p-3 rounded-md">
-                        <Label htmlFor="mobileService" className="cursor-pointer">Mobile Service Available</Label>
-                         <Checkbox 
-                           id="mobileService"
-                           checked={providerData.mobileService}
-                           onCheckedChange={(checked) => setProviderData({...providerData, mobileService: !!checked})}
-                         />
+                {/* Certifications & Licenses */}
+                <div className="space-y-4">
+                  <Label>Certifications & Licenses</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {movingCertifications.map((cert) => (
+                      <div key={cert} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`mcert-${cert}`}
+                          checked={providerData.movingCertifications.includes(cert)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.movingCertifications;
+                            const updated = checked
+                              ? [...current, cert]
+                              : current.filter(c => c !== cert);
+                            setProviderData({ ...providerData, movingCertifications: updated });
+                          }}
+                        />
+                        <Label htmlFor={`mcert-${cert}`} className="text-sm font-medium cursor-pointer">
+                          {cert}
+                        </Label>
                       </div>
-                      <div className="flex items-center justify-between border p-3 rounded-md">
-                        <Label htmlFor="availability247" className="cursor-pointer">24/7 Availability</Label>
-                         <Checkbox 
-                           id="availability247"
-                           checked={providerData.availability247}
-                           onCheckedChange={(checked) => setProviderData({...providerData, availability247: !!checked})}
-                         />
-                      </div>
-                   </div>
+                    ))}
+                  </div>
+                  
+                  {/* Document Uploads for Certifications */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                     <div className="space-y-2">
+                        <Label className="text-xs">Company Registration</Label>
+                        <div className="border border-dashed border-gray-300 rounded p-2 text-center hover:bg-gray-50 cursor-pointer"
+                             onClick={() => fileInputRefs.movingCompanyRegDoc.current?.click()}>
+                           <Upload className="mx-auto h-4 w-4 text-gray-400" />
+                           <span className="text-xs">Upload Doc</span>
+                        </div>
+                        <input
+                           ref={fileInputRefs.movingCompanyRegDoc}
+                           type="file"
+                           accept=".pdf,image/*"
+                           className="hidden"
+                           onChange={(e) => handleFileUpload('movingCompanyRegDoc', e.target.files?.[0] || null)}
+                        />
+                        {providerData.movingCompanyRegDoc && <span className="text-xs text-green-600">{providerData.movingCompanyRegDoc.name}</span>}
+                     </div>
+                     
+                     <div className="space-y-2">
+                        <Label className="text-xs">Insurance Certificate</Label>
+                        <div className="border border-dashed border-gray-300 rounded p-2 text-center hover:bg-gray-50 cursor-pointer"
+                             onClick={() => fileInputRefs.movingInsuranceCert.current?.click()}>
+                           <Upload className="mx-auto h-4 w-4 text-gray-400" />
+                           <span className="text-xs">Upload Doc</span>
+                        </div>
+                        <input
+                           ref={fileInputRefs.movingInsuranceCert}
+                           type="file"
+                           accept=".pdf,image/*"
+                           className="hidden"
+                           onChange={(e) => handleFileUpload('movingInsuranceCert', e.target.files?.[0] || null)}
+                        />
+                        {providerData.movingInsuranceCert && <span className="text-xs text-green-600">{providerData.movingInsuranceCert.name}</span>}
+                     </div>
 
-                   {/* Service Radius & Response Time */}
-                   <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="serviceRadius">Service Radius</Label>
-                        <Select 
-                          value={providerData.serviceRadius} 
-                          onValueChange={(value) => setProviderData({...providerData, serviceRadius: value})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select radius" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="5km">5km</SelectItem>
-                            <SelectItem value="10km">10km</SelectItem>
-                            <SelectItem value="20km">20km</SelectItem>
-                            <SelectItem value="30km">30km</SelectItem>
-                            <SelectItem value="50km+">50km+</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                     <div className="space-y-2">
+                        <Label className="text-xs">Vehicle Registration</Label>
+                        <div className="border border-dashed border-gray-300 rounded p-2 text-center hover:bg-gray-50 cursor-pointer"
+                             onClick={() => fileInputRefs.movingVehicleRegDoc.current?.click()}>
+                           <Upload className="mx-auto h-4 w-4 text-gray-400" />
+                           <span className="text-xs">Upload Doc</span>
+                        </div>
+                        <input
+                           ref={fileInputRefs.movingVehicleRegDoc}
+                           type="file"
+                           accept=".pdf,image/*"
+                           className="hidden"
+                           onChange={(e) => handleFileUpload('movingVehicleRegDoc', e.target.files?.[0] || null)}
+                        />
+                        {providerData.movingVehicleRegDoc && <span className="text-xs text-green-600">{providerData.movingVehicleRegDoc.name}</span>}
+                     </div>
+                  </div>
+                </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="responseTime">Typical Response Time</Label>
-                        <Select 
-                          value={providerData.responseTime} 
-                          onValueChange={(value) => setProviderData({...providerData, responseTime: value})}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select response time" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Under 30min">Under 30min</SelectItem>
-                            <SelectItem value="Within 1hr">Within 1hr</SelectItem>
-                            <SelectItem value="Within 2hrs">Within 2hrs</SelectItem>
-                            <SelectItem value="Scheduled">Scheduled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                {/* Service Coverage */}
+                <div className="space-y-4">
+                  <Label>Service Coverage</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label htmlFor="movingMaxDistance">Max Travel Distance</Label>
+                       <Select
+                         value={providerData.movingMaxDistance}
+                         onValueChange={(value) => setProviderData({...providerData, movingMaxDistance: value})}
+                       >
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select max distance" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {movingDistances.map(d => (
+                             <SelectItem key={d} value={d}>{d}</SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
+                     <div className="space-y-2">
+                        <Label>Cross Border / Interstate</Label>
+                        <div className="flex flex-col gap-2">
+                           <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                 id="movingCrossBorder"
+                                 checked={providerData.movingCrossBorder}
+                                 onCheckedChange={(checked) => setProviderData({...providerData, movingCrossBorder: !!checked})}
+                              />
+                              <Label htmlFor="movingCrossBorder">Cross-border moves</Label>
+                           </div>
+                           <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                 id="movingInterstate"
+                                 checked={providerData.movingInterstate}
+                                 onCheckedChange={(checked) => setProviderData({...providerData, movingInterstate: !!checked})}
+                              />
+                              <Label htmlFor="movingInterstate">Interstate moves</Label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Team Details */}
+                <div className="space-y-4">
+                  <Label>Team Details</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label htmlFor="movingTeamSize">Movers Available</Label>
+                       <Select
+                         value={providerData.movingTeamSize}
+                         onValueChange={(value) => setProviderData({...providerData, movingTeamSize: value})}
+                       >
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select team size" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {movingTeamSizes.map(s => (
+                             <SelectItem key={s} value={s}>{s}</SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="movingTeamExperienceLevel">Team Experience Level</Label>
+                       <Select
+                         value={providerData.movingTeamExperienceLevel}
+                         onValueChange={(value) => setProviderData({...providerData, movingTeamExperienceLevel: value})}
+                       >
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select level" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {movingExperienceLevels.map(l => (
+                             <SelectItem key={l} value={l}>{l}</SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="movingAvgTeamExperience">Avg Member Experience (Years)</Label>
+                        <Input 
+                           id="movingAvgTeamExperience"
+                           type="number"
+                           placeholder="e.g. 3"
+                           value={providerData.movingAvgTeamExperience}
+                           onChange={(e) => setProviderData({...providerData, movingAvgTeamExperience: e.target.value})}
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <Label>Team Verification</Label>
+                        <div className="flex flex-col gap-2">
+                           <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                 id="movingSupervisors"
+                                 checked={providerData.movingSupervisors}
+                                 onCheckedChange={(checked) => setProviderData({...providerData, movingSupervisors: !!checked})}
+                              />
+                              <Label htmlFor="movingSupervisors">Supervisors available</Label>
+                           </div>
+                           <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                 id="movingSecurityClearance"
+                                 checked={providerData.movingSecurityClearance}
+                                 onCheckedChange={(checked) => setProviderData({...providerData, movingSecurityClearance: !!checked})}
+                              />
+                              <Label htmlFor="movingSecurityClearance">Security cleared team</Label>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Storage Facilities */}
+                {providerData.movingProviderTypes.includes("Storage services") && (
+                   <div className="space-y-4 border p-4 rounded-md bg-gray-50">
+                     <Label>Storage Facilities</Label>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                           <Label htmlFor="movingStorageLocation">Storage Location</Label>
+                           <Input 
+                              id="movingStorageLocation"
+                              placeholder="Address/Area"
+                              value={providerData.movingStorageLocation}
+                              onChange={(e) => setProviderData({...providerData, movingStorageLocation: e.target.value})}
+                           />
+                        </div>
+                        <div className="space-y-2">
+                           <Label htmlFor="movingStorageCapacity">Capacity (m³)</Label>
+                           <Input 
+                              id="movingStorageCapacity"
+                              placeholder="e.g. 500"
+                              value={providerData.movingStorageCapacity}
+                              onChange={(e) => setProviderData({...providerData, movingStorageCapacity: e.target.value})}
+                           />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                              id="movingClimateControl"
+                              checked={providerData.movingClimateControl}
+                              onCheckedChange={(checked) => setProviderData({...providerData, movingClimateControl: !!checked})}
+                           />
+                           <Label htmlFor="movingClimateControl">Climate Controlled</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                              id="moving247Access"
+                              checked={providerData.moving247Access}
+                              onCheckedChange={(checked) => setProviderData({...providerData, moving247Access: !!checked})}
+                           />
+                           <Label htmlFor="moving247Access">24/7 Access</Label>
+                        </div>
+                     </div>
                    </div>
+                )}
+
+                {/* Additional Services */}
+                <div className="space-y-4">
+                  <Label>Additional Services</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {movingAdditionalServices.map((svc) => (
+                      <div key={svc} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`msvc-${svc}`}
+                          checked={providerData.movingAdditionalServices.includes(svc)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.movingAdditionalServices;
+                            const updated = checked
+                              ? [...current, svc]
+                              : current.filter(s => s !== svc);
+                            setProviderData({ ...providerData, movingAdditionalServices: updated });
+                          }}
+                        />
+                        <Label htmlFor={`msvc-${svc}`} className="text-sm font-medium cursor-pointer">
+                          {svc}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Availability & Pricing */}
+                <div className="space-y-4">
+                  <Label>Availability & Pricing</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                       <Label>Days Available</Label>
+                       <div className="flex flex-wrap gap-2">
+                           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                              <div key={day} className="flex items-center space-x-2">
+                                 <Checkbox 
+                                    id={`mday-${day}`}
+                                    checked={providerData.movingAvailabilityDays.includes(day)}
+                                    onCheckedChange={(checked) => {
+                                       const current = providerData.movingAvailabilityDays;
+                                       const updated = checked 
+                                          ? [...current, day]
+                                          : current.filter(d => d !== day);
+                                       setProviderData({...providerData, movingAvailabilityDays: updated});
+                                    }}
+                                 />
+                                 <Label htmlFor={`mday-${day}`}>{day}</Label>
+                              </div>
+                           ))}
+                       </div>
+                     </div>
+                     <div className="space-y-2">
+                       <Label htmlFor="movingNoticePeriod">Notice Period</Label>
+                       <Select
+                         value={providerData.movingNoticePeriod}
+                         onValueChange={(value) => setProviderData({...providerData, movingNoticePeriod: value})}
+                       >
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select notice period" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           {movingNoticePeriods.map(p => (
+                             <SelectItem key={p} value={p}>{p}</SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     </div>
+                     
+                     {/* Pricing Inputs */}
+                     <div className="space-y-2">
+                        <Label htmlFor="movingHourlyRate">Hourly Rate (Small Jobs)</Label>
+                        <Input 
+                           id="movingHourlyRate"
+                           type="number"
+                           placeholder="R"
+                           value={providerData.movingHourlyRate}
+                           onChange={(e) => setProviderData({...providerData, movingHourlyRate: e.target.value})}
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="movingMinCharge">Minimum Charge</Label>
+                        <Input 
+                           id="movingMinCharge"
+                           type="number"
+                           placeholder="R"
+                           value={providerData.movingMinCharge}
+                           onChange={(e) => setProviderData({...providerData, movingMinCharge: e.target.value})}
+                        />
+                     </div>
+                  </div>
+                </div>
+                
+                {/* References & Portfolio */}
+                <div className="space-y-4 border-t pt-4">
+                   <Label>References & Portfolio</Label>
+                   <div className="space-y-2">
+                      <Label htmlFor="movingClientReferences">Client References</Label>
+                      <Textarea 
+                         id="movingClientReferences"
+                         placeholder="List client references (Name, Contact)"
+                         value={providerData.movingClientReferences}
+                         onChange={(e) => setProviderData({...providerData, movingClientReferences: e.target.value})}
+                      />
+                   </div>
+                   
+                   {/* Specific Portfolio Upload for Moving */}
+                   <div className="space-y-2">
+                     <Label>Portfolio (Move Photos)</Label>
+                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                          onClick={() => fileInputRefs.movingPortfolio.current?.click()}>
+                       <Upload className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+                       <p className="text-sm font-medium">Upload photos of successful moves</p>
+                     </div>
+                     <input
+                       ref={fileInputRefs.movingPortfolio}
+                       type="file"
+                       accept="image/*"
+                       multiple
+                       className="hidden"
+                       onChange={(e) => {
+                         const files = Array.from(e.target.files || []);
+                         files.forEach(file => handleFileUpload('movingPortfolio', file));
+                       }}
+                     />
+                     {providerData.movingPortfolio.length > 0 && (
+                       <div className="flex flex-wrap gap-2 mt-2">
+                         {providerData.movingPortfolio.map((file, idx) => (
+                           <div key={idx} className="bg-primary/10 text-primary text-xs px-2 py-1 rounded">
+                             {file.name}
+                           </div>
+                         ))}
+                       </div>
+                     )}
+                   </div>
+                </div>
+
+              </div>
+            )}
+
+            {(providerData.services.includes("Waitering Services") || providerData.services.includes("Event Staff")) && (
+              <div className="space-y-6 border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-5 w-5 text-[#44062D]" />
+                  <h4 className="font-semibold text-lg text-[#44062D]">Event Staff Details</h4>
+                </div>
+
+                {/* Staff Type */}
+                <div className="space-y-4">
+                  <Label>Primary Role</Label>
+                  <Select
+                    value={providerData.eventStaffType}
+                    onValueChange={(value) => setProviderData({...providerData, eventStaffType: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your primary role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {eventStaffTypes.map(type => (
+                        <SelectItem key={type.id} value={type.id}>{type.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Specializations */}
+                <div className="space-y-4">
+                  <Label>Specializations</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {eventStaffSpecializations.map((spec) => (
+                      <div key={spec} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`espec-${spec}`}
+                          checked={providerData.eventStaffSpecializations.includes(spec)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.eventStaffSpecializations;
+                            const updated = checked
+                              ? [...current, spec]
+                              : current.filter(s => s !== spec);
+                            setProviderData({ ...providerData, eventStaffSpecializations: updated });
+                          }}
+                        />
+                        <Label htmlFor={`espec-${spec}`} className="text-sm font-medium cursor-pointer">
+                          {spec}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Certifications */}
-                <div className="space-y-2">
-                  <Label htmlFor="certifications">Certifications & Qualifications</Label>
-                  <Textarea
-                    id="certifications"
-                    placeholder="List your locksmith certifications, registration numbers, etc."
-                    value={providerData.certifications}
-                    onChange={(e) => setProviderData({...providerData, certifications: e.target.value})}
-                    rows={3}
-                  />
+                <div className="space-y-4">
+                  <Label>Certifications</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {eventStaffCertifications.map((cert) => (
+                      <div key={cert} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`ecert-${cert}`}
+                          checked={providerData.eventStaffCertifications.includes(cert)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.eventStaffCertifications;
+                            const updated = checked
+                              ? [...current, cert]
+                              : current.filter(c => c !== cert);
+                            setProviderData({ ...providerData, eventStaffCertifications: updated });
+                          }}
+                        />
+                        <Label htmlFor={`ecert-${cert}`} className="text-sm font-medium cursor-pointer">
+                          {cert}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
+                {/* Event Types Experienced */}
+                <div className="space-y-4">
+                  <Label>Event Types Experienced</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {eventTypesExperienced.map((type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`etype-${type}`}
+                          checked={providerData.eventTypesExperienced.includes(type)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.eventTypesExperienced;
+                            const updated = checked
+                              ? [...current, type]
+                              : current.filter(t => t !== type);
+                            setProviderData({ ...providerData, eventTypesExperienced: updated });
+                          }}
+                        />
+                        <Label htmlFor={`etype-${type}`} className="text-sm font-medium cursor-pointer">
+                          {type}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Experience & Capacity */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label htmlFor="eventExperienceYears">Years of Event Experience</Label>
+                     <Select
+                       value={providerData.eventExperienceYears}
+                       onValueChange={(value) => setProviderData({...providerData, eventExperienceYears: value})}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder="Select years" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="0-1">0-1 years</SelectItem>
+                         <SelectItem value="1-3">1-3 years</SelectItem>
+                         <SelectItem value="3-5">3-5 years</SelectItem>
+                         <SelectItem value="5-10">5-10 years</SelectItem>
+                         <SelectItem value="10+">10+ years</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="typicalEventSize">Typical Event Size</Label>
+                     <Select
+                       value={providerData.typicalEventSize}
+                       onValueChange={(value) => setProviderData({...providerData, typicalEventSize: value})}
+                     >
+                       <SelectTrigger>
+                         <SelectValue placeholder="Select size" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="Small (<20)">Small (&lt;20 guests)</SelectItem>
+                         <SelectItem value="Medium (20-50)">Medium (20-50 guests)</SelectItem>
+                         <SelectItem value="Large (50-100)">Large (50-100 guests)</SelectItem>
+                         <SelectItem value="Huge (100+)">Huge (100+ guests)</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="maxGuests">Max Guests Handled</Label>
+                     <Input
+                       id="maxGuests"
+                       type="number"
+                       placeholder="e.g. 200"
+                       value={providerData.maxGuests}
+                       onChange={(e) => setProviderData({...providerData, maxGuests: e.target.value})}
+                     />
+                   </div>
+                </div>
+
+                {/* Availability & Preferences */}
+                <div className="space-y-4">
+                  <Label>Availability & Preferences</Label>
+                  <div className="space-y-4 border p-4 rounded-md">
+                     <div className="space-y-2">
+                        <Label>Days Available</Label>
+                        <div className="flex flex-wrap gap-2">
+                           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                              <div key={day} className="flex items-center space-x-2">
+                                 <Checkbox 
+                                    id={`day-${day}`}
+                                    checked={providerData.eventAvailabilityDays.includes(day)}
+                                    onCheckedChange={(checked) => {
+                                       const current = providerData.eventAvailabilityDays;
+                                       const updated = checked 
+                                          ? [...current, day]
+                                          : current.filter(d => d !== day);
+                                       setProviderData({...providerData, eventAvailabilityDays: updated});
+                                    }}
+                                 />
+                                 <Label htmlFor={`day-${day}`}>{day}</Label>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        <Label>Times Available</Label>
+                        <div className="flex flex-wrap gap-2">
+                           {['Morning', 'Afternoon', 'Evening', 'Late Night'].map(time => (
+                              <div key={time} className="flex items-center space-x-2">
+                                 <Checkbox 
+                                    id={`time-${time}`}
+                                    checked={providerData.eventAvailabilityTimes.includes(time)}
+                                    onCheckedChange={(checked) => {
+                                       const current = providerData.eventAvailabilityTimes;
+                                       const updated = checked 
+                                          ? [...current, time]
+                                          : current.filter(t => t !== time);
+                                       setProviderData({...providerData, eventAvailabilityTimes: updated});
+                                    }}
+                                 />
+                                 <Label htmlFor={`time-${time}`}>{time}</Label>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        <Label htmlFor="travelDistance">Travel Distance Willing to Go</Label>
+                        <Select
+                           value={providerData.travelDistance}
+                           onValueChange={(value) => setProviderData({...providerData, travelDistance: value})}
+                        >
+                           <SelectTrigger>
+                              <SelectValue placeholder="Select distance" />
+                           </SelectTrigger>
+                           <SelectContent>
+                              <SelectItem value="10km">Within 10km</SelectItem>
+                              <SelectItem value="25km">Within 25km</SelectItem>
+                              <SelectItem value="50km">Within 50km</SelectItem>
+                              <SelectItem value="100km+">100km+</SelectItem>
+                              <SelectItem value="Anywhere">Anywhere (with travel fee)</SelectItem>
+                           </SelectContent>
+                        </Select>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Logistics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <Label>Transportation</Label>
+                     <div className="flex items-center space-x-2 border p-3 rounded-md">
+                        <Checkbox
+                          id="ownTransport"
+                          checked={providerData.ownTransport}
+                          onCheckedChange={(checked) => setProviderData({...providerData, ownTransport: !!checked})}
+                        />
+                        <Label htmlFor="ownTransport" className="cursor-pointer">I have my own transport</Label>
+                     </div>
+                   </div>
+                   <div className="space-y-2">
+                     <Label>Uniform</Label>
+                     <div className="flex items-center space-x-2 border p-3 rounded-md">
+                        <Checkbox
+                          id="ownUniform"
+                          checked={providerData.ownUniform}
+                          onCheckedChange={(checked) => setProviderData({...providerData, ownUniform: !!checked})}
+                        />
+                        <Label htmlFor="ownUniform" className="cursor-pointer">I have my own uniform (Black & White)</Label>
+                     </div>
+                   </div>
+                </div>
+
+                {/* Physical Requirements */}
+                <div className="space-y-4">
+                  <Label>Physical Requirements</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                     <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="physicalStand"
+                          checked={providerData.physicalStand}
+                          onCheckedChange={(checked) => setProviderData({...providerData, physicalStand: !!checked})}
+                        />
+                        <Label htmlFor="physicalStand">Can stand for 4+ hours</Label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="physicalLift"
+                          checked={providerData.physicalLift}
+                          onCheckedChange={(checked) => setProviderData({...providerData, physicalLift: !!checked})}
+                        />
+                        <Label htmlFor="physicalLift">Can lift 10kg+</Label>
+                     </div>
+                     <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="physicalCarry"
+                          checked={providerData.physicalCarry}
+                          onCheckedChange={(checked) => setProviderData({...providerData, physicalCarry: !!checked})}
+                        />
+                        <Label htmlFor="physicalCarry">Can carry trays</Label>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div className="space-y-4">
+                  <Label>Languages Spoken</Label>
+                  <div className="flex flex-wrap gap-4">
+                    {languageOptions.map((lang) => (
+                      <div key={lang} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`elang-${lang}`}
+                          checked={providerData.languages.includes(lang)}
+                          onCheckedChange={(checked) => {
+                            const current = providerData.languages;
+                            const updated = checked
+                              ? [...current, lang]
+                              : current.filter(l => l !== lang);
+                            setProviderData({ ...providerData, languages: updated });
+                          }}
+                        />
+                        <Label htmlFor={`elang-${lang}`} className="text-sm font-medium cursor-pointer">
+                          {lang}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* References */}
+                <div className="space-y-4 border p-4 rounded-md">
+                   <div className="space-y-2">
+                     <Label>CV / Resume (Optional)</Label>
+                     <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                         onClick={() => fileInputRefs.referencesCV.current?.click()}>
+                         <Upload className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+                         <p className="text-sm font-medium">Click to upload CV</p>
+                     </div>
+                     <input
+                         ref={fileInputRefs.referencesCV}
+                         type="file"
+                         accept=".pdf,.doc,.docx"
+                         className="hidden"
+                         onChange={(e) => handleFileUpload('referencesCV', e.target.files?.[0] || null)}
+                     />
+                     {providerData.referencesCV && (
+                         <p className="mt-2 text-sm text-green-600 flex items-center justify-center">
+                             <CheckCircle className="h-4 w-4 mr-1" />
+                             {providerData.referencesCV.name}
+                         </p>
+                     )}
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="previousEmployers">Previous Employers</Label>
+                     <Textarea
+                       id="previousEmployers"
+                       placeholder="List recent employers (Name, Role, Duration)"
+                       value={providerData.previousEmployers}
+                       onChange={(e) => setProviderData({...providerData, previousEmployers: e.target.value})}
+                       rows={3}
+                     />
+                   </div>
+
+                   <div className="space-y-2">
+                     <Label htmlFor="referenceContacts">References</Label>
+                     <Textarea
+                       id="referenceContacts"
+                       placeholder="Contact Name, Phone Number, Relationship"
+                       value={providerData.referenceContacts}
+                       onChange={(e) => setProviderData({...providerData, referenceContacts: e.target.value})}
+                       rows={3}
+                     />
+                   </div>
+                </div>
               </div>
             )}
 
@@ -1506,6 +2853,45 @@ export default function EnhancedProviderOnboarding() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Police Clearance (Au Pair only) */}
+              {(providerData.services.includes("Au Pair Services") || providerData.services.includes("Childcare Provider")) && (
+                <Card className="border-2 border-dashed border-gray-300">
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <Shield className="mx-auto h-12 w-12 text-gray-400" />
+                      <h4 className="mt-2 font-medium text-gray-900">Police Clearance</h4>
+                      <p className="text-sm text-gray-600 mb-4">Required for childcare providers</p>
+                      
+                      <div className="flex flex-col space-y-2">
+                        <Button
+                          onClick={() => fileInputRefs.policeClearance.current?.click()}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Clearance
+                        </Button>
+                      </div>
+                      
+                      <input
+                        ref={fileInputRefs.policeClearance}
+                        type="file"
+                        accept=".pdf,image/*"
+                        className="hidden"
+                        onChange={(e) => handleFileUpload('policeClearance', e.target.files?.[0] || null)}
+                      />
+                      
+                      {providerData.policeClearance && (
+                        <p className="mt-2 text-sm text-green-600 flex items-center justify-center">
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          {providerData.policeClearance.name}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         );

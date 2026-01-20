@@ -35,6 +35,27 @@ interface PaymentStepProps {
   setFormData: (updater: (prev: any) => any) => void;
   pricing: {
     totalPrice: number;
+    staffCosts?: number;
+    eventMultiplier?: number;
+    serviceStyleMultiplier?: number;
+    additionalFees?: number;
+    breakdown?: {
+      staffCosts: {
+        waiters: number;
+        bartenders: number;
+        assistants: number;
+        coordinators: number;
+      };
+      durationSubtotal: number;
+      fees: {
+        afterHours: number;
+        weekend: number;
+        travel: number;
+        uniforms: number;
+        equipment: number;
+        barSetup: number;
+      };
+    };
   };
   estimatedHours: number;
   pendingDrafts: any[];
@@ -594,6 +615,110 @@ export function PaymentStep({
           <span>Address</span>
           <span className="font-medium">{formData.address}</span>
         </div>
+        
+        {/* Detailed Pricing Breakdown for Waitering Service */}
+        {pricing.breakdown && (
+          <>
+            <Separator className="my-2" />
+            <div className="space-y-2 text-sm">
+              <div className="font-semibold text-gray-700">Price Breakdown</div>
+              
+              {/* Staff Costs */}
+              <div className="pl-2 space-y-1">
+                <div className="flex justify-between text-gray-600">
+                  <span>Base Staff Costs ({estimatedHours}h)</span>
+                  <span>R{pricing.breakdown.durationSubtotal.toFixed(2)}</span>
+                </div>
+                {pricing.breakdown.staffCosts.waiters > 0 && (
+                  <div className="flex justify-between text-xs text-gray-500 pl-2">
+                    <span>Waiters</span>
+                    <span>R{pricing.breakdown.staffCosts.waiters.toFixed(2)}</span>
+                  </div>
+                )}
+                {pricing.breakdown.staffCosts.bartenders > 0 && (
+                  <div className="flex justify-between text-xs text-gray-500 pl-2">
+                    <span>Bartenders</span>
+                    <span>R{pricing.breakdown.staffCosts.bartenders.toFixed(2)}</span>
+                  </div>
+                )}
+                 {pricing.breakdown.staffCosts.assistants > 0 && (
+                  <div className="flex justify-between text-xs text-gray-500 pl-2">
+                    <span>Assistants</span>
+                    <span>R{pricing.breakdown.staffCosts.assistants.toFixed(2)}</span>
+                  </div>
+                )}
+                 {pricing.breakdown.staffCosts.coordinators > 0 && (
+                  <div className="flex justify-between text-xs text-gray-500 pl-2">
+                    <span>Coordinators</span>
+                    <span>R{pricing.breakdown.staffCosts.coordinators.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Multipliers */}
+              {(pricing.eventMultiplier !== 1 || pricing.serviceStyleMultiplier !== 1) && (
+                 <div className="pl-2 space-y-1">
+                    {pricing.eventMultiplier !== undefined && pricing.eventMultiplier !== 1 && (
+                      <div className="flex justify-between text-blue-600">
+                        <span>Event Multiplier</span>
+                        <span>x{pricing.eventMultiplier}</span>
+                      </div>
+                    )}
+                    {pricing.serviceStyleMultiplier !== undefined && pricing.serviceStyleMultiplier !== 1 && (
+                      <div className="flex justify-between text-blue-600">
+                        <span>Service Style</span>
+                        <span>x{pricing.serviceStyleMultiplier}</span>
+                      </div>
+                    )}
+                 </div>
+              )}
+
+              {/* Additional Fees */}
+              {pricing.additionalFees && pricing.additionalFees > 0 ? (
+                <div className="pl-2 space-y-1">
+                   <div className="font-medium text-gray-700 mt-1">Additional Fees</div>
+                   {pricing.breakdown.fees.afterHours > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>After Hours Surcharge</span>
+                        <span>R{pricing.breakdown.fees.afterHours.toFixed(2)}</span>
+                      </div>
+                   )}
+                   {pricing.breakdown.fees.weekend > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>Weekend Surcharge</span>
+                        <span>R{pricing.breakdown.fees.weekend.toFixed(2)}</span>
+                      </div>
+                   )}
+                    {pricing.breakdown.fees.travel > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>Travel Fee</span>
+                        <span>R{pricing.breakdown.fees.travel.toFixed(2)}</span>
+                      </div>
+                   )}
+                    {pricing.breakdown.fees.uniforms > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>Uniform Rental</span>
+                        <span>R{pricing.breakdown.fees.uniforms.toFixed(2)}</span>
+                      </div>
+                   )}
+                    {pricing.breakdown.fees.equipment > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>Equipment Rental</span>
+                        <span>R{pricing.breakdown.fees.equipment.toFixed(2)}</span>
+                      </div>
+                   )}
+                    {pricing.breakdown.fees.barSetup > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>Bar Setup</span>
+                        <span>R{pricing.breakdown.fees.barSetup.toFixed(2)}</span>
+                      </div>
+                   )}
+                </div>
+              ) : null}
+              
+            </div>
+          </>
+        )}
         <Separator />
         <div className="flex justify-between font-semibold text-lg">
           <span>Total Amount</span>

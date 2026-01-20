@@ -87,6 +87,9 @@ model ServiceProvider {
   idDocument          String?
   proofOfAddress      String?
   qualificationCertificate String?
+  policeClearance     String?
+  referenceDocument   String?
+  specializations     String?   @db.Text
   availabilityCalendar Json?
   portfolioImages     String[]            @default([])
   rating              Decimal             @default(0) @db.Decimal(3, 2)

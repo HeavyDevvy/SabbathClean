@@ -7,7 +7,8 @@ import {
   TreePine,
   ChefHat,
   Users,
-  Wrench
+  Wrench,
+  Truck
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -46,6 +47,27 @@ export interface ServiceConfig {
   movingTypes?: Array<{ value: string; label: string; price: number; description: string }>;
   movingDistance?: Array<{ value: string; label: string; multiplier: number }>;
   careTypes?: Array<{ value: string; label: string; price: number; description: string }>;
+  accommodationTypes?: Array<{ value: string; label: string }>;
+  contractDurations?: Array<{ value: string; label: string }>;
+  floorLevels?: Array<{ value: string; label: string }>;
+  stairsCount?: Array<{ value: string; label: string }>;
+  parkingAccess?: Array<{ value: string; label: string }>;
+  moveSizes?: Array<{ value: string; label: string }>;
+  inventoryItems?: {
+    furniture: Array<{ id: string; label: string }>;
+    appliances: Array<{ id: string; label: string }>;
+    special: Array<{ id: string; label: string }>;
+  };
+  boxTypes?: Array<{ id: string; label: string }>;
+  complexityLevels?: Array<{ value: string; label: string; multiplier: number }>;
+  daysPerWeek?: Array<{ value: string; label: string }>;
+  hoursPerDay?: Array<{ value: string; label: string }>;
+  petTypes?: Array<{ value: string; label: string }>;
+  languages?: Array<{ value: string; label: string }>;
+  educationLevels?: Array<{ value: string; label: string }>;
+  experienceLevels?: Array<{ value: string; label: string }>;
+  childAgeGroups?: Array<{ value: string; label: string }>;
+  dutiesList?: Array<{ id: string; label: string }>;
   childrenCount?: Array<{ value: string; label: string; multiplier: number }>;
   childrenAges?: Array<{ value: string; label: string; multiplier: number }>;
   eventTypes?: Array<{
@@ -371,6 +393,15 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { value: "large", label: "Large (51-100 guests)", multiplier: 2.5 },
       { value: "corporate", label: "Corporate (100+ guests)", multiplier: 4.0 }
     ],
+    eventTypes: [
+      { value: "wedding", label: "Wedding Reception", multiplier: 1.3, description: "Formal service with full staff coordination" },
+      { value: "corporate", label: "Corporate Event", multiplier: 1.2, description: "Professional service for business functions" },
+      { value: "private-party", label: "Private Party", multiplier: 1.0, description: "Birthday, anniversary, or casual gathering" },
+      { value: "formal-dinner", label: "Formal Dinner", multiplier: 1.2, description: "Multi-course plated service" },
+      { value: "cocktail", label: "Cocktail Function", multiplier: 1.1, description: "Roaming service with canapés and drinks" },
+      { value: "buffet", label: "Buffet Service", multiplier: 1.0, description: "Assisted buffet service and clearing" },
+      { value: "conference", label: "Conference/Seminar", multiplier: 1.1, description: "Tea breaks and lunch service" }
+    ],
     addOns: [
       { id: "uniform-rental", name: "Professional Uniform Rental", price: 50 },
       { id: "overtime-coverage", name: "Overtime Coverage", price: 120 },
@@ -486,32 +517,185 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
   },
   "moving": {
     title: "Moving Services",
-    icon: Wrench,
+    icon: Truck,
     basePrice: 600,
-    steps: 4,
+    steps: 6,
+    
+    // 1. Primary Service Categories
+    serviceCategories: [
+      { value: "residential", label: "Residential Move" },
+      { value: "office", label: "Office/Commercial Move" },
+      { value: "specialty", label: "Specialty Moving" },
+      { value: "packing", label: "Packing Services" },
+      { value: "storage", label: "Storage Services" },
+      { value: "additional", label: "Additional Services" }
+    ],
+
+    // 2. Detailed Service Types (Mapped by Category)
+    serviceTypes: {
+      residential: [
+        { value: "local", label: "Local move (<50km)", price: 600 },
+        { value: "long-distance", label: "Long-distance move (>50km)", price: 1500 },
+        { value: "interstate", label: "Interstate/cross-border move", price: 3500 },
+        { value: "apartment", label: "Apartment/flat move", price: 800 },
+        { value: "house", label: "House move", price: 1800 },
+        { value: "mansion", label: "Estate/mansion move", price: 2800 }
+      ],
+      office: [
+        { value: "small-office", label: "Small office (1-5 employees)", price: 1200 },
+        { value: "medium-office", label: "Medium office (6-20 employees)", price: 2500 },
+        { value: "large-office", label: "Large office (20+ employees)", price: 5000 },
+        { value: "retail", label: "Retail store relocation", price: 3000 },
+        { value: "warehouse", label: "Warehouse relocation", price: 4500 },
+        { value: "server-it", label: "Server/IT equipment move", price: 2000 }
+      ],
+      specialty: [
+        { value: "piano", label: "Piano moving", price: 1200 },
+        { value: "antique", label: "Antique furniture", price: 900 },
+        { value: "art", label: "Art and sculptures", price: 800 },
+        { value: "pool-table", label: "Pool table moving", price: 1500 },
+        { value: "safe", label: "Safe moving", price: 1000 },
+        { value: "machinery", label: "Heavy machinery", price: 3000 },
+        { value: "fragile", label: "Fragile/valuable items", price: 700 }
+      ],
+      packing: [
+        { value: "full", label: "Full packing service", price: 2500 },
+        { value: "partial", label: "Partial packing (fragile only)", price: 1200 },
+        { value: "unpacking", label: "Unpacking service", price: 1500 },
+        { value: "materials", label: "Materials only", price: 500 },
+        { value: "crating", label: "Custom crating for valuables", price: 1800 }
+      ],
+      storage: [
+        { value: "short-term", label: "Short-term storage (1-3 months)", price: 800 },
+        { value: "long-term", label: "Long-term storage (3+ months)", price: 700 },
+        { value: "climate", label: "Climate-controlled storage", price: 1200 },
+        { value: "vehicle", label: "Vehicle storage", price: 1000 },
+        { value: "furniture", label: "Furniture storage", price: 600 }
+      ],
+      additional: [
+        { value: "assembly", label: "Furniture assembly/disassembly", price: 400 },
+        { value: "appliance", label: "Appliance disconnection", price: 300 },
+        { value: "cleaning", label: "Move-in/Move-out cleaning", price: 850 },
+        { value: "junk", label: "Junk removal", price: 600 },
+        { value: "pet", label: "Pet relocation", price: 900 },
+        { value: "transport", label: "Vehicle transport", price: 1500 }
+      ]
+    },
+
+    // 3. Move Complexity Levels
+    complexityLevels: [
+      { value: "basic", label: "Basic (Pre-packed, ground floor, minimal items)", multiplier: 1.0 },
+      { value: "standard", label: "Standard (Some packing, stairs/elevator)", multiplier: 1.3 },
+      { value: "complex", label: "Complex (Full packing, multi-floors)", multiplier: 1.6 },
+      { value: "premium", label: "Premium (White glove, high-value items)", multiplier: 2.2 }
+    ],
+
+    // Origin/Destination Options
+    floorLevels: [
+      { value: "ground", label: "Ground Floor" },
+      { value: "1", label: "1st Floor" },
+      { value: "2", label: "2nd Floor" },
+      { value: "3", label: "3rd Floor" },
+      { value: "4", label: "4th Floor" },
+      { value: "5+", label: "5th+ Floor (Elevator Required)" }
+    ],
+    stairsCount: [
+      { value: "none", label: "No Stairs (Elevator/Ground)" },
+      { value: "1-10", label: "1-10 Steps" },
+      { value: "11-20", label: "11-20 Steps" },
+      { value: "21+", label: "21+ Steps" }
+    ],
+    parkingAccess: [
+      { value: "driveway", label: "Direct Driveway Access" },
+      { value: "street", label: "Street Parking (< 10m)" },
+      { value: "lot", label: "Parking Lot" },
+      { value: "difficult", label: "Difficult/Far Access (> 20m)" }
+    ],
+    
+    // Move Details
+    moveSizes: [
+      { value: "studio", label: "Studio / Bachelor" },
+      { value: "1-bed", label: "1 Bedroom Home" },
+      { value: "2-bed", label: "2 Bedroom Home" },
+      { value: "3-bed", label: "3 Bedroom Home" },
+      { value: "4-bed", label: "4+ Bedroom Home" },
+      { value: "office-small", label: "Small Office" },
+      { value: "office-large", label: "Large Office" },
+      { value: "custom", label: "Custom / Partial Move" }
+    ],
+    
+    // Inventory Items (Categorized for UI generation)
+    inventoryItems: {
+      furniture: [
+        { id: "bed_single", label: "Bed (Single)" },
+        { id: "bed_double", label: "Bed (Double)" },
+        { id: "bed_queen", label: "Bed (Queen)" },
+        { id: "bed_king", label: "Bed (King)" },
+        { id: "sofa_2", label: "Sofa (2-seater)" },
+        { id: "sofa_3", label: "Sofa (3-seater)" },
+        { id: "sofa_l", label: "Sofa (L-shaped)" },
+        { id: "sofa_sectional", label: "Sofa (Sectional)" },
+        { id: "dining_table", label: "Dining Table & Chairs" },
+        { id: "coffee_table", label: "Coffee Table" },
+        { id: "tv_stand", label: "TV Stand/Entertainment Unit" },
+        { id: "wardrobe", label: "Wardrobe/Closet" },
+        { id: "dresser", label: "Dresser/Chest of Drawers" },
+        { id: "desk", label: "Desk" },
+        { id: "bookshelf", label: "Bookshelf" },
+        { id: "side_table", label: "Side Table" }
+      ],
+      appliances: [
+        { id: "fridge", label: "Refrigerator/Fridge-freezer" },
+        { id: "washing_machine", label: "Washing Machine" },
+        { id: "dryer", label: "Dryer" },
+        { id: "dishwasher", label: "Dishwasher" },
+        { id: "stove", label: "Stove/Oven" },
+        { id: "microwave", label: "Microwave" },
+        { id: "tv_small", label: "TV (<40\")" },
+        { id: "tv_med", label: "TV (40-55\")" },
+        { id: "tv_large", label: "TV (55\"+)" },
+        { id: "ac", label: "Air Conditioner" }
+      ],
+      special: [
+        { id: "piano_upright", label: "Piano (Upright)" },
+        { id: "piano_baby", label: "Piano (Baby Grand)" },
+        { id: "piano_grand", label: "Piano (Grand)" },
+        { id: "pool_table", label: "Pool Table" },
+        { id: "gym_equip", label: "Gym Equipment" },
+        { id: "safe_small", label: "Safe (<50kg)" },
+        { id: "safe_med", label: "Safe (50-150kg)" },
+        { id: "safe_large", label: "Safe (150kg+)" },
+        { id: "antique", label: "Antique Furniture" },
+        { id: "artwork", label: "Artwork/Paintings" },
+        { id: "chandelier", label: "Chandelier" },
+        { id: "outdoor_furn", label: "Outdoor Furniture" },
+        { id: "plants", label: "Plants (Large)" }
+      ]
+    },
+    
+    // Packing & Boxes
+    boxTypes: [
+      { id: "box_small", label: "Small Boxes (Books/Canned goods)" },
+      { id: "box_medium", label: "Medium Boxes (Kitchen/Decor)" },
+      { id: "box_large", label: "Large Boxes (Bedding/Clothes)" },
+      { id: "box_wardrobe", label: "Wardrobe Boxes" },
+      { id: "loose_items", label: "Loose Items (Estimate)" }
+    ],
+
     propertyTypes: [
       { value: "apartment", label: "Apartment/1-2 Bedrooms", multiplier: 1.0 },
       { value: "house", label: "House/3-4 Bedrooms", multiplier: 1.4 },
       { value: "townhouse", label: "Townhouse/2-3 Bedrooms", multiplier: 1.2 },
-      { value: "villa", label: "Villa/5+ Bedrooms", multiplier: 1.8 }
+      { value: "villa", label: "Villa/5+ Bedrooms", multiplier: 1.8 },
+      { value: "office", label: "Office", multiplier: 1.5 },
+      { value: "warehouse", label: "Warehouse", multiplier: 2.0 },
+      { value: "storage", label: "Storage Unit", multiplier: 0.8 }
     ],
-    movingTypes: [
-      { value: "local", label: "Local Moving (Same City)", price: 600, description: "Moving within the same city or nearby areas" },
-      { value: "long-distance", label: "Long-Distance Moving", price: 1200, description: "Intercity or interstate moving" },
-      { value: "office", label: "Office Relocation", price: 800, description: "Business and office moving services" },
-      { value: "furniture", label: "Furniture Moving & Assembly", price: 400, description: "Specialized furniture transport and setup" },
-      { value: "packing", label: "Packing & Unpacking Services", price: 350, description: "Professional packing and unpacking assistance" },
-      { value: "piano", label: "Piano & Specialty Items", price: 900, description: "Special handling for delicate items" }
-    ],
-    movingDistance: [
-      { value: "local", label: "Local (0-50km)", multiplier: 1.0 },
-      { value: "regional", label: "Regional (50-200km)", multiplier: 1.5 },
-      { value: "long-distance", label: "Long Distance (200km+)", multiplier: 2.2 }
-    ],
+
     addOns: [
       { id: "packing-materials", name: "Packing Materials Supply", price: 200 },
       { id: "storage", name: "Temporary Storage (1 month)", price: 300 },
-      { id: "insurance", name: "Premium Moving Insurance", price: 150 },
+      { id: "insurance", name: "Premium Moving Insurance", price: 350 },
       { id: "disassembly", name: "Furniture Disassembly/Assembly", price: 250 },
       { id: "cleaning", name: "Post-Move Cleaning", price: 400 }
     ]
@@ -520,7 +704,7 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
     title: "Au Pair Services",
     icon: Users,
     basePrice: 65,
-    steps: 4,
+    steps: 5,
     propertyTypes: [
       { value: "apartment", label: "Apartment", multiplier: 1.0 },
       { value: "house", label: "House", multiplier: 1.1 },
@@ -528,18 +712,112 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { value: "villa", label: "Villa", multiplier: 1.2 }
     ],
     careTypes: [
-      { value: "live-in", label: "Live-in Au Pair (6-12 months)", price: 3500, description: "Full-time live-in childcare provider" },
-      { value: "part-time", label: "Part-time Childcare", price: 65, description: "Flexible part-time childcare hours" },
-      { value: "after-school", label: "After-school Care", price: 80, description: "Care and supervision after school hours" },
-      { value: "weekend", label: "Weekend & Holiday Care", price: 90, description: "Weekend and special occasion care" },
-      { value: "overnight", label: "Overnight Babysitting", price: 120, description: "Extended overnight care services" },
-      { value: "educational", label: "Educational Support & Tutoring", price: 95, description: "Homework help and educational activities" }
+      { 
+        value: "full-time-live-in", 
+        label: "Full-Time Live-In Au Pair", 
+        price: 3500, // Monthly placement/base fee
+        description: "25-45 hours/week. Includes room, board & stipend. 6-24 month contract." 
+      },
+      { 
+        value: "part-time", 
+        label: "Part-Time Au Pair", 
+        price: 85, // Hourly rate
+        description: "10-24 hours/week. Flexible duration (min 3 months). Childcare only." 
+      },
+      { 
+        value: "after-school", 
+        label: "After-School Care", 
+        price: 95, // Hourly rate
+        description: "2-4 hours/day. School pickup, homework help & activities." 
+      },
+      { 
+        value: "emergency", 
+        label: "Emergency/Temporary Care", 
+        price: 120, // Premium hourly rate
+        description: "Immediate availability. Short-term (1 day - 4 weeks)." 
+      },
+      { 
+        value: "specialized", 
+        label: "Specialized Au Pair", 
+        price: 150, // Premium hourly rate
+        description: "Special needs, newborn specialist, or multiple children expertise." 
+      }
     ],
     childrenCount: [
       { value: "1", label: "1 Child", multiplier: 1.0 },
       { value: "2", label: "2 Children", multiplier: 1.4 },
       { value: "3", label: "3 Children", multiplier: 1.7 },
       { value: "4+", label: "4+ Children", multiplier: 2.0 }
+    ],
+    childAgeGroups: [
+      { value: "0-3m", label: "0-3 months" },
+      { value: "3-12m", label: "3-12 months" },
+      { value: "1-2y", label: "1-2 years" },
+      { value: "3-5y", label: "3-5 years" },
+      { value: "6-8y", label: "6-8 years" },
+      { value: "9-12y", label: "9-12 years" },
+      { value: "13-15y", label: "13-15 years" },
+      { value: "16-18y", label: "16-18 years" }
+    ],
+    accommodationTypes: [
+      { value: "separate-room", label: "Separate Room" },
+      { value: "shared-bathroom", label: "Shared Bathroom" },
+      { value: "private-bathroom", label: "Private Bathroom" },
+      { value: "separate-cottage", label: "Separate Cottage/Flat" }
+    ],
+    contractDurations: [
+      { value: "3-months", label: "3 Months" },
+      { value: "6-months", label: "6 Months" },
+      { value: "12-months", label: "12 Months" },
+      { value: "24-months", label: "24 Months" },
+      { value: "ongoing", label: "Ongoing" }
+    ],
+    daysPerWeek: [
+      { value: "mon-fri", label: "Monday - Friday" },
+      { value: "mon-sat", label: "Monday - Saturday" },
+      { value: "7-days", label: "7 Days / Week" },
+      { value: "custom", label: "Custom Schedule" }
+    ],
+    hoursPerDay: [
+      { value: "2-4", label: "2-4 hours" },
+      { value: "5-8", label: "5-8 hours" },
+      { value: "9-12", label: "9-12 hours" },
+      { value: "full-day", label: "Full Day (12+ hours)" }
+    ],
+    petTypes: [
+      { value: "none", label: "None" },
+      { value: "dog", label: "Dog" },
+      { value: "cat", label: "Cat" },
+      { value: "multiple", label: "Multiple Pets" }
+    ],
+    languages: [
+      { value: "english", label: "English" },
+      { value: "afrikaans", label: "Afrikaans" },
+      { value: "zulu", label: "Zulu" },
+      { value: "xhosa", label: "Xhosa" },
+      { value: "other", label: "Other" }
+    ],
+    educationLevels: [
+      { value: "high-school", label: "High School" },
+      { value: "diploma", label: "Diploma" },
+      { value: "degree", label: "Degree" },
+      { value: "certification", label: "Childcare Certification" }
+    ],
+    experienceLevels: [
+      { value: "entry", label: "Entry Level" },
+      { value: "1-2y", label: "1-2 Years" },
+      { value: "3-5y", label: "3-5 Years" },
+      { value: "5y+", label: "5+ Years" }
+    ],
+    dutiesList: [
+      { id: "childcare", label: "Childcare and supervision" },
+      { id: "school-transport", label: "School drop-off/pick-up" },
+      { id: "meal-prep", label: "Meal preparation for children" },
+      { id: "light-housework", label: "Light housework (children's areas only)" },
+      { id: "homework", label: "Homework assistance" },
+      { id: "activities", label: "Organize activities and playtime" },
+      { id: "bedtime", label: "Bathing and bedtime routine" },
+      { id: "laundry", label: "Laundry (children's only)" }
     ],
     childrenAges: [
       { value: "infant", label: "Infant (0-1 year)", multiplier: 1.3 },
@@ -552,7 +830,8 @@ const baseServiceConfigs: Record<string, ServiceConfig> = {
       { id: "first-aid", name: "Certified First Aid Training", price: 80 },
       { id: "transport", name: "Child Transportation Service", price: 100 },
       { id: "meal-prep", name: "Meal Preparation for Children", price: 60 },
-      { id: "overnight", name: "Overnight Care Available", price: 150 }
+      { id: "overnight", name: "Overnight Care Available", price: 150 },
+      { id: "tutoring", name: "Subject-Specific Tutoring", price: 200 }
     ]
   },
   "locksmith": {

@@ -75,7 +75,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       experience,
       location,
       bankingDetails,
-      providerType
+      providerType,
+      specializations,
+      policeClearance,
+      referenceDocument,
+      idDocument,
+      proofOfAddress,
+      qualificationCertificate,
+      portfolio
     } = body;
 
     // Find user
@@ -134,6 +141,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         hourlyRate: parseFloat(hourlyRate) || 250,
         experience: experience || null,
         location: location || null,
+        specializations: specializations || null,
+        policeClearance: policeClearance || null,
+        referenceDocument: referenceDocument || null,
+        idDocument: idDocument || null,
+        proofOfAddress: proofOfAddress || null,
+        qualificationCertificate: qualificationCertificate || null,
+        portfolioImages: Array.isArray(portfolio) ? portfolio : [],
         bankName: bankingDetails?.bankName || null,
         accountNumber: bankingDetails?.accountNumber || null,
         accountHolderName: bankingDetails?.accountHolder || null,

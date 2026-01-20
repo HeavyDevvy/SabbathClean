@@ -19,6 +19,7 @@ export interface BookingFormData {
   insurance: boolean;
   
   // Service-specific fields
+  serviceCategory?: string; // Generic category fallback
   cleaningType: string;
   propertySize: string;
   gardenSize: string;
@@ -52,14 +53,143 @@ export interface BookingFormData {
   selectedMenu: string;
   customMenuItems: string[];
   dietaryRequirements: string[];
+  dietaryNotes?: string; // For Waitering/Au Pair free text
   eventSize: string;
+
+  // Event Staff / Waitering specific
+  eventType?: string;
+  eventDate?: string;
+  eventStartTime?: string;
+  eventDuration?: string;
+  numberOfGuests?: string;
+  eventFormality?: string;
+  venueType?: string;
+  venueAddress?: string;
+  travelDistanceKm?: number;
+  waitersCount?: number;
+  bartendersCount?: number;
+  cateringAssistantsCount?: number;
+  coordinatorRequired?: boolean;
+  uniformPreference?: string;
+  serviceTypes?: string[];
+  mealType?: string;
+  numberOfCourses?: string;
+  serviceStyle?: string;
+  barServiceType?: string;
+  staffArrivalTime?: string;
+  serviceStartTime?: string;
+  serviceEndTime?: string;
+  breakRequirements?: string;
+  venueEquipment?: boolean;
+  staffEquipmentRequired?: boolean;
+  glasswareProvided?: boolean;
+  cutleryProvided?: boolean;
+  barSetupRequired?: boolean;
+  servingInstructions?: string;
+  culturalConsiderations?: string;
+  vipHandling?: string;
+  timingRequirements?: string;
+  healthSafety?: string;
+  accessParking?: string;
+  experienceLevelRequired?: string;
+  
+  // Au Pair specific
+  careType?: string;
+  childrenCount?: string;
+  childAges?: string[];
+  hasSpecialNeeds?: boolean;
+  specialNeedsDescription?: string;
+  petType?: string;
+  accommodationType?: string;
+  startDate?: string;
+  contractDuration?: string;
+  daysPerWeek?: string;
+  hoursPerDay?: string;
+  overnightCare?: string;
+  weekendAvailability?: string;
+  selectedDuties?: string[];
+  drivingRequired?: boolean;
+  preferredLanguage?: string;
+  educationLevel?: string;
+  experienceLevel?: string;
+  specificSkills?: string;
+  dailyRoutine?: string;
+  houseRules?: string;
+
+  // Moving Service specific
+  moveType?: string;
+  moveCategory?: string;
+  moveDate?: string;
+  preferredTime?: string;
+  moveSize?: string;
+  estimatedVolume?: string;
+  isCompleteMove?: boolean;
+  originPropertyType?: string;
+  originFloor?: string;
+  originElevator?: boolean;
+  originStairs?: string;
+  originParking?: boolean;
+  originAddress?: string;
+  originRestrictions?: string;
+  destPropertyType?: string;
+  destFloor?: string;
+  destElevator?: boolean;
+  destStairs?: string;
+  destParking?: boolean;
+  destAddress?: string;
+  destRestrictions?: string;
+  distance?: string | number;
+  furniture?: Record<string, number>;
+  appliances?: string[];
+  specialItems?: string[];
+  boxCounts?: { small: number; medium: number; large: number; wardrobe: number };
+  packingService?: string | boolean;
+  unpackingService?: string | boolean;
+  disassembly?: boolean;
+  assembly?: boolean;
+  applianceDisconnect?: boolean;
+  applianceConnect?: boolean;
+  needPackingMaterials?: boolean;
+  customCrating?: boolean;
+  storageNeeded?: boolean;
+  storageDuration?: string | number;
+  storageUnitSize?: string;
+  insuranceLevel?: string;
+  cleaningOld?: boolean;
+  cleaningNew?: boolean;
+  longCarry?: boolean;
+  narrowDoorways?: boolean;
+  shuttleService?: boolean;
+  specialEquipment?: boolean;
+  dateFlexible?: boolean;
+  latestDate?: string;
+  timeConstraints?: string;
+  specialInstructions?: string;
+  fragileDescription?: string;
+  valuablesList?: string;
+  accessDetails?: string;
+  budgetRange?: string;
+  priority?: string;
+
+  // Beauty & Wellness specific
+  beautyServices?: string[];
+  serviceQuantities?: Record<string, number>;
+  beautyCategory?: string;
+  beautyTreatment?: string;
+  hairLength?: string;
+  hairTexture?: string;
+  nailType?: string;
+  skinType?: string;
+  massageType?: string;
+  makeupOccasion?: string;
+  genderPreference?: string;
   
   // Selections
   selectedAddOns: string[];
   selectedProvider: any | null;
   specialRequests: string;
   
-  // House cleaning: Tip amount
+  // HOUSE CLEANING ONLY: Tip amount for provider
   tipAmount: number;
   
   // Payment information
@@ -146,6 +276,7 @@ function createDefaultFormData(): BookingFormData {
     insurance: false,
     
     // Service-specific
+    serviceCategory: "",
     cleaningType: "",
     propertySize: "",
     gardenSize: "",
@@ -180,7 +311,67 @@ function createDefaultFormData(): BookingFormData {
     customMenuItems: [],
     dietaryRequirements: [],
     eventSize: "",
+
+    // Event Staff / Waitering specific
+    eventType: "",
+    eventDate: "",
+    eventStartTime: "",
+    eventDuration: "",
+    numberOfGuests: "",
+    eventFormality: "",
+    venueType: "",
+    venueAddress: "",
+    travelDistanceKm: 0,
+    waitersCount: 0,
+    bartendersCount: 0,
+    cateringAssistantsCount: 0,
+    coordinatorRequired: false,
+    uniformPreference: "",
+    serviceTypes: [],
+    mealType: "",
+    numberOfCourses: "",
+    serviceStyle: "",
+    barServiceType: "",
+    staffArrivalTime: "",
+    serviceStartTime: "",
+    serviceEndTime: "",
+    breakRequirements: "",
+    venueEquipment: false,
+    staffEquipmentRequired: false,
+    glasswareProvided: false,
+    cutleryProvided: false,
+    barSetupRequired: false,
+    servingInstructions: "",
+    culturalConsiderations: "",
+    vipHandling: "",
+    timingRequirements: "",
+    healthSafety: "",
+    accessParking: "",
+    experienceLevelRequired: "",
     
+    // Au Pair specific
+    careType: "",
+    childrenCount: "",
+    childAges: [],
+    hasSpecialNeeds: false,
+    specialNeedsDescription: "",
+    petType: "",
+    accommodationType: "",
+    startDate: "",
+    contractDuration: "",
+    daysPerWeek: "",
+    hoursPerDay: "",
+    overnightCare: "",
+    weekendAvailability: "",
+    selectedDuties: [],
+    drivingRequired: false,
+    preferredLanguage: "",
+    educationLevel: "",
+    experienceLevel: "",
+    specificSkills: "",
+    dailyRoutine: "",
+    houseRules: "",
+
     // Selections
     selectedAddOns: [],
     selectedProvider: null,
@@ -276,6 +467,71 @@ export function useBookingFlow(options: BookingFlowOptions = {}) {
       customMenuItems: (isEditing || isPrefilling) ? (dataSource.customMenuItems || []) : [],
       dietaryRequirements: (isEditing || isPrefilling) ? (dataSource.dietaryRequirements || []) : [],
       eventSize: (isEditing || isPrefilling) ? (dataSource.eventSize || "") : "",
+
+      // Au Pair specific
+      careType: (isEditing || isPrefilling) ? (dataSource.careType || "") : "",
+      childrenCount: (isEditing || isPrefilling) ? (dataSource.childrenCount || "") : "",
+      childAges: (isEditing || isPrefilling) ? (dataSource.childAges || []) : [],
+      hasSpecialNeeds: (isEditing || isPrefilling) ? (dataSource.hasSpecialNeeds || false) : false,
+      specialNeedsDescription: (isEditing || isPrefilling) ? (dataSource.specialNeedsDescription || "") : "",
+      petType: (isEditing || isPrefilling) ? (dataSource.petType || "") : "",
+      accommodationType: (isEditing || isPrefilling) ? (dataSource.accommodationType || "") : "",
+      startDate: (isEditing || isPrefilling) ? (dataSource.startDate || "") : "",
+      contractDuration: (isEditing || isPrefilling) ? (dataSource.contractDuration || "") : "",
+      daysPerWeek: (isEditing || isPrefilling) ? (dataSource.daysPerWeek || "") : "",
+      hoursPerDay: (isEditing || isPrefilling) ? (dataSource.hoursPerDay || "") : "",
+      overnightCare: (isEditing || isPrefilling) ? (dataSource.overnightCare || "") : "",
+      weekendAvailability: (isEditing || isPrefilling) ? (dataSource.weekendAvailability || "") : "",
+      selectedDuties: (isEditing || isPrefilling) ? (dataSource.selectedDuties || []) : [],
+      drivingRequired: (isEditing || isPrefilling) ? (dataSource.drivingRequired || false) : false,
+      preferredLanguage: (isEditing || isPrefilling) ? (dataSource.preferredLanguage || "") : "",
+      educationLevel: (isEditing || isPrefilling) ? (dataSource.educationLevel || "") : "",
+      experienceLevel: (isEditing || isPrefilling) ? (dataSource.experienceLevel || "") : "",
+      specificSkills: (isEditing || isPrefilling) ? (dataSource.specificSkills || "") : "",
+      dailyRoutine: (isEditing || isPrefilling) ? (dataSource.dailyRoutine || "") : "",
+      houseRules: (isEditing || isPrefilling) ? (dataSource.houseRules || "") : "",
+      dietaryNotes: (isEditing || isPrefilling) ? (dataSource.dietaryNotes || "") : "",
+
+      // Event Staff specific
+      eventType: (isEditing || isPrefilling) ? (dataSource.eventType || "") : "",
+      eventDate: (isEditing || isPrefilling) ? (dataSource.eventDate || "") : "",
+      eventStartTime: (isEditing || isPrefilling) ? (dataSource.eventStartTime || "") : "",
+      eventDuration: (isEditing || isPrefilling) ? (dataSource.eventDuration || "") : "",
+      numberOfGuests: (isEditing || isPrefilling) ? (dataSource.numberOfGuests || "") : "",
+      eventFormality: (isEditing || isPrefilling) ? (dataSource.eventFormality || "") : "",
+      venueType: (isEditing || isPrefilling) ? (dataSource.venueType || "") : "",
+      venueAddress: (isEditing || isPrefilling) ? (dataSource.venueAddress || "") : "",
+      waitersCount: (isEditing || isPrefilling) ? (dataSource.waitersCount || 0) : 0,
+      bartendersCount: (isEditing || isPrefilling) ? (dataSource.bartendersCount || 0) : 0,
+      cateringAssistantsCount: (isEditing || isPrefilling) ? (dataSource.cateringAssistantsCount || 0) : 0,
+      coordinatorRequired: (isEditing || isPrefilling) ? (dataSource.coordinatorRequired || false) : false,
+      uniformPreference: (isEditing || isPrefilling) ? (dataSource.uniformPreference || "") : "",
+      serviceTypes: (isEditing || isPrefilling) ? (dataSource.serviceTypes || []) : [],
+      mealType: (isEditing || isPrefilling) ? (dataSource.mealType || "") : "",
+      numberOfCourses: (isEditing || isPrefilling) ? (dataSource.numberOfCourses || "") : "",
+      serviceStyle: (isEditing || isPrefilling) ? (dataSource.serviceStyle || "") : "",
+      barServiceType: (isEditing || isPrefilling) ? (dataSource.barServiceType || "") : "",
+      staffArrivalTime: (isEditing || isPrefilling) ? (dataSource.staffArrivalTime || "") : "",
+      serviceStartTime: (isEditing || isPrefilling) ? (dataSource.serviceStartTime || "") : "",
+      serviceEndTime: (isEditing || isPrefilling) ? (dataSource.serviceEndTime || "") : "",
+      breakRequirements: (isEditing || isPrefilling) ? (dataSource.breakRequirements || "") : "",
+      venueEquipment: (isEditing || isPrefilling) ? (dataSource.venueEquipment || false) : false,
+      staffEquipmentRequired: (isEditing || isPrefilling) ? (dataSource.staffEquipmentRequired || false) : false,
+      glasswareProvided: (isEditing || isPrefilling) ? (dataSource.glasswareProvided || false) : false,
+      cutleryProvided: (isEditing || isPrefilling) ? (dataSource.cutleryProvided || false) : false,
+      barSetupRequired: (isEditing || isPrefilling) ? (dataSource.barSetupRequired || false) : false,
+      servingInstructions: (isEditing || isPrefilling) ? (dataSource.servingInstructions || "") : "",
+      culturalConsiderations: (isEditing || isPrefilling) ? (dataSource.culturalConsiderations || "") : "",
+      vipHandling: (isEditing || isPrefilling) ? (dataSource.vipHandling || "") : "",
+      timingRequirements: (isEditing || isPrefilling) ? (dataSource.timingRequirements || "") : "",
+      healthSafety: (isEditing || isPrefilling) ? (dataSource.healthSafety || "") : "",
+      accessParking: (isEditing || isPrefilling) ? (dataSource.accessParking || "") : "",
+      experienceLevelRequired: (isEditing || isPrefilling) ? (dataSource.experienceLevelRequired || "") : "",
+      
+      // Beauty & Wellness specific
+      beautyServices: (isEditing || isPrefilling) ? (dataSource.beautyServices || []) : [],
+      serviceQuantities: (isEditing || isPrefilling) ? (dataSource.serviceQuantities || {}) : {},
+      beautyCategory: (isEditing || isPrefilling) ? (dataSource.beautyCategory || "") : "",
       
       // Selections
       selectedAddOns: (isEditing || isPrefilling) ? (dataSource.selectedAddOns || []) : [],

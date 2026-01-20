@@ -49,7 +49,11 @@ import ElectricalServiceForm from "./booking-forms/ElectricalServiceForm";
 import LocksmithServiceForm from "./booking-forms/LocksmithServiceForm";
 import EventStaffForm from "./booking-forms/EventStaffForm";
 import ChefCateringForm from "./booking-forms/ChefCateringForm";
+import WaiteringForm from "./booking-forms/WaiteringForm";
 import BeautyWellnessForm from "./booking-forms/BeautyWellnessForm";
+import { AuPairForm } from "./booking-forms/AuPairForm";
+import MovingForm from "./booking-forms/MovingForm";
+import { calculateMovingPrice, getSmartRecommendations, type MovingFormData } from "@/lib/moving-pricing";
 import { LocationStep } from "./booking-steps/LocationStep";
 import ScheduleStep from "./booking-steps/ScheduleStep";
 import AddOnsStep from "./booking-steps/AddOnsStep";
@@ -167,12 +171,125 @@ export default function ModernServiceModal({
     selectedMenu: editBookingData?.selectedMenu || "",
     customMenuItems: editBookingData?.customMenuItems || [] as string[],
     dietaryRequirements: editBookingData?.dietaryRequirements || [] as string[],
+    dietaryNotes: editBookingData?.dietaryNotes || "",
     eventSize: editBookingData?.eventSize || "",
+
+    // Event Staff / Waitering specific
+    eventType: editBookingData?.eventType || "",
+    eventDate: editBookingData?.eventDate || "",
+    eventStartTime: editBookingData?.eventStartTime || "",
+    eventDuration: editBookingData?.eventDuration || "",
+    numberOfGuests: editBookingData?.numberOfGuests || "",
+    eventFormality: editBookingData?.eventFormality || "",
+    venueType: editBookingData?.venueType || "",
+    venueAddress: editBookingData?.venueAddress || "",
+    waitersCount: editBookingData?.waitersCount || 0,
+    bartendersCount: editBookingData?.bartendersCount || 0,
+    cateringAssistantsCount: editBookingData?.cateringAssistantsCount || 0,
+    coordinatorRequired: editBookingData?.coordinatorRequired || false,
+    uniformPreference: editBookingData?.uniformPreference || "",
+    serviceTypes: editBookingData?.serviceTypes || [],
+    mealType: editBookingData?.mealType || "",
+    numberOfCourses: editBookingData?.numberOfCourses || "",
+    serviceStyle: editBookingData?.serviceStyle || "",
+    barServiceType: editBookingData?.barServiceType || "",
+    staffArrivalTime: editBookingData?.staffArrivalTime || "",
+    serviceStartTime: editBookingData?.serviceStartTime || "",
+    serviceEndTime: editBookingData?.serviceEndTime || "",
+    breakRequirements: editBookingData?.breakRequirements || "",
+    venueEquipment: editBookingData?.venueEquipment || false,
+    staffEquipmentRequired: editBookingData?.staffEquipmentRequired || false,
+    glasswareProvided: editBookingData?.glasswareProvided || false,
+    cutleryProvided: editBookingData?.cutleryProvided || false,
+    barSetupRequired: editBookingData?.barSetupRequired || false,
+    servingInstructions: editBookingData?.servingInstructions || "",
+    culturalConsiderations: editBookingData?.culturalConsiderations || "",
+    vipHandling: editBookingData?.vipHandling || "",
+    timingRequirements: editBookingData?.timingRequirements || "",
+    healthSafety: editBookingData?.healthSafety || "",
+    accessParking: editBookingData?.accessParking || "",
+    experienceLevelRequired: editBookingData?.experienceLevelRequired || "",
     
     // Beauty & Wellness specific
-    eventType: editBookingData?.eventType || "",
     beautyServices: editBookingData?.beautyServices || [] as string[],
     serviceQuantities: editBookingData?.serviceQuantities || {} as Record<string, number>,
+
+    // Au Pair specific
+    careType: editBookingData?.careType || "",
+    childrenCount: editBookingData?.childrenCount || "",
+    childAges: editBookingData?.childAges || [] as string[],
+    hasSpecialNeeds: editBookingData?.hasSpecialNeeds || false,
+    specialNeedsDescription: editBookingData?.specialNeedsDescription || "",
+    petType: editBookingData?.petType || "",
+    accommodationType: editBookingData?.accommodationType || "",
+    startDate: editBookingData?.startDate || "",
+    contractDuration: editBookingData?.contractDuration || "",
+    daysPerWeek: editBookingData?.daysPerWeek || "",
+    hoursPerDay: editBookingData?.hoursPerDay || "",
+    overnightCare: editBookingData?.overnightCare || "",
+    weekendAvailability: editBookingData?.weekendAvailability || "",
+    selectedDuties: editBookingData?.selectedDuties || [] as string[],
+    drivingRequired: editBookingData?.drivingRequired || false,
+    preferredLanguage: editBookingData?.preferredLanguage || "",
+    educationLevel: editBookingData?.educationLevel || "",
+    experienceLevel: editBookingData?.experienceLevel || "",
+    specificSkills: editBookingData?.specificSkills || "",
+    dailyRoutine: editBookingData?.dailyRoutine || "",
+    houseRules: editBookingData?.houseRules || "",
+
+    // Moving specific
+    moveType: editBookingData?.moveType || "",
+    moveCategory: editBookingData?.moveCategory || "",
+    moveDate: editBookingData?.moveDate || "",
+    preferredTime: editBookingData?.preferredTime || "",
+    moveSize: editBookingData?.moveSize || "",
+    estimatedVolume: editBookingData?.estimatedVolume || "",
+    isCompleteMove: editBookingData?.isCompleteMove || false,
+    originPropertyType: editBookingData?.originPropertyType || "",
+    originFloor: editBookingData?.originFloor || "",
+    originElevator: editBookingData?.originElevator || false,
+    originStairs: editBookingData?.originStairs || false,
+    originParking: editBookingData?.originParking || false,
+    originAddress: editBookingData?.originAddress || "",
+    originRestrictions: editBookingData?.originRestrictions || "",
+    destPropertyType: editBookingData?.destPropertyType || "",
+    destFloor: editBookingData?.destFloor || "",
+    destElevator: editBookingData?.destElevator || false,
+    destStairs: editBookingData?.destStairs || false,
+    destParking: editBookingData?.destParking || false,
+    destAddress: editBookingData?.destAddress || "",
+    destRestrictions: editBookingData?.destRestrictions || "",
+    distance: editBookingData?.distance || "",
+    furniture: editBookingData?.furniture || {},
+    appliances: editBookingData?.appliances || [],
+    specialItems: editBookingData?.specialItems || [],
+    boxCounts: editBookingData?.boxCounts || { small: 0, medium: 0, large: 0, wardrobe: 0 },
+    packingService: editBookingData?.packingService || false,
+    unpackingService: editBookingData?.unpackingService || false,
+    disassembly: editBookingData?.disassembly || false,
+    assembly: editBookingData?.assembly || false,
+    applianceDisconnect: editBookingData?.applianceDisconnect || false,
+    applianceConnect: editBookingData?.applianceConnect || false,
+    needPackingMaterials: editBookingData?.needPackingMaterials || false,
+    customCrating: editBookingData?.customCrating || false,
+    storageNeeded: editBookingData?.storageNeeded || false,
+    storageDuration: editBookingData?.storageDuration || "",
+    insuranceLevel: editBookingData?.insuranceLevel || "basic",
+    cleaningOld: editBookingData?.cleaningOld || false,
+    cleaningNew: editBookingData?.cleaningNew || false,
+    longCarry: editBookingData?.longCarry || false,
+    narrowDoorways: editBookingData?.narrowDoorways || false,
+    shuttleService: editBookingData?.shuttleService || false,
+    specialEquipment: editBookingData?.specialEquipment || false,
+    dateFlexible: editBookingData?.dateFlexible || false,
+    latestDate: editBookingData?.latestDate || "",
+    timeConstraints: editBookingData?.timeConstraints || "",
+    specialInstructions: editBookingData?.specialInstructions || "",
+    fragileDescription: editBookingData?.fragileDescription || "",
+    valuablesList: editBookingData?.valuablesList || "",
+    accessDetails: editBookingData?.accessDetails || "",
+    budgetRange: editBookingData?.budgetRange || "",
+    priority: editBookingData?.priority || "standard",
 
     // Locksmith specific
     serviceCategory: editBookingData?.serviceCategory || "",
@@ -331,6 +448,12 @@ export default function ModernServiceModal({
     totalPrice: 0
   });
 
+  const [movingRecommendations, setMovingRecommendations] = useState<{
+    truckSize: string;
+    movers: number;
+    duration: string;
+  } | null>(null);
+
   const dbServiceId = useMemo(() => {
     const map: Record<string, string> = {
       'cleaning': 'house-cleaning',
@@ -425,14 +548,15 @@ export default function ModernServiceModal({
   
   // WAITERING/EVENT STAFF SERVICE: Service-specific feature flag
   const isEventStaff = useMemo(() => 
-    serviceId === "waitering" || serviceId === "event-staff" || 
+    serviceId === "waitering" || serviceId === "event-staff" || serviceId === "catering-staff" ||
     mappedServiceId === "event-staff", 
     [serviceId, mappedServiceId]
   );
   
   // MOVING SERVICE: Service-specific feature flag
   const isMoving = useMemo(() => 
-    serviceId === "moving" || mappedServiceId === "moving", 
+    serviceId === "moving" || mappedServiceId === "moving" || 
+    serviceId === "MOVING_SERVICES" || serviceId === "removals", 
     [serviceId, mappedServiceId]
   );
   
@@ -447,13 +571,20 @@ export default function ModernServiceModal({
     serviceId === "beauty-wellness" || mappedServiceId === "beauty-wellness", 
     [serviceId, mappedServiceId]
   );
+
+  // LOCKSMITH SERVICE: Service-specific feature flag
+  const isLocksmith = useMemo(() => 
+    serviceId === "locksmith" || mappedServiceId === "locksmith" || 
+    serviceId === "LOCKSMITH_SERVICES", 
+    [serviceId, mappedServiceId]
+  );
   
   // Show enhanced provider details with tip section and 2-button layout
   const showEnhancedProviderDetails = useMemo(() => 
     isHouseCleaning || isPlumbing || isElectrical || isGardenService || isPoolService || 
-    isChefCatering || isEventStaff || isMoving || isAuPair || isBeautyWellness,
+    isChefCatering || isEventStaff || isMoving || isAuPair || isBeautyWellness || isLocksmith,
     [isHouseCleaning, isPlumbing, isElectrical, isGardenService, isPoolService,
-     isChefCatering, isEventStaff, isMoving, isAuPair, isBeautyWellness]
+     isChefCatering, isEventStaff, isMoving, isAuPair, isBeautyWellness, isLocksmith]
   );
   
   // Check if plumbing service has urgent priority requiring one-time booking
@@ -558,10 +689,99 @@ export default function ModernServiceModal({
       customMenuItems: (isEditing || isPrefilling) && Array.isArray(dataSource.customMenuItems) ? [...dataSource.customMenuItems] : [],
       dietaryRequirements: (isEditing || isPrefilling) && Array.isArray(dataSource.dietaryRequirements) ? [...dataSource.dietaryRequirements] : [],
       
+      // Event Staff / Waitering specific
+      eventDate: (isEditing || isPrefilling) ? (dataSource.eventDate || "") : "",
+      eventStartTime: (isEditing || isPrefilling) ? (dataSource.eventStartTime || "") : "",
+      eventDuration: (isEditing || isPrefilling) ? (dataSource.eventDuration || "") : "",
+      numberOfGuests: (isEditing || isPrefilling) ? (dataSource.numberOfGuests || "") : "",
+      eventFormality: (isEditing || isPrefilling) ? (dataSource.eventFormality || "") : "",
+      venueType: (isEditing || isPrefilling) ? (dataSource.venueType || "") : "",
+      venueAddress: (isEditing || isPrefilling) ? (dataSource.venueAddress || "") : "",
+      waitersCount: (isEditing || isPrefilling) ? (dataSource.waitersCount || 0) : 0,
+      bartendersCount: (isEditing || isPrefilling) ? (dataSource.bartendersCount || 0) : 0,
+      cateringAssistantsCount: (isEditing || isPrefilling) ? (dataSource.cateringAssistantsCount || 0) : 0,
+      coordinatorRequired: (isEditing || isPrefilling) ? (dataSource.coordinatorRequired || false) : false,
+      uniformPreference: (isEditing || isPrefilling) ? (dataSource.uniformPreference || "") : "",
+      serviceTypes: (isEditing || isPrefilling) && Array.isArray(dataSource.serviceTypes) ? [...dataSource.serviceTypes] : [],
+      mealType: (isEditing || isPrefilling) ? (dataSource.mealType || "") : "",
+      numberOfCourses: (isEditing || isPrefilling) ? (dataSource.numberOfCourses || "") : "",
+      serviceStyle: (isEditing || isPrefilling) ? (dataSource.serviceStyle || "") : "",
+      barServiceType: (isEditing || isPrefilling) ? (dataSource.barServiceType || "") : "",
+      staffArrivalTime: (isEditing || isPrefilling) ? (dataSource.staffArrivalTime || "") : "",
+      serviceStartTime: (isEditing || isPrefilling) ? (dataSource.serviceStartTime || "") : "",
+      serviceEndTime: (isEditing || isPrefilling) ? (dataSource.serviceEndTime || "") : "",
+      breakRequirements: (isEditing || isPrefilling) ? (dataSource.breakRequirements || "") : "",
+      venueEquipment: (isEditing || isPrefilling) ? (dataSource.venueEquipment || false) : false,
+      staffEquipmentRequired: (isEditing || isPrefilling) ? (dataSource.staffEquipmentRequired || false) : false,
+      glasswareProvided: (isEditing || isPrefilling) ? (dataSource.glasswareProvided || false) : false,
+      cutleryProvided: (isEditing || isPrefilling) ? (dataSource.cutleryProvided || false) : false,
+      barSetupRequired: (isEditing || isPrefilling) ? (dataSource.barSetupRequired || false) : false,
+      servingInstructions: (isEditing || isPrefilling) ? (dataSource.servingInstructions || "") : "",
+      culturalConsiderations: (isEditing || isPrefilling) ? (dataSource.culturalConsiderations || "") : "",
+      vipHandling: (isEditing || isPrefilling) ? (dataSource.vipHandling || "") : "",
+      timingRequirements: (isEditing || isPrefilling) ? (dataSource.timingRequirements || "") : "",
+      healthSafety: (isEditing || isPrefilling) ? (dataSource.healthSafety || "") : "",
+      accessParking: (isEditing || isPrefilling) ? (dataSource.accessParking || "") : "",
+      experienceLevelRequired: (isEditing || isPrefilling) ? (dataSource.experienceLevelRequired || "") : "",
+
       // Beauty & Wellness specific
       eventType: (isEditing || isPrefilling) ? (dataSource.eventType || "") : "",
       beautyServices: (isEditing || isPrefilling) && Array.isArray(dataSource.beautyServices) ? [...dataSource.beautyServices] : [],
       serviceQuantities: (isEditing || isPrefilling) && dataSource.serviceQuantities ? {...dataSource.serviceQuantities} : {},
+
+      // Moving specific
+      moveType: (isEditing || isPrefilling) ? (dataSource.moveType || "") : "",
+      moveCategory: (isEditing || isPrefilling) ? (dataSource.moveCategory || "") : "",
+      moveDate: (isEditing || isPrefilling) ? (dataSource.moveDate || "") : "",
+      preferredTime: (isEditing || isPrefilling) ? (dataSource.preferredTime || "") : "",
+      moveSize: (isEditing || isPrefilling) ? (dataSource.moveSize || "") : "",
+      estimatedVolume: (isEditing || isPrefilling) ? (dataSource.estimatedVolume || "") : "",
+      isCompleteMove: (isEditing || isPrefilling) ? (dataSource.isCompleteMove || false) : false,
+      originPropertyType: (isEditing || isPrefilling) ? (dataSource.originPropertyType || "") : "",
+      originFloor: (isEditing || isPrefilling) ? (dataSource.originFloor || "") : "",
+      originElevator: (isEditing || isPrefilling) ? (dataSource.originElevator || false) : false,
+      originStairs: (isEditing || isPrefilling) ? (dataSource.originStairs || false) : false,
+      originParking: (isEditing || isPrefilling) ? (dataSource.originParking || false) : false,
+      originAddress: (isEditing || isPrefilling) ? (dataSource.originAddress || "") : "",
+      originRestrictions: (isEditing || isPrefilling) ? (dataSource.originRestrictions || "") : "",
+      destPropertyType: (isEditing || isPrefilling) ? (dataSource.destPropertyType || "") : "",
+      destFloor: (isEditing || isPrefilling) ? (dataSource.destFloor || "") : "",
+      destElevator: (isEditing || isPrefilling) ? (dataSource.destElevator || false) : false,
+      destStairs: (isEditing || isPrefilling) ? (dataSource.destStairs || false) : false,
+      destParking: (isEditing || isPrefilling) ? (dataSource.destParking || false) : false,
+      destAddress: (isEditing || isPrefilling) ? (dataSource.destAddress || "") : "",
+      destRestrictions: (isEditing || isPrefilling) ? (dataSource.destRestrictions || "") : "",
+      distance: (isEditing || isPrefilling) ? (dataSource.distance || "") : "",
+      furniture: (isEditing || isPrefilling) ? (dataSource.furniture || {}) : {},
+      appliances: (isEditing || isPrefilling) ? (dataSource.appliances || []) : [],
+      specialItems: (isEditing || isPrefilling) ? (dataSource.specialItems || []) : [],
+      boxCounts: (isEditing || isPrefilling) ? (dataSource.boxCounts || { small: 0, medium: 0, large: 0, wardrobe: 0 }) : { small: 0, medium: 0, large: 0, wardrobe: 0 },
+      packingService: (isEditing || isPrefilling) ? (dataSource.packingService || false) : false,
+      unpackingService: (isEditing || isPrefilling) ? (dataSource.unpackingService || false) : false,
+      disassembly: (isEditing || isPrefilling) ? (dataSource.disassembly || false) : false,
+      assembly: (isEditing || isPrefilling) ? (dataSource.assembly || false) : false,
+      applianceDisconnect: (isEditing || isPrefilling) ? (dataSource.applianceDisconnect || false) : false,
+      applianceConnect: (isEditing || isPrefilling) ? (dataSource.applianceConnect || false) : false,
+      needPackingMaterials: (isEditing || isPrefilling) ? (dataSource.needPackingMaterials || false) : false,
+      customCrating: (isEditing || isPrefilling) ? (dataSource.customCrating || false) : false,
+      storageNeeded: (isEditing || isPrefilling) ? (dataSource.storageNeeded || false) : false,
+      storageDuration: (isEditing || isPrefilling) ? (dataSource.storageDuration || "") : "",
+      insuranceLevel: (isEditing || isPrefilling) ? (dataSource.insuranceLevel || "basic") : "basic",
+      cleaningOld: (isEditing || isPrefilling) ? (dataSource.cleaningOld || false) : false,
+      cleaningNew: (isEditing || isPrefilling) ? (dataSource.cleaningNew || false) : false,
+      longCarry: (isEditing || isPrefilling) ? (dataSource.longCarry || false) : false,
+      narrowDoorways: (isEditing || isPrefilling) ? (dataSource.narrowDoorways || false) : false,
+      shuttleService: (isEditing || isPrefilling) ? (dataSource.shuttleService || false) : false,
+      specialEquipment: (isEditing || isPrefilling) ? (dataSource.specialEquipment || false) : false,
+      dateFlexible: (isEditing || isPrefilling) ? (dataSource.dateFlexible || false) : false,
+      latestDate: (isEditing || isPrefilling) ? (dataSource.latestDate || "") : "",
+      timeConstraints: (isEditing || isPrefilling) ? (dataSource.timeConstraints || "") : "",
+      specialInstructions: (isEditing || isPrefilling) ? (dataSource.specialInstructions || "") : "",
+      fragileDescription: (isEditing || isPrefilling) ? (dataSource.fragileDescription || "") : "",
+      valuablesList: (isEditing || isPrefilling) ? (dataSource.valuablesList || "") : "",
+      accessDetails: (isEditing || isPrefilling) ? (dataSource.accessDetails || "") : "",
+      budgetRange: (isEditing || isPrefilling) ? (dataSource.budgetRange || "") : "",
+      priority: (isEditing || isPrefilling) ? (dataSource.priority || "standard") : "standard",
 
       // Locksmith specific
       serviceCategory: (isEditing || isPrefilling) ? (dataSource.serviceCategory || "") : "",
@@ -582,6 +802,31 @@ export default function ModernServiceModal({
       isDanger: (isEditing || isPrefilling) ? (dataSource.isDanger || false) : false,
 
       eventSize: (isEditing || isPrefilling) ? (dataSource.eventSize || "") : "",
+// Au Pair specific
+      careType: (isEditing || isPrefilling) ? (dataSource.careType || "") : "",
+      childrenCount: (isEditing || isPrefilling) ? (dataSource.childrenCount || "") : "",
+      childAges: (isEditing || isPrefilling) && Array.isArray(dataSource.childAges) ? [...dataSource.childAges] : [],
+      hasSpecialNeeds: (isEditing || isPrefilling) ? (dataSource.hasSpecialNeeds || false) : false,
+      specialNeedsDescription: (isEditing || isPrefilling) ? (dataSource.specialNeedsDescription || "") : "",
+      petType: (isEditing || isPrefilling) ? (dataSource.petType || "") : "",
+      accommodationType: (isEditing || isPrefilling) ? (dataSource.accommodationType || "") : "",
+      startDate: (isEditing || isPrefilling) ? (dataSource.startDate || "") : "",
+      contractDuration: (isEditing || isPrefilling) ? (dataSource.contractDuration || "") : "",
+      daysPerWeek: (isEditing || isPrefilling) ? (dataSource.daysPerWeek || "") : "",
+      hoursPerDay: (isEditing || isPrefilling) ? (dataSource.hoursPerDay || "") : "",
+      overnightCare: (isEditing || isPrefilling) ? (dataSource.overnightCare || "") : "",
+      weekendAvailability: (isEditing || isPrefilling) ? (dataSource.weekendAvailability || "") : "",
+      selectedDuties: (isEditing || isPrefilling) && Array.isArray(dataSource.selectedDuties) ? [...dataSource.selectedDuties] : [],
+      drivingRequired: (isEditing || isPrefilling) ? (dataSource.drivingRequired || false) : false,
+      preferredLanguage: (isEditing || isPrefilling) ? (dataSource.preferredLanguage || "") : "",
+      educationLevel: (isEditing || isPrefilling) ? (dataSource.educationLevel || "") : "",
+      experienceLevel: (isEditing || isPrefilling) ? (dataSource.experienceLevel || "") : "",
+      specificSkills: (isEditing || isPrefilling) ? (dataSource.specificSkills || "") : "",
+      dailyRoutine: (isEditing || isPrefilling) ? (dataSource.dailyRoutine || "") : "",
+      houseRules: (isEditing || isPrefilling) ? (dataSource.houseRules || "") : "",
+      dietaryNotes: (isEditing || isPrefilling) ? (dataSource.dietaryNotes || "") : "",
+
+      // Selections
       selectedAddOns: (isEditing || isPrefilling) && Array.isArray(dataSource.selectedAddOns) ? [...dataSource.selectedAddOns] : [],
       selectedProvider: (isEditing || isPrefilling) && dataSource.provider ? {...dataSource.provider} : null,
       specialRequests: isEditing ? (dataSource.specialRequests || "") : "", // Only prefill comments in edit mode
@@ -815,11 +1060,16 @@ export default function ModernServiceModal({
     }
 
     if (mappedServiceId === "moving") {
-      const movingType = config.movingTypes?.find((t: any) => t.value === formData.cleaningType);
-      if (movingType) basePrice = movingType.price;
+      // Use the comprehensive moving pricing logic
+      const movingData = formData as unknown as MovingFormData;
+      const breakdown = calculateMovingPrice(movingData);
       
-      const distance = config.movingDistance?.find((d: any) => d.value === formData.propertySize);
-      if (distance) basePrice *= distance.multiplier;
+      // Use the calculated total as the base price
+      basePrice = breakdown.total;
+      
+      // Get smart recommendations
+      const recs = getSmartRecommendations(movingData);
+      setMovingRecommendations(recs);
     }
 
     if (mappedServiceId === "au-pair") {
@@ -837,11 +1087,11 @@ export default function ModernServiceModal({
       // Base price is usually 0, driven by service type
       basePrice = config.basePrice || 450;
       
-      const serviceCategory = formData.serviceCategory || "residential";
+      const serviceCategory = formData.locksmithCategory || formData.serviceCategory || "residential";
       
       // Add Service Type Price
       if (config.serviceTypes && !Array.isArray(config.serviceTypes) && config.serviceTypes[serviceCategory]) {
-        const type = config.serviceTypes[serviceCategory].find((t: any) => t.value === formData.cleaningType);
+        const type = config.serviceTypes[serviceCategory].find((t: any) => t.value === formData.locksmithServiceType);
         if (type) basePrice = type.price; // Replaces base price
       }
       
@@ -851,7 +1101,7 @@ export default function ModernServiceModal({
       
       // Add Property Type Multiplier (if applicable and not vehicle)
       if (serviceCategory !== 'automotive') {
-         const property = config.propertyTypes?.find((p: any) => p.value === formData.propertySize);
+         const property = config.propertyTypes?.find((p: any) => p.value === formData.propertyType);
          if (property && property.multiplier) basePrice *= property.multiplier;
       }
     }
@@ -1176,11 +1426,124 @@ export default function ModernServiceModal({
         selectedMenu: "",
         customMenuItems: [],
         dietaryRequirements: [],
-        
+        dietaryNotes: "",
+
+        // Moving Service specific
+        moveType: "",
+        moveCategory: "",
+        moveDate: "",
+        preferredTime: "",
+        moveSize: "",
+        estimatedVolume: "",
+        isCompleteMove: false,
+        originPropertyType: "",
+        originFloor: "",
+        originElevator: false,
+        originStairs: false,
+        originParking: false,
+        originAddress: "",
+        originRestrictions: "",
+        destPropertyType: "",
+        destFloor: "",
+        destElevator: false,
+        destStairs: false,
+        destParking: false,
+        destAddress: "",
+        destRestrictions: "",
+        distance: "",
+        furniture: {},
+        appliances: [],
+        specialItems: [],
+        boxCounts: { small: 0, medium: 0, large: 0, wardrobe: 0 },
+        packingService: false,
+        unpackingService: false,
+        disassembly: false,
+        assembly: false,
+        applianceDisconnect: false,
+        applianceConnect: false,
+        needPackingMaterials: false,
+        customCrating: false,
+        storageNeeded: false,
+        storageDuration: "",
+        insuranceLevel: "basic",
+        cleaningOld: false,
+        cleaningNew: false,
+        longCarry: false,
+        narrowDoorways: false,
+        shuttleService: false,
+        specialEquipment: false,
+        dateFlexible: false,
+        latestDate: "",
+        timeConstraints: "",
+        specialInstructions: "",
+        fragileDescription: "",
+        valuablesList: "",
+        accessDetails: "",
+        budgetRange: "",
+        priority: "standard",
+
+        // Event Staff / Waitering specific
+        eventDate: "",
+        eventStartTime: "",
+        eventDuration: "",
+        numberOfGuests: "",
+        eventFormality: "",
+        venueType: "",
+        venueAddress: "",
+        waitersCount: 0,
+        bartendersCount: 0,
+        cateringAssistantsCount: 0,
+        coordinatorRequired: false,
+        uniformPreference: "",
+        serviceTypes: [],
+        mealType: "",
+        numberOfCourses: "",
+        serviceStyle: "",
+        barServiceType: "",
+        staffArrivalTime: "",
+        serviceStartTime: "",
+        serviceEndTime: "",
+        breakRequirements: "",
+        venueEquipment: false,
+        staffEquipmentRequired: false,
+        glasswareProvided: false,
+        cutleryProvided: false,
+        barSetupRequired: false,
+        servingInstructions: "",
+        culturalConsiderations: "",
+        vipHandling: "",
+        timingRequirements: "",
+        healthSafety: "",
+        accessParking: "",
+        experienceLevelRequired: "",
+
         // Beauty & Wellness specific
         eventType: "",
         beautyServices: [],
         serviceQuantities: {},
+
+        // Au Pair specific
+        careType: "",
+        childrenCount: "",
+        childAges: [],
+        hasSpecialNeeds: false,
+        specialNeedsDescription: "",
+        petType: "",
+        accommodationType: "",
+        startDate: "",
+        contractDuration: "",
+        daysPerWeek: "",
+        hoursPerDay: "",
+        overnightCare: "",
+        weekendAvailability: "",
+        selectedDuties: [],
+        drivingRequired: false,
+        preferredLanguage: "",
+        educationLevel: "",
+        experienceLevel: "",
+        specificSkills: "",
+        dailyRoutine: "",
+        houseRules: "",
 
         // Locksmith specific
         serviceCategory: "",
@@ -1451,10 +1814,123 @@ export default function ModernServiceModal({
       cuisineType: "",
       eventSize: "",
 
-      // Beauty & Wellness specific
+      // Moving Service specific
+      moveType: "",
+      moveCategory: "",
+      moveDate: "",
+      preferredTime: "",
+      moveSize: "",
+      estimatedVolume: "",
+      isCompleteMove: false,
+      originPropertyType: "",
+      originFloor: "",
+      originElevator: false,
+      originStairs: false,
+      originParking: false,
+      originAddress: "",
+      originRestrictions: "",
+      destPropertyType: "",
+      destFloor: "",
+      destElevator: false,
+      destStairs: false,
+      destParking: false,
+      destAddress: "",
+      destRestrictions: "",
+      distance: "",
+      furniture: {},
+      appliances: [],
+      specialItems: [],
+      boxCounts: { small: 0, medium: 0, large: 0, wardrobe: 0 },
+      packingService: false,
+      unpackingService: false,
+      disassembly: false,
+      assembly: false,
+      applianceDisconnect: false,
+      applianceConnect: false,
+      needPackingMaterials: false,
+      customCrating: false,
+      storageNeeded: false,
+      storageDuration: "",
+      insuranceLevel: "basic",
+      cleaningOld: false,
+      cleaningNew: false,
+      longCarry: false,
+      narrowDoorways: false,
+      shuttleService: false,
+      specialEquipment: false,
+      dateFlexible: false,
+      latestDate: "",
+      timeConstraints: "",
+      specialInstructions: "",
+      fragileDescription: "",
+      valuablesList: "",
+      accessDetails: "",
+      budgetRange: "",
+      priority: "standard",
+
+      // Event Staff / Waitering specific
       eventType: "",
+      eventDate: "",
+      eventStartTime: "",
+      eventDuration: "",
+      numberOfGuests: "",
+      eventFormality: "",
+      venueType: "",
+      venueAddress: "",
+      waitersCount: 0,
+      bartendersCount: 0,
+      cateringAssistantsCount: 0,
+      coordinatorRequired: false,
+      uniformPreference: "",
+      serviceTypes: [],
+      mealType: "",
+      numberOfCourses: "",
+      serviceStyle: "",
+      barServiceType: "",
+      staffArrivalTime: "",
+      serviceStartTime: "",
+      serviceEndTime: "",
+      breakRequirements: "",
+      venueEquipment: false,
+      staffEquipmentRequired: false,
+      glasswareProvided: false,
+      cutleryProvided: false,
+      barSetupRequired: false,
+      servingInstructions: "",
+      culturalConsiderations: "",
+      vipHandling: "",
+      timingRequirements: "",
+      healthSafety: "",
+      accessParking: "",
+      experienceLevelRequired: "",
+
+      // Beauty & Wellness specific
       beautyServices: [],
       serviceQuantities: {},
+
+      // Au Pair specific
+      careType: "",
+      childrenCount: "",
+      childAges: [],
+      hasSpecialNeeds: false,
+      specialNeedsDescription: "",
+      petType: "",
+      accommodationType: "",
+      startDate: "",
+      contractDuration: "",
+      daysPerWeek: "",
+      hoursPerDay: "",
+      overnightCare: "",
+      weekendAvailability: "",
+      selectedDuties: [],
+      drivingRequired: false,
+      preferredLanguage: "",
+      educationLevel: "",
+      experienceLevel: "",
+      specificSkills: "",
+      dailyRoutine: "",
+      houseRules: "",
+      dietaryNotes: "",
 
       // Locksmith specific
       serviceCategory: "",
@@ -1744,13 +2220,7 @@ export default function ModernServiceModal({
           />
         )}
 
-        {serviceId === "locksmith" && (
-          <LocksmithServiceForm
-            formData={formData}
-            setFormData={setFormData}
-            currentConfig={currentConfig}
-          />
-        )}
+
 
         {isPlumbing && (
           <PlumbingServiceForm
@@ -1768,7 +2238,15 @@ export default function ModernServiceModal({
           />
         )}
 
-        {serviceId === "locksmith" && (
+        {isAuPair && (
+          <AuPairForm
+            config={currentConfig!}
+            formData={formData}
+            updateFormData={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
+          />
+        )}
+
+        {isLocksmith && (
           <LocksmithServiceForm
             formData={formData}
             setFormData={setFormData}
@@ -1776,55 +2254,21 @@ export default function ModernServiceModal({
           />
         )}
 
-        {serviceId === "event-staff" && (
-          <EventStaffForm
+        {isEventStaff && (
+          <WaiteringForm
+            config={currentConfig!}
             formData={formData}
-            setFormData={setFormData}
-            currentConfig={currentConfig}
+            updateFormData={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
           />
         )}
 
-        {serviceId === "moving" && (
-          <>
-            <div>
-              <Label>Moving Type *</Label>
-              <Select value={formData.cleaningType} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, cleaningType: value }))
-              }>
-                <SelectTrigger data-testid="select-moving-type">
-                  <SelectValue placeholder="Select moving type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig?.movingTypes?.map((type: any) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{type.label} - R{type.price}</span>
-                        <span className="text-xs text-gray-500">{type.description}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label>Moving Distance *</Label>
-              <Select value={formData.propertySize} onValueChange={(value) =>
-                setFormData(prev => ({ ...prev, propertySize: value }))
-              }>
-                <SelectTrigger data-testid="select-moving-distance">
-                  <SelectValue placeholder="Select moving distance" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currentConfig?.movingDistance?.map((distance: any) => (
-                    <SelectItem key={distance.value} value={distance.value}>
-                      {distance.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </>
+        {isMoving && (
+          <MovingForm
+            formData={formData}
+            onUpdate={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
+            recommendations={movingRecommendations}
+            totalPrice={pricing.totalPrice}
+          />
         )}
 
         {serviceId === "au-pair" && (
@@ -2093,8 +2537,8 @@ export default function ModernServiceModal({
                           (isPlumbing && (!formData.plumbingIssue || !formData.urgency)) ||
                           (isElectrical && (!formData.electricalIssue || !formData.urgency)) ||
                           (isChefCatering && (!formData.cuisineType || !formData.eventSize)) ||
-                          (isEventStaff && (!formData.cleaningType || !formData.propertySize)) ||
-                          (isMoving && (!formData.cleaningType || !formData.propertySize)) ||
+                          (isEventStaff && (!formData.eventType || !formData.eventDate || !formData.numberOfGuests || !formData.venueAddress)) ||
+                        (isMoving && (!formData.moveCategory || !formData.originAddress || !formData.destAddress)) ||
                           (isAuPair && (!formData.cleaningType || !formData.propertySize || !formData.gardenSize))
                         )) ||
                         (step === 2 && (!formData.preferredDate || !formData.timePreference)) ||
