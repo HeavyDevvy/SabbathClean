@@ -16,6 +16,21 @@ export interface RegisterData {
   city?: string;
   province?: string;
   captchaToken?: string;
+  
+  // Business fields
+  accountType?: 'INDIVIDUAL' | 'BUSINESS';
+  businessName?: string;
+  businessRegistrationNumber?: string;
+  vatNumber?: string;
+  businessAddress?: string;
+  businessCity?: string;
+  businessPostalCode?: string;
+  businessCountry?: string;
+  contactPersonFirstName?: string;
+  contactPersonLastName?: string;
+  contactPersonEmail?: string;
+  contactPersonPhone?: string;
+  contactPersonRole?: string;
 }
 
 export interface User {

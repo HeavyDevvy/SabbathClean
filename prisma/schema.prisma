@@ -20,6 +20,22 @@ model User {
   profilePictureUrl String?
   role              UserRole   @default(CLIENT)
   isActive          Boolean    @default(true)
+  
+  // Business Account Fields
+  accountType                AccountType @default(INDIVIDUAL)
+  businessName               String?
+  businessRegistrationNumber String?
+  vatNumber                  String?
+  businessAddress            String?
+  businessCity               String?
+  businessPostalCode         String?
+  businessCountry            String?     @default("South Africa")
+  contactPersonFirstName     String?
+  contactPersonLastName      String?
+  contactPersonEmail         String?
+  contactPersonPhone         String?
+  contactPersonRole          String?
+
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -34,6 +50,11 @@ model User {
 
   @@index([email])
   @@map("users")
+}
+
+enum AccountType {
+  INDIVIDUAL
+  BUSINESS
 }
 
 enum UserRole {

@@ -28,7 +28,7 @@ const loginSchema = z.object({
   rememberMe: z.boolean().optional()
 });
 
-const registerSchema = z.object({
+export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   firstName: z.string().min(1),
@@ -38,7 +38,53 @@ const registerSchema = z.object({
   city: z.string().optional(),
   province: z.string().optional(),
   isProvider: z.boolean().optional(),
-  captchaToken: z.string().optional()
+  captchaToken: z.string().optional(),
+  // Business fields
+  accountType: z.enum(['INDIVIDUAL', 'BUSINESS']).optional().default('INDIVIDUAL'),
+  businessName: z.string().optional(),
+  businessRegistrationNumber: z.string().optional(),
+  vatNumber: z.string().optional(),
+  businessAddress: z.string().optional(),
+  businessCity: z.string().optional(),
+  businessPostalCode: z.string().optional(),
+  businessCountry: z.string().optional(),
+  contactPersonFirstName: z.string().optional(),
+  contactPersonLastName: z.string().optional(),
+  contactPersonEmail: z.string().optional(),
+  contactPersonPhone: z.string().optional(),
+  contactPersonRole: z.string().optional()
+}).superRefine((data, ctx) => {
+  if (data.accountType === 'BUSINESS') {
+    if (!data.businessName) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business Name is required", path: ["businessName"] });
+    
+    if (!data.businessRegistrationNumber) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Registration Number is required", path: ["businessRegistrationNumber"] });
+    } else if (!/^\d{4}\/\d{6}\/\d{2}$/.test(data.businessRegistrationNumber)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid format (e.g. 2023/123456/07)", path: ["businessRegistrationNumber"] });
+    }
+
+    if (!data.businessAddress) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business Address is required", path: ["businessAddress"] });
+    if (!data.businessCity) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business City is required", path: ["businessCity"] });
+    if (!data.businessPostalCode) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business Postal Code is required", path: ["businessPostalCode"] });
+    
+    if (!data.contactPersonFirstName) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contact Person First Name is required", path: ["contactPersonFirstName"] });
+    if (!data.contactPersonLastName) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contact Person Last Name is required", path: ["contactPersonLastName"] });
+    
+    if (!data.contactPersonEmail) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contact Person Email is required", path: ["contactPersonEmail"] });
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.contactPersonEmail)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid email format", path: ["contactPersonEmail"] });
+      }
+    }
+
+    if (!data.contactPersonPhone) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Contact Person Phone is required", path: ["contactPersonPhone"] });
+    } else if (!/^(\+27|0)[0-9]{9}$/.test(data.contactPersonPhone)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Invalid SA phone number (e.g. 0821234567)", path: ["contactPersonPhone"] });
+    }
+  }
 });
 
 const emailVerificationSchema = z.object({
@@ -291,7 +337,22 @@ export function registerAuthRoutes(app: Express) {
         city: body.city ?? undefined,
         province: body.province ?? undefined,
         isProvider: Boolean(body.isProvider === true || body.role === 'provider') || undefined,
-        captchaToken: body.captchaToken
+        captchaToken: body.captchaToken,
+        
+        // Business fields normalization
+        accountType: body.accountType || 'INDIVIDUAL',
+        businessName: body.businessName,
+        businessRegistrationNumber: body.businessRegistrationNumber,
+        vatNumber: body.vatNumber,
+        businessAddress: body.businessAddress,
+        businessCity: body.businessCity,
+        businessPostalCode: body.businessPostalCode,
+        businessCountry: body.businessCountry || 'South Africa',
+        contactPersonFirstName: body.contactPersonFirstName,
+        contactPersonLastName: body.contactPersonLastName,
+        contactPersonEmail: body.contactPersonEmail,
+        contactPersonPhone: body.contactPersonPhone,
+        contactPersonRole: body.contactPersonRole
       };
       const validatedData = registerSchema.parse(normalized);
       

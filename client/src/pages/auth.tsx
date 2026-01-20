@@ -63,13 +63,33 @@ export default function Auth() {
 
     try {
       setIsLoading(true);
-      await register({
+      
+      const registerData: any = {
         firstName: signUpData.firstName,
         lastName: signUpData.lastName,
         email: signUpData.email,
         phone: signUpData.phone || undefined,
-        password: signUpData.password
-      });
+        password: signUpData.password,
+        accountType: signUpData.accountType
+      };
+
+      if (signUpData.accountType === 'BUSINESS') {
+        Object.assign(registerData, {
+          businessName: signUpData.businessName,
+          businessRegistrationNumber: signUpData.businessRegistrationNumber,
+          vatNumber: signUpData.vatNumber || undefined,
+          businessAddress: signUpData.businessAddress,
+          businessCity: signUpData.businessCity,
+          businessPostalCode: signUpData.businessPostalCode,
+          contactPersonFirstName: signUpData.contactPersonFirstName,
+          contactPersonLastName: signUpData.contactPersonLastName,
+          contactPersonEmail: signUpData.contactPersonEmail,
+          contactPersonPhone: signUpData.contactPersonPhone,
+          contactPersonRole: signUpData.contactPersonRole || undefined
+        });
+      }
+
+      await register(registerData);
       
       toast({
         title: "Welcome to Berry Events!",
@@ -312,6 +332,35 @@ export default function Auth() {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
+                {/* Account Type Toggle */}
+                <div className="grid grid-cols-2 gap-2 mb-6 p-1 bg-gray-100 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setSignUpData({...signUpData, accountType: "INDIVIDUAL"})}
+                    className={`flex items-center justify-center py-2 text-sm font-medium rounded-md transition-all ${
+                      signUpData.accountType === "INDIVIDUAL" 
+                        ? "bg-white text-primary shadow-sm" 
+                        : "text-gray-500 hover:text-gray-900"
+                    }`}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Individual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSignUpData({...signUpData, accountType: "BUSINESS"})}
+                    className={`flex items-center justify-center py-2 text-sm font-medium rounded-md transition-all ${
+                      signUpData.accountType === "BUSINESS" 
+                        ? "bg-white text-primary shadow-sm" 
+                        : "text-gray-500 hover:text-gray-900"
+                    }`}
+                  >
+                    <Building className="w-4 h-4 mr-2" />
+                    Business
+                  </button>
+                </div>
+
+                {/* Common Fields - First Name / Last Name (Visible for both as per prompt "Show ALL of the above") */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -408,7 +457,151 @@ export default function Auth() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3">
+                {/* Business Specific Sections */}
+                {signUpData.accountType === 'BUSINESS' && (
+                  <div className="space-y-6 pt-4 animate-in slide-in-from-top-4 duration-300">
+                    {/* Business Details */}
+                    <div className="space-y-4 border rounded-lg p-4 bg-gray-50/50">
+                      <h3 className="font-semibold text-sm text-gray-900 flex items-center border-b pb-2">
+                        <Building className="w-4 h-4 mr-2 text-primary" />
+                        Business Details
+                      </h3>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="businessName">Business Name *</Label>
+                        <Input
+                          id="businessName"
+                          value={signUpData.businessName}
+                          onChange={(e) => setSignUpData({...signUpData, businessName: e.target.value})}
+                          required={signUpData.accountType === 'BUSINESS'}
+                          placeholder="Company Trading Name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="businessRegistrationNumber">Registration Number *</Label>
+                        <Input
+                          id="businessRegistrationNumber"
+                          value={signUpData.businessRegistrationNumber}
+                          onChange={(e) => setSignUpData({...signUpData, businessRegistrationNumber: e.target.value})}
+                          required={signUpData.accountType === 'BUSINESS'}
+                          placeholder="e.g. 2023/123456/07"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="vatNumber">VAT Number (Optional)</Label>
+                        <Input
+                          id="vatNumber"
+                          value={signUpData.vatNumber}
+                          onChange={(e) => setSignUpData({...signUpData, vatNumber: e.target.value})}
+                          placeholder="e.g. 4123456789"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="businessAddress">Business Address *</Label>
+                        <Input
+                          id="businessAddress"
+                          value={signUpData.businessAddress}
+                          onChange={(e) => setSignUpData({...signUpData, businessAddress: e.target.value})}
+                          required={signUpData.accountType === 'BUSINESS'}
+                          placeholder="Street Address"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="businessCity">City *</Label>
+                          <Input
+                            id="businessCity"
+                            value={signUpData.businessCity}
+                            onChange={(e) => setSignUpData({...signUpData, businessCity: e.target.value})}
+                            required={signUpData.accountType === 'BUSINESS'}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="businessPostalCode">Postal Code *</Label>
+                          <Input
+                            id="businessPostalCode"
+                            value={signUpData.businessPostalCode}
+                            onChange={(e) => setSignUpData({...signUpData, businessPostalCode: e.target.value})}
+                            required={signUpData.accountType === 'BUSINESS'}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Primary Contact Person */}
+                    <div className="space-y-4 border rounded-lg p-4 bg-gray-50/50">
+                      <h3 className="font-semibold text-sm text-gray-900 flex items-center border-b pb-2">
+                        <User className="w-4 h-4 mr-2 text-primary" />
+                        Primary Contact Person
+                      </h3>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="contactPersonFirstName">First Name *</Label>
+                          <Input
+                            id="contactPersonFirstName"
+                            value={signUpData.contactPersonFirstName}
+                            onChange={(e) => setSignUpData({...signUpData, contactPersonFirstName: e.target.value})}
+                            required={signUpData.accountType === 'BUSINESS'}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="contactPersonLastName">Last Name *</Label>
+                          <Input
+                            id="contactPersonLastName"
+                            value={signUpData.contactPersonLastName}
+                            onChange={(e) => setSignUpData({...signUpData, contactPersonLastName: e.target.value})}
+                            required={signUpData.accountType === 'BUSINESS'}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contactPersonEmail">Email Address *</Label>
+                        <Input
+                          id="contactPersonEmail"
+                          type="email"
+                          value={signUpData.contactPersonEmail}
+                          onChange={(e) => setSignUpData({...signUpData, contactPersonEmail: e.target.value})}
+                          required={signUpData.accountType === 'BUSINESS'}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contactPersonPhone">Phone Number *</Label>
+                        <Input
+                          id="contactPersonPhone"
+                          type="tel"
+                          value={signUpData.contactPersonPhone}
+                          onChange={(e) => setSignUpData({...signUpData, contactPersonPhone: e.target.value})}
+                          required={signUpData.accountType === 'BUSINESS'}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contactPersonRole">Role/Position</Label>
+                        <select
+                          id="contactPersonRole"
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          value={signUpData.contactPersonRole}
+                          onChange={(e) => setSignUpData({...signUpData, contactPersonRole: e.target.value})}
+                        >
+                          <option value="">Select Role</option>
+                          <option value="Owner">Owner</option>
+                          <option value="Manager">Manager</option>
+                          <option value="Administrator">Administrator</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-start space-x-3 pt-2">
                   <Checkbox
                     id="acceptTcs"
                     checked={acceptTcs}
