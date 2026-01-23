@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { prisma } from "../../lib/prisma.js";
-import jwt from "jsonwebtoken";
+const { prisma } = require("../../lib/prisma.js");
+const jwt = require("jsonwebtoken");
 
-export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
+module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "GET") {
     res.statusCode = 405;
     res.setHeader("Allow", "GET");

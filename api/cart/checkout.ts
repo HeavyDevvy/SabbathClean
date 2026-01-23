@@ -19,7 +19,7 @@ export function generateBookingReference() {
   return `BE-${year}-${randomChars}`;
 }
 
-export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
+module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "POST") {
     res.statusCode = 405;
     res.setHeader("Allow", "POST");

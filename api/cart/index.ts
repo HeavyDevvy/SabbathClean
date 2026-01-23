@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { prisma } from "../../lib/prisma.js";
+const { prisma } = require("../../lib/prisma.js");
 
 function readCookie(req: any, name: string): string | undefined {
   const header = req.headers["cookie"] as string | undefined;
@@ -20,7 +20,7 @@ function writeCookie(res: any, name: string, value: string, days = 14) {
   res.setHeader("Set-Cookie", arr);
 }
 
-export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
+module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method === "GET") {
     try {
       let sessionToken = readCookie(req, "cart_session") || undefined;

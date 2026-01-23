@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "http";
-import { storage } from "../../server/storage.js";
+const { storage } = require("../../server/storage.js");
 
-export default async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
+module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
   if (req.method !== "POST") {
     res.statusCode = 405;
     res.setHeader("Allow", "POST");
