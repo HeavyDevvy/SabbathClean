@@ -1,6 +1,7 @@
-import type { IncomingMessage, ServerResponse } from "http";
-import { storage } from "../../server/storage.js";
-import jwt from "jsonwebtoken";
+// @ts-ignore
+const { storage } = require("../../server/storage.js");
+// @ts-ignore
+const jwt = require("jsonwebtoken");
 
 function readCookie(req: any, name: string): string | undefined {
   const header = req.headers["cookie"] as string | undefined;
@@ -13,7 +14,7 @@ function readCookie(req: any, name: string): string | undefined {
   return undefined;
 }
 
-export function generateBookingReference() {
+function generateBookingReference() {
   const year = new Date().getFullYear();
   const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `BE-${year}-${randomChars}`;

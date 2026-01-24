@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+// @ts-ignore
 const { storage } = require("../../server/storage.js");
 
 module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {

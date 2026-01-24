@@ -1,6 +1,7 @@
-import { prisma } from "../../lib/prisma.js";
+// @ts-ignore
+const { prisma } = require("../../lib/prisma.js");
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req: any, res: any) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method Not Allowed" });

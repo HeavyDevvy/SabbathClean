@@ -1,6 +1,5 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default function handler(req: VercelRequest, res: VercelResponse) {
+// @ts-ignore
+module.exports = function handler(req: any, res: any) {
   res.status(200).json({ 
     message: 'API is working!',
     endpoint: '/api/test-simple',

@@ -1,8 +1,9 @@
-import jwt from "jsonwebtoken";
-import { prisma } from "../../../lib/prisma.js";
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+// @ts-ignore
+const jwt = require("jsonwebtoken");
+// @ts-ignore
+const { prisma } = require("../../../lib/prisma.js");
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
   
   if (req.method !== "POST" && req.method !== "PATCH") {

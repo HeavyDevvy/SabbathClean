@@ -1,5 +1,7 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+// @ts-ignore
+const bcrypt = require("bcryptjs");
+// @ts-ignore
+const jwt = require("jsonwebtoken");
 
 async function ensureDevAdminEnv() {
   if (process.env.NODE_ENV === "production") return;
@@ -30,7 +32,7 @@ async function ensureDevAdminEnv() {
   }
 }
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
   console.log("[AdminLogin] method:", req.method);
   const hasDbUrl = !!process.env.DATABASE_URL || !!process.env.POSTGRES_URL;

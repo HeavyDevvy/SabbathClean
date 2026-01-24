@@ -1,7 +1,9 @@
-import jwt from "jsonwebtoken";
-import { prisma } from "../../lib/prisma.js";
+// @ts-ignore
+const jwt = require("jsonwebtoken");
+// @ts-ignore
+const { prisma } = require("../../lib/prisma.js");
 
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req: any, res: any) {
   res.setHeader("Content-Type", "application/json");
 
   const auth = req.headers["authorization"] || "";

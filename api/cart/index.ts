@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+// @ts-ignore
 const { prisma } = require("../../lib/prisma.js");
 
 function readCookie(req: any, name: string): string | undefined {
