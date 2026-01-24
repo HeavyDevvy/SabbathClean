@@ -8,3 +8,5 @@ vite.config.ts.*
 .env
 .env.*
 server/data/admins.json
+.vercel
+.env*.local

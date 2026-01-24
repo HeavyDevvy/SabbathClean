@@ -10,10 +10,35 @@ module.exports = async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-    const { email, password, firstName, lastName, phoneNumber } = body || {};
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      phoneNumber,
+      // Business fields
+      accountType,
+      businessName,
+      businessRegistrationNumber,
+      vatNumber,
+      businessAddress,
+      businessCity,
+      businessPostalCode,
+      businessCountry,
+      contactPersonFirstName,
+      contactPersonLastName,
+      contactPersonEmail,
+      contactPersonPhone,
+      contactPersonRole,
+    } = body || {};
 
     if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Business Account Validation
+    if (accountType === "BUSINESS" && !businessName) {
+      return res.status(400).json({ error: "Business name is required for business accounts" });
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -30,6 +55,19 @@ module.exports = async function handler(req: any, res: any) {
         firstName,
         lastName,
         phoneNumber,
+        accountType: accountType || "INDIVIDUAL",
+        businessName,
+        businessRegistrationNumber,
+        vatNumber,
+        businessAddress,
+        businessCity,
+        businessPostalCode,
+        businessCountry,
+        contactPersonFirstName,
+        contactPersonLastName,
+        contactPersonEmail,
+        contactPersonPhone,
+        contactPersonRole,
       },
       select: {
         id: true,
@@ -37,6 +75,7 @@ module.exports = async function handler(req: any, res: any) {
         firstName: true,
         lastName: true,
         role: true,
+        accountType: true,
       },
     });
 
@@ -51,6 +90,7 @@ module.exports = async function handler(req: any, res: any) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        accountType: user.accountType,
         isProvider: user.role === "PROVIDER",
       },
       accessToken,
@@ -61,3 +101,5 @@ module.exports = async function handler(req: any, res: any) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export {};

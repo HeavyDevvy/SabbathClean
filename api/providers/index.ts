@@ -33,7 +33,7 @@ module.exports = async function handler(req: VercelRequest, res: VercelResponse)
         orderBy: { rating: 'desc' }
       });
       
-      const formatted = providers.map(p => ({
+      const formatted = providers.map((p: any) => ({
         id: p.id,
         businessName: p.businessName,
         category: p.category,

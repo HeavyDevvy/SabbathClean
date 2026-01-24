@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { prisma } from '../../lib/prisma.js';
+const { prisma } = require('../../lib/prisma.js');
 import sgMail from '@sendgrid/mail';
 
 function readRawBody(req: VercelRequest): Promise<Buffer> {

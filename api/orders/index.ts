@@ -31,7 +31,7 @@ module.exports = async function handler(req: IncomingMessage & any, res: ServerR
     const payments = await prisma.payment.findMany({ where: { userId } });
     for (const p of payments) paymentsByBooking[p.bookingId] = p;
 
-    const orders = bookings.map((b) => {
+    const orders = bookings.map((b: any) => {
       const pay = paymentsByBooking[b.id];
       const subtotal = String(b.totalAmount || "0");
       const platformFee = String((Number(subtotal) * 0.15).toFixed(2));
