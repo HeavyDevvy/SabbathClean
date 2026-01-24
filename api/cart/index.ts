@@ -20,7 +20,7 @@ function writeCookie(res: any, name: string, value: string, days = 14) {
   res.setHeader("Set-Cookie", arr);
 }
 
-module.exports = async function handler(req: IncomingMessage & any, res: ServerResponse & any) {
+module.exports = async function handler(req: any, res: any) {
   if (req.method === "GET") {
     try {
       let sessionToken = readCookie(req, "cart_session") || undefined;

@@ -1,9 +1,11 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import crypto from 'crypto';
+// @ts-ignore
+const crypto = require('crypto');
+// @ts-ignore
 const { prisma } = require('../../lib/prisma.js');
-import sgMail from '@sendgrid/mail';
+// @ts-ignore
+const sgMail = require('@sendgrid/mail');
 
-function readRawBody(req: VercelRequest): Promise<Buffer> {
+function readRawBody(req: any): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     req.on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -23,7 +25,7 @@ function timingSafeEqualHex(aHex: string, bHex: string): boolean {
   }
 }
 
-module.exports = async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ message: 'Method Not Allowed' });

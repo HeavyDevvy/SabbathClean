@@ -1,6 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-module.exports = function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = function handler(req: any, res: any) {
   return res.status(200).json({
     message: 'pong',
     timestamp: new Date().toISOString(),
