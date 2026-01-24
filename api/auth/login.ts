@@ -1,5 +1,8 @@
+// @ts-ignore
 const bcrypt = require("bcryptjs");
+// @ts-ignore
 const jwt = require("jsonwebtoken");
+// @ts-ignore
 const { prisma } = require("../../lib/prisma.js");
 
 module.exports = async function handler(req: any, res: any) {
@@ -97,5 +100,3 @@ module.exports = async function handler(req: any, res: any) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
-export {};
